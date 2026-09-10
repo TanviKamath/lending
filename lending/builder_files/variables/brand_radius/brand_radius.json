@@ -1,0 +1,16 @@
+{
+ "creation": "2026-09-09 14:21:04.771013",
+ "dark_value": null,
+ "docstatus": 0,
+ "doctype": "Builder Token",
+ "group": null,
+ "idx": 0,
+ "is_standard": 0,
+ "modified": "2026-09-09 22:55:08.046396",
+ "modified_by": "Administrator",
+ "name": "brand-radius",
+ "owner": "Administrator",
+ "token_name": "brand-radius",
+ "type": "Dimension",
+ "value": "8px"
+}

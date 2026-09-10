@@ -116,6 +116,10 @@ def get_dashboard() -> dict:
 	payload = {
 		"as_on": long_date(nowdate()),
 		"holder_name": holder_name(),
+		"initials": initials(),
+		"brand_name": brand_name(),
+		"crumb": _("Account overview"),
+		"action_label": _("View payment details"),
 		"head_note": head_note(),
 		"customer_note": _("{0} customer records").format(len(customers)),
 		"account_status": account_status(loans),
@@ -138,6 +142,10 @@ def empty_dashboard() -> dict:
 	payload = {
 		"as_on": long_date(nowdate()),
 		"holder_name": holder_name(),
+		"initials": initials(),
+		"brand_name": brand_name(),
+		"crumb": _("Account overview"),
+		"action_label": _("View payment details"),
 		"head_note": head_note(),
 		"customer_note": _("No customer record is linked to this login"),
 		"account_status": _("No accounts found"),
@@ -182,6 +190,28 @@ def holder_name() -> str:
 
 def head_note() -> str:
 	return _("{0} · figures as on {1}").format(holder_name(), long_date(nowdate()))
+
+
+def initials() -> str:
+	"""Two letters for the rail avatar. The page must not hardcode a person."""
+	words = (holder_name() or frappe.session.user).split()
+	letters = [word[0] for word in words[:2] if word]
+
+	return "".join(letters).upper() or "?"
+
+
+def brand_name() -> str:
+	"""The portal's own name, never a placeholder baked into the blocks.
+
+	PORTAL_PLAN.md section 9 adds Lending Settings.portal_brand_name. The meta check
+	keeps this working until that field lands, and starts reading it the moment it does.
+	"""
+	if frappe.get_meta("Lending Settings").has_field("portal_brand_name"):
+		configured = frappe.db.get_single_value("Lending Settings", "portal_brand_name")
+		if configured:
+			return configured
+
+	return "Frappe Lending"
 
 
 def get_loans(customers: list[str]) -> list[dict]:

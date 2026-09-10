@@ -1,0 +1,16 @@
+{
+ "creation": "2026-09-09 14:21:04.186416",
+ "dark_value": "#2fbe6a",
+ "docstatus": 0,
+ "doctype": "Builder Token",
+ "group": null,
+ "idx": 0,
+ "is_standard": 0,
+ "modified": "2026-09-09 22:55:08.040207",
+ "modified_by": "Administrator",
+ "name": "brand-mark",
+ "owner": "Administrator",
+ "token_name": "brand-mark",
+ "type": "Color",
+ "value": "#2bb24c"
+}
