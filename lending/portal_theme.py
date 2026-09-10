@@ -549,3 +549,118 @@ def note_panel(key):
 	node["visibilityCondition"] = key
 
 	return node
+
+
+# --- the public pages: no sidebar, one centred column -----------------------------
+
+PUBLIC_PAGE_STYLES = {
+	**COLUMN,
+	"minHeight": "100vh",
+	"alignItems": "center",
+	"padding": "40px 20px",
+	"gap": "20px",
+	"background": GRAY_50,
+}
+PUBLIC_COLUMN_STYLES = {**COLUMN, "width": "100%", "maxWidth": "560px", "gap": "20px"}
+PUBLIC_BRAND_STYLES = {**ROW_FLEX, "gap": "10px"}
+PUBLIC_HEADING_STYLES = {
+	"margin": "0",
+	"fontSize": "24px",
+	"fontWeight": "600",
+	"color": GRAY_950,
+	"letterSpacing": "0.01em",
+}
+PUBLIC_INTRO_STYLES = {"fontSize": "14px", "color": GRAY_700, "lineHeight": "1.55"}
+
+FIELD_STYLES = {**COLUMN, "gap": "4px", "padding": "8px 12px"}
+LABEL_STYLES = {"fontSize": "12px", "fontWeight": "500", "color": GRAY_700}
+INPUT_STYLES = {
+	"fontFamily": "inherit",
+	"fontSize": "14px",
+	"padding": "8px 10px",
+	"borderRadius": "var(--brand-radius,8px)",
+	"border": BORDER,
+	"background": WHITE,
+	"color": GRAY_900,
+	"width": "100%",
+	"boxSizing": "border-box",
+}
+SUBMIT_ROW_STYLES = {**ROW_FLEX, "gap": "10px", "padding": "12px", "borderTop": BORDER}
+RESULT_STYLES = {
+	**COLUMN,
+	"gap": "8px",
+	"padding": "16px",
+	"background": GREEN_100,
+	"borderRadius": "12px",
+	"color": GRAY_900,
+}
+ERROR_STYLES = {
+	"padding": "12px 16px",
+	"background": AMBER_50,
+	"borderRadius": "8px",
+	"fontSize": "13px",
+	"color": AMBER_700,
+}
+
+
+def field(label, name, input_type="text", placeholder="", required=True):
+	"""One labelled input. The name is what the client script posts."""
+	attributes = {"name": name, "type": input_type, "placeholder": placeholder or label}
+	if required:
+		attributes["required"] = "required"
+
+	return block(
+		"div",
+		styles=FIELD_STYLES,
+		children=[
+			block("label", styles=LABEL_STYLES, html=label),
+			block("input", styles=INPUT_STYLES, attributes=attributes),
+		],
+	)
+
+
+def select_field(label, name, options_key):
+	"""A select whose options come from the data script, one <option> per row."""
+	option = bound("option", "label", styles={})
+	bind(option, "value", property="value", type="attribute")
+
+	return block(
+		"div",
+		styles=FIELD_STYLES,
+		children=[
+			block("label", styles=LABEL_STYLES, html=label),
+			block(
+				"select",
+				styles=INPUT_STYLES,
+				attributes={"name": name, "required": "required"},
+				children=[repeater(options_key, option)],
+			),
+		],
+	)
+
+
+def public_frame(heading_key, intro_key, children):
+	"""The public shell: brand, heading, then whatever the page is for."""
+	return block(
+		"div",
+		styles=PUBLIC_PAGE_STYLES,
+		children=[
+			block(
+				"div",
+				styles=PUBLIC_COLUMN_STYLES,
+				children=[
+					block(
+						"div",
+						styles=PUBLIC_BRAND_STYLES,
+						children=[
+							block("span", styles=MARK_STYLES, html=ICON_BRAND),
+							bound("span", "brand_name", styles={"fontSize": "15px", "fontWeight": "600"}),
+						],
+					),
+					block("h1", styles=PUBLIC_HEADING_STYLES, children=[bound("span", heading_key)]),
+					bound("p", intro_key, styles=PUBLIC_INTRO_STYLES),
+					*children,
+				],
+			)
+		],
+	)

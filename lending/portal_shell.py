@@ -349,7 +349,44 @@ def upsert_component():
 	return doc.name, action
 
 
-def build_page(page_name, route, title, nav_href, content, action_href="#", data_script=None):
+def upsert_client_script(script_name, script):
+	"""Create or replace a JavaScript Builder Client Script, returning its document name.
+
+	Builder writes the script to a public file and serves it from the published page,
+	which is how a page gets behaviour without the editor's own bundle.
+	"""
+	existing = frappe.db.get_value("Builder Client Script", {"name": script_name}, "name")
+	if existing:
+		doc = frappe.get_doc("Builder Client Script", existing)
+		if doc.script == script:
+			return doc.name
+		doc.script = script
+		doc.save()
+		return doc.name
+
+	doc = frappe.get_doc(
+		{
+			"doctype": "Builder Client Script",
+			"name": script_name,
+			"script_type": "JavaScript",
+			"script": script,
+		}
+	).insert()
+
+	return doc.name
+
+
+def build_page(
+	page_name,
+	route,
+	title,
+	nav_href,
+	content,
+	action_href="#",
+	data_script=None,
+	authenticated=True,
+	client_script=None,
+):
 	"""Create or replace one portal page: the shared shell, wrapped around `content`.
 
 	Every page is assembled the same way, so the only per-page arguments are its route,
@@ -358,19 +395,20 @@ def build_page(page_name, route, title, nav_href, content, action_href="#", data
 	upsert_tokens()
 	component, component_action = upsert_component()
 
-	body = block(
-		"div",
-		styles=BODY_STYLES,
-		originalElement="body",
-		children=[reference(content, nav_href, action_href)],
+	# A public page cannot wear the borrower frame: every row in that sidebar needs a
+	# login, so a guest clicking one would be bounced. Public pages get their content
+	# straight in the body and carry their own heading.
+	children = (
+		[reference(content, nav_href, action_href)] if authenticated else list(content)
 	)
+	body = block("div", styles=BODY_STYLES, originalElement="body", children=children)
 
 	fields = {
 		"page_name": page_name,
 		"page_title": title,
 		"route": route,
 		"published": 1,
-		"authenticated_access": 1,
+		"authenticated_access": 1 if authenticated else 0,
 		"disable_indexing": 1,
 		"is_standard": 1,
 		"app": "lending",
@@ -382,6 +420,11 @@ def build_page(page_name, route, title, nav_href, content, action_href="#", data
 		# blocks. Left in place, a rebuild reaches the published route and nowhere else.
 		"draft_blocks": None,
 	}
+
+	if client_script:
+		fields["client_scripts"] = [
+			{"builder_script": upsert_client_script(*client_script)}
+		]
 
 	existing = frappe.db.get_value("Builder Page", {"route": route}, "name")
 	if existing:

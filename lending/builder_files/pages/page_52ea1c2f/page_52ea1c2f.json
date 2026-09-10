@@ -1,0 +1,498 @@
+{
+ "app": "lending",
+ "authenticated_access": 0,
+ "blocks": [
+  {
+   "attributes": {},
+   "baseStyles": {
+    "WebkitFontSmoothing": "antialiased",
+    "background": "#ffffff",
+    "color": "#171717",
+    "fontFamily": "var(--brand-font,InterVariable)",
+    "fontSize": "14px",
+    "fontVariationSettings": "\"opsz\" 24",
+    "fontWeight": "420",
+    "letterSpacing": "0.02em",
+    "lineHeight": "1.5",
+    "margin": "0"
+   },
+   "blockId": "fc5a0e53b",
+   "children": [
+    {
+     "attributes": {},
+     "baseStyles": {
+      "alignItems": "center",
+      "background": "#f8f8f8",
+      "display": "flex",
+      "flexDirection": "column",
+      "gap": "20px",
+      "minHeight": "100vh",
+      "padding": "40px 20px"
+     },
+     "blockId": "1efcf010d",
+     "children": [
+      {
+       "attributes": {},
+       "baseStyles": {
+        "display": "flex",
+        "flexDirection": "column",
+        "gap": "20px",
+        "maxWidth": "560px",
+        "width": "100%"
+       },
+       "blockId": "0c336cda7",
+       "children": [
+        {
+         "attributes": {},
+         "baseStyles": {
+          "alignItems": "center",
+          "display": "flex",
+          "gap": "10px"
+         },
+         "blockId": "63b082ea9",
+         "children": [
+          {
+           "attributes": {},
+           "baseStyles": {
+            "background": "var(--brand-mark,#2bb24c)",
+            "borderRadius": "8px",
+            "color": "#ffffff",
+            "display": "grid",
+            "flexShrink": "0",
+            "height": "28px",
+            "marginBottom": "8px",
+            "placeItems": "center",
+            "width": "28px"
+           },
+           "blockId": "f70b9def5",
+           "children": [],
+           "classes": [],
+           "customAttributes": {},
+           "element": "span",
+           "innerHTML": "<svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3 21h18\"/><path d=\"M5 21V10l7-5 7 5v11\"/><path d=\"M10 21v-6h4v6\"/></svg>",
+           "mobileStyles": {},
+           "tabletStyles": {}
+          },
+          {
+           "attributes": {},
+           "baseStyles": {
+            "fontSize": "15px",
+            "fontWeight": "600"
+           },
+           "blockId": "ec651099f",
+           "children": [],
+           "classes": [],
+           "customAttributes": {},
+           "dynamicValues": [
+            {
+             "comesFrom": "dataScript",
+             "key": "brand_name",
+             "property": "innerHTML",
+             "type": "key"
+            }
+           ],
+           "element": "span",
+           "mobileStyles": {},
+           "tabletStyles": {}
+          }
+         ],
+         "classes": [],
+         "customAttributes": {},
+         "element": "div",
+         "mobileStyles": {},
+         "tabletStyles": {}
+        },
+        {
+         "attributes": {},
+         "baseStyles": {
+          "color": "#0f0f0f",
+          "fontSize": "24px",
+          "fontWeight": "600",
+          "letterSpacing": "0.01em",
+          "margin": "0"
+         },
+         "blockId": "4e23900ab",
+         "children": [
+          {
+           "attributes": {},
+           "baseStyles": {},
+           "blockId": "f92bbfadc",
+           "children": [],
+           "classes": [],
+           "customAttributes": {},
+           "dynamicValues": [
+            {
+             "comesFrom": "dataScript",
+             "key": "heading",
+             "property": "innerHTML",
+             "type": "key"
+            }
+           ],
+           "element": "span",
+           "mobileStyles": {},
+           "tabletStyles": {}
+          }
+         ],
+         "classes": [],
+         "customAttributes": {},
+         "element": "h1",
+         "mobileStyles": {},
+         "tabletStyles": {}
+        },
+        {
+         "attributes": {},
+         "baseStyles": {
+          "color": "#525252",
+          "fontSize": "14px",
+          "lineHeight": "1.55"
+         },
+         "blockId": "3e41208e2",
+         "children": [],
+         "classes": [],
+         "customAttributes": {},
+         "dynamicValues": [
+          {
+           "comesFrom": "dataScript",
+           "key": "intro",
+           "property": "innerHTML",
+           "type": "key"
+          }
+         ],
+         "element": "p",
+         "mobileStyles": {},
+         "tabletStyles": {}
+        },
+        {
+         "attributes": {
+          "data-endpoint": "lending.portal_apply.track_application"
+         },
+         "baseStyles": {
+          "background": "#ffffff",
+          "border": "1px solid #ededed",
+          "borderRadius": "12px",
+          "display": "flex",
+          "flexDirection": "column",
+          "minWidth": "0"
+         },
+         "blockId": "a9695e050",
+         "children": [
+          {
+           "attributes": {},
+           "baseStyles": {
+            "padding": "12px 12px 14px"
+           },
+           "blockId": "f2dfa325e",
+           "children": [
+            {
+             "attributes": {},
+             "baseStyles": {
+              "color": "#0f0f0f",
+              "fontSize": "16px",
+              "fontWeight": "600",
+              "letterSpacing": "0.015em",
+              "lineHeight": "1.3em",
+              "margin": "0"
+             },
+             "blockId": "a91d6c671",
+             "children": [],
+             "classes": [],
+             "customAttributes": {},
+             "element": "h2",
+             "innerHTML": "Find your application",
+             "mobileStyles": {},
+             "tabletStyles": {}
+            },
+            {
+             "attributes": {},
+             "baseStyles": {
+              "color": "#525252",
+              "fontSize": "14px",
+              "fontVariantNumeric": "tabular-nums",
+              "marginTop": "5px"
+             },
+             "blockId": "099207998",
+             "children": [],
+             "classes": [],
+             "customAttributes": {},
+             "dynamicValues": [
+              {
+               "comesFrom": "dataScript",
+               "key": "intro",
+               "property": "innerHTML",
+               "type": "key"
+              }
+             ],
+             "element": "div",
+             "mobileStyles": {},
+             "tabletStyles": {}
+            }
+           ],
+           "classes": [],
+           "customAttributes": {},
+           "element": "div",
+           "mobileStyles": {},
+           "tabletStyles": {}
+          },
+          {
+           "attributes": {},
+           "baseStyles": {
+            "display": "flex",
+            "flexDirection": "column",
+            "gap": "4px",
+            "padding": "8px 12px"
+           },
+           "blockId": "7a05bb24b",
+           "children": [
+            {
+             "attributes": {},
+             "baseStyles": {
+              "color": "#525252",
+              "fontSize": "12px",
+              "fontWeight": "500"
+             },
+             "blockId": "5ed3b31a8",
+             "children": [],
+             "classes": [],
+             "customAttributes": {},
+             "element": "label",
+             "innerHTML": "Reference number",
+             "mobileStyles": {},
+             "tabletStyles": {}
+            },
+            {
+             "attributes": {
+              "name": "reference",
+              "placeholder": "Reference number",
+              "required": "required",
+              "type": "text"
+             },
+             "baseStyles": {
+              "background": "#ffffff",
+              "border": "1px solid #ededed",
+              "borderRadius": "var(--brand-radius,8px)",
+              "boxSizing": "border-box",
+              "color": "#171717",
+              "fontFamily": "inherit",
+              "fontSize": "14px",
+              "padding": "8px 10px",
+              "width": "100%"
+             },
+             "blockId": "2936e3fa3",
+             "children": [],
+             "classes": [],
+             "customAttributes": {},
+             "element": "input",
+             "mobileStyles": {},
+             "tabletStyles": {}
+            }
+           ],
+           "classes": [],
+           "customAttributes": {},
+           "element": "div",
+           "mobileStyles": {},
+           "tabletStyles": {}
+          },
+          {
+           "attributes": {},
+           "baseStyles": {
+            "display": "flex",
+            "flexDirection": "column",
+            "gap": "4px",
+            "padding": "8px 12px"
+           },
+           "blockId": "9925f1fc7",
+           "children": [
+            {
+             "attributes": {},
+             "baseStyles": {
+              "color": "#525252",
+              "fontSize": "12px",
+              "fontWeight": "500"
+             },
+             "blockId": "bb5426e8c",
+             "children": [],
+             "classes": [],
+             "customAttributes": {},
+             "element": "label",
+             "innerHTML": "Mobile number",
+             "mobileStyles": {},
+             "tabletStyles": {}
+            },
+            {
+             "attributes": {
+              "name": "mobile_number",
+              "placeholder": "Mobile number",
+              "required": "required",
+              "type": "tel"
+             },
+             "baseStyles": {
+              "background": "#ffffff",
+              "border": "1px solid #ededed",
+              "borderRadius": "var(--brand-radius,8px)",
+              "boxSizing": "border-box",
+              "color": "#171717",
+              "fontFamily": "inherit",
+              "fontSize": "14px",
+              "padding": "8px 10px",
+              "width": "100%"
+             },
+             "blockId": "2ff170130",
+             "children": [],
+             "classes": [],
+             "customAttributes": {},
+             "element": "input",
+             "mobileStyles": {},
+             "tabletStyles": {}
+            }
+           ],
+           "classes": [],
+           "customAttributes": {},
+           "element": "div",
+           "mobileStyles": {},
+           "tabletStyles": {}
+          },
+          {
+           "attributes": {},
+           "baseStyles": {
+            "alignItems": "center",
+            "borderTop": "1px solid #ededed",
+            "display": "flex",
+            "gap": "10px",
+            "padding": "12px"
+           },
+           "blockId": "a047a2c3e",
+           "children": [
+            {
+             "attributes": {
+              "data-submit": "1",
+              "type": "button"
+             },
+             "baseStyles": {
+              "background": "var(--brand-primary,#171717)",
+              "border": "1px solid transparent",
+              "borderRadius": "var(--brand-radius,8px)",
+              "color": "var(--brand-primary-ink,#ffffff)",
+              "cursor": "pointer",
+              "fontFamily": "inherit",
+              "fontSize": "13px",
+              "fontWeight": "500",
+              "hover:filter": "brightness(1.4)",
+              "padding": "6px 12px",
+              "textDecoration": "none",
+              "whiteSpace": "nowrap"
+             },
+             "blockId": "66a89135a",
+             "children": [],
+             "classes": [],
+             "customAttributes": {},
+             "element": "button",
+             "innerHTML": "Track",
+             "mobileStyles": {},
+             "tabletStyles": {}
+            }
+           ],
+           "classes": [],
+           "customAttributes": {},
+           "element": "div",
+           "mobileStyles": {},
+           "tabletStyles": {}
+          },
+          {
+           "attributes": {
+            "data-error": "1",
+            "hidden": "hidden"
+           },
+           "baseStyles": {
+            "background": "#fdf8ed",
+            "borderRadius": "8px",
+            "color": "#bb6f0c",
+            "fontSize": "13px",
+            "padding": "12px 16px"
+           },
+           "blockId": "4695c9f00",
+           "children": [],
+           "classes": [],
+           "customAttributes": {},
+           "element": "div",
+           "mobileStyles": {},
+           "tabletStyles": {}
+          },
+          {
+           "attributes": {
+            "data-result": "1",
+            "hidden": "hidden"
+           },
+           "baseStyles": {
+            "background": "#e4faeb",
+            "borderRadius": "12px",
+            "color": "#171717",
+            "display": "flex",
+            "flexDirection": "column",
+            "gap": "8px",
+            "padding": "16px"
+           },
+           "blockId": "dd761d7d1",
+           "children": [],
+           "classes": [],
+           "customAttributes": {},
+           "element": "div",
+           "mobileStyles": {},
+           "tabletStyles": {}
+          }
+         ],
+         "classes": [],
+         "customAttributes": {},
+         "element": "form",
+         "mobileStyles": {},
+         "tabletStyles": {}
+        }
+       ],
+       "classes": [],
+       "customAttributes": {},
+       "element": "div",
+       "mobileStyles": {},
+       "tabletStyles": {}
+      }
+     ],
+     "classes": [],
+     "customAttributes": {},
+     "element": "div",
+     "mobileStyles": {},
+     "tabletStyles": {}
+    }
+   ],
+   "classes": [],
+   "customAttributes": {},
+   "element": "div",
+   "mobileStyles": {},
+   "originalElement": "body",
+   "tabletStyles": {}
+  }
+ ],
+ "client_scripts": [
+  {
+   "builder_script": "lending-portal-apply"
+  }
+ ],
+ "creation": "2026-09-10 12:58:16.601341",
+ "disable_indexing": 1,
+ "docstatus": 0,
+ "doctype": "Builder Page",
+ "draft_blocks": null,
+ "dynamic_route": 0,
+ "head_html": "\n<!-- Builder Token records are served as :root custom properties by these routes, and the\n\tBuilder canvas serves the same records itself, so var(--brand-*) resolves in the\n\teditor and on the published page alike. -->\n<link rel=\"stylesheet\" href=\"/builder_assets/tokens.css\">\n<style>\n/* Website pages do not load the desk bundle, so the font ships with the page. */\n@font-face {\n\tfont-family: InterVariable;\n\tfont-style: normal;\n\tfont-weight: 100 900;\n\tfont-display: swap;\n\tsrc: url(\"/assets/frappe/css/fonts/inter/InterVariable.woff2\") format(\"woff2\");\n}\n\n:root { color-scheme: light; }\nhtml { background: #ffffff; }\n</style>\n",
+ "idx": 0,
+ "is_standard": 1,
+ "is_template": 0,
+ "modified": "2026-09-10 12:58:16.611363",
+ "modified_by": "Administrator",
+ "name": "page-52ea1c2f",
+ "owner": "Administrator",
+ "page_data_script": "\n# safe_exec blocks _(), so even this page's static wording comes from the data layer.\ndata.update(frappe.call(\"lending.portal_apply.get_track_page\"))  # noqa: F821\n",
+ "page_name": "page-52ea1c2f",
+ "page_title": "Track your application",
+ "preview": "/assets/builder/images/fallback.png",
+ "project_folder": "lending",
+ "published": 1,
+ "route": "track"
+}
