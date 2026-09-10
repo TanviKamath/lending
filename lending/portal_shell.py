@@ -333,6 +333,12 @@ def upsert_component():
 
 	if frappe.db.exists("Builder Component", COMPONENT_ID):
 		doc = frappe.get_doc("Builder Component", COMPONENT_ID)
+		# Saving a component queues a cache-clear job and locks the document, so
+		# building several pages in a row would collide on it. The shell is identical
+		# for every page, so an unchanged block is left alone.
+		if doc.block == fields["block"] and doc.component_name == fields["component_name"]:
+			return doc.name, "unchanged"
+
 		doc.update(fields)
 		doc.save()
 		action = "updated"

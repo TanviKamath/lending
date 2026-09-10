@@ -321,3 +321,44 @@ def documents_note(documents: list[dict]) -> str:
 	return (
 		_("{0} attached").format(len(documents)) if documents else _("Nothing attached yet")
 	)
+
+
+@frappe.whitelist()
+def get_documents_page() -> dict:
+	"""Every document attached to any of the borrower's applications.
+
+	There is no checklist to show against them, for the reason document_rows() gives:
+	an outstanding document is not a row with an empty file, it is no row at all, and
+	nothing records what a product expects. So this page answers "what have I sent
+	you" honestly, and cannot yet answer "what do you still need".
+	"""
+	customers = get_portal_customers()
+	applications = get_applications(customers) if customers else []
+
+	documents = []
+	for application in applications:
+		for document in document_rows(application["name"]):
+			documents.append({**document, "detail": application["product"]})
+
+	payload = shell_payload(_("Documents"), _("Contact us"), customers, [])
+	payload.update(
+		{
+			"documents": documents,
+			"documents_note": (
+				_("{0} attached across {1} applications").format(len(documents), len(applications))
+				if documents
+				else _("Nothing attached yet")
+			),
+			"applications": applications,
+			"applications_note": (
+				_("{0} in progress").format(len(applications))
+				if applications
+				else _("No applications in progress")
+			),
+			"upload_note": _(
+				"To send a document, reply to any message from us with the file attached."
+			),
+		}
+	)
+
+	return payload

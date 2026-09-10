@@ -4,7 +4,12 @@ app_publisher = "Frappe Technologies Pvt. Ltd."
 app_description = "Open Source Lending software"
 app_email = "contact@frappe.io"
 app_license = "GNU General Public License (v3)"
-required_apps = ["erpnext"]
+# builder serves the borrower portal. Every /borrower route is a Builder Page: the
+# doctype, the route, the HTML generation and the brand tokens all come from that app,
+# so without it the portal is silently absent rather than broken in a way that points
+# at the cause. Declaring it here installs it alongside lending and stops it being
+# uninstalled from under the portal.
+required_apps = ["erpnext", "frappe/builder"]
 app_logo_url = "/assets/lending/images/frappe-lending-logo.svg"
 
 add_to_apps_screen = [

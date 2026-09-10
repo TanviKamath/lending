@@ -501,3 +501,51 @@ def upsert_tokens():
 			frappe.rename_doc("Builder Token", doc.name, name, force=True, show_alert=False)
 
 	clear_builder_token_cache()
+
+
+def card(title, subtitle_key, body):
+	"""A titled panel with a subtitle from data. Every portal page is built of these."""
+	return block(
+		"section",
+		styles=CARD_STYLES,
+		children=[
+			block(
+				"div",
+				styles=CARD_HEAD_STYLES,
+				children=[
+					block("h2", styles=CARD_TITLE_STYLES, html=title),
+					bound("div", subtitle_key, styles=CARD_SUB_STYLES),
+				],
+			),
+			body,
+		],
+	)
+
+
+def pair_rows(key, with_detail=False, marker=False):
+	"""A repeater over {label, value, detail} rows -- the portal's workhorse shape."""
+	main = [
+		bound("div", "label", styles=SECONDARY_TEXT_STYLES),
+		bound("div", "value", styles=PRIMARY_TEXT_STYLES),
+	]
+	if with_detail:
+		detail = bound("div", "detail", styles=SECONDARY_TEXT_STYLES)
+		detail["visibilityCondition"] = "detail"
+		main.append(detail)
+
+	children = []
+	if marker:
+		children.append(
+			bound("span", "marker", styles={**AVATAR_STYLES, "background": "transparent"})
+		)
+	children.append(block("div", styles=COL_MAIN_STYLES, children=main))
+
+	return repeater(key, block("div", styles=ROW_STYLES, children=children))
+
+
+def note_panel(key):
+	"""A quiet line of guidance under a card, shown only when the data supplies one."""
+	node = bound("div", key, styles={**SECONDARY_TEXT_STYLES, "padding": "12px"})
+	node["visibilityCondition"] = key
+
+	return node
