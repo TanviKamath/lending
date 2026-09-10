@@ -19,14 +19,9 @@ Styling and block helpers come from portal_theme; see its docstring for why ever
 rule sits on its own block rather than in a stylesheet.
 """
 
-import frappe
-
-from lending.portal_shell import COMPONENT_ID
-from lending.portal_shell import reference as shell_reference
-from lending.portal_shell import upsert_component
+from lending.portal_shell import build_page
 from lending.portal_theme import (
 	AMOUNT_STYLES,
-	BODY_STYLES,
 	CARD_HEAD_STYLES,
 	CARD_STYLES,
 	CARD_SUB_STYLES,
@@ -40,7 +35,6 @@ from lending.portal_theme import (
 	FLAG_STYLES,
 	GRID_STYLES,
 	GRID_TABLET_STYLES,
-	HEAD_HTML,
 	LI_AMT_STYLES,
 	LI_BODY_STYLES,
 	LI_DATE_STYLES,
@@ -63,7 +57,6 @@ from lending.portal_theme import (
 	block,
 	bound,
 	repeater,
-	upsert_tokens,
 )
 
 PAGE_NAME = "Borrower Account Overview"
@@ -291,52 +284,13 @@ def content():
 	]
 
 
-def build_blocks():
-	body = block(
-		"div",
-		styles=BODY_STYLES,
-		originalElement="body",
-		children=[shell_reference(content(), NAV_HREF, ACTION_HREF)],
-	)
-
-	return [body]
-
-
 def build():
-	"""Create or replace the shell component and the standard Account overview page."""
-	upsert_tokens()
-	component, component_action = upsert_component()
-
-	fields = {
-		"page_name": PAGE_NAME,
-		"page_title": "Account overview",
-		"route": ROUTE,
-		"published": 1,
-		"authenticated_access": 1,
-		"disable_indexing": 1,
-		"is_standard": 1,
-		"app": "lending",
-		"head_html": HEAD_HTML,
-		"page_data_script": DATA_SCRIPT,
-		"blocks": frappe.as_json(build_blocks()),
-		# A leftover draft outranks what this script just wrote: the canvas loads
-		# draft_blocks when it exists, and export_page_as_standard prefers it over blocks.
-		# Left in place, a rebuild shows up on the published route and nowhere else.
-		"draft_blocks": None,
-	}
-
-	existing = frappe.db.get_value("Builder Page", {"route": ROUTE}, "name")
-	if existing:
-		page = frappe.get_doc("Builder Page", existing)
-		page.update(fields)
-		page.save()
-		action = "updated"
-	else:
-		page = frappe.get_doc(dict(doctype="Builder Page", **fields)).insert()
-		action = "created"
-
-	frappe.db.commit()
-	print(f"{component_action} Builder Component {component} ({COMPONENT_ID})")
-	print(f"{action} Builder Page {page.name} at /{ROUTE}")
-
-	return page.name
+	return build_page(
+		PAGE_NAME,
+		ROUTE,
+		"Account overview",
+		NAV_HREF,
+		content(),
+		action_href=ACTION_HREF,
+		data_script=DATA_SCRIPT,
+	)

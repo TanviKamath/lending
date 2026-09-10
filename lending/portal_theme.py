@@ -438,14 +438,29 @@ def block(element, styles=None, children=None, html=None, path=None, **kwargs):
 	return node
 
 
-def bound(element, key, styles=None, path=None, **kwargs):
-	"""A block whose text comes from the page data script."""
-	node = block(element, styles=styles, path=path, **kwargs)
-	node["dynamicValues"] = [
-		{"key": key, "type": "key", "property": "innerHTML", "comesFrom": "dataScript"}
-	]
+def bind(node, key, property="innerHTML", type="key"):
+	"""Point one of a block's properties at a key from the page data script.
+
+	type "key" writes the value into the property itself, which is how text arrives.
+	type "attribute" writes it into the rendered tag's attributes, which is how a
+	repeated row gets its own href.
+	"""
+	node.setdefault("dynamicValues", []).append(
+		{"key": key, "type": type, "property": property, "comesFrom": "dataScript"}
+	)
 
 	return node
+
+
+def bound(element, key, styles=None, path=None, **kwargs):
+	"""A block whose text comes from the page data script."""
+	return bind(block(element, styles=styles, path=path, **kwargs), key)
+
+
+def linked(key, styles=None, children=None, **kwargs):
+	"""A row that carries its own destination, for a repeater over records."""
+	node = block("a", styles=styles, children=children, attributes={"href": "#"}, **kwargs)
+	return bind(node, key, property="href", type="attribute")
 
 
 def repeater(key, row, path=None):

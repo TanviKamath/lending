@@ -97,6 +97,30 @@ def days_until(value) -> int:
 	return (getdate(value) - getdate(nowdate())).days
 
 
+def shell_payload(crumb: str, action_label: str, customers: list[str], loans: list[dict]) -> dict:
+	"""The keys the portal shell binds, which every page owes it.
+
+	The shell is one Builder Component shared by every route, so each page's endpoint
+	answers for the same frame: who is signed in, how many customer records they hold,
+	what this page is called and where its header button goes.
+	"""
+	return {
+		"as_on": long_date(nowdate()),
+		"brand_name": brand_name(),
+		"initials": initials(),
+		"holder_name": holder_name(),
+		"head_note": head_note(),
+		"customer_note": (
+			_("{0} customer records").format(len(customers))
+			if customers
+			else _("No customer record is linked to this login")
+		),
+		"account_status": account_status(loans),
+		"crumb": crumb,
+		"action_label": action_label,
+	}
+
+
 @frappe.whitelist()
 def get_dashboard() -> dict:
 	"""Everything the account overview page renders, formatted for display.
@@ -114,15 +138,6 @@ def get_dashboard() -> dict:
 	accounts = [present_loan(loan, len(customers) > 1) for loan in loans]
 
 	payload = {
-		"as_on": long_date(nowdate()),
-		"holder_name": holder_name(),
-		"initials": initials(),
-		"brand_name": brand_name(),
-		"crumb": _("Account overview"),
-		"action_label": _("View payment details"),
-		"head_note": head_note(),
-		"customer_note": _("{0} customer records").format(len(customers)),
-		"account_status": account_status(loans),
 		"accounts": accounts,
 		"applications": applications,
 		"schedule": schedule,
@@ -132,6 +147,7 @@ def get_dashboard() -> dict:
 		"schedule_note": _("Next four instalments"),
 		"activity_note": _("Last 60 days"),
 	}
+	payload.update(shell_payload(_("Account overview"), _("View payment details"), customers, loans))
 	payload.update(labels())
 	payload.update(build_summary(loans, schedule))
 
@@ -140,15 +156,6 @@ def get_dashboard() -> dict:
 
 def empty_dashboard() -> dict:
 	payload = {
-		"as_on": long_date(nowdate()),
-		"holder_name": holder_name(),
-		"initials": initials(),
-		"brand_name": brand_name(),
-		"crumb": _("Account overview"),
-		"action_label": _("View payment details"),
-		"head_note": head_note(),
-		"customer_note": _("No customer record is linked to this login"),
-		"account_status": _("No accounts found"),
 		"accounts": [],
 		"applications": [],
 		"schedule": [],
@@ -165,6 +172,7 @@ def empty_dashboard() -> dict:
 		"sanctioned": money(0),
 		"sanctioned_note": "",
 	}
+	payload.update(shell_payload(_("Account overview"), _("View payment details"), [], []))
 	payload.update(labels())
 
 	return payload

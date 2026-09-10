@@ -25,12 +25,14 @@ import frappe
 
 from lending.portal_theme import (
 	AVATAR_STYLES,
+	BODY_STYLES,
 	BTN_STYLES,
 	CONTENT_STYLES,
 	CRUMB_STYLES,
 	FOOTER_LINK_STYLES,
 	FOOTER_STYLES,
 	HEAD_END_STYLES,
+	HEAD_HTML,
 	HEAD_NOTE_STYLES,
 	HIDDEN,
 	ICON_BELL,
@@ -61,6 +63,7 @@ from lending.portal_theme import (
 	block_id,
 	bound,
 	empty_block_fields,
+	upsert_tokens,
 )
 
 # Builder Component autonames by field:component_id, so this is the document name too.
@@ -338,3 +341,54 @@ def upsert_component():
 		action = "created"
 
 	return doc.name, action
+
+
+def build_page(page_name, route, title, nav_href, content, action_href="#", data_script=None):
+	"""Create or replace one portal page: the shared shell, wrapped around `content`.
+
+	Every page is assembled the same way, so the only per-page arguments are its route,
+	which nav row it lights up, where its header button goes, and its data script.
+	"""
+	upsert_tokens()
+	component, component_action = upsert_component()
+
+	body = block(
+		"div",
+		styles=BODY_STYLES,
+		originalElement="body",
+		children=[reference(content, nav_href, action_href)],
+	)
+
+	fields = {
+		"page_name": page_name,
+		"page_title": title,
+		"route": route,
+		"published": 1,
+		"authenticated_access": 1,
+		"disable_indexing": 1,
+		"is_standard": 1,
+		"app": "lending",
+		"head_html": HEAD_HTML,
+		"page_data_script": data_script or "",
+		"blocks": frappe.as_json([body]),
+		# A leftover draft outranks what this script just wrote: the canvas loads
+		# draft_blocks when it exists, and export_page_as_standard prefers it over
+		# blocks. Left in place, a rebuild reaches the published route and nowhere else.
+		"draft_blocks": None,
+	}
+
+	existing = frappe.db.get_value("Builder Page", {"route": route}, "name")
+	if existing:
+		page = frappe.get_doc("Builder Page", existing)
+		page.update(fields)
+		page.save()
+		action = "updated"
+	else:
+		page = frappe.get_doc(dict(doctype="Builder Page", **fields)).insert()
+		action = "created"
+
+	frappe.db.commit()
+	print(f"{component_action} Builder Component {component}")
+	print(f"{action} Builder Page {page.name} at /{route}")
+
+	return page.name
