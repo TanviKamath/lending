@@ -423,6 +423,35 @@ def account_status(loans: list[dict]) -> str:
 	return _("Payment overdue") if overdue else _("All accounts regular")
 
 
+def loans_by_application(applications: list[str]) -> dict:
+	"""The loan booked against each application, in one query.
+
+	Loan Application.status is left at Open when create_loan books the loan, so the
+	status field alone would report a disbursed borrower as still under review. The
+	loan is the stronger evidence, so every stage decision consults it.
+	"""
+	if not applications:
+		return {}
+
+	rows = frappe.get_all(
+		"Loan",
+		filters={"loan_application": ["in", applications], "docstatus": 1},
+		fields=["name", "status", "loan_application"],
+	)
+
+	return {row.loan_application: row for row in rows}
+
+
+def application_stage(application: dict, needs_borrower: bool, loan: dict | None) -> str:
+	if needs_borrower:
+		return _("Action required")
+
+	if loan:
+		return _("Loan sanctioned")
+
+	return APPLICATION_STAGES.get(application.status, application.status)
+
+
 def get_applications(customers: list[str]) -> list[dict]:
 	rows = frappe.get_all(
 		"Loan Application",
@@ -430,6 +459,8 @@ def get_applications(customers: list[str]) -> list[dict]:
 		fields=["name", "loan_product", "loan_amount", "status", "posting_date", "docstatus"],
 		order_by="posting_date desc",
 	)
+
+	booked = loans_by_application([row.name for row in rows])
 
 	presented = []
 	for row in rows:
@@ -439,10 +470,10 @@ def get_applications(customers: list[str]) -> list[dict]:
 				"name": row.name,
 				"product": row.loan_product,
 				"reference": "{0} · initiated {1}".format(row.name, long_date(row.posting_date)),
-				"stage": _("Action required") if needs_borrower else APPLICATION_STAGES.get(row.status, row.status),
+				"stage": application_stage(row, needs_borrower, booked.get(row.name)),
 				"needs_borrower": needs_borrower,
 				"amount": money(row.loan_amount),
-				"note": missing_documents_note(row.name) if needs_borrower else "",
+				"note": draft_note(row.name) if needs_borrower else "",
 				"tag": "you" if needs_borrower else "us",
 			}
 		)
@@ -450,16 +481,24 @@ def get_applications(customers: list[str]) -> list[dict]:
 	return presented
 
 
-def missing_documents_note(application: str) -> str:
-	missing = frappe.get_all(
-		"Loan Application Document",
-		filters={"parent": application, "parenttype": "Loan Application"},
-		fields=["document_type", "file"],
-		ignore_permissions=True,
-	)
-	pending = [row.document_type for row in missing if not row.file]
+def draft_note(application: str) -> str:
+	"""Why a draft application is waiting on the borrower.
 
-	return _("{0} still needed").format(", ".join(pending)) if pending else ""
+	This used to list the documents still needed, which it could never do:
+	Loan Application Document.file is mandatory, so a row without a file cannot be
+	saved, and Loan Product names no expected document types. A checklist needs one
+	of those two to change -- see PORTAL_PLAN.md section 6.5 -- so until then the note
+	says the one thing that is true of every draft.
+	"""
+	uploaded = frappe.db.count(
+		"Loan Application Document", {"parent": application, "parenttype": "Loan Application"}
+	)
+
+	return (
+		_("Submit to start the review · {0} documents attached").format(uploaded)
+		if uploaded
+		else _("Submit to start the review")
+	)
 
 
 def get_activity(loans: list[dict], limit: int = 5) -> list[dict]:
