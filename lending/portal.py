@@ -81,6 +81,15 @@ def assert_owns(doctype: str, name: str) -> str:
 	return applicant
 
 
+def clean(value) -> str:
+	"""Text as it arrived from a browser, stripped of markup and whitespace.
+
+	Every portal endpoint that reads a value from the request runs it through this
+	first, so there is one place to harden rather than one per module.
+	"""
+	return frappe.utils.strip_html(str(value or "")).strip()
+
+
 def money(amount) -> str:
 	return fmt_money(flt(amount), currency=frappe.defaults.get_global_default("currency") or "INR")
 
@@ -450,6 +459,37 @@ def application_stage(application: dict, needs_borrower: bool, loan: dict | None
 		return _("Loan sanctioned")
 
 	return APPLICATION_STAGES.get(application.status, application.status)
+
+
+def leads_for_login() -> list[dict]:
+	"""Enquiries raised under this login's own email address.
+
+	A Loan Lead carries no Customer -- it exists before anyone becomes one -- so email
+	is the only join there is. It is the session's own address, never a value from the
+	request, so this can only ever return enquiries raised with the address the
+	borrower signs in with.
+
+	This is what a brand new borrower has instead of loans. Without it they open an
+	account, log in, and are told there is nothing here.
+	"""
+	user = frappe.session.user
+	if user == "Guest":
+		frappe.throw(_("Please log in to view your account."), frappe.PermissionError)
+
+	return frappe.get_all(
+		"Loan Lead",
+		filters={"email": user, "docstatus": ["<", 2]},
+		fields=[
+			"name",
+			"applicant_name",
+			"loan_product",
+			"loan_amount",
+			"status",
+			"prequalification_status",
+			"creation",
+		],
+		order_by="creation desc",
+	)
 
 
 def get_applications(customers: list[str]) -> list[dict]:
