@@ -12,7 +12,7 @@ canvas. The frame comes from the shell component; see portal_shell.
 """
 
 from lending.portal_shell import build_page
-from lending.portal_theme import card, note_panel, pair_rows
+from lending.portal_theme import card, download_link, note_panel, pair_rows
 
 PAGE_NAME = "Borrower Interest Certificate"
 ROUTE = "borrower/certificate"
@@ -27,6 +27,7 @@ data.update(frappe.call("lending.portal_statement.get_certificate_page"))  # noq
 def content():
 	return [
 		card("Amounts paid", "rows_note", pair_rows("rows")),
+		download_link("download_url", "download_label"),
 		note_panel("disclaimer"),
 		card("Accounts covered", "accounts_note", pair_rows("accounts", with_detail=True)),
 	]
@@ -34,5 +35,11 @@ def content():
 
 def build():
 	return build_page(
-		PAGE_NAME, ROUTE, "Interest certificate", NAV_HREF, content(), data_script=DATA_SCRIPT
+		PAGE_NAME,
+		ROUTE,
+		"Interest certificate",
+		NAV_HREF,
+		content(),
+		action_href="/api/method/lending.portal_print.download_certificate",
+		data_script=DATA_SCRIPT,
 	)

@@ -14,6 +14,8 @@ someone files with their return is a real liability, and the app holds no tax lo
 compute one from.
 """
 
+from urllib.parse import urlencode
+
 import frappe
 from frappe import _
 from frappe.utils import flt, getdate, nowdate
@@ -102,6 +104,18 @@ def loan_groups(loans: list) -> dict:
 	return groups
 
 
+def download_url(method: str, **params) -> str:
+	"""Where the page's download link points.
+
+	The filters travel in the link rather than being defaulted again by the download
+	endpoint, so a borrower looking at one period downloads that period and not the
+	one the page would have opened on.
+	"""
+	query = urlencode({key: value for key, value in params.items() if value})
+
+	return f"/api/method/lending.portal_print.{method}" + (f"?{query}" if query else "")
+
+
 @frappe.whitelist()
 def get_statement_page() -> dict:
 	"""Ledger entries across the borrower's loans for a date range."""
@@ -152,6 +166,10 @@ def get_statement_page() -> dict:
 			"totals_note": _("Across {0} accounts").format(len(loans)),
 			"from_date": from_date,
 			"to_date": to_date,
+			"download_url": download_url(
+				"download_statement", from_date=from_date, to_date=to_date, loan=loan
+			),
+			"download_label": _("Download PDF"),
 		}
 	)
 
@@ -236,6 +254,10 @@ def get_certificate_page() -> dict:
 				"This certificate reports amounts paid. It states no tax relief; "
 				"please consult your tax adviser."
 			),
+			"download_url": download_url(
+				"download_certificate", year=label, loan=frappe.form_dict.get("loan")
+			),
+			"download_label": _("Download {0} certificate").format(label),
 		}
 	)
 

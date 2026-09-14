@@ -12,7 +12,7 @@ canvas. The frame comes from the shell component; see portal_shell.
 """
 
 from lending.portal_shell import build_page
-from lending.portal_theme import card, pair_rows
+from lending.portal_theme import card, download_link, pair_rows
 
 PAGE_NAME = "Borrower Statement"
 ROUTE = "borrower/statement"
@@ -27,11 +27,20 @@ data.update(frappe.call("lending.portal_statement.get_statement_page"))  # noqa:
 def content():
 	return [
 		card("Summary", "totals_note", pair_rows("totals")),
+		download_link("download_url", "download_label"),
 		card("Entries", "rows_note", pair_rows("rows", with_detail=True)),
 	]
 
 
 def build():
 	return build_page(
-		PAGE_NAME, ROUTE, "Statement of account", NAV_HREF, content(), data_script=DATA_SCRIPT
+		PAGE_NAME,
+		ROUTE,
+		"Statement of account",
+		NAV_HREF,
+		content(),
+		# The header button has no access to the page's filters, so it downloads the
+		# default period. The link inside the page carries whatever is on screen.
+		action_href="/api/method/lending.portal_print.download_statement",
+		data_script=DATA_SCRIPT,
 	)

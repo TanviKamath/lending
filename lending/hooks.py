@@ -61,6 +61,12 @@ fixtures = [
 		"dt": "Workflow Transition Tasks",
 		"filters": [["name", "in", ("Loan Lead Basic Rules",)]],
 	},
+	# The layouts behind the borrower portal's two downloads. Named rather than
+	# filtered by doctype, so a site's own Print Formats on Loan are left alone.
+	{
+		"dt": "Print Format",
+		"filters": [["name", "in", ("Loan Statement of Account", "Loan Interest Certificate")]],
+	},
 ]
 
 
