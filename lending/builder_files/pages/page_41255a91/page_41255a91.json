@@ -8,7 +8,7 @@
     "WebkitFontSmoothing": "antialiased",
     "background": "#ffffff",
     "color": "#171717",
-    "fontFamily": "var(--brand-font,InterVariable)",
+    "fontFamily": "var(--brand-font,InterVariable),Inter,-apple-system,BlinkMacSystemFont,\"Segoe UI\",Roboto,Oxygen,Ubuntu,Cantarell,\"Fira Sans\",\"Droid Sans\",\"Helvetica Neue\",sans-serif",
     "fontSize": "14px",
     "fontVariationSettings": "\"opsz\" 24",
     "fontWeight": "420",
@@ -16,7 +16,7 @@
     "lineHeight": "1.5",
     "margin": "0"
    },
-   "blockId": "bc8c40134",
+   "blockId": "9673eebdc",
    "children": [
     {
      "attributes": {},
@@ -128,38 +128,13 @@
         {
          "attributes": {},
          "baseStyles": {},
-         "blockId": "ec2ec33f8",
-         "children": [
-          {
-           "attributes": {},
-           "baseStyles": {},
-           "blockId": "8913fc6bd",
-           "children": [],
-           "classes": [],
-           "customAttributes": {},
-           "isChildOfComponent": "lending-borrower-shell",
-           "mobileStyles": {},
-           "referenceBlockId": "73085f0fb",
-           "tabletStyles": {}
-          },
-          {
-           "attributes": {},
-           "baseStyles": {},
-           "blockId": "50214d6da",
-           "children": [],
-           "classes": [],
-           "customAttributes": {},
-           "isChildOfComponent": "lending-borrower-shell",
-           "mobileStyles": {},
-           "referenceBlockId": "b85379572",
-           "tabletStyles": {}
-          }
-         ],
+         "blockId": "81257ce1c",
+         "children": [],
          "classes": [],
          "customAttributes": {},
          "isChildOfComponent": "lending-borrower-shell",
          "mobileStyles": {},
-         "referenceBlockId": "67298d694",
+         "referenceBlockId": "bb9c13776",
          "tabletStyles": {}
         },
         {
@@ -186,10 +161,10 @@
             "background": "#ffffff",
             "borderRadius": "8px",
             "boxShadow": "0 0 1px 0 rgba(0, 0, 0, 0.14), 0 1px 3px 0 rgba(0, 0, 0, 0.14)",
-            "color": "#171717",
+            "color": "#525252",
             "display": "flex",
             "fontSize": "13px",
-            "fontWeight": "500",
+            "fontWeight": "420",
             "gap": "10px",
             "hover:background": "#f3f3f3",
             "hover:color": "#171717",
@@ -437,12 +412,12 @@
             "gap": "20px",
             "gridTemplateColumns": "repeat(auto-fit, minmax(240px, 1fr))"
            },
-           "blockId": "08010bb44",
+           "blockId": "0e367ad48",
            "children": [
             {
              "attributes": {},
              "baseStyles": {},
-             "blockId": "199fb00d7",
+             "blockId": "7ec4a9001",
              "children": [
               {
                "attributes": {},
@@ -455,7 +430,7 @@
                 "minHeight": "110px",
                 "padding": "12px"
                },
-               "blockId": "e21df291a",
+               "blockId": "c8d708a11",
                "children": [
                 {
                  "attributes": {},
@@ -465,7 +440,7 @@
                   "gap": "8px",
                   "justifyContent": "space-between"
                  },
-                 "blockId": "abb0d2ac5",
+                 "blockId": "45751bf99",
                  "children": [
                   {
                    "attributes": {},
@@ -473,7 +448,7 @@
                     "fontSize": "13px",
                     "fontWeight": "500"
                    },
-                   "blockId": "29726feda",
+                   "blockId": "2d681169f",
                    "children": [],
                    "classes": [],
                    "customAttributes": {},
@@ -503,7 +478,7 @@
                   "flexDirection": "column",
                   "paddingTop": "12px"
                  },
-                 "blockId": "b8316f5d3",
+                 "blockId": "572f33549",
                  "children": [
                   {
                    "attributes": {},
@@ -514,7 +489,7 @@
                     "letterSpacing": "0.01em",
                     "lineHeight": "115%"
                    },
-                   "blockId": "038cd42cc",
+                   "blockId": "f5f9a1214",
                    "children": [],
                    "classes": [],
                    "customAttributes": {},
@@ -573,7 +548,7 @@
             "gap": "20px",
             "gridTemplateColumns": "minmax(0, 1.9fr) minmax(0, 1fr)"
            },
-           "blockId": "7a3265a44",
+           "blockId": "804b4ae82",
            "children": [
             {
              "attributes": {},
@@ -583,7 +558,7 @@
               "gap": "20px",
               "minWidth": "0"
              },
-             "blockId": "2215a6efe",
+             "blockId": "934f58190",
              "children": [
               {
                "attributes": {},
@@ -595,14 +570,14 @@
                 "flexDirection": "column",
                 "minWidth": "0"
                },
-               "blockId": "4fe52bcef",
+               "blockId": "4e713ac41",
                "children": [
                 {
                  "attributes": {},
                  "baseStyles": {
                   "padding": "12px 12px 14px"
                  },
-                 "blockId": "9d606ad98",
+                 "blockId": "51b2cb363",
                  "children": [
                   {
                    "attributes": {},
@@ -614,7 +589,7 @@
                     "lineHeight": "1.3em",
                     "margin": "0"
                    },
-                   "blockId": "43ae8d7da",
+                   "blockId": "221d50e7c",
                    "children": [],
                    "classes": [],
                    "customAttributes": {},
@@ -631,7 +606,7 @@
                     "fontVariantNumeric": "tabular-nums",
                     "marginTop": "5px"
                    },
-                   "blockId": "87c8dfd3c",
+                   "blockId": "3fc975998",
                    "children": [],
                    "classes": [],
                    "customAttributes": {},
@@ -657,7 +632,7 @@
                 {
                  "attributes": {},
                  "baseStyles": {},
-                 "blockId": "abed1b6f5",
+                 "blockId": "c8160104c",
                  "children": [
                   {
                    "attributes": {},
@@ -669,7 +644,7 @@
                     "hover:background": "#f8f8f8",
                     "padding": "12px"
                    },
-                   "blockId": "3dba5ae7c",
+                   "blockId": "3ba48037f",
                    "children": [
                     {
                      "attributes": {},
@@ -680,7 +655,7 @@
                       "gap": "2px",
                       "minWidth": "0"
                      },
-                     "blockId": "44ee81424",
+                     "blockId": "3c46664b3",
                      "children": [
                       {
                        "attributes": {},
@@ -688,7 +663,7 @@
                         "fontSize": "13px",
                         "fontWeight": "500"
                        },
-                       "blockId": "837df7e5c",
+                       "blockId": "a7a77388b",
                        "children": [],
                        "classes": [],
                        "customAttributes": {},
@@ -711,7 +686,7 @@
                         "fontSize": "12px",
                         "fontVariantNumeric": "tabular-nums"
                        },
-                       "blockId": "06233f690",
+                       "blockId": "a3fdf2a44",
                        "children": [],
                        "classes": [],
                        "customAttributes": {},
@@ -740,7 +715,7 @@
                       "flexShrink": "0",
                       "width": "150px"
                      },
-                     "blockId": "27ce53fb1",
+                     "blockId": "c7ddb09f2",
                      "children": [
                       {
                        "attributes": {},
@@ -751,7 +726,7 @@
                         "fontSize": "13px",
                         "gap": "6px"
                        },
-                       "blockId": "09f994378",
+                       "blockId": "d94e6a185",
                        "children": [],
                        "classes": [],
                        "customAttributes": {},
@@ -784,7 +759,7 @@
                       "textAlign": "right",
                       "width": "150px"
                      },
-                     "blockId": "49b4778e8",
+                     "blockId": "8360e7e06",
                      "children": [
                       {
                        "attributes": {},
@@ -793,7 +768,7 @@
                         "fontVariantNumeric": "tabular-nums",
                         "fontWeight": "500"
                        },
-                       "blockId": "0636d2c0d",
+                       "blockId": "d118ea1c6",
                        "children": [],
                        "classes": [],
                        "customAttributes": {},
@@ -816,7 +791,7 @@
                         "fontSize": "12px",
                         "fontVariantNumeric": "tabular-nums"
                        },
-                       "blockId": "d77c38bb2",
+                       "blockId": "05ea0e690",
                        "children": [],
                        "classes": [],
                        "customAttributes": {},
@@ -877,14 +852,14 @@
                 "flexDirection": "column",
                 "minWidth": "0"
                },
-               "blockId": "818b72bd2",
+               "blockId": "d75876fbc",
                "children": [
                 {
                  "attributes": {},
                  "baseStyles": {
                   "padding": "12px 12px 14px"
                  },
-                 "blockId": "c55a7d07d",
+                 "blockId": "e3a9b1ee0",
                  "children": [
                   {
                    "attributes": {},
@@ -896,7 +871,7 @@
                     "lineHeight": "1.3em",
                     "margin": "0"
                    },
-                   "blockId": "3cc212345",
+                   "blockId": "2ce540fd9",
                    "children": [],
                    "classes": [],
                    "customAttributes": {},
@@ -913,7 +888,7 @@
                     "fontVariantNumeric": "tabular-nums",
                     "marginTop": "5px"
                    },
-                   "blockId": "bc668f2aa",
+                   "blockId": "376840935",
                    "children": [],
                    "classes": [],
                    "customAttributes": {},
@@ -939,7 +914,7 @@
                 {
                  "attributes": {},
                  "baseStyles": {},
-                 "blockId": "2cfd498ea",
+                 "blockId": "20a9eb50f",
                  "children": [
                   {
                    "attributes": {},
@@ -950,7 +925,7 @@
                     "gap": "12px",
                     "padding": "12px"
                    },
-                   "blockId": "8c98452a9",
+                   "blockId": "581457c74",
                    "children": [
                     {
                      "attributes": {},
@@ -961,7 +936,7 @@
                       "fontVariantNumeric": "tabular-nums",
                       "width": "80px"
                      },
-                     "blockId": "3f762d8f0",
+                     "blockId": "07f77db0b",
                      "children": [],
                      "classes": [],
                      "customAttributes": {},
@@ -986,7 +961,7 @@
                       "gap": "2px",
                       "minWidth": "0"
                      },
-                     "blockId": "fefb3ca11",
+                     "blockId": "806af05d4",
                      "children": [
                       {
                        "attributes": {},
@@ -994,7 +969,7 @@
                         "fontSize": "13px",
                         "fontWeight": "500"
                        },
-                       "blockId": "471f629ee",
+                       "blockId": "dae7d3420",
                        "children": [],
                        "classes": [],
                        "customAttributes": {},
@@ -1017,7 +992,7 @@
                         "fontSize": "12px",
                         "fontVariantNumeric": "tabular-nums"
                        },
-                       "blockId": "08ab83eb2",
+                       "blockId": "7f64c87cf",
                        "children": [],
                        "classes": [],
                        "customAttributes": {},
@@ -1048,7 +1023,7 @@
                       "fontVariantNumeric": "tabular-nums",
                       "fontWeight": "500"
                      },
-                     "blockId": "36fbc746b",
+                     "blockId": "1d1ca45c6",
                      "children": [],
                      "classes": [],
                      "customAttributes": {},
@@ -1107,7 +1082,7 @@
               "gap": "20px",
               "minWidth": "0"
              },
-             "blockId": "0b48df05b",
+             "blockId": "1d6fd3f25",
              "children": [
               {
                "attributes": {},
@@ -1119,14 +1094,14 @@
                 "flexDirection": "column",
                 "minWidth": "0"
                },
-               "blockId": "4f4c60e0a",
+               "blockId": "51470c7f1",
                "children": [
                 {
                  "attributes": {},
                  "baseStyles": {
                   "padding": "12px 12px 14px"
                  },
-                 "blockId": "43aa8d806",
+                 "blockId": "db6174148",
                  "children": [
                   {
                    "attributes": {},
@@ -1138,7 +1113,7 @@
                     "lineHeight": "1.3em",
                     "margin": "0"
                    },
-                   "blockId": "fdddd4277",
+                   "blockId": "24b238d21",
                    "children": [],
                    "classes": [],
                    "customAttributes": {},
@@ -1155,7 +1130,7 @@
                     "fontVariantNumeric": "tabular-nums",
                     "marginTop": "5px"
                    },
-                   "blockId": "bc77fecb2",
+                   "blockId": "9cba09027",
                    "children": [],
                    "classes": [],
                    "customAttributes": {},
@@ -1181,12 +1156,12 @@
                 {
                  "attributes": {},
                  "baseStyles": {},
-                 "blockId": "8596e5b69",
+                 "blockId": "891933c83",
                  "children": [
                   {
                    "attributes": {},
                    "baseStyles": {},
-                   "blockId": "13475776e",
+                   "blockId": "af278252f",
                    "children": [
                     {
                      "attributes": {},
@@ -1198,7 +1173,7 @@
                       "hover:background": "#f8f8f8",
                       "padding": "12px"
                      },
-                     "blockId": "dab411a1f",
+                     "blockId": "d7b416380",
                      "children": [
                       {
                        "attributes": {},
@@ -1209,7 +1184,7 @@
                         "gap": "2px",
                         "minWidth": "0"
                        },
-                       "blockId": "f5773b5ad",
+                       "blockId": "2dc2608c0",
                        "children": [
                         {
                          "attributes": {},
@@ -1218,7 +1193,7 @@
                           "fontSize": "12px",
                           "fontVariantNumeric": "tabular-nums"
                          },
-                         "blockId": "1ffae9982",
+                         "blockId": "8dc3b0d12",
                          "children": [],
                          "classes": [],
                          "customAttributes": {},
@@ -1240,7 +1215,7 @@
                           "fontSize": "13px",
                           "fontWeight": "500"
                          },
-                         "blockId": "27bdf80c2",
+                         "blockId": "7fc171462",
                          "children": [],
                          "classes": [],
                          "customAttributes": {},
@@ -1289,7 +1264,7 @@
                    "baseStyles": {
                     "padding": "12px"
                    },
-                   "blockId": "17036c5e2",
+                   "blockId": "0f164bc35",
                    "children": [
                     {
                      "attributes": {
@@ -1309,7 +1284,7 @@
                       "textDecoration": "none",
                       "whiteSpace": "nowrap"
                      },
-                     "blockId": "c94db2506",
+                     "blockId": "727713aa9",
                      "children": [],
                      "classes": [],
                      "customAttributes": {},
@@ -1349,14 +1324,14 @@
                 "flexDirection": "column",
                 "minWidth": "0"
                },
-               "blockId": "5a26456b5",
+               "blockId": "4d3dd6d81",
                "children": [
                 {
                  "attributes": {},
                  "baseStyles": {
                   "padding": "12px 12px 14px"
                  },
-                 "blockId": "50bf68467",
+                 "blockId": "aa3b7e6f5",
                  "children": [
                   {
                    "attributes": {},
@@ -1368,7 +1343,7 @@
                     "lineHeight": "1.3em",
                     "margin": "0"
                    },
-                   "blockId": "f91986567",
+                   "blockId": "f188f753e",
                    "children": [],
                    "classes": [],
                    "customAttributes": {},
@@ -1385,7 +1360,7 @@
                     "fontVariantNumeric": "tabular-nums",
                     "marginTop": "5px"
                    },
-                   "blockId": "07763d066",
+                   "blockId": "f48601407",
                    "children": [],
                    "classes": [],
                    "customAttributes": {},
@@ -1411,7 +1386,7 @@
                 {
                  "attributes": {},
                  "baseStyles": {},
-                 "blockId": "42bb7141c",
+                 "blockId": "1ddfddde2",
                  "children": [
                   {
                    "attributes": {},
@@ -1423,7 +1398,7 @@
                     "hover:background": "#f8f8f8",
                     "padding": "12px"
                    },
-                   "blockId": "6cacf6717",
+                   "blockId": "b66f0cd9c",
                    "children": [
                     {
                      "attributes": {},
@@ -1434,7 +1409,7 @@
                       "gap": "2px",
                       "minWidth": "0"
                      },
-                     "blockId": "a7b260f16",
+                     "blockId": "2c50035f5",
                      "children": [
                       {
                        "attributes": {},
@@ -1443,7 +1418,7 @@
                         "fontSize": "12px",
                         "fontVariantNumeric": "tabular-nums"
                        },
-                       "blockId": "32b7a9bf3",
+                       "blockId": "97d9f3aa3",
                        "children": [],
                        "classes": [],
                        "customAttributes": {},
@@ -1465,7 +1440,7 @@
                         "fontSize": "13px",
                         "fontWeight": "500"
                        },
-                       "blockId": "a8b20f5d8",
+                       "blockId": "33f9c8b92",
                        "children": [],
                        "classes": [],
                        "customAttributes": {},
@@ -1640,18 +1615,22 @@
    "tabletStyles": {}
   }
  ],
- "client_scripts": [],
+ "client_scripts": [
+  {
+   "builder_script": "lending-portal-forms"
+  }
+ ],
  "creation": "2026-09-10 11:59:38.260471",
  "disable_indexing": 1,
  "docstatus": 0,
  "doctype": "Builder Page",
  "draft_blocks": null,
  "dynamic_route": 1,
- "head_html": "\n<!-- Builder Token records are served as :root custom properties by these routes, and the\n\tBuilder canvas serves the same records itself, so var(--brand-*) resolves in the\n\teditor and on the published page alike. -->\n<link rel=\"stylesheet\" href=\"/builder_assets/tokens.css\">\n<style>\n/* Website pages do not load the desk bundle, so the font ships with the page. */\n@font-face {\n\tfont-family: InterVariable;\n\tfont-style: normal;\n\tfont-weight: 100 900;\n\tfont-display: swap;\n\tsrc: url(\"/assets/frappe/css/fonts/inter/InterVariable.woff2\") format(\"woff2\");\n}\n\n:root { color-scheme: light; }\nhtml { background: #ffffff; }\n</style>\n",
+ "head_html": "\n<!-- Builder Token records are served as :root custom properties by these routes, and the\n\tBuilder canvas serves the same records itself, so var(--brand-*) resolves in the\n\teditor and on the published page alike. -->\n<link rel=\"stylesheet\" href=\"/builder_assets/tokens.css\">\n<style>\n/* Website pages do not load the desk bundle, so the font ships with the page. */\n@font-face {\n\tfont-family: InterVariable;\n\tfont-style: normal;\n\tfont-weight: 100 900;\n\tfont-display: swap;\n\tsrc: url(\"/assets/frappe/css/fonts/inter/InterVariable.woff2\") format(\"woff2\");\n}\n\n:root { color-scheme: light; }\nhtml { background: #ffffff; }\n\n/* Every block carries its display inline, which outranks the browser's own\n\t[hidden] { display: none } rule. Without this, hiding a panel does nothing. */\n[hidden] { display: none !important; }\n\n/* State and interaction, which a block's inline styles cannot express. A block can\n\tcarry its own :hover through a \"hover:property\" style key, but the chosen tile and\n\tthe filled code box are states the script sets on an attribute, so the appearance\n\tof a choice lives here rather than in the script. */\ninput:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible {\n\toutline: 2px solid #0f0f0f; outline-offset: 2px;\n}\ninput:focus, select:focus { border-color: #0f0f0f; }\n[data-code] input:not(:placeholder-shown) { border-color: #0f0f0f; }\n\n/* The tiles are this page's radio buttons, at the size the question deserves. The\n\tdot is the smallest part of the control, so choosing one restyles the whole tile. */\n[data-tile][data-chosen=\"1\"] {\n\tborder-color: #0f0f0f; box-shadow: inset 0 0 0 1px #0f0f0f;\n}\n[data-tile][data-chosen=\"1\"] [data-tile-icon] { background: #0f0f0f; color: #ffffff; }\n[data-tile][data-chosen=\"1\"] [data-tile-radio] {\n\tbackground: #0f0f0f; border-color: #0f0f0f;\n}\n[data-tile-icon] svg { width: 19px; height: 19px; }\n[data-tile-radio] svg { width: 13px; height: 13px; }\n[data-echo-note] svg { width: 13px; height: 13px; }\n\n/* The tick is always in the dot, so the dot never changes size when it is chosen. */\n[data-tile-radio] svg { opacity: 0; }\n[data-tile][data-chosen=\"1\"] [data-tile-radio] svg { opacity: 1; }\n\n/* A step whose question is unanswered offers a button that cannot be pressed, which\n\tis quieter than letting it through and then refusing the form. */\nbutton[disabled], button[disabled]:hover { opacity: 0.45; cursor: default; filter: none; }\n\n/* The sidebar's collapse toggle. Out of the way until the pointer is over the\n\tsidebar, and always in reach while the sidebar is shut, because a control that\n\thides the menu has to be the control that brings it back. */\n[data-sidebar-toggle] { opacity: 0; transition: opacity 120ms ease, transform 160ms ease; }\n[data-sidebar]:hover [data-sidebar-toggle],\n[data-sidebar-toggle]:focus-visible { opacity: 1; }\n\n[data-sidebar][data-collapsed=\"1\"] {\n\twidth: 0; min-width: 0; padding-left: 0; padding-right: 0; border-right-color: transparent;\n}\n/* Every row carries its display inline, so hiding the list needs to outrank that.\n\tThe toggle is the one child that stays. */\n[data-sidebar][data-collapsed=\"1\"] > *:not([data-sidebar-toggle]) { display: none; }\n[data-sidebar][data-collapsed=\"1\"] [data-sidebar-toggle] { opacity: 1; transform: rotate(180deg); }\n\n/* The offer grid is three columns of figures. Two of them on a phone would wrap\n\tmid-number, so it drops to one. */\n@media (max-width: 600px) {\n\t[data-offer-grid] { grid-template-columns: minmax(0, 1fr); }\n}\n</style>\n",
  "idx": 0,
  "is_standard": 1,
  "is_template": 0,
- "modified": "2026-09-10 12:01:49.762050",
+ "modified": "2026-09-11 11:59:38.144564",
  "modified_by": "Administrator",
  "name": "page-41255a91",
  "owner": "Administrator",

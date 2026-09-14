@@ -23,10 +23,12 @@ import json
 
 import frappe
 
+from lending.portal_script import CLIENT_SCRIPT, SCRIPT_NAME
 from lending.portal_theme import (
 	AVATAR_STYLES,
 	BODY_STYLES,
 	BTN_STYLES,
+	CHEVRON_LEFT,
 	CONTENT_STYLES,
 	CRUMB_STYLES,
 	FOOTER_LINK_STYLES,
@@ -48,6 +50,7 @@ from lending.portal_theme import (
 	RAIL_ICON_STYLES,
 	RAIL_STYLES,
 	SHELL_STYLES,
+	SIDE_COLLAPSE_STYLES,
 	SIDE_FOOT_NAME_STYLES,
 	SIDE_FOOT_NOTE_STYLES,
 	SIDE_FOOT_STYLES,
@@ -56,9 +59,6 @@ from lending.portal_theme import (
 	SPACER_STYLES,
 	STATUS_DOT_STYLES,
 	STATUS_STYLES,
-	SWITCHER_NAME_STYLES,
-	SWITCHER_NOTE_STYLES,
-	SWITCHER_STYLES,
 	block,
 	block_id,
 	bound,
@@ -120,7 +120,34 @@ def rail():
 	)
 
 
+def collapse_toggle():
+	"""The control that gets the sidebar out of the way, and brings it back.
+
+	One button for both directions: the script turns it over, so there is never a
+	moment where the menu is shut and nothing on screen will reopen it.
+	"""
+	return block(
+		"button",
+		path="shell/sidebar/collapse",
+		styles=SIDE_COLLAPSE_STYLES,
+		html=CHEVRON_LEFT,
+		attributes={
+			"type": "button",
+			"data-sidebar-toggle": "1",
+			"aria-label": "Hide the menu",
+			"aria-expanded": "true",
+		},
+	)
+
+
 def sidebar():
+	"""The list of pages, whose portal it is, and the toggle that gets it out of the way.
+
+	It used to open with a record switcher, reading "All customer records" and how many
+	there were. The count is at the foot already, under the name of whoever is signed
+	in, which is where it means something, and a switcher between one thing read as a
+	control that does nothing.
+	"""
 	nav_items = [
 		block(
 			"a",
@@ -137,27 +164,10 @@ def sidebar():
 		path="shell/sidebar",
 		styles=SIDEBAR_STYLES,
 		mobileStyles=HIDDEN,
+		attributes={"data-sidebar": "1"},
 		children=[
 			bound("div", "brand_name", path="shell/sidebar/brand", styles=SIDE_HEAD_STYLES),
-			block(
-				"div",
-				path="shell/sidebar/switcher",
-				styles=SWITCHER_STYLES,
-				children=[
-					block(
-						"b",
-						path="shell/sidebar/switcher/name",
-						styles=SWITCHER_NAME_STYLES,
-						html="All customer records",
-					),
-					bound(
-						"span",
-						"customer_note",
-						path="shell/sidebar/switcher/note",
-						styles=SWITCHER_NOTE_STYLES,
-					),
-				],
-			),
+			collapse_toggle(),
 			block("nav", path="shell/sidebar/nav", styles=NAV_STYLES, children=nav_items),
 			block(
 				"div",
@@ -385,7 +395,6 @@ def build_page(
 	action_href="#",
 	data_script=None,
 	authenticated=True,
-	client_script=None,
 ):
 	"""Create or replace one portal page: the shared shell, wrapped around `content`.
 
@@ -421,10 +430,9 @@ def build_page(
 		"draft_blocks": None,
 	}
 
-	if client_script:
-		fields["client_scripts"] = [
-			{"builder_script": upsert_client_script(*client_script)}
-		]
+	# Every page gets the one shared script, not just the pages with a form: the shell
+	# itself has behaviour now, since the sidebar remembers whether it is open.
+	fields["client_scripts"] = [{"builder_script": upsert_client_script(SCRIPT_NAME, CLIENT_SCRIPT)}]
 
 	existing = frappe.db.get_value("Builder Page", {"route": route}, "name")
 	if existing:
