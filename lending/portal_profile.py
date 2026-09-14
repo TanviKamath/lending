@@ -1,22 +1,23 @@
 # Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-"""Read-only data for the borrower's personal information page.
+"""The borrower's personal information page, and the one write it accepts.
 
 One login can hold several Customer records -- PORTAL_PLAN.md section 7 -- so this
-page shows a section per record rather than pretending there is one identity.
+page shows a section per record rather than pretending there is one identity, and the
+edit form names which record it is correcting.
 
 Section 6.3 divides the fields in two. Contact details and address are the borrower's
 to correct. Identity is not: the name on the record and the tax id behind it belong to
 the verified file, and a borrower editing those would be editing the result of a KYC
-check. Everything here is read-only for now; the fields that will accept an edit are
-marked, so the write endpoint has an obvious shape when it arrives.
+check. save_profile enforces that split by writing a fixed list of fields and reading
+nothing else from the request.
 """
 
 import frappe
 from frappe import _
 
-from lending.portal import get_loans, get_portal_customers, shell_payload
+from lending.portal import clean, get_loans, get_portal_customers, shell_payload
 
 CUSTOMER_FIELDS = (
 	"name",
@@ -29,9 +30,18 @@ CUSTOMER_FIELDS = (
 	"customer_primary_address",
 )
 
-# What section 6.3 lets a borrower correct. Anything absent from this set is shown but
-# never accepted from the browser.
-EDITABLE = ("email", "mobile", "phone", "address")
+# What section 6.3 lets a borrower correct. Anything absent from these two lists is
+# shown on the page but never read from the request, so adding a field to the form
+# without adding it here changes nothing.
+EDITABLE_CONTACT = ("email", "mobile", "phone")
+EDITABLE_ADDRESS = (
+	"address_line1",
+	"address_line2",
+	"city",
+	"state",
+	"pincode",
+	"country",
+)
 
 
 @frappe.whitelist()
@@ -56,16 +66,50 @@ def get_profile_page() -> dict:
 				if len(customers) > 1
 				else _("Your record")
 			),
-			# Said plainly on the page, so nobody hunts for an edit button that is not
-			# there yet and nobody expects to correct a verified field here.
 			"edit_note": _(
 				"Contact details and address can be corrected. Name and tax id come from "
 				"your verified records -- write to us to change those."
 			),
 		}
 	)
+	payload.update(edit_form(customers))
 
 	return payload
+
+
+def chosen_customer(customers: list[str]) -> str | None:
+	"""Which record the form is editing. A name from the request must be one of ours."""
+	asked = frappe.form_dict.get("customer")
+
+	return asked if asked in customers else (customers[0] if customers else None)
+
+
+def edit_form(customers: list[str]) -> dict:
+	"""Current values for the edit form, so the boxes open filled in."""
+	name = chosen_customer(customers)
+	if not name:
+		return {"form_customer": "", "customer_options": [], "form_note": ""}
+
+	customer = frappe.db.get_value("Customer", name, CUSTOMER_FIELDS, as_dict=True)
+	contact = frappe.db.get_value(
+		"Contact", primary_contact(customer), ["email_id", "mobile_no", "phone"], as_dict=True
+	) or frappe._dict()
+	address = frappe.db.get_value(
+		"Address", primary_address(customer), EDITABLE_ADDRESS, as_dict=True
+	) or frappe._dict()
+
+	form = {
+		"form_customer": name,
+		"form_email": contact.email_id or customer.email_id or "",
+		"form_mobile": contact.mobile_no or customer.mobile_no or "",
+		"form_phone": contact.phone or "",
+		"customer_options": [{"label": row, "value": row} for row in customers],
+		"form_note": _("Editing {0}").format(customer.customer_name),
+		"save_label": _("Save my details"),
+	}
+	form.update({f"form_{field}": address.get(field) or "" for field in EDITABLE_ADDRESS})
+
+	return form
 
 
 def row(label: str, value: str, detail: str = "") -> dict:
@@ -152,3 +196,165 @@ def address_rows(customer: dict) -> list[dict]:
 	]
 
 	return [row(_("Address"), ", ".join(part for part in parts if part))]
+
+
+# --- the one write this page accepts ------------------------------------------------
+
+
+def owned_customer(customers: list[str]) -> str:
+	"""The customer the request names, checked against the borrower's own list.
+
+	A customer name arrives from the browser, so it is never trusted. This is the same
+	rule as assert_owns, applied to the record a write is aimed at rather than a read.
+	"""
+	name = clean(frappe.form_dict.get("customer"))
+
+	if name not in customers:
+		raise frappe.PermissionError(_("Not permitted"))
+
+	return name
+
+
+def set_primary_row(contact, table: str, value_field: str, value: str, flag: str):
+	"""Update the row a Contact child table flags as primary, or add one.
+
+	Contact.email_id and Contact.mobile_no are read-only fields fetched from these
+	tables, so writing them directly does nothing. Appending every time would leave a
+	borrower with a row per correction, which is why an existing row is reused.
+
+	The match is on the flag alone. `phone_nos` holds the mobile and the landline in
+	one table under different flags, so falling back to "the first row" would let a
+	landline overwrite the mobile that was saved a moment earlier.
+	"""
+	if not value:
+		return
+
+	rows = contact.get(table) or []
+	primary = next((row for row in rows if row.get(flag)), None)
+
+	if primary:
+		primary.set(value_field, value)
+	else:
+		contact.append(table, {value_field: value, flag: 1})
+
+
+def safe_to_edit(doc, customers: list[str]) -> bool:
+	"""True when every customer this record serves is one the borrower owns.
+
+	Frappe creates a Contact per login and erpnext links it to each Customer that
+	login is a portal user of, so one record commonly serves several customers. That
+	is harmless while they all belong to the same person. It stops being harmless if
+	the record also serves a customer somebody else holds: editing it would then
+	change what that other borrower sees. In that case a fresh record is made for
+	this customer instead of writing to the shared one.
+	"""
+	served = {row.link_name for row in doc.get("links") or [] if row.link_doctype == "Customer"}
+
+	return served <= set(customers)
+
+
+def save_contact(customer: str, customers: list[str], data: dict):
+	name = primary_contact(frappe.db.get_value("Customer", customer, CUSTOMER_FIELDS, as_dict=True))
+	contact = frappe.get_doc("Contact", name) if name else None
+
+	if contact is None or not safe_to_edit(contact, customers):
+		contact = frappe.new_doc("Contact")
+		contact.first_name = frappe.db.get_value("Customer", customer, "customer_name")
+		contact.append("links", {"link_doctype": "Customer", "link_name": customer})
+
+	set_primary_row(contact, "email_ids", "email_id", data["email"], "is_primary")
+	set_primary_row(contact, "phone_nos", "phone", data["mobile"], "is_primary_mobile_no")
+	set_primary_row(contact, "phone_nos", "phone", data["phone"], "is_primary_phone")
+
+	contact.save(ignore_permissions=True)
+
+	return contact.name
+
+
+def resolve_country(given: str, existing: str | None) -> str | None:
+	"""The country to save, which is never allowed to be blank.
+
+	Address.country is mandatory, and india_compliance refuses an address outside
+	India unless its GST category says so. A borrower who leaves the box empty would
+	otherwise get that rule quoted at them, which explains nothing. So a blank box
+	keeps whatever the address already had, and failing that the site's own country.
+	"""
+	if given:
+		if not frappe.db.exists("Country", given):
+			frappe.throw(
+				_("We do not recognise {0} as a country.").format(given), frappe.ValidationError
+			)
+		return given
+
+	return existing or frappe.db.get_single_value("System Settings", "country") or None
+
+
+def save_address(customer: str, customers: list[str], data: dict):
+	name = primary_address(frappe.db.get_value("Customer", customer, CUSTOMER_FIELDS, as_dict=True))
+	values = {field: data[field] for field in EDITABLE_ADDRESS}
+
+	if not any(values.values()):
+		return None
+
+	address = frappe.get_doc("Address", name) if name else None
+
+	if address is None or not safe_to_edit(address, customers):
+		address = frappe.new_doc("Address")
+		address.address_type = "Billing"
+		address.address_title = frappe.db.get_value("Customer", customer, "customer_name")
+		address.append("links", {"link_doctype": "Customer", "link_name": customer})
+
+	values["country"] = resolve_country(values["country"], address.get("country"))
+	if not values["country"]:
+		frappe.throw(_("Please give a country for your address."), frappe.ValidationError)
+
+	# Address's own mandatory fields, checked here so a borrower who filled in half
+	# the form is told what is missing in our words rather than the doctype's.
+	# Anything a regional app adds on top -- india_compliance wants a state on an
+	# Indian address -- stays that app's rule to state, because it varies by install.
+	missing = [field for field in ("address_line1", "city") if not values[field]]
+	if missing:
+		frappe.throw(
+			_("An address needs at least a first line and a city."), frappe.ValidationError
+		)
+
+	address.update(values)
+	address.save(ignore_permissions=True)
+
+	return address.name
+
+
+@frappe.whitelist(methods=["POST"])
+def save_profile() -> dict:
+	"""Correct the contact details and address on one of the borrower's own records.
+
+	Written with ignore_permissions because a Website User holds no write rights on
+	Contact or Address, and granting them would open every other borrower's records
+	too. The narrowing is done here instead: one customer the borrower owns, and a
+	fixed list of fields. Nothing else in the request is read.
+	"""
+	customers = get_portal_customers()
+	customer = owned_customer(customers)
+
+	data = {field: clean(frappe.form_dict.get(field)) for field in EDITABLE_CONTACT}
+	data.update({field: clean(frappe.form_dict.get(field)) for field in EDITABLE_ADDRESS})
+
+	if data["email"] and not frappe.utils.validate_email_address(data["email"]):
+		frappe.throw(_("Please give a valid email address."), frappe.ValidationError)
+
+	if not data["email"] and not data["mobile"]:
+		frappe.throw(
+			_("Please leave us at least an email address or a mobile number."),
+			frappe.ValidationError,
+		)
+
+	save_contact(customer, customers, data)
+	save_address(customer, customers, data)
+	frappe.db.commit()  # nosemgrep
+
+	return {
+		"headline": _("Saved"),
+		"message": _("Your details have been updated."),
+		"offer": [],
+		"reference_note": "",
+	}

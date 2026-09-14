@@ -14,24 +14,14 @@ canvas. The frame comes from the shell component; see portal_shell.
 from lending.portal_shell import build_page
 from lending.portal_theme import (
 	AMOUNT_STYLES,
-	CARD_HEAD_STYLES,
-	CARD_STYLES,
-	CARD_SUB_STYLES,
-	CARD_TITLE_STYLES,
-	COL_AMT_STYLES,
-	COL_MAIN_STYLES,
-	COL_STATUS_STYLES,
 	PRIMARY_TEXT_STYLES,
-	ROW_STYLES,
 	SECONDARY_TEXT_STYLES,
 	STATE_STYLES,
-	THEAD_LABEL_STYLES,
-	THEAD_STYLES,
 	WHY_STYLES,
-	block,
 	bound,
-	linked,
-	repeater,
+	card,
+	pair_rows,
+	record_table,
 )
 
 PAGE_NAME = "Borrower Applications"
@@ -46,78 +36,33 @@ data.update(frappe.call("lending.portal_applications.get_applications_page"))  #
 '''
 
 
-def card(title, subtitle_key, body):
-	return block(
-		"section",
-		styles=CARD_STYLES,
-		children=[
-			block(
-				"div",
-				styles=CARD_HEAD_STYLES,
-				children=[
-					block("h2", styles=CARD_TITLE_STYLES, html=title),
-					bound("div", subtitle_key, styles=CARD_SUB_STYLES),
-				],
-			),
-			body,
-		],
-	)
-
-
-def thead(labels):
-	columns = [COL_MAIN_STYLES, COL_STATUS_STYLES, COL_AMT_STYLES]
-	return block(
-		"div",
-		styles=THEAD_STYLES,
-		children=[
-			block("span", styles={**columns[index], **THEAD_LABEL_STYLES}, html=label)
-			for index, label in enumerate(labels)
-		],
-	)
-
-
 def applications_body():
 	"""Each row links to its own tracker, so the whole line is the way in."""
 	why = bound("div", "note", styles=WHY_STYLES)
 	why["visibilityCondition"] = "note"
 
-	row = linked(
-		"url",
-		styles={**ROW_STYLES, "color": "inherit"},
-		children=[
-			block(
-				"div",
-				styles=COL_MAIN_STYLES,
-				children=[
-					bound("div", "product", styles=PRIMARY_TEXT_STYLES),
-					bound("div", "reference", styles=SECONDARY_TEXT_STYLES),
-					why,
-				],
-			),
-			block(
-				"div",
-				styles=COL_STATUS_STYLES,
-				children=[bound("span", "stage", styles=STATE_STYLES)],
-			),
-			block(
-				"div",
-				styles=COL_AMT_STYLES,
-				children=[bound("div", "amount", styles=AMOUNT_STYLES)],
-			),
+	return record_table(
+		["Application", "Stage", "Amount sought"],
+		[
+			[
+				bound("div", "product", styles=PRIMARY_TEXT_STYLES),
+				bound("div", "reference", styles=SECONDARY_TEXT_STYLES),
+				why,
+			],
+			[bound("span", "stage", styles=STATE_STYLES)],
+			[bound("div", "amount", styles=AMOUNT_STYLES)],
 		],
-	)
-
-	return block(
-		"div",
-		children=[
-			thead(["Application", "Stage", "Amount sought"]),
-			repeater("applications", row),
-		],
+		"applications",
 	)
 
 
 def content():
-	return [card("Applications", "applications_note", applications_body())]
+	return [
+		card("Applications", "applications_note", applications_body()),
+		# What a borrower has before any of it becomes an application. On the day they
+		# sign up this card is their whole account, so the page cannot leave it out.
+		card("Enquiries", "enquiries_note", pair_rows("enquiries", with_detail=True)),
+	]
 
 
 def build():

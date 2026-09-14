@@ -21,8 +21,10 @@ from lending.portal import (
 	APPLICATION_STAGES,
 	STATUS_LABELS,
 	assert_owns,
+	clean,
 	get_applications,
 	get_portal_customers,
+	leads_for_login,
 	long_date,
 	money,
 	shell_payload,
@@ -72,6 +74,7 @@ def get_applications_page() -> dict:
 	for row in applications:
 		row["url"] = f"/borrower/application/{row['name']}"
 
+	enquiries = get_enquiries()
 	waiting = sum(1 for row in applications if row["needs_borrower"])
 	payload = shell_payload(_("Applications"), _("Apply for a loan"), customers, [])
 	payload.update(
@@ -82,10 +85,37 @@ def get_applications_page() -> dict:
 				if applications
 				else _("No applications in progress")
 			),
+			"enquiries": enquiries,
+			"enquiries_note": (
+				_("{0} raised from this website").format(len(enquiries))
+				if enquiries
+				else _("No enquiries")
+			),
 		}
 	)
 
 	return payload
+
+
+def get_enquiries() -> list[dict]:
+	"""What the borrower asked for before any of it became an application.
+
+	A new borrower has one of these and nothing else, so this is the whole of their
+	account on the day they sign up. Each row carries the reference they were given,
+	because that is what the public tracker asks for.
+	"""
+	from lending.portal_apply import tracker_stage
+
+	return [
+		{
+			"label": row.loan_product,
+			"value": money(row.loan_amount),
+			"detail": "{0} · {1} · {2}".format(
+				row.name, long_date(row.creation), tracker_stage(row)
+			),
+		}
+		for row in leads_for_login()
+	]
 
 
 @frappe.whitelist()
@@ -149,6 +179,9 @@ def step(title: str, detail: str, state: tuple) -> dict:
 		"detail": detail,
 		"marker": marker,
 		"state": _(STATE_LABELS[code]),
+		# The label above is translated for reading. The code is what a reader compares
+		# against, so finding the step in progress does not depend on the language.
+		"code": code,
 	}
 
 
@@ -200,6 +233,38 @@ def get_application_steps(application: dict) -> list[dict]:
 		)
 
 	return steps
+
+
+def progress_line(steps: list[dict]) -> str:
+	"""Where a tracker has reached, in one line: "Step 3 of 4 - Under review".
+
+	A page with room for a timeline draws the steps. A page with room for a line says
+	which one of them the application is standing on, which is the part a borrower
+	checking in actually wants.
+	"""
+	at = next(
+		(index for index, row in enumerate(steps) if row["code"] == "current"), len(steps) - 1
+	)
+
+	return _("Step {0} of {1} · {2}").format(at + 1, len(steps), steps[at]["title"])
+
+
+def progress_by_application(names: list[str]) -> dict[str, str]:
+	"""One progress line per application, read in a single query.
+
+	The names come from the borrower's own list, never from the request, so this reads
+	them without a second ownership check.
+	"""
+	if not names:
+		return {}
+
+	rows = frappe.get_all(
+		"Loan Application",
+		filters={"name": ["in", names]},
+		fields=["name", "status", "docstatus", "posting_date"],
+	)
+
+	return {row.name: progress_line(get_application_steps(row)) for row in rows}
 
 
 def stage_note(application: dict) -> str:
@@ -335,10 +400,25 @@ def get_documents_page() -> dict:
 	customers = get_portal_customers()
 	applications = get_applications(customers) if customers else []
 
+	progress = progress_by_application([row["name"] for row in applications])
+
 	documents = []
+	listed = []
 	for application in applications:
-		for document in document_rows(application["name"]):
-			documents.append({**document, "detail": application["product"]})
+		attached = document_rows(application["name"])
+		documents.extend({**document, "detail": application["product"]} for document in attached)
+		listed.append(
+			{
+				**application,
+				"url": "/borrower/application/{0}".format(application["name"]),
+				"progress": progress.get(application["name"], ""),
+				# This page is about files, so the column that carries money elsewhere
+				# counts what the application already holds.
+				"attached": (
+					_("{0} sent").format(len(attached)) if attached else _("Nothing sent")
+				),
+			}
+		)
 
 	payload = shell_payload(_("Documents"), _("Contact us"), customers, [])
 	payload.update(
@@ -349,16 +429,146 @@ def get_documents_page() -> dict:
 				if documents
 				else _("Nothing attached yet")
 			),
-			"applications": applications,
+			"applications": listed,
 			"applications_note": (
-				_("{0} in progress").format(len(applications))
+				_("{0} in progress · tap one to see its tracker").format(len(applications))
 				if applications
 				else _("No applications in progress")
 			),
-			"upload_note": _(
-				"To send a document, reply to any message from us with the file attached."
+			# The wording that went with having no upload form at all. Both notes are
+			# returned; the page shows whichever fits, on can_upload.
+			"upload_note": _("Attach it to one of your applications. Only you and we can see it."),
+			"no_upload_note": _(
+				"There is no application open for new documents just now. "
+				"Once we have your application in draft, you can attach files here."
 			),
 		}
 	)
 
 	return payload
+
+
+# --- the one write this page accepts ------------------------------------------------
+
+# A borrower sends identity and income papers, so images and PDFs and nothing else.
+# Checked on the extension here and again by the File doctype's own rules.
+ALLOWED_DOCUMENT_TYPES = (".pdf", ".png", ".jpg", ".jpeg")
+
+# Comfortably above a phone photo of a payslip, well below anything worth hosting.
+MAX_DOCUMENT_BYTES = 5 * 1024 * 1024
+
+
+@frappe.whitelist()
+def get_document_choices() -> dict:
+	"""What the upload form offers: which application, and which kind of document."""
+	customers = get_portal_customers()
+	applications = get_applications(customers) if customers else []
+
+	# Only a draft may take a new document. A submitted application is with our team,
+	# and PORTAL_PLAN.md section 6.2 keeps the borrower out of it from that point.
+	open_applications = [
+		{"label": f"{row['name']} · {row['product']}", "value": row["name"]}
+		for row in applications
+		if row.get("needs_borrower")
+	]
+
+	return {
+		"application_options": open_applications,
+		"document_type_options": [
+			{"label": row, "value": row}
+			for row in frappe.get_all("Loan Document Type", pluck="name", order_by="name asc")
+		],
+		"can_upload": bool(open_applications),
+		"upload_label": _("Send this document"),
+	}
+
+
+def editable_application() -> str:
+	"""The application the upload names, if the borrower owns it and may still edit it."""
+	name = clean(frappe.form_dict.get("application"))
+	if not name:
+		raise frappe.PermissionError(_("Not permitted"))
+
+	assert_owns("Loan Application", name)
+
+	if frappe.db.get_value("Loan Application", name, "docstatus") != 0:
+		frappe.throw(
+			_("This application is with our team now, so it cannot take new documents."),
+			frappe.ValidationError,
+		)
+
+	return name
+
+
+def read_upload():
+	"""The uploaded file, checked before anything is written.
+
+	frappe.request.files is where a multipart upload lands. The checks are on the
+	bytes we hold, not on what the browser said: an accept attribute on the input is
+	a hint to the file picker and nothing more.
+	"""
+	upload = (frappe.request.files or {}).get("file") if frappe.request else None
+	if not upload:
+		frappe.throw(_("Please choose a file."), frappe.ValidationError)
+
+	content = upload.stream.read()
+	if not content:
+		frappe.throw(_("That file is empty."), frappe.ValidationError)
+
+	if len(content) > MAX_DOCUMENT_BYTES:
+		frappe.throw(
+			_("Please keep the file under {0} MB.").format(MAX_DOCUMENT_BYTES // (1024 * 1024)),
+			frappe.ValidationError,
+		)
+
+	filename = clean(upload.filename)
+	if not filename.lower().endswith(ALLOWED_DOCUMENT_TYPES):
+		frappe.throw(
+			_("Please send a PDF or a photo ({0}).").format(", ".join(ALLOWED_DOCUMENT_TYPES)),
+			frappe.ValidationError,
+		)
+
+	return filename, content
+
+
+@frappe.whitelist(methods=["POST"])
+def upload_document() -> dict:
+	"""Attach one document to one of the borrower's own draft applications.
+
+	Written with ignore_permissions for the reason save_profile gives: a Website User
+	holds no write rights on Loan Application, and granting them would open every
+	other borrower's applications too. The narrowing happens above instead.
+
+	The file is private. A loan document is a payslip or an identity paper, and a
+	public file URL is guessable by anyone who has seen one.
+	"""
+	application = editable_application()
+	document_type = clean(frappe.form_dict.get("document_type"))
+
+	if not frappe.db.exists("Loan Document Type", document_type):
+		frappe.throw(_("Please choose a document type from the list."), frappe.ValidationError)
+
+	filename, content = read_upload()
+
+	stored = frappe.get_doc(
+		{
+			"doctype": "File",
+			"file_name": filename,
+			"content": content,
+			"is_private": 1,
+			"attached_to_doctype": "Loan Application",
+			"attached_to_name": application,
+		}
+	).insert(ignore_permissions=True)
+
+	document = frappe.get_doc("Loan Application", application)
+	document.append("documents", {"document_type": document_type, "file": stored.file_url})
+	document.save(ignore_permissions=True)
+	frappe.db.commit()  # nosemgrep
+
+	return {
+		"headline": _("Received"),
+		"message": _("{0} has been added to {1}.").format(document_type, application),
+		"offer": [],
+		"reference_note": "",
+	}
