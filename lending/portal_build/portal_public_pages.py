@@ -4,7 +4,7 @@
 """Builds the two public portal pages: /apply and /track.
 
 Run once with:
-	bench --site <site> execute lending.portal_public_pages.build
+	bench --site <site> execute lending.portal_build.portal_public_pages.build
 
 Then stop running it. Both pages become UI-owned: Builder exports every save to
 lending/builder_files/, and re-running this discards whatever was laid out on the

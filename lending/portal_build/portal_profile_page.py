@@ -4,7 +4,7 @@
 """Builds the borrower's Personal details page as a standard Builder page.
 
 Run once with:
-	bench --site <site> execute lending.portal_profile_page.build
+	bench --site <site> execute lending.portal_build.portal_profile_page.build
 
 Then stop running it. The page becomes UI-owned: Builder exports every save to
 lending/builder_files/, and re-running this discards whatever was laid out on the

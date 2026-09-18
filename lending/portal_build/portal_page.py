@@ -4,7 +4,7 @@
 """Builds the borrower Account overview as a standard Builder page.
 
 Run once with:
-	bench --site <site> execute lending.portal_page.build
+	bench --site <site> execute lending.portal_build.portal_page.build
 
 Then stop running it. After that run the page is UI-owned: Builder exports every save
 to lending/builder_files/, so the exported JSON becomes the source of truth and
