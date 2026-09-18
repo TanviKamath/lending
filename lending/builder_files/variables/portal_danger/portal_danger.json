@@ -1,0 +1,16 @@
+{
+ "creation": "2026-09-18 14:14:42.470925",
+ "dark_value": null,
+ "docstatus": 0,
+ "doctype": "Builder Token",
+ "group": null,
+ "idx": 0,
+ "is_standard": 0,
+ "modified": "2026-09-18 14:14:42.470925",
+ "modified_by": "Administrator",
+ "name": "portal-danger",
+ "owner": "Administrator",
+ "token_name": "portal-danger",
+ "type": "Color",
+ "value": "#ce2c2c"
+}

@@ -31,7 +31,10 @@ from lending.portal_theme import (
 	CHEVRON_LEFT,
 	CONTENT_STYLES,
 	CRUMB_STYLES,
+	FOOTER_BRAND_STYLES,
 	FOOTER_LINK_STYLES,
+	FOOTER_LOGO_STYLES,
+	FOOTER_MAIL_STYLES,
 	FOOTER_STYLES,
 	HEAD_END_STYLES,
 	HEAD_HTML,
@@ -50,18 +53,22 @@ from lending.portal_theme import (
 	RAIL_ICON_STYLES,
 	RAIL_STYLES,
 	SHELL_STYLES,
+	SIDE_BRAND_STYLES,
 	SIDE_COLLAPSE_STYLES,
 	SIDE_FOOT_NAME_STYLES,
 	SIDE_FOOT_NOTE_STYLES,
 	SIDE_FOOT_STYLES,
 	SIDE_HEAD_STYLES,
+	SIDE_LOGO_STYLES,
 	SIDEBAR_STYLES,
 	SPACER_STYLES,
 	STATUS_DOT_STYLES,
 	STATUS_STYLES,
+	bind,
 	block,
 	block_id,
 	bound,
+	brand_lockup,
 	empty_block_fields,
 	upsert_tokens,
 )
@@ -166,7 +173,14 @@ def sidebar():
 		mobileStyles=HIDDEN,
 		attributes={"data-sidebar": "1"},
 		children=[
-			bound("div", "brand_name", path="shell/sidebar/brand", styles=SIDE_HEAD_STYLES),
+			block(
+				"div",
+				path="shell/sidebar/brand",
+				styles=SIDE_BRAND_STYLES,
+				children=brand_lockup(
+					SIDE_HEAD_STYLES, logo_styles=SIDE_LOGO_STYLES, path="shell/sidebar/brand"
+				),
+			),
 			collapse_toggle(),
 			block("nav", path="shell/sidebar/nav", styles=NAV_STYLES, children=nav_items),
 			block(
@@ -230,6 +244,12 @@ def page_head():
 
 
 def footer():
+	"""Whose portal this is, how to complain about it, and the policies.
+
+	Nothing here names Frappe. The brand is the lender's logo or the lender's name,
+	and the address beside it is the lender's own, so the foot of the page says what
+	a regulator expects it to say and nothing a borrower has no use for.
+	"""
 	links = [
 		block(
 			"a",
@@ -241,12 +261,30 @@ def footer():
 		for index, label in enumerate(FOOTER_LINKS)
 	]
 
+	support = bound(
+		"a",
+		"support_email",
+		path="shell/main/footer/support",
+		styles=FOOTER_MAIL_STYLES,
+		attributes={"href": "#"},
+	)
+	bind(support, "support_href", property="href", type="attribute")
+	support["visibilityCondition"] = "support_email"
+
 	return block(
 		"footer",
 		path="shell/main/footer",
 		styles=FOOTER_STYLES,
 		children=[
-			bound("span", "brand_name", path="shell/main/footer/brand"),
+			block(
+				"div",
+				path="shell/main/footer/brand",
+				styles=FOOTER_BRAND_STYLES,
+				children=brand_lockup(
+					{}, logo_styles=FOOTER_LOGO_STYLES, path="shell/main/footer/brand"
+				),
+			),
+			support,
 			block("span", path="shell/main/footer/links", children=links),
 		],
 	)
@@ -444,6 +482,11 @@ def build_page(
 		page = frappe.get_doc(dict(doctype="Builder Page", **fields)).insert()
 		action = "created"
 
+	# The save alone does not always reach the process that serves the page: a stale
+	# document_cache entry in Redis outlived a rebuild, a cache clear and a restart, and
+	# the browser kept getting the previous build. Dropping it by name here is what makes
+	# a rebuild something you can see.
+	frappe.clear_document_cache("Builder Page", page.name)
 	frappe.db.commit()
 	print(f"{component_action} Builder Component {component}")
 	print(f"{action} Builder Page {page.name} at /{route}")

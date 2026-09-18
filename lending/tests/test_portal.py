@@ -23,12 +23,29 @@ no login at all, and the two borrower writes, which must reach the borrower's ow
 records and nothing beside them.
 """
 
+import inspect
+import random
+import re
+from pathlib import Path
 from unittest.mock import patch
 
 import frappe
 from frappe.utils import add_years, nowdate
 
-from lending.portal import assert_owns, get_portal_customers, leads_for_login
+from lending import portal_theme
+from lending.loan_management.doctype.lending_settings.lending_settings import (
+	PORTAL_SCRIPT_MARKER,
+	sync_portal_pages,
+)
+from lending.portal import (
+	DEFAULT_BRAND_NAME,
+	assert_owns,
+	brand_name,
+	brand_payload,
+	get_portal_customers,
+	leads_for_login,
+	shell_payload,
+)
 from lending.portal_accounts import customer_for_email
 from lending.portal_applications import (
 	get_application_detail,
@@ -40,12 +57,34 @@ from lending.portal_apply import (
 	confirm_mobile_code,
 	create_account,
 	get_apply_page,
+	get_track_page,
+	read_product,
 	send_mobile_code,
 	submit_lead,
 	track_application,
 )
 from lending.portal_loans import get_loan_detail, get_loans_page
 from lending.portal_profile import get_profile_page, save_profile
+from lending.portal_shell import tree
+from lending.portal_theme import (
+	NEUTRALS,
+	PORTAL_TOKENS,
+	SCALE_TOKENS,
+	SHIPPED,
+	STATES,
+	apca,
+	brand_overrides,
+	channels,
+	from_hsl,
+	hue_shift,
+	ink_for,
+	luminance,
+	palette_overrides,
+	relight,
+	tint,
+	to_hsl,
+	upsert_tokens,
+)
 from lending.tests.test_utils import (
 	create_loan,
 	create_loan_accounts,
@@ -79,6 +118,83 @@ MOBILE = "9812345678"
 # Fresh emails for the sign-up tests, which create real Users and delete them again.
 PERSON_EMAIL = "_test-portal-person@example.com"
 COMPANY_EMAIL = "_test-portal-company@example.com"
+
+
+def set_portal_switches(portal: int, public_apply: int):
+	"""Drive the two Lending Settings switches, the way saving the form would.
+
+	sync_portal_pages is what Lending Settings.on_update runs, and it is half of what
+	the switch does: the data layer refuses, and the pages stop being routed. Setting
+	the values without it would test only the half that raises.
+	"""
+	frappe.db.set_single_value(
+		"Lending Settings",
+		{"enable_borrower_portal": portal, "enable_public_apply": public_apply},
+	)
+	sync_portal_pages()
+
+
+def published_portal_routes() -> set[str]:
+	return set(
+		frappe.get_all(
+			"Builder Page",
+			filters={"page_data_script": ("like", f"%{PORTAL_SCRIPT_MARKER}%"), "published": 1},
+			pluck="route",
+		)
+	)
+
+
+def show_product_on_portal(product: str, shown: int):
+	frappe.db.set_value("Loan Product", product, "show_on_portal", shown)
+
+
+# Everything a lender may set about how the portal looks. Cleared between tests, so
+# one test's red portal is not the next test's starting point.
+BRAND_FIELDS = (
+	"portal_brand_name",
+	"portal_logo",
+	"portal_support_email",
+	"portal_brand_color",
+	"portal_accent_color",
+)
+
+
+def set_branding(**values):
+	"""Fill in the Borrower Portal section, the way saving the desk form would.
+
+	The save is what matters for the colours: Lending Settings.on_update is where the
+	Builder Tokens are written, and setting the values underneath it would test the
+	half of the mechanism that does not reach the page.
+	"""
+	settings = frappe.get_doc("Lending Settings")
+	settings.update({field: values.get(field) for field in BRAND_FIELDS})
+	settings.save()
+
+
+def token_value(token_name: str) -> str:
+	return frappe.db.get_value("Builder Token", token_name, "value")
+
+
+def theme_source() -> str:
+	"""portal_theme.py as text, for the two tests that read the styles rather than run them."""
+	return Path(inspect.getsourcefile(portal_theme)).read_text()
+
+
+def contrast(one: str, other: str) -> float:
+	"""The WCAG contrast ratio between two colours, lighter over darker."""
+	first, second = luminance(channels(one)) + 0.05, luminance(channels(other)) + 0.05
+
+	return max(first, second) / min(first, second)
+
+
+def setUpModule():
+	"""Switch the portal on for the whole file.
+
+	Both switches default to off, which is right for a real site: a portal is a public
+	surface and should not appear because somebody ran an upgrade. Left off here it
+	would turn every test in this file into a 404.
+	"""
+	set_portal_switches(1, 1)
 
 
 def make_website_user(email: str) -> str:
@@ -169,6 +285,7 @@ class TestPortalOwnership(LendingTestSuite):
 			8.4,
 			repayment_schedule_type="Monthly as per repayment start date",
 		)
+		show_product_on_portal(PRODUCT, 1)
 
 		make_website_user(ALPHA_USER)
 		make_website_user(BETA_USER)
@@ -303,6 +420,7 @@ class TestPortalGuestEndpoints(LendingTestSuite):
 			8.4,
 			repayment_schedule_type="Monthly as per repayment start date",
 		)
+		show_product_on_portal(PRODUCT, 1)
 		frappe.set_user("Guest")
 		frappe.local.form_dict = frappe._dict()
 
@@ -480,6 +598,7 @@ class PortalPeople(LendingTestSuite):
 			8.4,
 			repayment_schedule_type="Monthly as per repayment start date",
 		)
+		show_product_on_portal(PRODUCT, 1)
 
 		make_website_user(ALPHA_USER)
 		make_website_user(BETA_USER)
@@ -717,6 +836,7 @@ class TestPortalSignUp(LendingTestSuite):
 			8.4,
 			repayment_schedule_type="Monthly as per repayment start date",
 		)
+		show_product_on_portal(PRODUCT, 1)
 		for email in (PERSON_EMAIL, COMPANY_EMAIL):
 			if frappe.db.exists("User", email):
 				frappe.delete_doc("User", email, force=True, ignore_permissions=True)
@@ -887,3 +1007,456 @@ class TestPortalSignUp(LendingTestSuite):
 
 		self.assertEqual(application.applicant, customer)
 		self.assertEqual(frappe.db.count("Customer"), before)
+
+
+class TestPortalSwitches(LendingTestSuite):
+	"""The three switches a lender uses to decide what the portal serves.
+
+	Every refusal here has to be frappe.PageDoesNotExistError and not PermissionError.
+	website/serve.py renders the first as 404 and the second as "not permitted", and a
+	lender who switched the portal off wants it gone rather than hidden behind a refusal
+	that confirms it is there.
+
+	The signed-in checks run as Administrator on purpose. The switch is read before the
+	guest check, so a real borrower is not needed to prove it fires, and using one would
+	tie these tests to the fixtures of another class.
+	"""
+
+	def setUp(self):
+		set_loan_settings_in_company()
+		create_loan_accounts()
+		setup_loan_demand_offset_order()
+		create_loan_product(
+			PRODUCT,
+			PRODUCT,
+			500000,
+			8.4,
+			repayment_schedule_type="Monthly as per repayment start date",
+		)
+		show_product_on_portal(PRODUCT, 1)
+		frappe.local.form_dict = frappe._dict()
+
+	def tearDown(self):
+		set_portal_switches(1, 1)
+		show_product_on_portal(PRODUCT, 1)
+		frappe.set_user("Administrator")
+		frappe.local.form_dict = frappe._dict()
+
+	def test_portal_off_hides_every_signed_in_page(self):
+		set_portal_switches(0, 0)
+
+		self.assertRaises(frappe.PageDoesNotExistError, get_portal_customers)
+
+	def test_portal_off_hides_the_public_pages(self):
+		set_portal_switches(0, 0)
+
+		self.assertRaises(frappe.PageDoesNotExistError, get_apply_page)
+		self.assertRaises(frappe.PageDoesNotExistError, get_track_page)
+
+	def test_portal_off_closes_the_endpoints_that_write(self):
+		"""The switch has to stop the writes, not only the pages that lead to them."""
+		set_portal_switches(0, 0)
+		frappe.set_user("Guest")
+
+		self.assertRaises(frappe.PageDoesNotExistError, send_mobile_code)
+		self.assertRaises(frappe.PageDoesNotExistError, submit_lead)
+		self.assertRaises(frappe.PageDoesNotExistError, create_account)
+
+	def test_public_apply_off_leaves_the_signed_in_portal_serving(self):
+		"""A lender whose sales team keys leads in the desk wants exactly this."""
+		set_portal_switches(1, 0)
+
+		self.assertRaises(frappe.PageDoesNotExistError, get_apply_page)
+		self.assertRaises(frappe.PageDoesNotExistError, submit_lead)
+
+		# The tracker follows the portal switch alone: a lead raised by a sales rep
+		# still deserves a tracker.
+		self.assertTrue(get_track_page()["heading"])
+
+		# And a borrower who already has a login is untouched.
+		self.assertIsInstance(get_portal_customers(), list)
+
+	def test_a_product_not_shown_on_the_portal_is_not_offered(self):
+		show_product_on_portal(PRODUCT, 0)
+
+		offered = [row["value"] for row in get_apply_page()["products"]]
+
+		self.assertNotIn(PRODUCT, offered)
+
+	def test_a_product_not_shown_on_the_portal_cannot_be_applied_for(self):
+		"""Filtering the list alone would leave it one guessed name away."""
+		show_product_on_portal(PRODUCT, 0)
+
+		self.assertRaises(frappe.ValidationError, read_product, PRODUCT, 100000)
+
+	def test_a_product_shown_on_the_portal_is_offered_and_accepted(self):
+		offered = [row["value"] for row in get_apply_page()["products"]]
+
+		self.assertIn(PRODUCT, offered)
+		self.assertEqual(read_product(PRODUCT, 100000)["name"], PRODUCT)
+
+	def test_portal_off_takes_every_page_out_of_the_route_table(self):
+		"""The data layer refusing is not enough on its own.
+
+		A refusal raised while a page renders comes back as the 404 page with a 200
+		status. Only an unresolved route gives a real 404, and Builder resolves a route
+		by looking for a published page.
+		"""
+		set_portal_switches(0, 0)
+
+		self.assertEqual(published_portal_routes(), set())
+
+	def test_public_apply_off_takes_only_the_apply_page_out(self):
+		set_portal_switches(1, 0)
+		routes = published_portal_routes()
+
+		self.assertNotIn("apply", routes)
+		self.assertIn("track", routes)
+		self.assertIn("borrower/overview", routes)
+
+	def test_switching_the_portal_back_on_restores_every_page(self):
+		"""A switch a lender cannot reverse is worse than no switch."""
+		before = published_portal_routes()
+		set_portal_switches(0, 0)
+		set_portal_switches(1, 1)
+
+		self.assertEqual(published_portal_routes(), before)
+
+
+class TestPortalBranding(LendingTestSuite):
+	"""What a lender sets on one desk form, and where it comes out.
+
+	The goal these serve is in PORTAL_CUSTOMIZATION_PLAN.md part B: a borrower of the
+	bank that runs this portal should not be able to tell which app built it. So the
+	tests are about two things. That nothing a lender leaves blank changes anything,
+	because that is what makes these settings safe to add to a site already running.
+	And that everything a lender does fill in reaches the page, the tokens and the
+	PDFs, rather than only the one place it was first wired to.
+	"""
+
+	def tearDown(self):
+		set_branding()
+		frappe.local.form_dict = frappe._dict()
+
+	def test_an_unnamed_portal_falls_back_to_ours(self):
+		set_branding()
+
+		self.assertEqual(brand_name(), DEFAULT_BRAND_NAME)
+
+	def test_a_named_portal_is_called_what_the_lender_called_it(self):
+		set_branding(portal_brand_name="Ganges Finance")
+
+		self.assertEqual(brand_name(), "Ganges Finance")
+		self.assertEqual(shell_payload("Loans", "Apply", [], [])["brand_name"], "Ganges Finance")
+
+	def test_without_a_logo_the_frame_shows_the_name(self):
+		set_branding(portal_brand_name="Ganges Finance")
+		payload = brand_payload()
+
+		self.assertEqual(payload["brand_logo"], "")
+		self.assertEqual(payload["show_wordmark"], 1)
+
+	def test_with_a_logo_the_frame_shows_the_logo_instead_of_the_name(self):
+		"""Both are written into the page, so exactly one of them has to be dropped."""
+		set_branding(portal_brand_name="Ganges Finance", portal_logo="/files/ganges.png")
+		payload = brand_payload()
+
+		self.assertEqual(payload["brand_logo"], "/files/ganges.png")
+		self.assertEqual(payload["show_wordmark"], 0)
+		# The name still travels, because it is the logo's alt text and the PDFs' fallback.
+		self.assertEqual(payload["brand_name"], "Ganges Finance")
+
+	def test_the_shell_draws_both_the_logo_and_the_name(self):
+		"""The switch above only works if the frame carries the pair to switch between.
+
+		Wired the other way -- one block, bound to whichever the lender set -- this
+		would pass on the data and still show nothing on the page.
+		"""
+		conditions = set()
+
+		def walk(node):
+			if node.get("visibilityCondition"):
+				conditions.add(node["visibilityCondition"])
+			for child in node.get("children") or []:
+				walk(child)
+
+		walk(tree())
+
+		self.assertIn("brand_logo", conditions)
+		self.assertIn("show_wordmark", conditions)
+
+	def test_the_public_pages_carry_the_brand_too(self):
+		"""/apply and /track wear no borrower shell, so they answer for it themselves."""
+		set_branding(portal_brand_name="Ganges Finance", portal_logo="/files/ganges.png")
+
+		for payload in (get_apply_page(), get_track_page()):
+			self.assertEqual(payload["brand_name"], "Ganges Finance")
+			self.assertEqual(payload["brand_logo"], "/files/ganges.png")
+
+	def test_a_support_address_becomes_something_to_press(self):
+		set_branding(portal_support_email="grievance@ganges.example.com")
+		payload = brand_payload()
+
+		self.assertEqual(payload["support_email"], "grievance@ganges.example.com")
+		self.assertEqual(payload["support_href"], "mailto:grievance@ganges.example.com")
+
+	def test_no_support_address_leaves_the_footer_nothing_to_show(self):
+		set_branding()
+
+		self.assertEqual(brand_payload()["support_email"], "")
+
+	def test_a_blank_section_overrides_nothing(self):
+		"""The whole reason this is safe to add to a site that is already running."""
+		set_branding()
+
+		self.assertEqual(brand_overrides(), {})
+		for token in PORTAL_TOKENS:
+			self.assertEqual(token_value(token["token_name"]), token["value"])
+
+	def test_a_brand_colour_reaches_the_token_the_pages_read(self):
+		set_branding(portal_brand_color="#8b1d3f")
+
+		self.assertEqual(token_value("brand-primary"), "#8b1d3f")
+
+	def test_the_text_on_a_button_is_worked_out_rather_than_asked_for(self):
+		"""A lender picks one colour. Whether its label is white is our problem."""
+		set_branding(portal_brand_color="#0b1d51")
+		dark_ink = token_value("brand-primary-ink")
+
+		set_branding(portal_brand_color="#ffd400")
+		light_ink = token_value("brand-primary-ink")
+
+		self.assertGreater(contrast(dark_ink, "#0b1d51"), 4.5)
+		self.assertGreater(contrast(light_ink, "#ffd400"), 4.5)
+		self.assertNotEqual(dark_ink, light_ink)
+
+	def test_the_accent_brings_its_own_tint_and_its_own_ink(self):
+		"""The avatar chip and the opening card are washes of the accent.
+
+		Left as literals they stayed Frappe green on an otherwise red portal, which is
+		exactly the tell this part of the plan exists to remove.
+		"""
+		set_branding(portal_accent_color="#8b1d3f")
+
+		soft = token_value("brand-mark-soft")
+		deep = token_value("brand-mark-deep")
+
+		self.assertEqual(token_value("brand-mark"), "#8b1d3f")
+		self.assertGreater(luminance(channels(soft)), 0.7)
+		self.assertGreater(contrast(deep, soft), 4.5)
+
+	def test_clearing_a_colour_gives_the_shipped_one_back(self):
+		"""A lender who changes their mind has to be able to change it back."""
+		set_branding(portal_brand_color="#8b1d3f")
+		set_branding()
+
+		defaults = {token["token_name"]: token["value"] for token in PORTAL_TOKENS}
+		self.assertEqual(token_value("brand-primary"), defaults["brand-primary"])
+
+	def test_nonsense_in_a_colour_field_is_ignored_rather_than_written_out(self):
+		"""A Color field holds whatever was typed into it, including nothing useful."""
+		set_branding(portal_brand_color="rebeccapurple")
+
+		self.assertNotIn("brand-primary", brand_overrides())
+
+	def test_deepening_a_colour_keeps_it_the_colour_it_was(self):
+		"""The derived ink has to read as the lender's accent, not as a grey."""
+		red, green, blue = channels(relight(channels("#2bb24c"), 0.12))
+
+		self.assertGreater(green, red)
+		self.assertGreater(green, blue)
+
+	def test_a_tint_is_the_colour_laid_over_white(self):
+		self.assertGreater(luminance(channels(tint(channels("#8b1d3f")))), 0.75)
+
+	def test_white_or_near_black_whichever_can_be_read(self):
+		self.assertEqual(ink_for(channels("#000000")), "#ffffff")
+		self.assertEqual(ink_for(channels("#ffffff")), "#171717")
+
+	def test_migrating_puts_the_lender_colours_back(self):
+		"""The exported tokens carry what the app ships, and migrate re-imports them.
+
+		Part C hit the same trap with the published pages. The after_migrate hook runs
+		this, so a lender's portal does not quietly turn Frappe-coloured overnight.
+		"""
+		set_branding(portal_brand_color="#8b1d3f")
+		frappe.db.set_value("Builder Token", "brand-primary", "value", "#171717")
+
+		upsert_tokens()
+
+		self.assertEqual(token_value("brand-primary"), "#8b1d3f")
+
+
+class TestPortalScale(LendingTestSuite):
+	"""Stage 1 of PORTAL_DESIGN_PLAN.md: the size scale.
+
+	The point of the stage is that no size in portal_theme.py is a number any more, so
+	there is one place to change them all. The source tests at the end are what hold
+	that open.
+	"""
+
+	def test_the_shipped_scale_is_what_the_pages_read(self):
+		upsert_tokens()
+
+		for token in SCALE_TOKENS:
+			self.assertEqual(token_value(token["token_name"]), token["value"])
+
+	def test_every_step_of_the_scale_is_larger_than_the_one_below_it(self):
+		"""A scale that repeats a size is not a scale. Six steps have to be six sizes."""
+		steps = [int(token["value"].removesuffix("px")) for token in SCALE_TOKENS[:6]]
+
+		self.assertEqual(steps, sorted(set(steps)))
+
+	def test_body_text_is_never_smaller_than_fifteen_pixels(self):
+		"""The whole reason for the stage.
+
+		The portal shipped at 13px, which is a desk tool. A borrower opens this page a
+		few times a year to read one number, so the scale has to stay readable to
+		somebody who is not a daily user.
+		"""
+		body = int(SCALE_TOKENS[2]["value"].removesuffix("px"))
+
+		self.assertGreaterEqual(body, 15)
+
+	def test_no_style_carries_a_text_size_as_a_number(self):
+		"""The guard on the next person who adds a style.
+
+		A literal size is invisible: the page still renders, and the one block that
+		ignores the scale is the one nobody looks at. Three are allowed, and each is a
+		glyph centred in a circle of a fixed width, which cannot grow with the text.
+		"""
+		literals = re.findall(r'"fontSize": "(\d+px)"', theme_source())
+
+		self.assertEqual(sorted(literals), ["10px", "10px", "11px"])
+
+	def test_the_fallback_beside_a_token_is_the_value_that_token_holds(self):
+		"""A fallback is what renders wherever the tokens have not been written yet.
+
+		One that has drifted from the token beside it is a second scale hiding in the
+		source, and it shows up only on a site that has never saved Lending Settings.
+		"""
+		shipped = {token["token_name"]: token["value"] for token in SCALE_TOKENS}
+		drifted = {
+			name: fallback
+			for name, fallback in re.findall(r"var\(--(portal-[a-z0-9-]+),([^)]+)\)", theme_source())
+			if name in shipped and fallback != shipped[name]
+		}
+
+		self.assertEqual(drifted, {})
+
+	def test_every_token_a_style_names_is_a_token_that_exists(self):
+		"""A misspelt custom property falls back and says nothing about it."""
+		named = set(re.findall(r"var\(--([a-z0-9-]+),", theme_source()))
+		defined = {token["token_name"] for token in PORTAL_TOKENS}
+
+		self.assertEqual(named - defined, set())
+
+
+class TestPortalPalette(LendingTestSuite):
+	"""Stage 2 of PORTAL_DESIGN_PLAN.md: the neutrals, the states, and the ink maths.
+
+	Two claims are worth testing rather than believing. That a lender's colour reaches
+	the greys without costing the page any contrast, and that the ink on a button is
+	readable for a colour nobody thought to try.
+	"""
+
+	def tearDown(self):
+		set_branding()
+
+	def test_a_blank_brand_colour_leaves_the_shipped_neutrals_alone(self):
+		set_branding()
+
+		self.assertEqual(palette_overrides(), {})
+		for name in NEUTRALS:
+			self.assertEqual(token_value(f"portal-{name}"), SHIPPED[name])
+
+	def test_a_brand_colour_reaches_the_greys(self):
+		"""The half of white labelling the colour fields alone do not reach.
+
+		Grey is the largest surface on the page. A portal whose button is HDFC blue and
+		whose greys are still Frappe's is a Frappe portal with a blue button.
+		"""
+		set_branding(portal_brand_color="#8b1d3f")
+
+		self.assertNotEqual(token_value("portal-surface-sunken"), SHIPPED["surface-sunken"])
+		self.assertNotEqual(token_value("portal-ink-muted"), SHIPPED["ink-muted"])
+
+	def test_the_page_under_the_cards_stays_white(self):
+		"""What the six bank sites do: colour in the band, white under it."""
+		set_branding(portal_brand_color="#8b1d3f")
+
+		self.assertEqual(token_value("portal-surface-page"), SHIPPED["surface-page"])
+
+	def test_no_brand_colour_can_move_a_state_colour(self):
+		"""A lender whose brand is red still tells a borrower in green that nothing is owed."""
+		set_branding(portal_brand_color="#8b1d3f", portal_accent_color="#8b1d3f")
+
+		for name in STATES:
+			self.assertEqual(token_value(f"portal-{name}"), SHIPPED[name])
+
+	def test_a_grey_brand_colour_tints_nothing(self):
+		"""There is no hue to take off a grey, so taking one would give channel rounding."""
+		set_branding(portal_brand_color="#4a4a4a")
+
+		self.assertEqual(palette_overrides(), {})
+
+	def test_tinting_the_greys_costs_no_contrast(self):
+		"""The reason hue_shift puts the luminance back.
+
+		Contrast is a ratio of luminances, so holding each neutral at the luminance it
+		ships with holds every ratio on the page at the value it was designed and tested
+		at. One percent is the room 8-bit rounding needs and nothing else.
+
+		Written at a fixed lightness first, this test failed at hue 60 -- a yellow grey
+		reads brighter than a blue grey of the same lightness, and the body text lost
+		five percent. That failure is what the second step in hue_shift is for.
+		"""
+		marks = ("ink", "ink-muted", "ink-subtle", "ink-faint", "border", "border-strong")
+		surfaces = ("surface-page", "surface-card", "surface-sunken", "surface-hover")
+
+		for step in range(36):
+			shifted = {name: hue_shift(SHIPPED[name], step / 36) for name in NEUTRALS}
+			for mark in marks:
+				for surface in surfaces:
+					before = contrast(SHIPPED[mark], SHIPPED[surface])
+					after = contrast(shifted[mark], shifted[surface])
+					self.assertGreater(after, before * 0.99, f"{mark} on {surface} at hue {step}")
+
+	def test_the_ink_on_a_button_is_readable_for_any_brand_colour(self):
+		"""The colour that breaks a portal is the one nobody demos.
+
+		Lc 45 is APCA's floor for a large or bold label, which is what a button carries.
+		A thousand colours rather than a handful, because the failures are a narrow band
+		of mid tones and a hand-picked list walks straight past them.
+		"""
+		generator = random.Random(20260918)
+
+		for _ in range(1000):
+			brand = tuple(generator.randrange(256) for _ in range(3))
+			ink = ink_for(brand)
+			self.assertGreaterEqual(apca(channels(ink), brand), 45, f"{brand} took {ink}")
+
+	def test_apca_agrees_with_the_published_reference_values(self):
+		"""Borrowed maths, checked against the source it was borrowed from."""
+		pairs = (("#888888", "#ffffff", 63.1), ("#000000", "#ffffff", 106.0), ("#ffffff", "#000000", 107.9))
+
+		for text, background, expected in pairs:
+			self.assertAlmostEqual(apca(channels(text), channels(background)), expected, delta=0.1)
+
+	def test_a_colour_survives_the_trip_through_hue_saturation_lightness(self):
+		for colour in ("#ffffff", "#f8f8f8", "#ededed", "#999999", "#171717", "#ce2c2c", "#0b1d51"):
+			self.assertEqual(from_hsl(*to_hsl(channels(colour))), colour)
+
+	def test_no_style_carries_a_colour_as_a_hex(self):
+		"""The guard on the next person who adds a style.
+
+		The same reason as the sizes: a literal renders, so the one block that ignores
+		the lender's palette is the one nobody looks at. Two places are allowed to hold
+		a raw colour, and both are the values themselves rather than a use of them.
+		"""
+		source = theme_source()
+		source = re.sub(r"SHIPPED = \{.*?\n\}\n", "", source, flags=re.S)
+		source = re.sub(r"BRAND_TOKENS = \[.*?\n\]\n", "", source, flags=re.S)
+		source = re.sub(r"var\([^)]*\)", "", source)
+
+		self.assertEqual(re.findall(r"#[0-9a-fA-F]{6}\b", source), [])

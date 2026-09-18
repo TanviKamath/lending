@@ -1,0 +1,16 @@
+{
+ "creation": "2026-09-18 14:14:39.002052",
+ "dark_value": null,
+ "docstatus": 0,
+ "doctype": "Builder Token",
+ "group": null,
+ "idx": 0,
+ "is_standard": 0,
+ "modified": "2026-09-18 14:38:57.174677",
+ "modified_by": "Administrator",
+ "name": "portal-border",
+ "owner": "Administrator",
+ "token_name": "portal-border",
+ "type": "Color",
+ "value": "#ebedf3"
+}

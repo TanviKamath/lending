@@ -1,0 +1,16 @@
+{
+ "creation": "2026-09-18 12:35:11.681647",
+ "dark_value": null,
+ "docstatus": 0,
+ "doctype": "Builder Token",
+ "group": null,
+ "idx": 0,
+ "is_standard": 0,
+ "modified": "2026-09-18 14:32:33.441147",
+ "modified_by": "Administrator",
+ "name": "portal-text-2xl",
+ "owner": "Administrator",
+ "token_name": "portal-text-2xl",
+ "type": "Dimension",
+ "value": "32px"
+}

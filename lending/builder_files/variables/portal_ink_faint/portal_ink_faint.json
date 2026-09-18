@@ -1,0 +1,16 @@
+{
+ "creation": "2026-09-18 14:14:40.780866",
+ "dark_value": null,
+ "docstatus": 0,
+ "doctype": "Builder Token",
+ "group": null,
+ "idx": 0,
+ "is_standard": 0,
+ "modified": "2026-09-18 14:38:57.242158",
+ "modified_by": "Administrator",
+ "name": "portal-ink-faint",
+ "owner": "Administrator",
+ "token_name": "portal-ink-faint",
+ "type": "Color",
+ "value": "#97999f"
+}

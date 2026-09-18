@@ -48,6 +48,10 @@ STATUS_LABELS = {
 
 REGULAR_LABELS = ("Regular",)
 
+# What the portal calls itself before a lender has named it. Every page reads the
+# name through brand_name(), so this is the only place the words appear.
+DEFAULT_BRAND_NAME = "Frappe Lending"
+
 APPLICATION_STAGES = {
 	"Open": "Under review",
 	"Approved": "Approved",
@@ -55,12 +59,46 @@ APPLICATION_STAGES = {
 }
 
 
+def assert_portal_enabled():
+	"""Refuse every portal route unless the lender has switched the portal on.
+
+	A 404 and not a 403. "Not permitted" confirms the page is there, and a lender who
+	turned the portal off wants it gone rather than hidden. frappe.PageDoesNotExistError
+	is what website/serve.py maps to the not-found page, so raising it from a Builder
+	data script renders the same 404 as a route that was never registered.
+	"""
+	if not frappe.db.get_single_value("Lending Settings", "enable_borrower_portal"):
+		raise frappe.PageDoesNotExistError
+
+
+def assert_public_apply_enabled():
+	"""Refuse the public application form unless both switches are on.
+
+	Applying ends by creating a login and landing the borrower on /borrower/overview,
+	so a public funnel into a portal that is switched off leads nowhere. The portal
+	switch therefore governs this one too.
+
+	/track is deliberately not behind this. A lead keyed in by a sales rep still
+	deserves a tracker, so the tracker follows the portal switch alone.
+	"""
+	assert_portal_enabled()
+
+	if not frappe.db.get_single_value("Lending Settings", "enable_public_apply"):
+		raise frappe.PageDoesNotExistError
+
+
 def get_portal_customers() -> list[str]:
 	"""Every Customer record that lists the logged-in user in its Portal Users table.
 
 	One login maps to many customers, so this returns a list. See PORTAL_PLAN.md
 	section 7: dropping the extra records silently hides a borrower's own loans.
+
+	The portal switch is checked here rather than on each page, because this is the one
+	call every signed-in page and every borrower write already makes. A check copied
+	into eleven modules is a check that gets missed in the twelfth.
 	"""
+	assert_portal_enabled()
+
 	user = frappe.session.user
 	if user == "Guest":
 		frappe.throw(_("Please log in to view your account."), frappe.PermissionError)
@@ -115,7 +153,7 @@ def shell_payload(crumb: str, action_label: str, customers: list[str], loans: li
 	"""
 	return {
 		"as_on": long_date(nowdate()),
-		"brand_name": brand_name(),
+		**brand_payload(),
 		"initials": initials(),
 		"holder_name": holder_name(),
 		"head_note": head_note(),
@@ -217,18 +255,42 @@ def initials() -> str:
 	return "".join(letters).upper() or "?"
 
 
-def brand_name() -> str:
-	"""The portal's own name, never a placeholder baked into the blocks.
+def portal_settings(*fieldnames) -> frappe._dict:
+	"""The Borrower Portal section of Lending Settings, by fieldname.
 
-	PORTAL_PLAN.md section 9 adds Lending Settings.portal_brand_name. The meta check
-	keeps this working until that field lands, and starts reading it the moment it does.
+	One door onto the settings, so the fallback for an unset field is decided once
+	rather than at each of the dozen places that read one.
 	"""
-	if frappe.get_meta("Lending Settings").has_field("portal_brand_name"):
-		configured = frappe.db.get_single_value("Lending Settings", "portal_brand_name")
-		if configured:
-			return configured
+	return frappe._dict(
+		{name: frappe.db.get_single_value("Lending Settings", name) for name in fieldnames}
+	)
 
-	return "Frappe Lending"
+
+def brand_name() -> str:
+	"""The portal's own name, never a placeholder baked into the blocks."""
+	return portal_settings("portal_brand_name").portal_brand_name or DEFAULT_BRAND_NAME
+
+
+def brand_payload() -> dict:
+	"""The lender's mark and its grievance address, for every frame that carries one.
+
+	The pages are written once by the build scripts and these values are read per
+	request, so the page cannot be built knowing whether a logo exists. It carries
+	both the image and the name, and drops one of them as it renders -- see
+	portal_theme.brand_lockup. show_wordmark is the negation of brand_logo, spelt out
+	here because a Builder visibility condition tests a key and cannot invert it.
+	"""
+	settings = portal_settings("portal_brand_name", "portal_logo", "portal_support_email")
+	logo = (settings.portal_logo or "").strip()
+	support = (settings.portal_support_email or "").strip()
+
+	return {
+		"brand_name": settings.portal_brand_name or DEFAULT_BRAND_NAME,
+		"brand_logo": logo,
+		"show_wordmark": 0 if logo else 1,
+		"support_email": support,
+		"support_href": f"mailto:{support}" if support else "#",
+	}
 
 
 def get_loans(customers: list[str]) -> list[dict]:

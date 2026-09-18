@@ -10,10 +10,15 @@ renders as unstyled text there and cannot be arranged by hand. Rules that CSS wo
 share through one class are therefore repeated per block. That repetition is the price
 of a canvas that shows the real page.
 
-Brand colours, fonts and radii stay in Builder Token records, which the canvas does
-serve as custom properties, so a bank restyles without touching this file. The palette
-holds the Espresso tokens from the installed frappe source, inlined as literals because
-:root custom properties declared in head_html do not reach the canvas.
+Brand colours, fonts, radii and the size scale stay in Builder Token records, which
+the canvas does serve as custom properties, so a bank restyles without touching this
+file. It does that from the Borrower Portal section of Lending Settings, which writes
+the tokens on save -- see upsert_tokens below. Every size of text names a token and
+carries the shipped value as its fallback, so the scale is changed in one place rather
+than at each block that names a size. The three exceptions are marked where they stand:
+a glyph centred in a circle of a fixed width cannot grow with the rest. The palette holds the Espresso tokens from the
+installed frappe source, inlined as literals because :root custom properties declared in
+head_html do not reach the canvas.
 """
 
 import hashlib
@@ -22,13 +27,53 @@ from builder.builder.doctype.builder_token.builder_token import clear_builder_to
 
 import frappe
 
-# A bank overrides these five records. Nothing else in the portal carries brand.
+# What the portal carries brand in. A lender sets two of them on Lending Settings -- a
+# colour and an accent -- and brand_overrides() derives the rest, because nobody should
+# be asked to pick the text colour for their own button. These values are
+# the default for a site that has configured nothing.
 BRAND_TOKENS = [
 	{"token_name": "brand-primary", "type": "Color", "value": "#171717", "dark_value": "#f8f8f8"},
 	{"token_name": "brand-primary-ink", "type": "Color", "value": "#ffffff", "dark_value": "#171717"},
 	{"token_name": "brand-mark", "type": "Color", "value": "#2bb24c", "dark_value": "#2fbe6a"},
+	{"token_name": "brand-mark-ink", "type": "Color", "value": "#ffffff", "dark_value": "#171717"},
+	# The accent at two other lightnesses: a tint to sit behind it, and a deepened
+	# version of it to write on that tint.
+	{"token_name": "brand-mark-soft", "type": "Color", "value": "#e4faeb", "dark_value": "#e4faeb"},
+	{"token_name": "brand-mark-deep", "type": "Color", "value": "#14804d", "dark_value": "#14804d"},
 	{"token_name": "brand-radius", "type": "Dimension", "value": "8px"},
 	{"token_name": "brand-font", "type": "Font", "value": "InterVariable"},
+]
+
+# How the portal is set, as opposed to what it is branded. Two families rather than one,
+# because they answer to different people: a lender picks the brand-* values, and the
+# portal-* values are the portal's own size scale, which nobody configures. The prefix
+# also keeps them out of the way of whatever tokens a site's own Builder pages already
+# define, since a Builder Token emits --<document name> into one global namespace shared
+# with the rest of the site.
+#
+# Nine tokens, because they are what a page is made of: six sizes of text, and the three
+# distances that decide whether a page feels like a bank or like an admin tool. They are
+# named rather than written into the blocks so that the scale moves as one: a page whose
+# sizes were nine separate numbers would read as nine unrelated pages.
+#
+# The portal used to sit below even this: 13px was its commonest size, and 13px is a
+# desk tool, not a bank. A borrower opens this page a few times a year to read one
+# number, so nothing the borrower reads goes below 15px. See PORTAL_DESIGN_PLAN.md,
+# stage 1.
+SCALE_TOKENS = [
+	{"token_name": "portal-text-xs", "type": "Dimension", "value": "11px"},
+	{"token_name": "portal-text-sm", "type": "Dimension", "value": "13px"},
+	{"token_name": "portal-text-md", "type": "Dimension", "value": "15px"},
+	{"token_name": "portal-text-lg", "type": "Dimension", "value": "18px"},
+	{"token_name": "portal-text-xl", "type": "Dimension", "value": "24px"},
+	{"token_name": "portal-text-2xl", "type": "Dimension", "value": "32px"},
+	# How tall one row of a table stands.
+	{"token_name": "portal-row-pad", "type": "Dimension", "value": "10px"},
+	# The room inside a card, which a row is also padded by down its sides so that the
+	# two line up.
+	{"token_name": "portal-card-pad", "type": "Dimension", "value": "12px"},
+	# The distance between two cards, and the margin of the page around all of them.
+	{"token_name": "portal-gap", "type": "Dimension", "value": "16px"},
 ]
 
 # What no block style can carry: the webfont, and the ground behind the page.
@@ -48,7 +93,7 @@ HEAD_HTML = """
 }
 
 :root { color-scheme: light; }
-html { background: #ffffff; }
+html { background: var(--portal-surface-page, #ffffff); }
 
 /* Every block carries its display inline, which outranks the browser's own
 	[hidden] { display: none } rule. Without this, hiding a panel does nothing. */
@@ -59,19 +104,22 @@ html { background: #ffffff; }
 	the filled code box are states the script sets on an attribute, so the appearance
 	of a choice lives here rather than in the script. */
 input:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible {
-	outline: 2px solid #0f0f0f; outline-offset: 2px;
+	outline: 2px solid var(--brand-primary, #0f0f0f); outline-offset: 2px;
 }
-input:focus, select:focus { border-color: #0f0f0f; }
-[data-code] input:not(:placeholder-shown) { border-color: #0f0f0f; }
+input:focus, select:focus { border-color: var(--brand-primary, #0f0f0f); }
+[data-code] input:not(:placeholder-shown) { border-color: var(--brand-primary, #0f0f0f); }
 
 /* The tiles are this page's radio buttons, at the size the question deserves. The
 	dot is the smallest part of the control, so choosing one restyles the whole tile. */
 [data-tile][data-chosen="1"] {
-	border-color: #0f0f0f; box-shadow: inset 0 0 0 1px #0f0f0f;
+	border-color: var(--brand-primary, #0f0f0f);
+	box-shadow: inset 0 0 0 1px var(--brand-primary, #0f0f0f);
 }
-[data-tile][data-chosen="1"] [data-tile-icon] { background: #0f0f0f; color: #ffffff; }
+[data-tile][data-chosen="1"] [data-tile-icon] {
+	background: var(--brand-primary, #0f0f0f); color: var(--brand-primary-ink, #ffffff);
+}
 [data-tile][data-chosen="1"] [data-tile-radio] {
-	background: #0f0f0f; border-color: #0f0f0f;
+	background: var(--brand-primary, #0f0f0f); border-color: var(--brand-primary, #0f0f0f);
 }
 [data-tile-icon] svg { width: 19px; height: 19px; }
 [data-tile-radio] svg { width: 13px; height: 13px; }
@@ -108,24 +156,95 @@ button[disabled], button[disabled]:hover { opacity: 0.45; cursor: default; filte
 </style>
 """
 
-# Espresso palette, from frappe/public/css/espresso/.
-WHITE = "#ffffff"
-GRAY_50 = "#f8f8f8"
-GRAY_100 = "#f3f3f3"
-GRAY_200 = "#ededed"
-GRAY_500 = "#999999"
-GRAY_600 = "#7c7c7c"
-GRAY_700 = "#525252"
-GRAY_900 = "#171717"
-GRAY_950 = "#0f0f0f"
-BLACK = GRAY_900  # the same darkest ink, for the places that mean black rather than a gray
-GREEN_100 = "#e4faeb"
-GREEN_700 = "#14804d"
-RED_600 = "#ce2c2c"
-AMBER_50 = "#fdf8ed"
-AMBER_700 = "#bb6f0c"
+# Espresso palette, from frappe/public/css/espresso/. These are the values the portal
+# ships with, and the fallback that every reference below carries.
+#
+# Two groups, and which group a colour is in decides who owns it.
+#
+# The neutrals are the lender's. A grey is not neutral: PNB's greys lean red and
+# Canara's lean blue, and a portal built on pure grey reads as software rather than as
+# a bank. palette_overrides() below puts a trace of the lender's own colour into each
+# of them.
+#
+# The states are ours, and a lender may not touch them. Overdue has to mean the same
+# thing at every bank, and a lender whose brand is red still wants their borrower told
+# in green that nothing is owed. This is the Tier 0 and Tier 1 split of
+# PORTAL_DESIGN_PLAN.md section 4, written down where it can be read.
+SHIPPED = {
+	"surface-page": "#ffffff",
+	"surface-card": "#ffffff",
+	"surface-sunken": "#f8f8f8",
+	"surface-hover": "#f3f3f3",
+	"border": "#ededed",
+	"border-strong": "#999999",
+	"ink": "#171717",
+	"ink-muted": "#525252",
+	"ink-subtle": "#7c7c7c",
+	"ink-faint": "#999999",
+	"ok-soft": "#e4faeb",
+	"ok-deep": "#14804d",
+	"warn-soft": "#fdf8ed",
+	"warn-deep": "#bb6f0c",
+	"danger": "#ce2c2c",
+}
 
-BORDER = f"1px solid {GRAY_200}"
+# The ten a lender's colour reaches, and the five it does not.
+NEUTRALS = (
+	"surface-page",
+	"surface-card",
+	"surface-sunken",
+	"surface-hover",
+	"border",
+	"border-strong",
+	"ink",
+	"ink-muted",
+	"ink-subtle",
+	"ink-faint",
+)
+STATES = ("ok-soft", "ok-deep", "warn-soft", "warn-deep", "danger")
+
+
+def paint(name: str) -> str:
+	"""One reference to a palette token, carrying the shipped value as its fallback."""
+	return f"var(--portal-{name},{SHIPPED[name]})"
+
+
+# The page under everything, and a card on it. Two names for one colour today, because
+# they are two decisions: every bank in the six I looked at puts colour in the band and
+# leaves the page under it white, but a bank that wants an off-white page should not
+# have to repaint its cards to get one.
+SURFACE_PAGE = paint("surface-page")
+SURFACE_CARD = paint("surface-card")
+# The sidebar, a table head, the ground a card sits against.
+SURFACE_SUNKEN = paint("surface-sunken")
+# A row under the pointer.
+SURFACE_HOVER = paint("surface-hover")
+# A hairline, and the heavier edge a control takes when the pointer is over it.
+BORDER_COLOR = paint("border")
+BORDER_STRONG = paint("border-strong")
+# Three weights of text, and a fourth for the label nobody has to read.
+INK = paint("ink")
+INK_MUTED = paint("ink-muted")
+INK_SUBTLE = paint("ink-subtle")
+INK_FAINT = paint("ink-faint")
+# On time, paid, approved. Due soon, action needed. And the mark on a required field.
+OK_SOFT = paint("ok-soft")
+OK_DEEP = paint("ok-deep")
+WARN_SOFT = paint("warn-soft")
+WARN_DEEP = paint("warn-deep")
+DANGER = paint("danger")
+
+PALETTE_TOKENS = [
+	# No dark_value: dark mode is pinned light, and Builder writes a plain value rather
+	# than a light-dark() pair when the second half is missing.
+	{"token_name": f"portal-{name}", "type": "Color", "value": SHIPPED[name]}
+	for name in NEUTRALS + STATES
+]
+
+# Every token the app writes. upsert_tokens walks this one.
+PORTAL_TOKENS = BRAND_TOKENS + SCALE_TOKENS + PALETTE_TOKENS
+
+BORDER = f"1px solid {BORDER_COLOR}"
 ACTIVE_SHADOW = "0 0 1px 0 rgba(0, 0, 0, 0.14), 0 1px 3px 0 rgba(0, 0, 0, 0.14)"
 
 # Fragments spread into the style dicts below.
@@ -188,13 +307,12 @@ FONT_STACK = ",".join(
 
 BODY_STYLES = {
 	"margin": "0",
-	"background": WHITE,
-	"color": GRAY_900,
+	"background": SURFACE_PAGE,
+	"color": INK,
 	"fontFamily": FONT_STACK,
 	"fontVariationSettings": '"opsz" 24',
-	"fontSize": "14px",
-	"fontWeight": "420",
-	"letterSpacing": "0.02em",
+	"fontSize": "var(--portal-text-md,15px)",
+	"fontWeight": "400",
 	"lineHeight": "1.5",
 	"WebkitFontSmoothing": "antialiased",
 }
@@ -205,7 +323,7 @@ RAIL_STYLES = {
 	**COLUMN,
 	"width": "50px",
 	"flexShrink": "0",
-	"background": GRAY_50,
+	"background": SURFACE_SUNKEN,
 	"alignItems": "center",
 	"gap": "4px",
 	"padding": "11px 0 14px",
@@ -219,16 +337,28 @@ MARK_STYLES = {
 	"borderRadius": "8px",
 	"flexShrink": "0",
 	"background": "var(--brand-mark,#2bb24c)",
-	"color": WHITE,
+	"color": "var(--brand-mark-ink,#ffffff)",
 	"display": "grid",
 	"placeItems": "center",
 	"marginBottom": "8px",
 }
+# A lender's own logo, wherever the brand name would otherwise be. Height is fixed and
+# width is not, because a wordmark is wide and a roundel is not, and contain keeps both
+# whole. The ceiling stops a wide one pushing the rest of the bar off the row.
+LOGO_STYLES = {
+	"height": "24px",
+	"width": "auto",
+	"maxWidth": "160px",
+	"objectFit": "contain",
+	"display": "block",
+}
+SIDE_LOGO_STYLES = {**LOGO_STYLES, "height": "22px", "maxWidth": "150px"}
+
 RAIL_DIVIDER_STYLES = {
 	"width": "20px",
 	"height": "1px",
 	"flexShrink": "0",
-	"background": GRAY_200,
+	"background": BORDER_COLOR,
 	"margin": "4px 0",
 }
 RAIL_ICON_STYLES = {
@@ -238,10 +368,10 @@ RAIL_ICON_STYLES = {
 	"flexShrink": "0",
 	"display": "grid",
 	"placeItems": "center",
-	"color": GRAY_700,
+	"color": INK_MUTED,
 	"textDecoration": "none",
-	"hover:background": GRAY_100,
-	"hover:color": GRAY_900,
+	"hover:background": SURFACE_HOVER,
+	"hover:color": INK,
 }
 SPACER_STYLES = {"flex": "1 1 auto"}
 AVATAR_STYLES = {
@@ -249,11 +379,11 @@ AVATAR_STYLES = {
 	"height": "28px",
 	"borderRadius": "999px",
 	"flexShrink": "0",
-	"background": GREEN_100,
-	"color": GREEN_700,
+	"background": f"var(--brand-mark-soft,{OK_SOFT})",
+	"color": f"var(--brand-mark-deep,{OK_DEEP})",
 	"display": "grid",
 	"placeItems": "center",
-	"fontSize": "12px",
+	"fontSize": "var(--portal-text-xs,11px)",
 	"fontWeight": "600",
 }
 
@@ -261,7 +391,7 @@ SIDEBAR_STYLES = {
 	**COLUMN,
 	"width": "220px",
 	"flexShrink": "0",
-	"background": GRAY_50,
+	"background": SURFACE_SUNKEN,
 	"borderRight": BORDER,
 	"gap": "12px",
 	"padding": "8px 8px 10px 8px",
@@ -289,29 +419,29 @@ SIDE_COLLAPSE_STYLES = {
 	"padding": "0",
 	"borderRadius": "999px",
 	"border": BORDER,
-	"background": WHITE,
+	"background": SURFACE_CARD,
 	"boxShadow": ACTIVE_SHADOW,
-	"color": GRAY_700,
+	"color": INK_MUTED,
 	"cursor": "pointer",
 	"zIndex": "30",
-	"hover:color": GRAY_950,
-	"hover:borderColor": GRAY_500,
+	"hover:color": INK,
+	"hover:borderColor": BORDER_STRONG,
 }
 # One treatment for every line in the sidebar, so the whole rail reads as a single
 # list rather than as six kinds of text. The rows that need to stand out -- the one
 # you are on, the one under the pointer -- do it with a card and a colour, not with a
 # size or a weight of their own. The two names are <b> elements, so the weight has to
 # be said out loud to beat the browser's bold.
-SIDE_TEXT_STYLES = {"fontSize": "13px", "fontWeight": "420", "color": GRAY_700}
+SIDE_TEXT_STYLES = {"fontSize": "var(--portal-text-sm,13px)", "fontWeight": "400", "color": INK_MUTED}
 
 # The one line that is not a row in the list: it says whose portal this is.
 SIDE_HEAD_STYLES = {
 	**SIDE_TEXT_STYLES,
-	"fontSize": "14px",
+	"fontSize": "var(--portal-text-md,15px)",
 	"fontWeight": "500",
-	"color": BLACK,
-	"padding": "6px 8px 0",
+	"color": INK,
 }
+SIDE_BRAND_STYLES = {**ROW_FLEX, "gap": "8px", "minHeight": "24px", "padding": "6px 8px 0"}
 
 NAV_STYLES = {**COLUMN, "flex": "1 1 auto", "overflowY": "auto", "gap": "2px"}
 NAV_ITEM_STYLES = {
@@ -322,11 +452,11 @@ NAV_ITEM_STYLES = {
 	"marginBottom": "1px",
 	**SIDE_TEXT_STYLES,
 	"textDecoration": "none",
-	"hover:background": GRAY_100,
-	"hover:color": GRAY_900,
+	"hover:background": SURFACE_HOVER,
+	"hover:color": INK,
 }
 # The white card and its shadow are the whole of the active state now.
-NAV_ITEM_ACTIVE_STYLES = {**NAV_ITEM_STYLES, "background": WHITE, "boxShadow": ACTIVE_SHADOW}
+NAV_ITEM_ACTIVE_STYLES = {**NAV_ITEM_STYLES, "background": SURFACE_CARD, "boxShadow": ACTIVE_SHADOW}
 
 # The foot is the last line inside a box that is exactly 100vh tall, so it is the one
 # place in the sidebar where text meets a hard edge with nothing under it. On a display
@@ -343,27 +473,26 @@ PAGE_HEAD_STYLES = {
 	"gap": "12px",
 	"flexWrap": "wrap",
 	"minHeight": "48px",
-	"padding": "0 20px",
+	"padding": "0 var(--portal-gap,16px)",
 	"borderBottom": BORDER,
 }
 CRUMB_STYLES = {
-	"fontSize": "16px",
+	"fontSize": "var(--portal-text-lg,18px)",
 	"fontWeight": "500",
-	"color": GRAY_950,
-	"letterSpacing": "0.015em",
+	"color": INK,
 }
-HEAD_NOTE_STYLES = {"fontSize": "13px", "color": GRAY_700}
+HEAD_NOTE_STYLES = {"fontSize": "var(--portal-text-sm,13px)", "color": INK_MUTED}
 HEAD_END_STYLES = {**ROW_FLEX, "marginLeft": "auto", "gap": "10px"}
-STATUS_STYLES = {**ROW_FLEX, "gap": "6px", "fontSize": "13px", "color": GRAY_700}
+STATUS_STYLES = {**ROW_FLEX, "gap": "6px", "fontSize": "var(--portal-text-sm,13px)", "color": INK_MUTED}
 STATUS_DOT_STYLES = {
 	"width": "6px",
 	"height": "6px",
 	"borderRadius": "999px",
-	"background": GREEN_700,
+	"background": OK_DEEP,
 }
 BTN_STYLES = {
 	"fontFamily": "inherit",
-	"fontSize": "13px",
+	"fontSize": "var(--portal-text-md,15px)",
 	"fontWeight": "500",
 	"cursor": "pointer",
 	"padding": "6px 12px",
@@ -378,17 +507,22 @@ BTN_STYLES = {
 
 # A little more room at the foot than at the head: the last card ends against the
 # footer's rule, and a page that stops dead on its last line reads as cut off.
-CONTENT_STYLES = {**COLUMN, "flex": "1 1 auto", "padding": "20px 20px 28px", "gap": "20px"}
+CONTENT_STYLES = {
+	**COLUMN,
+	"flex": "1 1 auto",
+	"padding": "var(--portal-gap,16px) var(--portal-gap,16px) calc(var(--portal-gap,16px) * 1.4)",
+	"gap": "var(--portal-gap,16px)",
+}
 CARDS_STYLES = {
 	"display": "grid",
 	"gridTemplateColumns": "repeat(auto-fit, minmax(240px, 1fr))",
-	"gap": "20px",
+	"gap": "var(--portal-gap,16px)",
 }
 NCARD_STYLES = {
 	**COLUMN,
 	"minHeight": "110px",
-	"padding": "12px",
-	"background": WHITE,
+	"padding": "var(--portal-card-pad,12px)",
+	"background": SURFACE_CARD,
 	"border": BORDER,
 	"borderRadius": "12px",
 }
@@ -398,44 +532,42 @@ NCARD_HEAD_STYLES = {
 	"alignItems": "flex-start",
 	"gap": "8px",
 }
-NCARD_TITLE_STYLES = {"fontSize": "13px", "fontWeight": "500"}
-NCARD_BODY_STYLES = {**COLUMN, "paddingTop": "12px"}
+NCARD_TITLE_STYLES = {"fontSize": "var(--portal-text-sm,13px)", "fontWeight": "500"}
+NCARD_BODY_STYLES = {**COLUMN, "paddingTop": "var(--portal-card-pad,12px)"}
 NUMBER_STYLES = {
 	**TABULAR,
-	"fontSize": "18px",
+	"fontSize": "var(--portal-text-xl,24px)",
 	"fontWeight": "600",
-	"letterSpacing": "0.01em",
 	"lineHeight": "115%",
 }
-NCARD_STAT_STYLES = {**TABULAR, "marginTop": "10px", "fontSize": "13px", "color": GRAY_700}
+NCARD_STAT_STYLES = {**TABULAR, "marginTop": "10px", "fontSize": "var(--portal-text-sm,13px)", "color": INK_MUTED}
 
 # The two-column split folds to one column on Builder's tablet breakpoint (<=1023px).
 GRID_STYLES = {
 	"display": "grid",
 	"gridTemplateColumns": "minmax(0, 1.9fr) minmax(0, 1fr)",
-	"gap": "20px",
+	"gap": "var(--portal-gap,16px)",
 	"alignItems": "start",
 }
 GRID_TABLET_STYLES = {"gridTemplateColumns": "minmax(0, 1fr)"}
 
-STACK_STYLES = {**COLUMN, "gap": "20px", "minWidth": "0"}
+STACK_STYLES = {**COLUMN, "gap": "var(--portal-gap,16px)", "minWidth": "0"}
 CARD_STYLES = {
 	**COLUMN,
-	"background": WHITE,
+	"background": SURFACE_CARD,
 	"border": BORDER,
 	"borderRadius": "12px",
 	"minWidth": "0",
 }
-CARD_HEAD_STYLES = {"padding": "12px 12px 14px"}
+CARD_HEAD_STYLES = {"padding": "var(--portal-card-pad,12px)"}
 CARD_TITLE_STYLES = {
 	"margin": "0",
-	"fontSize": "16px",
+	"fontSize": "var(--portal-text-lg,18px)",
 	"fontWeight": "600",
-	"color": GRAY_950,
+	"color": INK,
 	"lineHeight": "1.3em",
-	"letterSpacing": "0.015em",
 }
-CARD_SUB_STYLES = {**TABULAR, "marginTop": "5px", "fontSize": "14px", "color": GRAY_700}
+CARD_SUB_STYLES = {**TABULAR, "marginTop": "5px", "fontSize": "var(--portal-text-sm,13px)", "color": INK_MUTED}
 # A head that carries a control: the titles take the room they need and the control
 # sits against the right edge, dropping under them when there is no room for both.
 CARD_HEAD_ROW_STYLES = {
@@ -447,14 +579,14 @@ CARD_HEAD_ROW_STYLES = {
 }
 CARD_TITLES_STYLES = {**COLUMN, "flex": "1 1 auto", "minWidth": "0"}
 
-THEAD_STYLES = {**ROW_FLEX, "gap": "12px", "padding": "0 12px 8px", "borderBottom": BORDER}
-THEAD_LABEL_STYLES = {"fontSize": "12px", "color": GRAY_600}
+THEAD_STYLES = {**ROW_FLEX, "gap": "12px", "padding": "0 var(--portal-card-pad,12px) 8px", "borderBottom": BORDER}
+THEAD_LABEL_STYLES = {"fontSize": "var(--portal-text-xs,11px)", "color": INK_SUBTLE}
 ROW_STYLES = {
 	**ROW_FLEX,
 	"gap": "12px",
-	"padding": "12px",
+	"padding": "var(--portal-row-pad,10px) var(--portal-card-pad,12px)",
 	"borderTop": BORDER,
-	"hover:background": GRAY_50,
+	"hover:background": SURFACE_SUNKEN,
 }
 COL_MAIN_STYLES = {**COLUMN, "flex": "1 1 auto", "minWidth": "0", "gap": "2px"}
 COL_STATUS_STYLES = {"width": "150px", "flexShrink": "0"}
@@ -467,67 +599,72 @@ COL_AMT_STYLES = {
 	"gap": "2px",
 }
 
-PRIMARY_TEXT_STYLES = {"fontSize": "13px", "fontWeight": "500"}
-SECONDARY_TEXT_STYLES = {**TABULAR, "fontSize": "12px", "color": GRAY_600}
-AMOUNT_STYLES = {**TABULAR, "fontSize": "13px", "fontWeight": "500"}
+PRIMARY_TEXT_STYLES = {"fontSize": "var(--portal-text-md,15px)", "fontWeight": "500"}
+SECONDARY_TEXT_STYLES = {**TABULAR, "fontSize": "var(--portal-text-sm,13px)", "color": INK_SUBTLE}
+AMOUNT_STYLES = {**TABULAR, "fontSize": "var(--portal-text-md,15px)", "fontWeight": "500"}
 
 STATE_STYLES = {
 	"display": "inline-flex",
 	"alignItems": "center",
 	"gap": "6px",
-	"fontSize": "13px",
-	"color": GRAY_700,
+	"fontSize": "var(--portal-text-sm,13px)",
+	"color": INK_MUTED,
 }
 DOT_STYLES = {
 	"width": "6px",
 	"height": "6px",
 	"borderRadius": "999px",
-	"background": GRAY_500,
+	"background": BORDER_STRONG,
 	"flexShrink": "0",
 }
 FLAG_STYLES = {
 	"display": "inline-block",
-	"fontSize": "12px",
+	"fontSize": "var(--portal-text-xs,11px)",
 	"fontWeight": "500",
-	"color": AMBER_700,
-	"background": AMBER_50,
+	"color": WARN_DEEP,
+	"background": WARN_SOFT,
 	"padding": "2px 8px",
 	"borderRadius": "4px",
 }
-WHY_STYLES = {"fontSize": "12px", "color": AMBER_700}
+WHY_STYLES = {"fontSize": "var(--portal-text-xs,11px)", "color": WARN_DEEP}
 
 LI_STYLES = {
 	"display": "flex",
 	"alignItems": "baseline",
 	"gap": "12px",
-	"padding": "12px",
+	"padding": "var(--portal-row-pad,10px) var(--portal-card-pad,12px)",
 	"borderTop": BORDER,
 }
 LI_DATE_STYLES = {
 	**TABULAR,
 	"width": "80px",
 	"flexShrink": "0",
-	"fontSize": "13px",
-	"color": GRAY_700,
+	"fontSize": "var(--portal-text-sm,13px)",
+	"color": INK_MUTED,
 }
 LI_BODY_STYLES = {**COLUMN, "flex": "1 1 auto", "minWidth": "0", "gap": "2px"}
-LI_AMT_STYLES = {**TABULAR, "flexShrink": "0", "fontSize": "13px", "fontWeight": "500"}
+LI_AMT_STYLES = {**TABULAR, "flexShrink": "0", "fontSize": "var(--portal-text-md,15px)", "fontWeight": "500"}
 
 FOOTER_STYLES = {
 	**ROW_FLEX,
 	"gap": "20px",
 	"flexWrap": "wrap",
-	"padding": "14px 20px",
+	"padding": "14px var(--portal-gap,16px)",
 	"borderTop": BORDER,
-	"fontSize": "12px",
-	"color": GRAY_600,
+	"fontSize": "var(--portal-text-xs,11px)",
+	"color": INK_SUBTLE,
 }
 FOOTER_LINK_STYLES = {
-	"color": GRAY_700,
+	"color": INK_MUTED,
 	"textDecoration": "none",
 	"marginRight": "18px",
-	"hover:color": GRAY_900,
+	"hover:color": INK,
 }
+FOOTER_BRAND_STYLES = {**ROW_FLEX, "gap": "8px", "minWidth": "0"}
+FOOTER_LOGO_STYLES = {**LOGO_STYLES, "height": "18px", "maxWidth": "120px"}
+# The grievance contact. A lender is required to publish one, and a borrower reading
+# the foot of the page is the one looking for it.
+FOOTER_MAIL_STYLES = {**FOOTER_LINK_STYLES, "marginRight": "0"}
 
 # The rail and the sidebar leave the page on Builder's mobile breakpoint (<=576px).
 HIDDEN = {"display": "none"}
@@ -617,21 +754,290 @@ def repeater(key, row, path=None, styles=None, **kwargs):
 	return node
 
 
+def channels(colour: str):
+	"""The three channels of a #rgb or #rrggbb colour, or None if it is neither.
+
+	A Color field holds whatever the picker wrote, and an empty one holds nothing, so
+	every colour read from settings comes through here before it is believed.
+	"""
+	digits = (colour or "").strip().lstrip("#")
+	if len(digits) == 3:
+		digits = "".join(digit * 2 for digit in digits)
+
+	if len(digits) != 6 or any(digit not in "0123456789abcdefABCDEF" for digit in digits):
+		return None
+
+	return tuple(int(digits[index : index + 2], 16) for index in (0, 2, 4))
+
+
+def to_linear(channel: int) -> float:
+	ratio = channel / 255
+	return ratio / 12.92 if ratio <= 0.03928 else ((ratio + 0.055) / 1.055) ** 2.4
+
+
+def from_linear(part: float) -> int:
+	ratio = part * 12.92 if part <= 0.0031308 else 1.055 * part ** (1 / 2.4) - 0.055
+	return round(max(0.0, min(1.0, ratio)) * 255)
+
+
+def luminance(rgb) -> float:
+	"""Relative luminance as WCAG defines it: 0 for black, 1 for white."""
+	red, green, blue = (to_linear(channel) for channel in rgb)
+
+	return 0.2126 * red + 0.7152 * green + 0.0722 * blue
+
+
+def relight(rgb, target: float) -> str:
+	"""The same colour at a given luminance, so one brand colour yields a family.
+
+	The scaling is done on the linear components, which keeps the hue: converting back
+	through the sRGB curve gives a colour that reads as the one the lender chose, only
+	darker. It is used to darken and never to lighten, because brightening a saturated
+	colour clips a channel and the hue moves.
+	"""
+	parts = [to_linear(channel) for channel in rgb]
+	current = 0.2126 * parts[0] + 0.7152 * parts[1] + 0.0722 * parts[2]
+	scale = target / current if current else 0
+
+	return "#" + "".join(f"{from_linear(part * scale):02x}" for part in parts)
+
+
+def tint(rgb, weight: float = 0.12) -> str:
+	"""The colour laid thinly over white, for a chip or a wash behind it."""
+	return "#" + "".join(
+		f"{round(channel * weight + 255 * (1 - weight)):02x}" for channel in rgb
+	)
+
+
+# Dark enough to read on the tint above it, and no darker, so the accent is still
+# recognisable as the colour the lender picked.
+DEEP_LUMINANCE = 0.12
+
+# APCA, from the W3C's published algorithm. The names are the ones the algorithm uses,
+# so the numbers can be checked against it rather than taken on trust.
+APCA_BLACK_THRESHOLD = 0.022
+APCA_BLACK_CLAMP = 1.414
+APCA_SCALE = 1.14
+APCA_LOW_CLIP = 0.1
+APCA_OFFSET = 0.027
+
+
+def apca_y(rgb) -> float:
+	"""Screen luminance as APCA measures it, which is not what WCAG measures.
+
+	The plain 2.4 exponent, with no sRGB curve: APCA models what a screen emits rather
+	than what the sRGB standard encodes. The clamp near black is what stops two very
+	dark colours reporting a contrast that nobody can see.
+	"""
+	red, green, blue = ((channel / 255) ** 2.4 for channel in rgb)
+	brightness = 0.2126729 * red + 0.7151522 * green + 0.0721750 * blue
+
+	if brightness >= APCA_BLACK_THRESHOLD:
+		return brightness
+
+	return brightness + (APCA_BLACK_THRESHOLD - brightness) ** APCA_BLACK_CLAMP
+
+
+def apca(text, background) -> float:
+	"""How readable this text colour is on this background, 0 to about 106.
+
+	Returned without its sign, because the only question asked of it here is which of
+	two inks reads better. About 60 is body text, about 45 is a large label.
+	"""
+	text_y, back_y = apca_y(text), apca_y(background)
+
+	if back_y > text_y:
+		raw = (back_y**0.56 - text_y**0.57) * APCA_SCALE
+		return 0.0 if raw < APCA_LOW_CLIP else (raw - APCA_OFFSET) * 100
+
+	raw = (back_y**0.65 - text_y**0.62) * APCA_SCALE
+
+	return 0.0 if -raw < APCA_LOW_CLIP else -(raw + APCA_OFFSET) * 100
+
+
+def ink_for(rgb) -> str:
+	"""Whichever of white and the dark ink reads better on this colour.
+
+	APCA rather than the WCAG ratio. WCAG puts the crossover at one luminance for every
+	hue, and luminance is not how the eye reads a colour: it over-weights green and
+	under-weights blue, so a mid green and a mid yellow both get the wrong ink. Those
+	are the two colours nobody demos and somebody eventually picks.
+	"""
+	light, dark = SHIPPED["surface-card"], SHIPPED["ink"]
+
+	return light if apca(channels(light), rgb) >= apca(channels(dark), rgb) else dark
+
+
+def to_hsl(rgb):
+	"""Hue in turns, saturation and lightness, all 0 to 1."""
+	red, green, blue = (channel / 255 for channel in rgb)
+	high, low = max(red, green, blue), min(red, green, blue)
+	lightness = (high + low) / 2
+	spread = high - low
+
+	if not spread:
+		return 0.0, 0.0, lightness
+
+	saturation = spread / (1 - abs(2 * lightness - 1))
+	if high == red:
+		hue = ((green - blue) / spread) % 6
+	elif high == green:
+		hue = (blue - red) / spread + 2
+	else:
+		hue = (red - green) / spread + 4
+
+	return hue / 6, saturation, lightness
+
+
+def from_hsl(hue: float, saturation: float, lightness: float) -> str:
+	"""The colour those three describe, as #rrggbb."""
+	spread = (1 - abs(2 * lightness - 1)) * saturation
+	second = spread * (1 - abs((hue * 6) % 2 - 1))
+	base = lightness - spread / 2
+	parts = [
+		(spread, second, 0.0),
+		(second, spread, 0.0),
+		(0.0, spread, second),
+		(0.0, second, spread),
+		(second, 0.0, spread),
+		(spread, 0.0, second),
+	][min(int(hue * 6), 5)]
+
+	return "#" + "".join(f"{round((part + base) * 255):02x}" for part in parts)
+
+
+# How much of the lender's colour a neutral carries. Held as a chroma rather than as a
+# saturation, because saturation buys almost no colour at the top and the bottom of the
+# scale, which is exactly where the neutrals are: a flat saturation would tint the mid
+# greys and leave the page and the ink untouched. A chroma is the same amount of colour
+# at every lightness.
+NEUTRAL_CHROMA = 0.03
+
+
+def hue_shift(colour: str, hue: float) -> str:
+	"""The same luminance, carrying NEUTRAL_CHROMA of a given hue.
+
+	Two steps, and the second is the one that matters. Mixing the hue in at a fixed
+	lightness is not enough, because lightness is not luminance: the eye reads a yellow
+	grey as brighter than a blue grey of the same lightness, and left there the body
+	text on a yellow-branded portal loses five percent of its contrast. So the tinted
+	colour is then put back to the luminance it started at. Contrast is a ratio of
+	luminances and nothing else, so every ratio on the page comes out unchanged.
+
+	White is returned unchanged. There is no room for chroma at full lightness, and
+	that is the right answer anyway: every one of the six bank sites puts its colour in
+	the band across the top and leaves the page under it white.
+	"""
+	rgb = channels(colour)
+	_, _, lightness = to_hsl(rgb)
+	headroom = 1 - abs(2 * lightness - 1)
+	if not headroom:
+		return colour
+
+	tinted = from_hsl(hue, min(NEUTRAL_CHROMA / headroom, 1.0), lightness)
+
+	return relight(channels(tinted), luminance(rgb))
+
+
+def brand_overrides() -> dict:
+	"""The token values a lender has configured, keyed by token name.
+
+	Anything left unset is left out, so the shipped default in BRAND_TOKENS stands.
+	That is what makes the settings safe to add to a running site: a bank that has
+	filled nothing in gets the portal it had yesterday.
+	"""
+	from lending.portal import portal_settings
+
+	settings = portal_settings("portal_brand_color", "portal_accent_color")
+	overrides = {}
+
+	primary = channels(settings.portal_brand_color)
+	if primary:
+		overrides["brand-primary"] = settings.portal_brand_color.strip()
+		overrides["brand-primary-ink"] = ink_for(primary)
+
+	accent = channels(settings.portal_accent_color)
+	if accent:
+		overrides["brand-mark"] = settings.portal_accent_color.strip()
+		overrides["brand-mark-ink"] = ink_for(accent)
+		overrides["brand-mark-soft"] = tint(accent)
+		overrides["brand-mark-deep"] = (
+			relight(accent, DEEP_LUMINANCE) if luminance(accent) > DEEP_LUMINANCE else overrides["brand-mark"]
+		)
+
+	return overrides
+
+
+# Below this there is no hue to take. A lender who picks a grey or a near black has
+# picked a neutral already, and reading a hue off it would give whichever of the three
+# channels rounding happened to leave highest.
+BRAND_SATURATION_FLOOR = 0.15
+
+
+def palette_overrides() -> dict:
+	"""Every neutral, carrying a trace of the lender's own colour.
+
+	This is the half of white labelling that the colour fields alone do not reach. A
+	lender sets a brand colour and gets a blue button on a portal whose greys are still
+	the ones Frappe ships, and grey is the largest surface on the page.
+
+	Only the hue moves. Each neutral keeps the lightness it ships with, so a border
+	stays as strong a border and the body text stays as readable as it was designed to
+	be. The states are left out on purpose: see SHIPPED.
+	"""
+	from lending.portal import portal_settings
+
+	settings = portal_settings("portal_brand_color")
+	brand = channels(settings.portal_brand_color)
+	if not brand:
+		return {}
+
+	hue, saturation, _ = to_hsl(brand)
+	if saturation < BRAND_SATURATION_FLOOR:
+		return {}
+
+	return {f"portal-{name}": hue_shift(SHIPPED[name], hue) for name in NEUTRALS}
+
+
 def upsert_tokens():
-	"""Create the brand tokens under readable, stable document names.
+	"""Create the portal's tokens under readable, stable document names.
 
 	Builder Token.autoname only falls back to a UUID when no name is set, and the
 	emitted CSS custom property is --<document name>. Naming them after the token
-	gives every site the same --brand-* properties, so the references above are
-	portable; left to autoname, each site would emit a different UUID.
+	gives every site the same --brand-* and --portal-* properties, so the references
+	above are portable; left to autoname, each site would emit a different UUID.
+
+	This is also how a lender's own colours reach the page. Lending Settings.on_update
+	calls it, so saving one desk form restyles every portal page at once, and the
+	after_migrate hook calls it again so that migrating cannot quietly hand a lender
+	back the colours the app ships with.
 	"""
-	for token in BRAND_TOKENS:
+	overrides = brand_overrides() | palette_overrides()
+	changed = False
+
+	for token in PORTAL_TOKENS:
 		name = token["token_name"]
+		token = dict(token)
+
+		if name in overrides:
+			token["value"] = overrides[name]
+			# Dark mode is pinned light -- see PORTAL_CUSTOMIZATION_PLAN.md B.3 -- but a
+			# dark_value left behind would be the one value on the record still holding
+			# the colour the lender replaced.
+			if "dark_value" in token:
+				token["dark_value"] = overrides[name]
 
 		if frappe.db.exists("Builder Token", name):
 			doc = frappe.get_doc("Builder Token", name)
+			# An unchanged record is left alone. Saving one in developer mode exports it
+			# back over lending/builder_files/, so a no-op save would rewrite the app's
+			# own source every time anybody saved Lending Settings.
+			if all(doc.get(field) == value for field, value in token.items()):
+				continue
+
 			doc.update(token)
 			doc.save()
+			changed = True
 			continue
 
 		# drop any earlier UUID-named copy of the same token
@@ -647,7 +1053,10 @@ def upsert_tokens():
 		if doc.name != name:
 			frappe.rename_doc("Builder Token", doc.name, name, force=True, show_alert=False)
 
-	clear_builder_token_cache()
+		changed = True
+
+	if changed:
+		clear_builder_token_cache()
 
 
 def card(title, subtitle_key, body, action=None):
@@ -779,42 +1188,42 @@ PUBLIC_PAGE_STYLES = {
 	"alignItems": "center",
 	"padding": "0 20px 64px",
 	"gap": "0",
-	"background": GRAY_50,
+	"background": SURFACE_SUNKEN,
 }
-PUBLIC_COLUMN_STYLES = {**COLUMN, "width": "100%", "maxWidth": "720px", "gap": "18px"}
+PUBLIC_COLUMN_STYLES = {**COLUMN, "width": "100%", "maxWidth": "720px", "gap": "var(--portal-gap,16px)"}
 
 FIELD_STYLES = {**COLUMN, "gap": "6px", "padding": "8px 12px"}
-LABEL_STYLES = {"fontSize": "13px", "fontWeight": "500", "color": GRAY_700}
+LABEL_STYLES = {"fontSize": "var(--portal-text-sm,13px)", "fontWeight": "500", "color": INK_MUTED}
 INPUT_STYLES = {
 	"fontFamily": "inherit",
-	"fontSize": "14px",
+	"fontSize": "var(--portal-text-md,15px)",
 	"padding": "10px 12px",
 	"borderRadius": "var(--brand-radius,10px)",
 	"border": BORDER,
-	"background": WHITE,
-	"color": GRAY_900,
+	"background": SURFACE_CARD,
+	"color": INK,
 	"width": "100%",
 	"boxSizing": "border-box",
-	"hover:borderColor": GRAY_500,
+	"hover:borderColor": BORDER_STRONG,
 }
 # An answer already given, shown back rather than asked for twice.
-ECHO_INPUT_STYLES = {**INPUT_STYLES, "background": GRAY_100, "color": GRAY_700, "hover:borderColor": GRAY_200}
-ECHO_NOTE_STYLES = {**ROW_FLEX, "gap": "5px", "fontSize": "12px", "fontWeight": "500", "color": GREEN_700}
+ECHO_INPUT_STYLES = {**INPUT_STYLES, "background": SURFACE_HOVER, "color": INK_MUTED, "hover:borderColor": BORDER_COLOR}
+ECHO_NOTE_STYLES = {**ROW_FLEX, "gap": "5px", "fontSize": "var(--portal-text-xs,11px)", "fontWeight": "500", "color": OK_DEEP}
 SUBMIT_ROW_STYLES = {**ROW_FLEX, "gap": "10px", "padding": "12px", "borderTop": BORDER}
 RESULT_STYLES = {
 	**COLUMN,
 	"gap": "8px",
 	"padding": "16px",
-	"background": GREEN_100,
+	"background": OK_SOFT,
 	"borderRadius": "12px",
-	"color": GRAY_900,
+	"color": INK,
 }
 ERROR_STYLES = {
 	"padding": "12px 16px",
-	"background": AMBER_50,
+	"background": WARN_SOFT,
 	"borderRadius": "8px",
-	"fontSize": "13px",
-	"color": AMBER_700,
+	"fontSize": "var(--portal-text-sm,13px)",
+	"color": WARN_DEEP,
 }
 
 
@@ -824,7 +1233,7 @@ def label_block(label, required=True):
 	Required-ness was only in the note above the form before, so the one field holding
 	a visitor up was whichever they had skipped, and the form would not say which.
 	"""
-	mark = f' <span style="color: {RED_600}">*</span>' if required else ""
+	mark = f' <span style="color: {DANGER}">*</span>' if required else ""
 
 	return block("label", styles=LABEL_STYLES, html=f"{label}{mark}")
 
@@ -911,7 +1320,7 @@ BAND_STYLES = {
 	**COLUMN,
 	"width": "100%",
 	"alignItems": "center",
-	"background": WHITE,
+	"background": SURFACE_CARD,
 	"borderBottom": BORDER,
 	"padding": "0 20px",
 	"marginBottom": "28px",
@@ -923,11 +1332,11 @@ BAND_COLUMN_STYLES = {**COLUMN, "width": "100%", "maxWidth": "720px", "gap": "14
 TOPBAR_STYLES = {**ROW_FLEX, "gap": "10px", "padding": "13px 0", "width": "100%"}
 TOPBAR_LINKS_STYLES = {**ROW_FLEX, "marginLeft": "auto", "gap": "14px"}
 TOPBAR_LINK_STYLES = {
-	"fontSize": "13px",
+	"fontSize": "var(--portal-text-md,15px)",
 	"fontWeight": "500",
-	"color": GRAY_700,
+	"color": INK_MUTED,
 	"textDecoration": "none",
-	"hover:color": GRAY_950,
+	"hover:color": INK,
 }
 # The way back in, for a visitor who has applied before. A pill rather than a third
 # link, because it is the only thing in the bar anybody arrives looking for.
@@ -937,30 +1346,30 @@ PILL_LINK_STYLES = {
 	"padding": "7px 14px",
 	"borderRadius": "999px",
 	"border": BORDER,
-	"background": WHITE,
-	"fontSize": "13px",
+	"background": SURFACE_CARD,
+	"fontSize": "var(--portal-text-md,15px)",
 	"fontWeight": "500",
-	"color": GRAY_900,
+	"color": INK,
 	"textDecoration": "none",
 	"whiteSpace": "nowrap",
-	"hover:borderColor": GRAY_500,
+	"hover:borderColor": BORDER_STRONG,
 }
 
 HERO_TITLE_STYLES = {
 	"margin": "0",
-	"fontSize": "30px",
+	"fontSize": "var(--portal-text-2xl,32px)",
 	"lineHeight": "1.15",
 	"fontWeight": "600",
-	"color": GRAY_950,
+	"color": INK,
 	"letterSpacing": "-0.02em",
 	"maxWidth": "20ch",
 }
-HERO_TITLE_MOBILE_STYLES = {"fontSize": "24px"}
+HERO_TITLE_MOBILE_STYLES = {"fontSize": "var(--portal-text-xl,24px)"}
 HERO_INTRO_STYLES = {
 	"margin": "0",
-	"fontSize": "15px",
+	"fontSize": "var(--portal-text-md,15px)",
 	"lineHeight": "1.55",
-	"color": GRAY_700,
+	"color": INK_MUTED,
 	"maxWidth": "56ch",
 }
 
@@ -975,12 +1384,13 @@ TRUST_TICK_STYLES = {
 	"height": "16px",
 	"flexShrink": "0",
 	"borderRadius": "999px",
-	"background": GREEN_100,
-	"color": GREEN_700,
+	"background": OK_SOFT,
+	"color": OK_DEEP,
+	# Not on the scale: this is a glyph inside a fixed circle, so it may not grow.
 	"fontSize": "10px",
 	"fontWeight": "600",
 }
-TRUST_TEXT_STYLES = {"fontSize": "13px", "color": GRAY_700}
+TRUST_TEXT_STYLES = {"fontSize": "var(--portal-text-sm,13px)", "color": INK_MUTED}
 
 
 def trust_row(key):
@@ -1010,19 +1420,22 @@ START_CARD_STYLES = {
 	"padding": "30px 32px",
 	"border": BORDER,
 	"borderRadius": "var(--brand-radius,14px)",
-	"background": f"linear-gradient(150deg, {WHITE} 0%, {GRAY_50} 60%, {GREEN_100} 220%)",
+	"background": (
+		f"linear-gradient(150deg, {SURFACE_CARD} 0%, {SURFACE_SUNKEN} 60%,"
+		f" var(--brand-mark-soft,{OK_SOFT}) 220%)"
+	),
 	"boxShadow": ACTIVE_SHADOW,
 }
 START_CARD_MOBILE_STYLES = {"padding": "24px 20px"}
 START_COPY_STYLES = {**COLUMN, "gap": "6px", "minWidth": "0"}
 START_TITLE_STYLES = {
 	"margin": "0",
-	"fontSize": "24px",
+	"fontSize": "var(--portal-text-xl,24px)",
 	"fontWeight": "600",
 	"letterSpacing": "-0.01em",
-	"color": GRAY_950,
+	"color": INK,
 }
-START_NOTE_STYLES = {"margin": "0", "fontSize": "14px", "color": GRAY_700}
+START_NOTE_STYLES = {"margin": "0", "fontSize": "var(--portal-text-sm,13px)", "color": INK_MUTED}
 
 BENEFIT_ROW_STYLES = {
 	"display": "grid",
@@ -1042,11 +1455,12 @@ BENEFIT_NUMBER_STYLES = {
 	"borderRadius": "999px",
 	"background": "var(--brand-primary,#171717)",
 	"color": "var(--brand-primary-ink,#ffffff)",
+	# Not on the scale: this is a glyph inside a fixed circle, so it may not grow.
 	"fontSize": "11px",
 	"fontWeight": "600",
 }
-BENEFIT_TITLE_STYLES = {"fontSize": "14px", "fontWeight": "600", "color": GRAY_950}
-BENEFIT_NOTE_STYLES = {"margin": "0", "fontSize": "13px", "color": GRAY_600, "lineHeight": "1.5"}
+BENEFIT_TITLE_STYLES = {"fontSize": "var(--portal-text-md,15px)", "fontWeight": "600", "color": INK}
+BENEFIT_NOTE_STYLES = {"margin": "0", "fontSize": "var(--portal-text-sm,13px)", "color": INK_SUBTLE, "lineHeight": "1.5"}
 
 
 def benefits(key):
@@ -1078,13 +1492,13 @@ def benefits(key):
 
 PROGRESS_STYLES = {**COLUMN, "gap": "8px", "width": "100%", "padding": "0 2px"}
 PROGRESS_HEAD_STYLES = {**ROW_FLEX, "justifyContent": "space-between", "gap": "10px"}
-PROGRESS_NAME_STYLES = {"fontSize": "13px", "fontWeight": "600", "color": GRAY_950}
-PROGRESS_COUNT_STYLES = {**TABULAR, "fontSize": "12px", "fontWeight": "500", "color": GRAY_600}
+PROGRESS_NAME_STYLES = {"fontSize": "var(--portal-text-sm,13px)", "fontWeight": "600", "color": INK}
+PROGRESS_COUNT_STYLES = {**TABULAR, "fontSize": "var(--portal-text-xs,11px)", "fontWeight": "500", "color": INK_SUBTLE}
 PROGRESS_TRACK_STYLES = {
 	"width": "100%",
 	"height": "4px",
 	"borderRadius": "999px",
-	"background": GRAY_200,
+	"background": BORDER_COLOR,
 	"overflow": "hidden",
 }
 PROGRESS_FILL_STYLES = {
@@ -1127,7 +1541,7 @@ def progress_bar(steps):
 WIZARD_STYLES = {**COLUMN, "gap": "18px"}
 PANEL_STYLES = {
 	**COLUMN,
-	"background": WHITE,
+	"background": SURFACE_CARD,
 	"border": BORDER,
 	"borderRadius": "var(--brand-radius,14px)",
 	"boxShadow": ACTIVE_SHADOW,
@@ -1138,26 +1552,26 @@ PANEL_STYLES = {
 OPENING_STYLES = {**COLUMN, "gap": "20px"}
 PANEL_HEAD_STYLES = {**COLUMN, "gap": "6px", "padding": "26px 28px 0"}
 PANEL_STEP_STYLES = {
-	"fontSize": "11px",
+	"fontSize": "var(--portal-text-xs,11px)",
 	"fontWeight": "600",
 	"letterSpacing": "0.06em",
 	"textTransform": "uppercase",
-	"color": GRAY_500,
+	"color": INK_FAINT,
 }
-PANEL_TITLE_STYLES = {"margin": "0", "fontSize": "18px", "fontWeight": "600", "color": GRAY_950}
-PANEL_SUB_STYLES = {"margin": "0", "fontSize": "13px", "color": GRAY_700, "lineHeight": "1.5"}
+PANEL_TITLE_STYLES = {"margin": "0", "fontSize": "var(--portal-text-lg,18px)", "fontWeight": "600", "color": INK}
+PANEL_SUB_STYLES = {"margin": "0", "fontSize": "var(--portal-text-sm,13px)", "color": INK_MUTED, "lineHeight": "1.5"}
 
 # One question per screen, asked at the size of the only thing being asked.
 QUESTION_TITLE_STYLES = {
 	"margin": "0",
-	"fontSize": "26px",
+	"fontSize": "var(--portal-text-xl,24px)",
 	"lineHeight": "1.2",
 	"fontWeight": "600",
 	"letterSpacing": "-0.02em",
-	"color": GRAY_950,
+	"color": INK,
 }
-QUESTION_TITLE_MOBILE_STYLES = {"fontSize": "21px"}
-QUESTION_SUB_STYLES = {"margin": "0", "fontSize": "14px", "color": GRAY_600, "lineHeight": "1.5"}
+QUESTION_TITLE_MOBILE_STYLES = {"fontSize": "var(--portal-text-lg,18px)"}
+QUESTION_SUB_STYLES = {"margin": "0", "fontSize": "var(--portal-text-sm,13px)", "color": INK_SUBTLE, "lineHeight": "1.5"}
 
 # What was answered two screens ago, on the screen that posts it, so a visitor does
 # not have to walk back to remind themselves what they picked.
@@ -1167,10 +1581,10 @@ PICKED_STYLES = {
 	"gap": "6px",
 	"padding": "5px 10px",
 	"borderRadius": "999px",
-	"background": GRAY_100,
-	"fontSize": "12px",
+	"background": SURFACE_HOVER,
+	"fontSize": "var(--portal-text-xs,11px)",
 	"fontWeight": "500",
-	"color": GRAY_700,
+	"color": INK_MUTED,
 }
 
 PANEL_BODY_STYLES = {**COLUMN, "gap": "2px", "padding": "18px 16px 4px"}
@@ -1191,11 +1605,11 @@ FORM_SECTION_STYLES = {
 	"gridColumn": "1 / -1",
 	"margin": "14px 0 0",
 	"padding": "0 12px",
-	"fontSize": "11px",
+	"fontSize": "var(--portal-text-xs,11px)",
 	"fontWeight": "600",
 	"letterSpacing": "0.06em",
 	"textTransform": "uppercase",
-	"color": GRAY_500,
+	"color": INK_FAINT,
 }
 
 
@@ -1216,7 +1630,7 @@ WIZARD_BTN_STYLES = {
 	"background": "var(--brand-primary,#171717)",
 	"color": "var(--brand-primary-ink,#ffffff)",
 	"fontFamily": "inherit",
-	"fontSize": "14px",
+	"fontSize": "var(--portal-text-md,15px)",
 	"fontWeight": "600",
 	"cursor": "pointer",
 	"whiteSpace": "nowrap",
@@ -1225,12 +1639,12 @@ WIZARD_BTN_STYLES = {
 }
 WIZARD_GHOST_STYLES = {
 	**WIZARD_BTN_STYLES,
-	"background": WHITE,
+	"background": SURFACE_CARD,
 	"border": BORDER,
-	"color": GRAY_900,
+	"color": INK,
 	"fontWeight": "500",
 	"hover:filter": "none",
-	"hover:borderColor": GRAY_500,
+	"hover:borderColor": BORDER_STRONG,
 }
 GHOST_BTN_STYLES = {
 	**ROW_FLEX,
@@ -1239,10 +1653,10 @@ GHOST_BTN_STYLES = {
 	"padding": "8px 14px",
 	"borderRadius": "var(--brand-radius,8px)",
 	"border": BORDER,
-	"background": WHITE,
-	"color": GRAY_900,
+	"background": SURFACE_CARD,
+	"color": INK,
 	"fontFamily": "inherit",
-	"fontSize": "13px",
+	"fontSize": "var(--portal-text-md,15px)",
 	"fontWeight": "500",
 	"cursor": "pointer",
 }
@@ -1251,9 +1665,9 @@ LINK_BTN_STYLES = {
 	"padding": "0",
 	"border": "0",
 	"background": "transparent",
-	"color": GRAY_700,
+	"color": INK_MUTED,
 	"fontFamily": "inherit",
-	"fontSize": "13px",
+	"fontSize": "var(--portal-text-md,15px)",
 	"fontWeight": "500",
 	"textDecoration": "underline",
 	"cursor": "pointer",
@@ -1266,10 +1680,10 @@ NAV_ROW_STYLES = {
 	"padding": "18px 28px",
 	"marginTop": "20px",
 	"borderTop": BORDER,
-	"background": GRAY_50,
+	"background": SURFACE_SUNKEN,
 }
 NAV_END_STYLES = {**ROW_FLEX, "gap": "10px", "marginLeft": "auto"}
-QUIET_NOTE_STYLES = {"fontSize": "12px", "color": GRAY_600, "lineHeight": "1.5"}
+QUIET_NOTE_STYLES = {"fontSize": "var(--portal-text-xs,11px)", "color": INK_SUBTLE, "lineHeight": "1.5"}
 
 
 def wizard_button(label, styles, chevron=None, leading=False, attributes=None):
@@ -1327,13 +1741,13 @@ TILE_STYLES = {
 	"padding": "16px",
 	"boxSizing": "border-box",
 	"textAlign": "left",
-	"background": WHITE,
+	"background": SURFACE_CARD,
 	"border": BORDER,
 	"borderRadius": "var(--brand-radius,12px)",
 	"fontFamily": "inherit",
-	"color": GRAY_900,
+	"color": INK,
 	"cursor": "pointer",
-	"hover:borderColor": GRAY_500,
+	"hover:borderColor": BORDER_STRONG,
 }
 TILE_ICON_STYLES = {
 	**ROW_FLEX,
@@ -1342,8 +1756,8 @@ TILE_ICON_STYLES = {
 	"height": "40px",
 	"flexShrink": "0",
 	"borderRadius": "10px",
-	"background": GRAY_100,
-	"color": GRAY_700,
+	"background": SURFACE_HOVER,
+	"color": INK_MUTED,
 }
 TILE_BODY_STYLES = {
 	**COLUMN,
@@ -1352,9 +1766,9 @@ TILE_BODY_STYLES = {
 	"minWidth": "0",
 	"alignItems": "flex-start",
 }
-TILE_LABEL_STYLES = {"fontSize": "15px", "fontWeight": "600", "color": GRAY_950}
-TILE_NOTE_STYLES = {"fontSize": "13px", "color": GRAY_600, "lineHeight": "1.45"}
-TILE_META_STYLES = {**ROW_FLEX, "gap": "6px", "flexWrap": "wrap", "fontSize": "12px", "color": GRAY_600}
+TILE_LABEL_STYLES = {"fontSize": "var(--portal-text-md,15px)", "fontWeight": "600", "color": INK}
+TILE_NOTE_STYLES = {"fontSize": "var(--portal-text-sm,13px)", "color": INK_SUBTLE, "lineHeight": "1.45"}
+TILE_META_STYLES = {**ROW_FLEX, "gap": "6px", "flexWrap": "wrap", "fontSize": "var(--portal-text-xs,11px)", "color": INK_SUBTLE}
 TILE_RADIO_STYLES = {
 	**ROW_FLEX,
 	"justifyContent": "center",
@@ -1362,9 +1776,9 @@ TILE_RADIO_STYLES = {
 	"height": "20px",
 	"flexShrink": "0",
 	"borderRadius": "999px",
-	"border": f"1px solid {GRAY_500}",
-	"background": WHITE,
-	"color": WHITE,
+	"border": f"1px solid {BORDER_STRONG}",
+	"background": SURFACE_CARD,
+	"color": "var(--brand-primary-ink,#ffffff)",
 }
 
 
@@ -1425,12 +1839,12 @@ def product_tiles(key, name):
 			bound(
 				"span",
 				"rate",
-				styles={**TABULAR, "fontSize": "14px", "fontWeight": "600", "color": GRAY_950},
+				styles={**TABULAR, "fontSize": "var(--portal-text-md,15px)", "fontWeight": "600", "color": INK},
 			),
 			bound("span", "rate_note"),
 		],
 	)
-	strong = {"fontWeight": "500", "color": GRAY_700}
+	strong = {"fontWeight": "500", "color": INK_MUTED}
 	ceiling = block(
 		"span",
 		styles=TILE_META_STYLES,
@@ -1472,12 +1886,12 @@ CODE_BOX_STYLES = {
 	"height": "50px",
 	"textAlign": "center",
 	"fontFamily": "inherit",
-	"fontSize": "19px",
+	"fontSize": "var(--portal-text-lg,18px)",
 	"fontWeight": "600",
 	"borderRadius": "var(--brand-radius,8px)",
 	"border": BORDER,
-	"background": WHITE,
-	"color": GRAY_950,
+	"background": SURFACE_CARD,
+	"color": INK,
 	"boxSizing": "border-box",
 }
 
@@ -1516,31 +1930,31 @@ def code_boxes(count=6):
 OFFER_STYLES = {
 	**COLUMN,
 	"gap": "0",
-	"border": f"1px solid {GREEN_700}",
+	"border": f"1px solid {OK_DEEP}",
 	"borderRadius": "var(--brand-radius,12px)",
 	"overflow": "hidden",
-	"background": WHITE,
+	"background": SURFACE_CARD,
 }
-OFFER_HEAD_STYLES = {**COLUMN, "gap": "3px", "padding": "18px 20px", "background": GREEN_100}
-OFFER_HEADLINE_STYLES = {"fontSize": "17px", "fontWeight": "600", "color": GREEN_700}
-OFFER_MESSAGE_STYLES = {"fontSize": "13px", "color": GRAY_700, "lineHeight": "1.5"}
+OFFER_HEAD_STYLES = {**COLUMN, "gap": "3px", "padding": "18px 20px", "background": OK_SOFT}
+OFFER_HEADLINE_STYLES = {"fontSize": "var(--portal-text-lg,18px)", "fontWeight": "600", "color": OK_DEEP}
+OFFER_MESSAGE_STYLES = {"fontSize": "var(--portal-text-sm,13px)", "color": INK_MUTED, "lineHeight": "1.5"}
 OFFER_GRID_STYLES = {
 	"display": "grid",
 	"gridTemplateColumns": "repeat(3, minmax(0, 1fr))",
-	"borderTop": f"1px solid {GREEN_100}",
+	"borderTop": f"1px solid {OK_SOFT}",
 }
 OFFER_CELL_STYLES = {**COLUMN, "gap": "4px", "padding": "16px 20px"}
-OFFER_LABEL_STYLES = {"fontSize": "12px", "color": GRAY_600}
-OFFER_VALUE_STYLES = {**TABULAR, "fontSize": "20px", "fontWeight": "600", "color": GRAY_950}
+OFFER_LABEL_STYLES = {"fontSize": "var(--portal-text-xs,11px)", "color": INK_SUBTLE}
+OFFER_VALUE_STYLES = {**TABULAR, "fontSize": "var(--portal-text-xl,24px)", "fontWeight": "600", "color": INK}
 OFFER_FOOT_STYLES = {
 	**ROW_FLEX,
 	"gap": "12px",
 	"flexWrap": "wrap",
 	"padding": "14px 20px",
 	"borderTop": BORDER,
-	"background": GRAY_50,
+	"background": SURFACE_SUNKEN,
 }
-REFERENCE_STYLES = {**TABULAR, "fontSize": "13px", "color": GRAY_700}
+REFERENCE_STYLES = {**TABULAR, "fontSize": "var(--portal-text-sm,13px)", "color": INK_MUTED}
 
 
 # --- the tracker timeline -----------------------------------------------------------
@@ -1555,13 +1969,14 @@ TIMELINE_DOT_STYLES = {
 	"height": "20px",
 	"marginTop": "10px",
 	"borderRadius": "999px",
+	# Not on the scale: this is a glyph inside a fixed circle, so it may not grow.
 	"fontSize": "10px",
 	"fontWeight": "700",
 }
-TIMELINE_STEM_STYLES = {"width": "1px", "flex": "1 1 auto", "minHeight": "18px", "background": GRAY_200}
+TIMELINE_STEM_STYLES = {"width": "1px", "flex": "1 1 auto", "minHeight": "18px", "background": BORDER_COLOR}
 TIMELINE_BODY_STYLES = {**COLUMN, "gap": "2px", "padding": "8px 0 14px"}
-TIMELINE_TITLE_STYLES = {"fontSize": "14px", "fontWeight": "500", "color": GRAY_950}
-TIMELINE_NOTE_STYLES = {"fontSize": "13px", "color": GRAY_600, "lineHeight": "1.5"}
+TIMELINE_TITLE_STYLES = {"fontSize": "var(--portal-text-md,15px)", "fontWeight": "500", "color": INK}
+TIMELINE_NOTE_STYLES = {"fontSize": "var(--portal-text-sm,13px)", "color": INK_SUBTLE, "lineHeight": "1.5"}
 
 
 def timeline_shell():
@@ -1747,18 +2162,56 @@ def choice_field(label, name, choices, required=False):
 	)
 
 
+def brand_lockup(word_styles, logo_styles=None, mark_styles=None, path=None):
+	"""What a frame puts in its corner: the lender's logo, or the lender's name.
+
+	Both are written into the page and one of them is dropped as it renders.
+	build() writes the blocks once, while the logo is a setting read per request, so
+	the choice cannot be made here; visibilityCondition is Builder's way of saying it
+	in the page instead. brand_logo is the URL and is falsy when none is set, and
+	show_wordmark is its negation, which the data layer has to supply because a
+	condition cannot be inverted.
+
+	`mark_styles` draws the generic glyph beside the name, for the bars that had one.
+	It goes with the name: a lender that has given us its logo does not want ours
+	next to it.
+	"""
+	image = block("img", styles=logo_styles or LOGO_STYLES, path=path and f"{path}/logo")
+	# The src is a customAttribute rather than an attribute because create_html_tag
+	# percent-encodes an img's src, which would turn the binding's own Jinja tag into
+	# escape sequences. customAttributes are written to the tag verbatim.
+	image["customAttributes"] = {"src": ""}
+	image["visibilityCondition"] = "brand_logo"
+	bind(image, "brand_logo", property="src", type="attribute")
+	bind(image, "brand_name", property="alt", type="attribute")
+
+	named = block(
+		"div",
+		path=path and f"{path}/name",
+		styles={**ROW_FLEX, "gap": "10px", "minWidth": "0"},
+		children=[
+			*(
+				[block("span", path=path and f"{path}/name/mark", styles=mark_styles, html=ICON_BRAND)]
+				if mark_styles
+				else []
+			),
+			bound("span", "brand_name", path=path and f"{path}/name/word", styles=word_styles),
+		],
+	)
+	named["visibilityCondition"] = "show_wordmark"
+
+	return [image, named]
+
+
 def topbar(links):
 	"""The brand, and the ways off this page.
 
 	The last link is the way back in, which is the only thing anybody arrives in this
 	bar looking for, so it is a pill rather than the third of three identical links.
 	"""
-	children = [
-		block("span", styles=MARK_STYLES, html=ICON_BRAND),
-		bound(
-			"span", "brand_name", styles={"fontSize": "14px", "fontWeight": "500", "color": BLACK}
-		),
-	]
+	children = brand_lockup(
+		{"fontSize": "var(--portal-text-md,15px)", "fontWeight": "500", "color": INK}, mark_styles=MARK_STYLES
+	)
 
 	if links:
 		*plain, (last_label, last_href) = links

@@ -1,0 +1,16 @@
+{
+ "creation": "2026-09-18 14:14:38.139102",
+ "dark_value": null,
+ "docstatus": 0,
+ "doctype": "Builder Token",
+ "group": null,
+ "idx": 0,
+ "is_standard": 0,
+ "modified": "2026-09-18 14:14:38.139102",
+ "modified_by": "Administrator",
+ "name": "portal-surface-card",
+ "owner": "Administrator",
+ "token_name": "portal-surface-card",
+ "type": "Color",
+ "value": "#ffffff"
+}

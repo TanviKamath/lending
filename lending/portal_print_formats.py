@@ -38,6 +38,10 @@ STYLE = """
 	.portal-doc .muted { color: #7c7c7c; }
 	.portal-doc .head { border-bottom: 2px solid #171717; padding-bottom: 10px; margin-bottom: 14px; }
 	.portal-doc .head td { vertical-align: bottom; }
+	/* The lender's own logo, at a height a letterhead can carry. get_pdf runs the
+	   HTML through scrub_urls, so the relative path an Attach Image field holds is
+	   absolute by the time wkhtmltopdf fetches it. */
+	.portal-doc .logo { height: 34px; max-width: 190px; }
 	.portal-doc .meta { margin-bottom: 16px; }
 	.portal-doc .meta td { padding: 2px 16px 2px 0; }
 	.portal-doc table.rows { width: 100%; border-collapse: collapse; }
@@ -69,7 +73,13 @@ HEAD = """
 <table class="head" width="100%">
 	<tr>
 		<td><h1>{{ title }}</h1><div class="muted">{{ subtitle }}</div></td>
-		<td align="right"><strong>{{ brand_name }}</strong></td>
+		<td align="right">
+			{%- if brand_logo -%}
+				<img class="logo" src="{{ brand_logo }}" alt="{{ brand_name }}">
+			{%- else -%}
+				<strong>{{ brand_name }}</strong>
+			{%- endif -%}
+		</td>
 	</tr>
 </table>
 
@@ -88,7 +98,8 @@ HEAD = """
 FOOT = """
 <div class="foot">
 	Generated on {{ generated_on }}. This document is issued electronically and is
-	valid without a signature. For any query please contact {{ brand_name }}.
+	valid without a signature. For any query please contact
+	{{ brand_name }}{% if support_email %} at {{ support_email }}{% endif %}.
 </div>
 """
 

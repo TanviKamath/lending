@@ -33,7 +33,14 @@ from frappe import _
 from frappe.rate_limiter import rate_limit
 from frappe.utils import cint, flt, getdate, today
 
-from lending.portal import brand_name, clean, long_date, money
+from lending.portal import (
+	assert_portal_enabled,
+	assert_public_apply_enabled,
+	brand_payload,
+	clean,
+	long_date,
+	money,
+)
 from lending.portal_accounts import customer_for_applicant, link_portal_user
 
 LEAD_SOURCE = "Portal"
@@ -95,16 +102,24 @@ MINIMUM_PASSWORD_LENGTH = 8
 
 @frappe.whitelist(allow_guest=True)
 def get_apply_page() -> dict:
-	"""Products a visitor can browse, plus every word the page shows."""
+	"""Products a visitor can browse, plus every word the page shows.
+
+	show_on_portal and not disabled. They answer different questions: disabled means
+	nobody may take this product, show_on_portal means nobody is told it exists. A
+	lender needs the second one on its own, for a staff-only product and for the test
+	records every bench carries.
+	"""
+	assert_public_apply_enabled()
+
 	products = frappe.get_all(
 		"Loan Product",
-		filters={"disabled": 0},
+		filters={"disabled": 0, "show_on_portal": 1},
 		fields=["name", "rate_of_interest", "maximum_loan_amount", "is_term_loan"],
 		order_by="rate_of_interest asc, name asc",
 	)
 
 	return {
-		"brand_name": brand_name(),
+		**brand_payload(),
 		"heading": _("A loan that fits, without the paperwork"),
 		"intro": _(
 			"Tell us what you need and see an indicative offer in about two minutes. "
@@ -176,8 +191,10 @@ def get_track_page() -> dict:
 	A data script runs under safe_exec, where _() is unavailable, so even a page whose
 	content is entirely static reads its wording from here to stay translatable.
 	"""
+	assert_portal_enabled()
+
 	return {
-		"brand_name": brand_name(),
+		**brand_payload(),
 		"heading": _("Where has my application got to?"),
 		"intro": _(
 			"Enter the reference number we gave you and the mobile number you applied with. "
@@ -229,6 +246,8 @@ def send_mobile_code() -> dict:
 	which is the flooding case. The telephony app caps how many codes one number may
 	receive, which is the harassment case. Neither alone is enough.
 	"""
+	assert_public_apply_enabled()
+
 	mobile = with_country_code(clean(frappe.form_dict.get("mobile_number")))
 
 	telephony_otp().send_otp(mobile, VERIFY_CHANNEL, purpose=VERIFY_PURPOSE)
@@ -245,6 +264,8 @@ def send_mobile_code() -> dict:
 @rate_limit(limit=10, seconds=60 * 60, ip_based=True)
 def confirm_mobile_code() -> dict:
 	"""Check the code and hand back the token step 3 requires."""
+	assert_public_apply_enabled()
+
 	mobile = with_country_code(clean(frappe.form_dict.get("mobile_number")))
 	code = clean(frappe.form_dict.get("otp"))
 
@@ -295,10 +316,14 @@ def verified_mobile(token: str) -> str:
 
 
 def read_product(name: str, amount: float) -> dict:
-	"""A Link field is a name, so it is checked against the table rather than trusted."""
+	"""A Link field is a name, so it is checked against the table rather than trusted.
+
+	The same filter as the list above. Filtering only the list would leave the hidden
+	products one guessed name away from being applied for.
+	"""
 	product = frappe.db.get_value(
 		"Loan Product",
-		{"name": name, "disabled": 0},
+		{"name": name, "disabled": 0, "show_on_portal": 1},
 		["name", "maximum_loan_amount"],
 		as_dict=True,
 	)
@@ -408,6 +433,8 @@ def submit_lead() -> dict:
 	Submitting is what runs the decision engine, so the indicative offer is read back
 	off the saved document rather than computed here. The portal owns no credit policy.
 	"""
+	assert_public_apply_enabled()
+
 	mobile = verified_mobile(clean(frappe.form_dict.get("token")))
 	data = read_submission()
 
@@ -547,6 +574,8 @@ def create_account() -> dict:
 	keeps that narrow is the token: it names one lead, it is spent on use, and every
 	value written comes off that lead rather than out of the request.
 	"""
+	assert_public_apply_enabled()
+
 	lead_name = lead_for_account(clean(frappe.form_dict.get("token")))
 
 	# Not run through clean(): stripping a password would change it silently, and
@@ -635,6 +664,8 @@ def create_account() -> dict:
 @rate_limit(limit=10, seconds=60 * 60, ip_based=True)
 def track_application() -> dict:
 	"""Status by reference number and mobile number, both of which must match."""
+	assert_portal_enabled()
+
 	reference = clean(frappe.form_dict.get("reference"))
 	mobile = clean(frappe.form_dict.get("mobile_number"))
 

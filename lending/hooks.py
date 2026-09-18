@@ -122,6 +122,15 @@ fixtures = [
 # before_install = "lending.install.before_install"
 after_install = "lending.install.after_install"
 
+# Migrating re-imports the portal's Builder Pages and Builder Tokens from
+# lending/builder_files/, and every exported record carries what this app ships rather
+# than what the lender chose: a page is published: 1, and a token holds the default
+# colour. Both of these put the lender's own answer back.
+after_migrate = [
+	"lending.loan_management.doctype.lending_settings.lending_settings.sync_portal_pages",
+	"lending.loan_management.doctype.lending_settings.lending_settings.apply_brand_tokens",
+]
+
 # Uninstallation
 # ------------
 
