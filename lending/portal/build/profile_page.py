@@ -4,11 +4,11 @@
 """Builds the borrower's Personal details page as a standard Builder page.
 
 Run once with:
-	bench --site <site> execute lending.portal_build.portal_profile_page.build
+	bench --site <site> execute lending.portal.build.profile_page.build
 
 Then stop running it. The page becomes UI-owned: Builder exports every save to
 lending/builder_files/, and re-running this discards whatever was laid out on the
-canvas. The frame comes from the shell component; see portal_shell.
+canvas. The frame comes from the shell component; see shell.
 
 The page reads first and edits second. Everything on record is listed, and one Edit
 button opens the form that corrects the parts section 6.3 of PORTAL_PLAN.md allows --
@@ -20,8 +20,8 @@ come to check what is on record far more often than to change it, and a page tha
 opens with nine empty boxes below the answer asks to be filled in.
 """
 
-from lending.portal_shell import build_page
-from lending.portal_theme import (
+from lending.portal.build.shell import build_page
+from lending.portal.build.theme import (
 	BTN_STYLES,
 	CARD_HEAD_STYLES,
 	CARD_STYLES,
@@ -54,7 +54,7 @@ NAV_HREF = "/borrower/profile"
 DATA_SCRIPT = '''
 # safe_exec blocks str.format and _(), and cannot import lending. So this script only
 # bridges: every value arrives already formatted and translated from the data layer.
-data.update(frappe.call("lending.portal_profile.get_profile_page"))  # noqa: F821
+data.update(frappe.call("lending.portal.profile.get_profile_page"))  # noqa: F821
 '''
 
 
@@ -64,7 +64,7 @@ def edit_form():
 		"form",
 		styles=CARD_STYLES,
 		attributes={
-			"data-endpoint": "lending.portal_profile.save_profile",
+			"data-endpoint": "lending.portal.profile.save_profile",
 			# The list above the form is now stale, so the page re-reads itself.
 			"data-reload": "1",
 			"data-revealed": EDIT_PANEL,

@@ -4,15 +4,15 @@
 """Builds the borrower's Applications list as a standard Builder page.
 
 Run once with:
-	bench --site <site> execute lending.portal_build.portal_applications_page.build
+	bench --site <site> execute lending.portal.build.applications_page.build
 
 Then stop running it. The page becomes UI-owned: Builder exports every save to
 lending/builder_files/, and re-running this discards whatever was laid out on the
-canvas. The frame comes from the shell component; see portal_shell.
+canvas. The frame comes from the shell component; see shell.
 """
 
-from lending.portal_shell import build_page
-from lending.portal_theme import (
+from lending.portal.build.shell import build_page
+from lending.portal.build.theme import (
 	AMOUNT_STYLES,
 	PRIMARY_TEXT_STYLES,
 	SECONDARY_TEXT_STYLES,
@@ -32,7 +32,7 @@ ACTION_HREF = "/apply"
 DATA_SCRIPT = '''
 # safe_exec blocks str.format and _(), and cannot import lending. So this script only
 # bridges: every value arrives already formatted and translated from the data layer.
-data.update(frappe.call("lending.portal_applications.get_applications_page"))  # noqa: F821
+data.update(frappe.call("lending.portal.applications.get_applications_page"))  # noqa: F821
 '''
 
 

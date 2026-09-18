@@ -4,7 +4,7 @@
 """Read-only data for the borrower portal.
 
 A Builder page data script runs inside safe_exec, so it cannot import this module.
-It reaches these functions with frappe.call("lending.portal.<name>") -- the same door
+It reaches these functions with frappe.call("lending.portal.core.<name>") -- the same door
 the Loan Lead server scripts in install.py use.
 
 Every function resolves the borrower's own Customer records first and filters on them.
@@ -277,7 +277,7 @@ def brand_payload() -> dict:
 	The pages are written once by the build scripts and these values are read per
 	request, so the page cannot be built knowing whether a logo exists. It carries
 	both the image and the name, and drops one of them as it renders -- see
-	portal_theme.brand_lockup. show_wordmark is the negation of brand_logo, spelt out
+	build.theme.brand_lockup. show_wordmark is the negation of brand_logo, spelt out
 	here because a Builder visibility condition tests a key and cannot invert it.
 	"""
 	settings = portal_settings("portal_brand_name", "portal_logo", "portal_support_email")

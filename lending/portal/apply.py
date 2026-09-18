@@ -33,7 +33,8 @@ from frappe import _
 from frappe.rate_limiter import rate_limit
 from frappe.utils import cint, flt, getdate, today
 
-from lending.portal import (
+from lending.portal.accounts import customer_for_applicant, link_portal_user
+from lending.portal.core import (
 	assert_portal_enabled,
 	assert_public_apply_enabled,
 	brand_payload,
@@ -41,7 +42,6 @@ from lending.portal import (
 	long_date,
 	money,
 )
-from lending.portal_accounts import customer_for_applicant, link_portal_user
 
 LEAD_SOURCE = "Portal"
 

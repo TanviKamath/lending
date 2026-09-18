@@ -9,11 +9,11 @@ from frappe.utils import cint
 # so the scripts themselves say which Builder Pages belong to the portal. A hand-kept
 # list of routes would have to be edited whenever a page is added, and the page that
 # got missed would be the one still reachable with the portal switched off.
-PORTAL_SCRIPT_MARKER = "lending.portal"
+PORTAL_SCRIPT_MARKER = "lending.portal."
 
 # The one page the public-apply switch governs on its own. Everything else, including
 # the tracker, follows the portal switch.
-APPLY_PAGE_MARKER = "lending.portal_apply.get_apply_page"
+APPLY_PAGE_MARKER = "lending.portal.apply.get_apply_page"
 
 # Saving these is what restyles the portal. The rest of the Borrower Portal section is
 # read per request, so only these need anything written when the form is saved.
@@ -50,33 +50,12 @@ class LendingSettings(Document):
 
 
 def apply_brand_tokens():
-	"""Push the lender's colours into the Builder Tokens the pages read.
-
-	The portal is styled through custom properties that Builder serves to the canvas
-	and to the published page alike, so writing the tokens is what makes one desk form
-	restyle every page at once. A colour left blank is not written, and the value the
-	app ships with stands.
-	"""
-	from lending.portal_theme import upsert_tokens
+	from lending.portal.build.theme import upsert_tokens
 
 	upsert_tokens()
 
 
 def sync_portal_pages():
-	"""Publish or unpublish the portal's Builder Pages to match the two switches.
-
-	The data layer refuses on its own -- see lending.portal.assert_portal_enabled -- and
-	that refusal is what protects the whitelisted endpoints, which have no route to take
-	away. It is not enough for the pages themselves. A PageDoesNotExistError raised while
-	a page renders comes back as the 404 page with a 200 status, because
-	website/serve.py builds its NotFoundPage with the status code it was called with
-	rather than with 404. Only a route that fails to resolve gives a real 404, and
-	Builder resolves a route by looking for a published page.
-
-	So the switch takes the page out of the route table. A lender who switched the portal
-	off gets a portal that is absent, not one that answers every request with a cheerful
-	200 and an apology.
-	"""
 	portal_on = cint(frappe.db.get_single_value("Lending Settings", "enable_borrower_portal"))
 	apply_on = portal_on and cint(
 		frappe.db.get_single_value("Lending Settings", "enable_public_apply")
@@ -105,12 +84,6 @@ def sync_portal_pages():
 
 
 def clear_portal_route_cache():
-	"""Drop the caches Builder reads a route through.
-
-	Both are Builder's own, and both are keyed on published, so a page that has just been
-	unpublished keeps resolving until they are cleared. Builder does this for itself in
-	Builder Page.on_update, which db_set does not run.
-	"""
 	from builder.builder.doctype.builder_page.builder_page import (
 		find_page_with_path,
 		get_web_pages_with_dynamic_routes,

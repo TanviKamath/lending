@@ -4,23 +4,23 @@
 """Builds the borrower Account overview as a standard Builder page.
 
 Run once with:
-	bench --site <site> execute lending.portal_build.portal_page.build
+	bench --site <site> execute lending.portal.build.overview_page.build
 
 Then stop running it. After that run the page is UI-owned: Builder exports every save
 to lending/builder_files/, so the exported JSON becomes the source of truth and
 re-running this script would discard whatever was laid out on the canvas.
 
 The frame -- rail, sidebar, page head, footer -- is not here. It lives once in the
-Builder Component built by portal_shell, and this page references it, so a nav link
+Builder Component built by shell, and this page references it, so a nav link
 fixed on the canvas is fixed for every portal page at once. What follows is only the
 content that sits in the frame's middle.
 
-Styling and block helpers come from portal_theme; see its docstring for why every
+Styling and block helpers come from theme; see its docstring for why every
 rule sits on its own block rather than in a stylesheet.
 """
 
-from lending.portal_shell import build_page
-from lending.portal_theme import (
+from lending.portal.build.shell import build_page
+from lending.portal.build.theme import (
 	AMOUNT_STYLES,
 	CARD_HEAD_STYLES,
 	CARD_STYLES,
@@ -69,7 +69,7 @@ DATA_SCRIPT = '''
 # safe_exec blocks str.format and _(), and cannot import lending. So this script only
 # bridges: every value arrives already formatted and translated from the data layer,
 # reached through the whitelisted door the Loan Lead server scripts use.
-data.update(frappe.call("lending.portal.get_dashboard"))  # noqa: F821
+data.update(frappe.call("lending.portal.core.get_dashboard"))  # noqa: F821
 '''
 
 

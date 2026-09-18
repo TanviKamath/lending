@@ -23,8 +23,8 @@ import json
 
 import frappe
 
-from lending.portal_script import CLIENT_SCRIPT, SCRIPT_NAME
-from lending.portal_theme import (
+from lending.portal.build.script import CLIENT_SCRIPT, SCRIPT_NAME
+from lending.portal.build.theme import (
 	AVATAR_STYLES,
 	BODY_STYLES,
 	BTN_STYLES,

@@ -20,7 +20,7 @@ import frappe
 from frappe import _
 from frappe.utils import flt, getdate, nowdate
 
-from lending.portal import (
+from lending.portal.core import (
 	get_loans,
 	get_portal_customers,
 	long_date,
@@ -113,7 +113,7 @@ def download_url(method: str, **params) -> str:
 	"""
 	query = urlencode({key: value for key, value in params.items() if value})
 
-	return f"/api/method/lending.portal_print.{method}" + (f"?{query}" if query else "")
+	return f"/api/method/lending.portal.downloads.{method}" + (f"?{query}" if query else "")
 
 
 @frappe.whitelist()

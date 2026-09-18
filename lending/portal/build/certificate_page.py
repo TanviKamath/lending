@@ -4,15 +4,15 @@
 """Builds the borrower's Interest certificate page as a standard Builder page.
 
 Run once with:
-	bench --site <site> execute lending.portal_build.portal_certificate_page.build
+	bench --site <site> execute lending.portal.build.certificate_page.build
 
 Then stop running it. The page becomes UI-owned: Builder exports every save to
 lending/builder_files/, and re-running this discards whatever was laid out on the
-canvas. The frame comes from the shell component; see portal_shell.
+canvas. The frame comes from the shell component; see shell.
 """
 
-from lending.portal_shell import build_page
-from lending.portal_theme import card, download_link, note_panel, pair_rows
+from lending.portal.build.shell import build_page
+from lending.portal.build.theme import card, download_link, note_panel, pair_rows
 
 PAGE_NAME = "Borrower Interest Certificate"
 ROUTE = "borrower/certificate"
@@ -20,7 +20,7 @@ NAV_HREF = "/borrower/certificate"
 DATA_SCRIPT = '''
 # safe_exec blocks str.format and _(), and cannot import lending. So this script only
 # bridges: every value arrives already formatted and translated from the data layer.
-data.update(frappe.call("lending.portal_statement.get_certificate_page"))  # noqa: F821
+data.update(frappe.call("lending.portal.statement.get_certificate_page"))  # noqa: F821
 '''
 
 
@@ -40,6 +40,6 @@ def build():
 		"Interest certificate",
 		NAV_HREF,
 		content(),
-		action_href="/api/method/lending.portal_print.download_certificate",
+		action_href="/api/method/lending.portal.downloads.download_certificate",
 		data_script=DATA_SCRIPT,
 	)

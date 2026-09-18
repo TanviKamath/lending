@@ -76,7 +76,7 @@
 	// --- filling the two result shells ---------------------------------------------
 	//
 	// Both are rendered by the page and cloned from here, so every style stays in
-	// portal_theme and this function only ever sets text.
+	// theme and this function only ever sets text.
 
 	function fillOffer(card, payload) {
 		if (!card) return;
@@ -439,7 +439,7 @@
 			body.append("mobile_number", mobile.value.trim());
 
 			busy(button, true, "Sending…");
-			post("lending.portal_apply.send_mobile_code", body)
+			post("lending.portal.apply.send_mobile_code", body)
 				.then(function (outcome) {
 					if (!outcome.ok || !outcome.data.message) return fail(verifyError, reason(outcome.data));
 					showCodeSection();
@@ -465,7 +465,7 @@
 			body.append("otp", code);
 
 			busy(button, true, "Checking…");
-			post("lending.portal_apply.confirm_mobile_code", body)
+			post("lending.portal.apply.confirm_mobile_code", body)
 				.then(function (outcome) {
 					if (!outcome.ok || !outcome.data.message) return fail(verifyError, reason(outcome.data));
 
@@ -516,7 +516,7 @@
 			read.body.append("token", token);
 
 			busy(button, true, "Working it out…");
-			post("lending.portal_apply.submit_lead", read.body)
+			post("lending.portal.apply.submit_lead", read.body)
 				.then(function (outcome) {
 					if (!outcome.ok || !outcome.data.message) return fail(detailsError, reason(outcome.data));
 					// The token is spent server-side, so a second submit cannot succeed.
@@ -556,7 +556,7 @@
 			read.body.append("token", accountToken);
 
 			busy(button, true, "Creating…");
-			post("lending.portal_apply.create_account", read.body)
+			post("lending.portal.apply.create_account", read.body)
 				.then(function (outcome) {
 					if (!outcome.ok || !outcome.data.message) return fail(accountError, reason(outcome.data));
 					// Spent server-side, so a second click cannot open a second account.

@@ -4,7 +4,7 @@
 """Builds the two public portal pages: /apply and /track.
 
 Run once with:
-	bench --site <site> execute lending.portal_build.portal_public_pages.build
+	bench --site <site> execute lending.portal.build.public_pages.build
 
 Then stop running it. Both pages become UI-owned: Builder exports every save to
 lending/builder_files/, and re-running this discards whatever was laid out on the
@@ -26,11 +26,11 @@ answers given on the tile screens land in hidden inputs on the details panel, so
 form that posts still posts one flat set of fields and the endpoints are unchanged.
 
 Both pages post to whitelisted guest endpoints through the shared client script in
-portal_script, which every portal page that takes input uses.
+script, which every portal page that takes input uses.
 """
 
-from lending.portal_shell import build_page
-from lending.portal_theme import (
+from lending.portal.build.shell import build_page
+from lending.portal.build.theme import (
 	CHEVRON_LEFT,
 	CHEVRON_RIGHT,
 	ERROR_STYLES,
@@ -112,12 +112,12 @@ APPLY_STEPS = (
 APPLY_DATA_SCRIPT = '''
 # safe_exec blocks str.format and _(), and cannot import lending. So this script only
 # bridges: the product list and its copy arrive formatted from the data layer.
-data.update(frappe.call("lending.portal_apply.get_apply_page"))  # noqa: F821
+data.update(frappe.call("lending.portal.apply.get_apply_page"))  # noqa: F821
 '''
 
 TRACK_DATA_SCRIPT = '''
 # safe_exec blocks _(), so even this page's static wording comes from the data layer.
-data.update(frappe.call("lending.portal_apply.get_track_page"))  # noqa: F821
+data.update(frappe.call("lending.portal.apply.get_track_page"))  # noqa: F821
 '''
 
 
@@ -444,7 +444,7 @@ def track_content():
 	form = block(
 		"form",
 		styles=PANEL_STYLES,
-		attributes={"data-endpoint": "lending.portal_apply.track_application"},
+		attributes={"data-endpoint": "lending.portal.apply.track_application"},
 		children=[
 			block(
 				"div",

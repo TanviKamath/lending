@@ -17,7 +17,7 @@ nothing else from the request.
 import frappe
 from frappe import _
 
-from lending.portal import clean, get_loans, get_portal_customers, shell_payload
+from lending.portal.core import clean, get_loans, get_portal_customers, shell_payload
 
 CUSTOMER_FIELDS = (
 	"name",

@@ -409,7 +409,7 @@
             },
             {
              "attributes": {
-              "href": "/api/method/lending.portal_print.download_statement"
+              "href": "/api/method/lending.portal.downloads.download_statement"
              },
              "baseStyles": {},
              "blockId": "7c9b896dc",
@@ -1060,11 +1060,11 @@
  "idx": 0,
  "is_standard": 1,
  "is_template": 0,
- "modified": "2026-09-18 14:41:50.493454",
+ "modified": "2026-09-18 15:43:48.053630",
  "modified_by": "Administrator",
  "name": "page-3a4ae060",
  "owner": "Administrator",
- "page_data_script": "\n# safe_exec blocks str.format and _(), and cannot import lending. So this script only\n# bridges: every value arrives already formatted and translated from the data layer.\ndata.update(frappe.call(\"lending.portal_statement.get_statement_page\"))  # noqa: F821\n",
+ "page_data_script": "\n# safe_exec blocks str.format and _(), and cannot import lending. So this script only\n# bridges: every value arrives already formatted and translated from the data layer.\ndata.update(frappe.call(\"lending.portal.statement.get_statement_page\"))  # noqa: F821\n",
  "page_name": "page-3a4ae060",
  "page_title": "Statement of account",
  "preview": "/assets/builder/images/fallback.png",

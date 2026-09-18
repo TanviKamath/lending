@@ -719,7 +719,7 @@
           },
           {
            "attributes": {
-            "data-endpoint": "lending.portal_profile.save_profile",
+            "data-endpoint": "lending.portal.profile.save_profile",
             "data-reload": "1",
             "data-revealed": "profile-edit",
             "hidden": "hidden"
@@ -2041,11 +2041,11 @@
  "idx": 0,
  "is_standard": 1,
  "is_template": 0,
- "modified": "2026-09-18 14:41:50.236762",
+ "modified": "2026-09-18 15:43:48.051656",
  "modified_by": "Administrator",
  "name": "page-eb9708aa",
  "owner": "Administrator",
- "page_data_script": "\n# safe_exec blocks str.format and _(), and cannot import lending. So this script only\n# bridges: every value arrives already formatted and translated from the data layer.\ndata.update(frappe.call(\"lending.portal_profile.get_profile_page\"))  # noqa: F821\n",
+ "page_data_script": "\n# safe_exec blocks str.format and _(), and cannot import lending. So this script only\n# bridges: every value arrives already formatted and translated from the data layer.\ndata.update(frappe.call(\"lending.portal.profile.get_profile_page\"))  # noqa: F821\n",
  "page_name": "page-eb9708aa",
  "page_title": "Personal details",
  "preview": "/assets/builder/images/fallback.png",

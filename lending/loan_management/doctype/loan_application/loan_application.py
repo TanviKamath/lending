@@ -22,7 +22,7 @@ from lending.loan_management.doctype.loan_repayment_schedule.loan_repayment_sche
 from lending.loan_management.doctype.loan_security_price.loan_security_price import (
 	get_loan_security_price,
 )
-from lending.portal_accounts import customer_for_email, link_portal_user
+from lending.portal.accounts import customer_for_email, link_portal_user
 
 
 class LoanApplication(Document):

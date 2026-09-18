@@ -4,11 +4,11 @@
 """Builds one borrower's application detail page as a standard Builder page.
 
 Run once with:
-	bench --site <site> execute lending.portal_build.portal_application_page.build
+	bench --site <site> execute lending.portal.build.application_page.build
 
 Then stop running it. The page becomes UI-owned: Builder exports every save to
 lending/builder_files/, and re-running this discards whatever was laid out on the
-canvas. The frame comes from the shell component; see portal_shell.
+canvas. The frame comes from the shell component; see shell.
 
 The route carries the application name. Builder marks a route dynamic when it holds
 "<", frappe's router matches it with werkzeug and drops the match into
@@ -19,8 +19,8 @@ The tracker leads, because "where has my application got to" is the question tha
 brings a borrower here. Everything below it answers "and what did I ask for".
 """
 
-from lending.portal_shell import build_page
-from lending.portal_theme import (
+from lending.portal.build.shell import build_page
+from lending.portal.build.theme import (
 	AVATAR_STYLES,
 	CARD_HEAD_STYLES,
 	CARD_STYLES,
@@ -49,7 +49,7 @@ DATA_SCRIPT = '''
 # safe_exec blocks str.format and _(), and cannot import lending. So this script only
 # bridges. The application name is not passed from here: get_application_detail reads
 # it from frappe.form_dict server-side and proves ownership before reading further.
-data.update(frappe.call("lending.portal_applications.get_application_detail"))  # noqa: F821
+data.update(frappe.call("lending.portal.applications.get_application_detail"))  # noqa: F821
 '''
 
 

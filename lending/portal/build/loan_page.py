@@ -4,11 +4,11 @@
 """Builds one borrower's loan detail page as a standard Builder page.
 
 Run once with:
-	bench --site <site> execute lending.portal_build.portal_loan_page.build
+	bench --site <site> execute lending.portal.build.loan_page.build
 
 Then stop running it. The page becomes UI-owned: Builder exports every save to
 lending/builder_files/, and re-running this discards whatever was laid out on the
-canvas. The frame comes from the shell component; see portal_shell.
+canvas. The frame comes from the shell component; see shell.
 
 The route carries the loan name. Builder marks a route dynamic when it holds "<",
 frappe's router matches it with werkzeug and drops the match into frappe.form_dict,
@@ -20,8 +20,8 @@ charges, plus the payoff figure from 6.11. No days past due, no NPA flag, no
 classification: a borrower sees an overdue instalment, not a risk grade.
 """
 
-from lending.portal_shell import build_page
-from lending.portal_theme import (
+from lending.portal.build.shell import build_page
+from lending.portal.build.theme import (
 	AMOUNT_STYLES,
 	BTN_STYLES,
 	CARD_HEAD_STYLES,
@@ -61,7 +61,7 @@ DATA_SCRIPT = '''
 # safe_exec blocks str.format and _(), and cannot import lending. So this script only
 # bridges. The loan name is not passed from here: get_loan_detail reads it from
 # frappe.form_dict server-side and proves the borrower owns it before reading further.
-data.update(frappe.call("lending.portal_loans.get_loan_detail"))  # noqa: F821
+data.update(frappe.call("lending.portal.loans.get_loan_detail"))  # noqa: F821
 '''
 
 

@@ -3,13 +3,13 @@
 
 """The borrower's two downloads: a statement of account, and an interest certificate.
 
-Both reuse the page endpoints in portal_statement rather than querying again. That
+Both reuse the page endpoints in statement rather than querying again. That
 matters for more than tidiness: those functions scope every figure to the borrower's
 own loans, so reusing them means the PDF cannot show a row the page would not, and
 there is only one ownership check to keep correct.
 
 The layout comes from a Print Format record, per PORTAL_PLAN.md section 6.10 -- see
-portal_print_formats for why a Print Format is used for something that is not a
+build.print_formats for why a Print Format is used for something that is not a
 document. This module supplies the numbers and turns the rendered HTML into a PDF.
 
 Both endpoints answer with a file rather than JSON, so they are reached by a plain
@@ -23,9 +23,9 @@ from frappe import _
 from frappe.utils import nowdate
 from frappe.utils.pdf import get_pdf
 
-from lending.portal import long_date
-from lending.portal_print_formats import CERTIFICATE_FORMAT, STATEMENT_FORMAT
-from lending.portal_statement import get_certificate_page, get_statement_page
+from lending.portal.build.print_formats import CERTIFICATE_FORMAT, STATEMENT_FORMAT
+from lending.portal.core import long_date
+from lending.portal.statement import get_certificate_page, get_statement_page
 
 # A filename reaches the browser in a header, so it carries nothing that needs quoting.
 UNSAFE_IN_FILENAME = re.compile(r"[^A-Za-z0-9._-]+")

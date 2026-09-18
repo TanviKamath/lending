@@ -32,28 +32,18 @@ from unittest.mock import patch
 import frappe
 from frappe.utils import add_years, nowdate
 
-from lending import portal_theme
 from lending.loan_management.doctype.lending_settings.lending_settings import (
 	PORTAL_SCRIPT_MARKER,
 	sync_portal_pages,
 )
-from lending.portal import (
-	DEFAULT_BRAND_NAME,
-	assert_owns,
-	brand_name,
-	brand_payload,
-	get_portal_customers,
-	leads_for_login,
-	shell_payload,
-)
-from lending.portal_accounts import customer_for_email
-from lending.portal_applications import (
+from lending.portal.accounts import customer_for_email
+from lending.portal.applications import (
 	get_application_detail,
 	get_applications_page,
 	get_document_choices,
 	upload_document,
 )
-from lending.portal_apply import (
+from lending.portal.apply import (
 	confirm_mobile_code,
 	create_account,
 	get_apply_page,
@@ -63,10 +53,9 @@ from lending.portal_apply import (
 	submit_lead,
 	track_application,
 )
-from lending.portal_loans import get_loan_detail, get_loans_page
-from lending.portal_profile import get_profile_page, save_profile
-from lending.portal_shell import tree
-from lending.portal_theme import (
+from lending.portal.build import theme
+from lending.portal.build.shell import tree
+from lending.portal.build.theme import (
 	NEUTRALS,
 	PORTAL_TOKENS,
 	SCALE_TOKENS,
@@ -85,6 +74,17 @@ from lending.portal_theme import (
 	to_hsl,
 	upsert_tokens,
 )
+from lending.portal.core import (
+	DEFAULT_BRAND_NAME,
+	assert_owns,
+	brand_name,
+	brand_payload,
+	get_portal_customers,
+	leads_for_login,
+	shell_payload,
+)
+from lending.portal.loans import get_loan_detail, get_loans_page
+from lending.portal.profile import get_profile_page, save_profile
 from lending.tests.test_utils import (
 	create_loan,
 	create_loan_accounts,
@@ -176,8 +176,8 @@ def token_value(token_name: str) -> str:
 
 
 def theme_source() -> str:
-	"""portal_theme.py as text, for the two tests that read the styles rather than run them."""
-	return Path(inspect.getsourcefile(portal_theme)).read_text()
+	"""theme.py as text, for the two tests that read the styles rather than run them."""
+	return Path(inspect.getsourcefile(theme)).read_text()
 
 
 def contrast(one: str, other: str) -> float:
@@ -442,7 +442,7 @@ class TestPortalGuestEndpoints(LendingTestSuite):
 	def mint_token(self, mobile=MOBILE):
 		"""Walk step 2 with the SMS provider stubbed, and keep the token it returns."""
 		frappe.local.form_dict = frappe._dict({"mobile_number": mobile, "otp": "123456"})
-		with patch("lending.portal_apply.telephony_otp") as telephony:
+		with patch("lending.portal.apply.telephony_otp") as telephony:
 			telephony.return_value.verify_otp.return_value = {"verified": True}
 			result = confirm_mobile_code()
 
@@ -460,7 +460,7 @@ class TestPortalGuestEndpoints(LendingTestSuite):
 
 	def test_a_code_is_sent_to_the_number_given(self):
 		frappe.local.form_dict = frappe._dict({"mobile_number": MOBILE})
-		with patch("lending.portal_apply.telephony_otp") as telephony:
+		with patch("lending.portal.apply.telephony_otp") as telephony:
 			result = send_mobile_code()
 			telephony.return_value.send_otp.assert_called_once()
 
@@ -477,7 +477,7 @@ class TestPortalGuestEndpoints(LendingTestSuite):
 
 	def test_a_wrong_code_hands_back_no_token(self):
 		frappe.local.form_dict = frappe._dict({"mobile_number": MOBILE, "otp": "000000"})
-		with patch("lending.portal_apply.telephony_otp") as telephony:
+		with patch("lending.portal.apply.telephony_otp") as telephony:
 			telephony.return_value.verify_otp.return_value = {"verified": False}
 			result = confirm_mobile_code()
 
@@ -852,7 +852,7 @@ class TestPortalSignUp(LendingTestSuite):
 	def apply_as(self, email, mobile, **overrides):
 		"""Walk steps 2 and 3 with the SMS provider stubbed, and return the offer."""
 		frappe.local.form_dict = frappe._dict({"mobile_number": mobile, "otp": "123456"})
-		with patch("lending.portal_apply.telephony_otp") as telephony:
+		with patch("lending.portal.apply.telephony_otp") as telephony:
 			telephony.return_value.verify_otp.return_value = {"verified": True}
 			token = confirm_mobile_code()["token"]
 
@@ -1290,7 +1290,7 @@ class TestPortalBranding(LendingTestSuite):
 class TestPortalScale(LendingTestSuite):
 	"""Stage 1 of PORTAL_DESIGN_PLAN.md: the size scale.
 
-	The point of the stage is that no size in portal_theme.py is a number any more, so
+	The point of the stage is that no size in theme.py is a number any more, so
 	there is one place to change them all. The source tests at the end are what hold
 	that open.
 	"""

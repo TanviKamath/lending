@@ -17,7 +17,7 @@ import frappe
 from frappe import _
 from frappe.utils import flt, nowdate
 
-from lending.portal import (
+from lending.portal.core import (
 	STATUS_LABELS,
 	assert_owns,
 	build_summary,

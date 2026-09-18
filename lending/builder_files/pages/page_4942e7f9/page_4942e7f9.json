@@ -409,7 +409,7 @@
             },
             {
              "attributes": {
-              "href": "/api/method/lending.portal_print.download_certificate"
+              "href": "/api/method/lending.portal.downloads.download_certificate"
              },
              "baseStyles": {},
              "blockId": "7c9b896dc",
@@ -1085,11 +1085,11 @@
  "idx": 0,
  "is_standard": 1,
  "is_template": 0,
- "modified": "2026-09-18 14:41:50.599585",
+ "modified": "2026-09-18 15:43:48.054537",
  "modified_by": "Administrator",
  "name": "page-4942e7f9",
  "owner": "Administrator",
- "page_data_script": "\n# safe_exec blocks str.format and _(), and cannot import lending. So this script only\n# bridges: every value arrives already formatted and translated from the data layer.\ndata.update(frappe.call(\"lending.portal_statement.get_certificate_page\"))  # noqa: F821\n",
+ "page_data_script": "\n# safe_exec blocks str.format and _(), and cannot import lending. So this script only\n# bridges: every value arrives already formatted and translated from the data layer.\ndata.update(frappe.call(\"lending.portal.statement.get_certificate_page\"))  # noqa: F821\n",
  "page_name": "page-4942e7f9",
  "page_title": "Interest certificate",
  "preview": "/assets/builder/images/fallback.png",

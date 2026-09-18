@@ -58,8 +58,8 @@ BRAND_TOKENS = [
 #
 # The portal used to sit below even this: 13px was its commonest size, and 13px is a
 # desk tool, not a bank. A borrower opens this page a few times a year to read one
-# number, so nothing the borrower reads goes below 15px. See PORTAL_DESIGN_PLAN.md,
-# stage 1.
+# number, so the body size holds at 15px however tight the rest is drawn. See
+# PORTAL_DESIGN_PLAN.md, stage 1.
 SCALE_TOKENS = [
 	{"token_name": "portal-text-xs", "type": "Dimension", "value": "11px"},
 	{"token_name": "portal-text-sm", "type": "Dimension", "value": "13px"},
@@ -946,7 +946,7 @@ def brand_overrides() -> dict:
 	That is what makes the settings safe to add to a running site: a bank that has
 	filled nothing in gets the portal it had yesterday.
 	"""
-	from lending.portal import portal_settings
+	from lending.portal.core import portal_settings
 
 	settings = portal_settings("portal_brand_color", "portal_accent_color")
 	overrides = {}
@@ -985,7 +985,7 @@ def palette_overrides() -> dict:
 	stays as strong a border and the body text stays as readable as it was designed to
 	be. The states are left out on purpose: see SHIPPED.
 	"""
-	from lending.portal import portal_settings
+	from lending.portal.core import portal_settings
 
 	settings = portal_settings("portal_brand_color")
 	brand = channels(settings.portal_brand_color)

@@ -4,11 +4,11 @@
 """Builds the borrower's Documents page as a standard Builder page.
 
 Run once with:
-	bench --site <site> execute lending.portal_build.portal_documents_page.build
+	bench --site <site> execute lending.portal.build.documents_page.build
 
 Then stop running it. The page becomes UI-owned: Builder exports every save to
 lending/builder_files/, and re-running this discards whatever was laid out on the
-canvas. The frame comes from the shell component; see portal_shell.
+canvas. The frame comes from the shell component; see shell.
 
 The upload form only appears when there is a draft application to attach to. A
 submitted application is with our team, and section 6.2 of PORTAL_PLAN.md keeps the
@@ -20,8 +20,8 @@ tracker it is standing on and how many files it already holds, and opens the tra
 itself.
 """
 
-from lending.portal_shell import build_page
-from lending.portal_theme import (
+from lending.portal.build.shell import build_page
+from lending.portal.build.theme import (
 	AMOUNT_STYLES,
 	BTN_STYLES,
 	CARD_HEAD_STYLES,
@@ -52,8 +52,8 @@ NAV_HREF = "/borrower/documents"
 DATA_SCRIPT = '''
 # safe_exec blocks str.format and _(), and cannot import lending. So this script only
 # bridges: every value arrives already formatted and translated from the data layer.
-data.update(frappe.call("lending.portal_applications.get_documents_page"))  # noqa: F821
-data.update(frappe.call("lending.portal_applications.get_document_choices"))  # noqa: F821
+data.update(frappe.call("lending.portal.applications.get_documents_page"))  # noqa: F821
+data.update(frappe.call("lending.portal.applications.get_document_choices"))  # noqa: F821
 '''
 
 
@@ -62,7 +62,7 @@ def upload_form():
 		"form",
 		styles=CARD_STYLES,
 		attributes={
-			"data-endpoint": "lending.portal_applications.upload_document",
+			"data-endpoint": "lending.portal.applications.upload_document",
 			# A file input only reaches the server in a multipart body.
 			"data-upload": "1",
 			"data-reload": "1",

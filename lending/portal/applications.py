@@ -17,7 +17,7 @@ import frappe
 from frappe import _
 from frappe.utils import flt
 
-from lending.portal import (
+from lending.portal.core import (
 	APPLICATION_STAGES,
 	STATUS_LABELS,
 	assert_owns,
@@ -104,7 +104,7 @@ def get_enquiries() -> list[dict]:
 	account on the day they sign up. Each row carries the reference they were given,
 	because that is what the public tracker asks for.
 	"""
-	from lending.portal_apply import tracker_stage
+	from lending.portal.apply import tracker_stage
 
 	return [
 		{
@@ -154,7 +154,7 @@ def get_application_detail() -> dict:
 
 
 def stage_label(application: dict) -> str:
-	from lending.portal import application_stage
+	from lending.portal.core import application_stage
 
 	return application_stage(application, application.docstatus == 0, booked_loan(application.name))
 

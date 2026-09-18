@@ -4,17 +4,17 @@
 """The Print Formats behind the borrower's two downloads.
 
 Run once with:
-	bench --site <site> execute lending.portal_print_formats.build
+	bench --site <site> execute lending.portal.build.print_formats.build
 
 PORTAL_PLAN.md section 6.10 asks for the layout to live in a Print Format so that
 changing it stays a design job rather than a code job. These records hold the layout;
-lending/portal_print.py supplies the numbers and turns the result into a PDF.
+lending/portal/downloads.py supplies the numbers and turns the result into a PDF.
 
 One compromise is worth naming. A Print Format normally renders one document, and
 neither of these is a document: a statement is a report over a date range, and a
 certificate is a sum over many Loan Repayment rows. So `doc_type` is set to Loan
 because a Print Format record requires one, and the template reads the context that
-portal_print passes rather than a `doc`. Opening either from a Loan form would render
+downloads passes rather than a `doc`. Opening either from a Loan form would render
 an empty shell, which is why both are marked disabled -- they are reached only
 through the portal, never from the desk print menu.
 
@@ -188,7 +188,7 @@ def upsert(name: str, html: str) -> str:
 			"print_format_type": "Jinja",
 			"custom_format": 1,
 			"standard": "No",
-			# Kept out of the desk print menu: without the context portal_print
+			# Kept out of the desk print menu: without the context downloads
 			# passes, this template renders an empty page.
 			"disabled": 1,
 			"html": html,
