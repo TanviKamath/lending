@@ -324,9 +324,10 @@
 
 	// --- the two things the rail opens ---------------------------------------------
 	//
-	// Both are written into the shell hidden, and both have a page behind them: the
-	// rail's icons are real links, and these handlers only take the click when they
-	// are there to take it. Nothing below runs on a page that does not carry them.
+	// Both are written into the shell hidden. The magnifier is a real link to a page,
+	// so its handler takes the click only where the dialog is there to take it; the
+	// bell is a button with nothing behind it but its panel. Nothing below runs on a
+	// page that does not carry them.
 
 	// One row is in the markup; the rest are copies of it. Same trick as the offer
 	// grid above, and for the same reason -- every style stays in theme, and this

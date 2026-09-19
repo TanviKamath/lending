@@ -210,7 +210,7 @@ def nav():
 
 	aria-current is the row's own answer to which page it is on. The data script sets
 	it to "page" on one row, which both tells a screen reader where it is and is what
-	NAV_ACTIVE_CSS marks the row with.
+	SHELL_STATE_CSS marks the row with.
 	"""
 	row = block(
 		"a",

@@ -169,7 +169,6 @@ def nav_items() -> list[dict]:
 
 
 def shell_payload(crumb: str, action_label: str, customers: list[str], loans: list[dict]) -> dict:
-
 	return {
 		"as_on": long_date(nowdate()),
 		"nav_items": nav_items(),

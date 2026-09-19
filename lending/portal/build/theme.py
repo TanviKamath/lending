@@ -486,21 +486,14 @@ NAV_ITEM_STYLES = {
 	"hover:background": SURFACE_HOVER,
 	"hover:color": INK,
 }
-# The white card and its shadow are the whole of the active state, and it cannot live
-# on the block. The rows are one block repeated over the menu now, so there is no
-# separate block for the current page to carry different styles: the row says which
-# page it is on with aria-current, and this is what that looks like.
-#
-# It has to outrank two things Builder writes for that same row -- the class holding
-# its base styles, and that class's :hover rule -- which a tag and two attributes do.
-# Appended to the head after HEAD_HTML, where the rest of the portal's stylesheet is.
 
 # --- the two things the rail opens -------------------------------------------------
 #
 # The search dialog and the notifications panel belong to the frame rather than to any
 # page: they are written once into the shell component and the shared client script
-# brings them out. Both are built hidden, so where no script runs the rail's icons are
-# still plain links to /borrower/search and /borrower/notifications.
+# brings them out. Both are built hidden, so where no script runs the magnifier is
+# still a plain link to /borrower/search, and the bell, which has no page behind it,
+# does nothing at all.
 
 OVERLAY_STYLES = {
 	"position": "fixed",
