@@ -50,7 +50,6 @@ EDIT_PANEL = "profile-edit"
 
 PAGE_NAME = "Borrower Profile"
 ROUTE = "borrower/profile"
-NAV_HREF = "/borrower/profile"
 DATA_SCRIPT = '''
 # safe_exec blocks str.format and _(), and cannot import lending. So this script only
 # bridges: every value arrives already formatted and translated from the data layer.
@@ -143,7 +142,6 @@ def build():
 		PAGE_NAME,
 		ROUTE,
 		"Personal details",
-		NAV_HREF,
 		content(),
 		data_script=DATA_SCRIPT,
 	)

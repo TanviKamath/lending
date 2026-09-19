@@ -16,7 +16,6 @@ from lending.portal.build.theme import card, download_link, pair_rows
 
 PAGE_NAME = "Borrower Statement"
 ROUTE = "borrower/statement"
-NAV_HREF = "/borrower/statement"
 DATA_SCRIPT = '''
 # safe_exec blocks str.format and _(), and cannot import lending. So this script only
 # bridges: every value arrives already formatted and translated from the data layer.
@@ -37,7 +36,6 @@ def build():
 		PAGE_NAME,
 		ROUTE,
 		"Statement of account",
-		NAV_HREF,
 		content(),
 		# The header button has no access to the page's filters, so it downloads the
 		# default period. The link inside the page carries whatever is on screen.

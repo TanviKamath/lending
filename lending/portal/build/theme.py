@@ -443,7 +443,20 @@ SIDE_HEAD_STYLES = {
 }
 SIDE_BRAND_STYLES = {**ROW_FLEX, "gap": "8px", "minHeight": "24px", "padding": "6px 8px 0"}
 
-NAV_STYLES = {**COLUMN, "flex": "1 1 auto", "overflowY": "auto", "gap": "2px"}
+# overflow-y on its own makes the menu a scroll container on both axes -- the other
+# axis cannot stay visible next to it -- and a scroll container cuts at its padding
+# box. With no padding that box is the row itself, so the shadow the current row
+# carries was being sliced flat down both sides. The negative margin gives the box
+# the sidebar's own side padding to cut at instead, and the padding puts the rows
+# back where they were, on the same line as the brand above and the name below.
+NAV_STYLES = {
+	**COLUMN,
+	"flex": "1 1 auto",
+	"overflowY": "auto",
+	"gap": "2px",
+	"padding": "0 8px",
+	"margin": "0 -8px",
+}
 NAV_ITEM_STYLES = {
 	**ROW_FLEX,
 	"gap": "10px",
@@ -455,8 +468,33 @@ NAV_ITEM_STYLES = {
 	"hover:background": SURFACE_HOVER,
 	"hover:color": INK,
 }
-# The white card and its shadow are the whole of the active state now.
-NAV_ITEM_ACTIVE_STYLES = {**NAV_ITEM_STYLES, "background": SURFACE_CARD, "boxShadow": ACTIVE_SHADOW}
+# The white card and its shadow are the whole of the active state, and it cannot live
+# on the block. The rows are one block repeated over the menu now, so there is no
+# separate block for the current page to carry different styles: the row says which
+# page it is on with aria-current, and this is what that looks like.
+#
+# It has to outrank two things Builder writes for that same row -- the class holding
+# its base styles, and that class's :hover rule -- which a tag and two attributes do.
+# Appended to the head after HEAD_HTML, where the rest of the portal's stylesheet is.
+
+# Every rule the blocks cannot carry themselves: a state the script sets, or a position
+# that depends on another element. Appended to the head after HEAD_HTML, which is where
+# the rest of the portal's stylesheet lives.
+#
+# The nav rule has to outrank two things Builder writes for that same row -- the class
+# holding its base styles, and that class's :hover rule -- which a tag and two
+# attributes do.
+SHELL_STATE_CSS = f"""
+<style>
+/* The sidebar row for the page being served. The rows are one block repeated over the
+	menu, so the current one cannot carry different styles: it says which page it is on
+	with aria-current, and this is what that looks like. */
+[data-portal-nav] a[aria-current="page"] {{
+	background: {SURFACE_CARD};
+	box-shadow: {ACTIVE_SHADOW};
+}}
+</style>
+"""
 
 # The foot is the last line inside a box that is exactly 100vh tall, so it is the one
 # place in the sidebar where text meets a hard edge with nothing under it. On a display
@@ -741,14 +779,18 @@ def linked(key, styles=None, children=None, **kwargs):
 	return bind(node, key, property="href", type="attribute")
 
 
-def repeater(key, row, path=None, styles=None, **kwargs):
+def repeater(key, row, path=None, styles=None, element="div", **kwargs):
 	"""A block that renders its one child once per row of `key`.
 
 	The rows come out as children of this block, not of its parent, so a grid or a
 	flex row has to be styled *here*. Styled on the parent instead, every row lands in
 	the parent's first cell: the repeater itself is that cell.
+
+	`element` is for the repeater that *is* the landmark it fills -- a <nav> of links
+	rather than a <div> of them -- so the tree does not gain a wrapper whose only job
+	is to hold a tag name.
 	"""
-	node = block("div", path=path, styles=styles, isRepeaterBlock=True, children=[row], **kwargs)
+	node = block(element, path=path, styles=styles, isRepeaterBlock=True, children=[row], **kwargs)
 	node["dataKey"] = {"key": key, "type": "key", "property": "dataKey", "comesFrom": "dataScript"}
 
 	return node

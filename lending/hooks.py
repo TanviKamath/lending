@@ -90,6 +90,43 @@ fixtures = [
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
 
+# Portal menu
+# -----------
+
+# The borrower portal's sidebar. Frappe already owns a portal menu -- Portal Settings,
+# the portal_menu_items hook and website.utils.get_portal_sidebar_items -- so the rows
+# are declared here and read back at render time rather than drawn into the pages.
+#
+# That is what makes a route something written once. The shell renders whatever this
+# list holds, so a page added or renamed is a line here, not an edit to a Builder
+# Component and the ten pages that mirror it.
+#
+# standard_portal_menu_items is the other door, and the wrong one: it syncs into Portal
+# Settings, whose sync drops every row that does not name an existing DocType, and four
+# of these rows are views rather than records.
+#
+# `covers` is this app's own key, carried through the hook untouched. A detail page has
+# no row of its own, so it lights its list's row: /borrower/loan/L-0001 is a loan
+# account. A row added from Portal Settings has no such key and matches its route alone.
+#
+# No `role`. A borrower is authorised by the Portal Users table on their Customer, not
+# by a role, so gating the menu on "Customer" would empty the sidebar for anyone linked
+# by hand. The rows are a menu, not a permission: every page behind them asks
+# portal.core.get_portal_customers() who is knocking.
+#
+# One row per page a borrower can actually open. PORTAL_PLAN.md section 6.7 keeps
+# repayments, disbursements and charges as sections of a loan rather than as pages of
+# their own, so the sidebar does not offer them.
+portal_menu_items = [
+	{"title": "Account overview", "route": "/borrower/overview"},
+	{"title": "Loan accounts", "route": "/borrower/loans", "covers": "/borrower/loan"},
+	{"title": "Applications", "route": "/borrower/applications", "covers": "/borrower/application"},
+	{"title": "Documents", "route": "/borrower/documents"},
+	{"title": "Statement of account", "route": "/borrower/statement"},
+	{"title": "Interest certificate", "route": "/borrower/certificate"},
+	{"title": "Personal details", "route": "/borrower/profile"},
+]
+
 # Home Pages
 # ----------
 

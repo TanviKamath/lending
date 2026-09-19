@@ -14,6 +14,7 @@ Nothing here trusts a document name that arrived with the request.
 import frappe
 from frappe import _
 from frappe.utils import flt, fmt_money, formatdate, getdate, nowdate
+from frappe.website.utils import get_portal_sidebar_items
 
 # Internal risk classification. These never reach a borrower -- see PORTAL_PLAN.md
 # section 6.7: showing someone their own delinquency labels invites a dispute.
@@ -51,6 +52,10 @@ REGULAR_LABELS = ("Regular",)
 # What the portal calls itself before a lender has named it. Every page reads the
 # name through brand_name(), so this is the only place the words appear.
 DEFAULT_BRAND_NAME = "Frappe Lending"
+
+# Every borrower page lives under this prefix, and nothing else in the site's portal
+# menu does. It is how nav_items() tells this portal's rows from another's.
+PORTAL_ROUTE_PREFIX = "/borrower/"
 
 APPLICATION_STAGES = {
 	"Open": "Under review",
@@ -114,10 +119,60 @@ def days_until(value) -> int:
 	return (getdate(value) - getdate(nowdate())).days
 
 
+def current_route() -> str:
+	"""The route being served, spelt the way a menu row spells its own.
+
+	frappe.local rather than frappe.request: off a request the proxy has nothing behind
+	it, and asking it for a path raises rather than answering. Off a request no row is
+	the current one and the sidebar simply has nothing lit.
+	"""
+	request = getattr(frappe.local, "request", None)
+
+	return "/" + (getattr(request, "path", "") or "").strip("/")
+
+
+def is_current(item: dict, route: str) -> bool:
+	"""Whether a menu row owns the route being served.
+
+	A row owns its own route, and the section named by its `covers` key. The trailing
+	slash is what keeps /borrower/applications out of the hands of /borrower/application.
+	"""
+	if route == item.get("route"):
+		return True
+
+	covers = item.get("covers")
+
+	return bool(covers) and route.startswith(covers + "/")
+
+
+def nav_items() -> list[dict]:
+	"""The sidebar rows, read from Frappe's portal menu and marked for this page.
+
+	get_portal_sidebar_items() answers for every portal on the site at once, so an
+	ERPNext bench hands back Orders and Invoices alongside these. The borrower frame
+	takes the rows under its own prefix and leaves the rest to the portal they were
+	written for.
+	"""
+	route = current_route()
+
+	return [
+		{
+			"nav_title": _(item.get("title") or item.get("label") or ""),
+			"nav_route": item.get("route"),
+			# Read into aria-current, which is both what a screen reader announces and
+			# what the stylesheet marks the row with.
+			"nav_current": "page" if is_current(item, route) else "false",
+		}
+		for item in get_portal_sidebar_items()
+		if (item.get("route") or "").startswith(PORTAL_ROUTE_PREFIX)
+	]
+
+
 def shell_payload(crumb: str, action_label: str, customers: list[str], loans: list[dict]) -> dict:
 
 	return {
 		"as_on": long_date(nowdate()),
+		"nav_items": nav_items(),
 		**brand_payload(),
 		"initials": initials(),
 		"holder_name": holder_name(),

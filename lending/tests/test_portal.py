@@ -76,11 +76,13 @@ from lending.portal.build.theme import (
 )
 from lending.portal.core import (
 	DEFAULT_BRAND_NAME,
+	PORTAL_ROUTE_PREFIX,
 	assert_owns,
 	brand_name,
 	brand_payload,
 	get_portal_customers,
 	leads_for_login,
+	nav_items,
 	shell_payload,
 )
 from lending.portal.loans import get_loan_detail, get_loans_page
@@ -1285,6 +1287,109 @@ class TestPortalBranding(LendingTestSuite):
 		upsert_tokens()
 
 		self.assertEqual(token_value("brand-primary"), "#8b1d3f")
+
+
+class TestPortalMenu(LendingTestSuite):
+	"""The sidebar, which is a list read per request rather than seven blocks per page.
+
+	The rows live in lending.hooks.portal_menu_items and reach the page through
+	Frappe's own portal menu. That is what these hold open: that the frame stays a
+	single repeated row, and that the list it repeats is this portal's own.
+	"""
+
+	def setUp(self):
+		self.request = getattr(frappe.local, "request", None)
+
+	def tearDown(self):
+		frappe.local.request = self.request
+		super().tearDown()
+
+	def declared(self) -> list[dict]:
+		return [
+			item
+			for item in frappe.get_hooks("portal_menu_items")
+			if item["route"].startswith(PORTAL_ROUTE_PREFIX)
+		]
+
+	def serving(self, route: str) -> dict[str, str]:
+		"""The menu as it comes out while `route` is the page being served."""
+		frappe.local.request = frappe._dict(path=route)
+
+		return {row["nav_title"]: row["nav_current"] for row in nav_items()}
+
+	def test_the_menu_is_the_one_declared_in_hooks(self):
+		"""In the order declared, with nothing dropped on the way to the page."""
+		rows = nav_items()
+
+		self.assertEqual(
+			[(row["nav_title"], row["nav_route"]) for row in rows],
+			[(item["title"], item["route"]) for item in self.declared()],
+		)
+
+	def test_another_portals_rows_are_left_to_it(self):
+		"""get_portal_sidebar_items answers for the whole site, ERPNext's portal included."""
+		routes = {row["nav_route"] for row in nav_items()}
+
+		self.assertNotIn("/orders", routes)
+		self.assertNotIn("/invoices", routes)
+
+	def test_the_page_being_served_is_the_row_that_lights(self):
+		marks = self.serving("/borrower/statement")
+
+		self.assertEqual(marks["Statement of account"], "page")
+		self.assertEqual(marks["Account overview"], "false")
+		self.assertEqual([*marks.values()].count("page"), 1)
+
+	def test_a_detail_page_lights_the_list_it_belongs_to(self):
+		"""A loan has no row of its own, and a page with nothing lit reads as lost."""
+		self.assertEqual(self.serving("/borrower/loan/LOAN-0001")["Loan accounts"], "page")
+		self.assertEqual(self.serving("/borrower/application/LN-APP-0001")["Applications"], "page")
+
+	def test_a_list_is_not_swallowed_by_the_section_beside_it(self):
+		"""/borrower/applications starts with /borrower/application, and is not one."""
+		marks = self.serving("/borrower/applications")
+
+		self.assertEqual(marks["Applications"], "page")
+		self.assertEqual([*marks.values()].count("page"), 1)
+
+	def test_off_a_request_the_menu_still_comes_out(self):
+		"""An /api call on one of these endpoints is serving no page at all."""
+		frappe.local.request = None
+		marks = {row["nav_title"]: row["nav_current"] for row in nav_items()}
+
+		self.assertEqual(len(marks), len(self.declared()))
+		self.assertNotIn("page", marks.values())
+
+	def test_the_frame_holds_one_row_and_not_a_copy_per_link(self):
+		"""The whole point of the change: a route is written in hooks.py and nowhere else.
+
+		A block carrying its own /borrower href would be a second copy of the menu,
+		frozen into the component and into every page that mirrors it.
+		"""
+		repeaters = []
+		hrefs = []
+
+		def walk(node):
+			if node.get("isRepeaterBlock"):
+				repeaters.append(node)
+			href = (node.get("attributes") or {}).get("href") or ""
+			if href.startswith("/borrower"):
+				hrefs.append(href)
+			for child in node.get("children") or []:
+				walk(child)
+
+		walk(tree())
+
+		# The rail's own two links are borrower routes and are meant to be written in
+		# the frame; they are not menu rows. What must not appear is a menu route.
+		menu_routes = {item["route"] for item in self.declared()}
+		self.assertEqual([href for href in hrefs if href in menu_routes], [])
+		self.assertEqual([node["dataKey"]["key"] for node in repeaters], ["nav_items"])
+		row = repeaters[0]["children"][0]
+		self.assertEqual(
+			{value["key"] for value in row["dynamicValues"]},
+			{"nav_title", "nav_route", "nav_current"},
+		)
 
 
 class TestPortalScale(LendingTestSuite):

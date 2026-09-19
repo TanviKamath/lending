@@ -26,7 +26,6 @@ from lending.portal.build.theme import (
 
 PAGE_NAME = "Borrower Applications"
 ROUTE = "borrower/applications"
-NAV_HREF = "/borrower/applications"
 ACTION_HREF = "/apply"
 
 DATA_SCRIPT = '''
@@ -70,7 +69,6 @@ def build():
 		PAGE_NAME,
 		ROUTE,
 		"Applications",
-		NAV_HREF,
 		content(),
 		action_href=ACTION_HREF,
 		data_script=DATA_SCRIPT,

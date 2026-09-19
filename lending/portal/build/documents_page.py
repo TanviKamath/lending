@@ -48,7 +48,6 @@ from lending.portal.build.theme import (
 
 PAGE_NAME = "Borrower Documents"
 ROUTE = "borrower/documents"
-NAV_HREF = "/borrower/documents"
 DATA_SCRIPT = '''
 # safe_exec blocks str.format and _(), and cannot import lending. So this script only
 # bridges: every value arrives already formatted and translated from the data layer.
@@ -162,7 +161,6 @@ def build():
 		PAGE_NAME,
 		ROUTE,
 		"Documents",
-		NAV_HREF,
 		content(),
 		data_script=DATA_SCRIPT,
 	)

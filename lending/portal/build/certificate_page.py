@@ -16,7 +16,6 @@ from lending.portal.build.theme import card, download_link, note_panel, pair_row
 
 PAGE_NAME = "Borrower Interest Certificate"
 ROUTE = "borrower/certificate"
-NAV_HREF = "/borrower/certificate"
 DATA_SCRIPT = '''
 # safe_exec blocks str.format and _(), and cannot import lending. So this script only
 # bridges: every value arrives already formatted and translated from the data layer.
@@ -38,7 +37,6 @@ def build():
 		PAGE_NAME,
 		ROUTE,
 		"Interest certificate",
-		NAV_HREF,
 		content(),
 		action_href="/api/method/lending.portal.downloads.download_certificate",
 		data_script=DATA_SCRIPT,

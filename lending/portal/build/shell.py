@@ -15,8 +15,14 @@ referenceBlockId of the node it stands for. reference() below builds that mirror
 block_id() keeps both sides addressable by path rather than by chance.
 
 The mirror is also where a page differs from the frame: extend_block layers the page
-stub's own baseStyles and attributes over the component's, so a page marks its own nav
-row active and points the header button wherever it likes, without forking the shell.
+stub's own baseStyles and attributes over the component's, so a page points the header
+button wherever it likes without forking the shell.
+
+The sidebar is not one of those differences. It used to be -- each page's mirror froze
+its own copy of the menu and marked one row active -- so seven links lived in eleven
+stored trees and a renamed route meant rebuilding all of them. The menu now comes from
+lending.hooks.portal_menu_items through Frappe's portal menu, read per request, and the
+frame holds a single row block repeated over it.
 """
 
 import json
@@ -45,13 +51,13 @@ from lending.portal.build.theme import (
 	ICON_SEARCH,
 	MAIN_STYLES,
 	MARK_STYLES,
-	NAV_ITEM_ACTIVE_STYLES,
 	NAV_ITEM_STYLES,
 	NAV_STYLES,
 	PAGE_HEAD_STYLES,
 	RAIL_DIVIDER_STYLES,
 	RAIL_ICON_STYLES,
 	RAIL_STYLES,
+	SHELL_STATE_CSS,
 	SHELL_STYLES,
 	SIDE_BRAND_STYLES,
 	SIDE_COLLAPSE_STYLES,
@@ -70,6 +76,7 @@ from lending.portal.build.theme import (
 	bound,
 	brand_lockup,
 	empty_block_fields,
+	repeater,
 	upsert_tokens,
 )
 
@@ -77,19 +84,6 @@ from lending.portal.build.theme import (
 # A fixed slug keeps every site addressing the same component.
 COMPONENT_ID = "lending-borrower-shell"
 COMPONENT_NAME = "Borrower Portal Shell"
-
-# One row per page the borrower can actually open. PORTAL_PLAN.md section 6.7 keeps
-# repayments, disbursements and charges as sections of a loan, not as pages, so the
-# sidebar does not offer them.
-NAV_LINKS = (
-	("Account overview", "/borrower/overview"),
-	("Loan accounts", "/borrower/loans"),
-	("Applications", "/borrower/applications"),
-	("Documents", "/borrower/documents"),
-	("Statement of account", "/borrower/statement"),
-	("Interest certificate", "/borrower/certificate"),
-	("Personal details", "/borrower/profile"),
-)
 
 FOOTER_LINKS = ("Fair practice code", "Grievance redressal", "Interest rate policy")
 
@@ -147,6 +141,38 @@ def collapse_toggle():
 	)
 
 
+def nav():
+	"""The menu, as one row rendered once per row of the portal menu.
+
+	The rows are not written here. lending.hooks.portal_menu_items declares them and
+	portal.core.nav_items reads them back through Frappe's own portal menu, so the
+	sidebar is whatever the site's menu says it is at the moment the page is served:
+	a row renamed, reordered or switched off needs no rebuild of anything.
+
+	aria-current is the row's own answer to which page it is on. The data script sets
+	it to "page" on one row, which both tells a screen reader where it is and is what
+	NAV_ACTIVE_CSS marks the row with.
+	"""
+	row = block(
+		"a",
+		path="shell/sidebar/nav/row",
+		styles=NAV_ITEM_STYLES,
+		attributes={"href": "#", "aria-current": "false"},
+	)
+	bind(row, "nav_title")
+	bind(row, "nav_route", property="href", type="attribute")
+	bind(row, "nav_current", property="aria-current", type="attribute")
+
+	return repeater(
+		"nav_items",
+		row,
+		element="nav",
+		path="shell/sidebar/nav",
+		styles=NAV_STYLES,
+		attributes={"data-portal-nav": "1"},
+	)
+
+
 def sidebar():
 	"""The list of pages, whose portal it is, and the toggle that gets it out of the way.
 
@@ -155,17 +181,6 @@ def sidebar():
 	in, which is where it means something, and a switcher between one thing read as a
 	control that does nothing.
 	"""
-	nav_items = [
-		block(
-			"a",
-			path=f"shell/sidebar/nav/{href}",
-			styles=NAV_ITEM_STYLES,
-			html=label,
-			attributes={"href": href},
-		)
-		for label, href in NAV_LINKS
-	]
-
 	return block(
 		"aside",
 		path="shell/sidebar",
@@ -182,7 +197,7 @@ def sidebar():
 				),
 			),
 			collapse_toggle(),
-			block("nav", path="shell/sidebar/nav", styles=NAV_STYLES, children=nav_items),
+			nav(),
 			block(
 				"div",
 				path="shell/sidebar/foot",
@@ -343,18 +358,17 @@ def stub(node, overrides):
 	return mirror
 
 
-def reference(content, active_href, action_href="#"):
+def reference(content, action_href="#"):
 	"""The page-side block that renders the shell with this page's content inside it.
 
-	`content` is the page's own blocks, `active_href` the nav row to mark active, and
-	`action_href` where the header button points.
+	`content` is the page's own blocks and `action_href` is where the header button
+	points. Which nav row is lit is not a page's business any more: the row knows,
+	from the route being served.
 	"""
 	overrides = {
 		CONTENT_PATH: {"extra_children": content},
 		ACTION_PATH: {"attributes": {"href": action_href}},
 	}
-	if active_href:
-		overrides[f"shell/sidebar/nav/{active_href}"] = {"baseStyles": NAV_ITEM_ACTIVE_STYLES}
 
 	mirror = stub(tree(), overrides)
 	mirror["extendedFromComponent"] = COMPONENT_ID
@@ -428,7 +442,6 @@ def build_page(
 	page_name,
 	route,
 	title,
-	nav_href,
 	content,
 	action_href="#",
 	data_script=None,
@@ -437,7 +450,7 @@ def build_page(
 	"""Create or replace one portal page: the shared shell, wrapped around `content`.
 
 	Every page is assembled the same way, so the only per-page arguments are its route,
-	which nav row it lights up, where its header button goes, and its data script.
+	where its header button goes, and its data script.
 	"""
 	upsert_tokens()
 	component, component_action = upsert_component()
@@ -445,9 +458,7 @@ def build_page(
 	# A public page cannot wear the borrower frame: every row in that sidebar needs a
 	# login, so a guest clicking one would be bounced. Public pages get their content
 	# straight in the body and carry their own heading.
-	children = (
-		[reference(content, nav_href, action_href)] if authenticated else list(content)
-	)
+	children = [reference(content, action_href)] if authenticated else list(content)
 	body = block("div", styles=BODY_STYLES, originalElement="body", children=children)
 
 	fields = {
@@ -459,7 +470,7 @@ def build_page(
 		"disable_indexing": 1,
 		"is_standard": 1,
 		"app": "lending",
-		"head_html": HEAD_HTML,
+		"head_html": HEAD_HTML + SHELL_STATE_CSS,
 		"page_data_script": data_script or "",
 		"blocks": frappe.as_json([body]),
 		# A leftover draft outranks what this script just wrote: the canvas loads

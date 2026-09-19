@@ -61,7 +61,6 @@ from lending.portal.build.theme import (
 
 PAGE_NAME = "Borrower Account Overview"
 ROUTE = "borrower/overview"
-NAV_HREF = "/borrower/overview"
 ACTION_HREF = "/borrower/repayments"
 
 # One call, so the page makes a single trip to the data layer.
@@ -289,7 +288,6 @@ def build():
 		PAGE_NAME,
 		ROUTE,
 		"Account overview",
-		NAV_HREF,
 		content(),
 		action_href=ACTION_HREF,
 		data_script=DATA_SCRIPT,

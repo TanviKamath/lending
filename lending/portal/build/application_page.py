@@ -43,7 +43,6 @@ from lending.portal.build.theme import (
 
 PAGE_NAME = "Borrower Application Detail"
 ROUTE = "borrower/application/<name>"
-NAV_HREF = "/borrower/applications"
 
 DATA_SCRIPT = '''
 # safe_exec blocks str.format and _(), and cannot import lending. So this script only
@@ -170,7 +169,6 @@ def build():
 		PAGE_NAME,
 		ROUTE,
 		"Application",
-		NAV_HREF,
 		content(),
 		data_script=DATA_SCRIPT,
 	)
