@@ -664,12 +664,16 @@ def reference(content, action_href="#"):
 	"""The page-side block that renders the shell with this page's content inside it.
 
 	`content` is the page's own blocks and `action_href` is where the header button
-	points. Which nav row is lit is not a page's business any more: the row knows,
-	from the route being served.
+	points, or None on a page that wants no header button at all. Which nav row is lit
+	is not a page's business any more: the row knows, from the route being served.
 	"""
 	overrides = {
 		CONTENT_PATH: {"extra_children": content},
-		ACTION_PATH: {"attributes": {"href": action_href}},
+		# The button is the frame's, so a page that has no use for it hides its own stub
+		# rather than forking the shell.
+		ACTION_PATH: (
+			{"attributes": {"href": action_href}} if action_href else {"baseStyles": {"display": "none"}}
+		),
 	}
 
 	mirror = stub(tree(), overrides)
@@ -752,7 +756,7 @@ def build_page(
 	"""Create or replace one portal page: the shared shell, wrapped around `content`.
 
 	Every page is assembled the same way, so the only per-page arguments are its route,
-	where its header button goes, and its data script.
+	where its header button goes -- None for no button -- and its data script.
 	"""
 	upsert_tokens()
 	component, component_action = upsert_component()

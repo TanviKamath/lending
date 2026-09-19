@@ -37,8 +37,9 @@ def build():
 		ROUTE,
 		"Statement of account",
 		content(),
-		# The header button has no access to the page's filters, so it downloads the
-		# default period. The link inside the page carries whatever is on screen.
-		action_href="/api/method/lending.portal.downloads.download_statement",
+		# No header button: it had no access to the page's filters, so it downloaded the
+		# default period while the link inside the page carried whatever was on screen.
+		# Two buttons a click apart, one of them quietly ignoring the dates above it.
+		action_href=None,
 		data_script=DATA_SCRIPT,
 	)

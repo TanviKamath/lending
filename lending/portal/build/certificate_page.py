@@ -38,6 +38,8 @@ def build():
 		ROUTE,
 		"Interest certificate",
 		content(),
-		action_href="/api/method/lending.portal.downloads.download_certificate",
+		# No header button: it had no access to the year on screen, so it downloaded the
+		# default one while the link inside the page followed the picker above it.
+		action_href=None,
 		data_script=DATA_SCRIPT,
 	)

@@ -238,6 +238,9 @@ def empty_dashboard() -> dict:
 		"outstanding_note": _("No live accounts"),
 		"sanctioned": money(0),
 		"sanctioned_note": "",
+		# Nothing sanctioned is not a figure of zero. The line hides itself rather than
+		# telling a borrower with no loans that they have been sanctioned nothing.
+		"sanctioned_line": "",
 	}
 	payload.update(shell_payload(_("Account overview"), _("View payment details"), [], []))
 	payload.update(labels())
@@ -479,6 +482,8 @@ def build_summary(loans: list[dict], schedule: list[dict]) -> dict:
 	sanctioned = sum(flt(loan.loan_amount) for loan in loans)
 	undrawn = sum(undrawn_of(loan) for loan in live)
 	first = schedule[0] if schedule else {}
+	sanctioned_amount = money(sanctioned)
+	sanctioned_note = _("{0} undrawn").format(money(undrawn)) if undrawn else _("Fully drawn")
 
 	return {
 		"next_amount": first.get("amount", "—"),
@@ -488,8 +493,20 @@ def build_summary(loans: list[dict], schedule: list[dict]) -> dict:
 		"next_flag": next_flag(loans),
 		"outstanding": money(outstanding),
 		"outstanding_note": _("Across {0} live accounts").format(len(live)),
-		"sanctioned": money(sanctioned),
-		"sanctioned_note": _("{0} undrawn").format(money(undrawn)) if undrawn else _("Fully drawn"),
+		"sanctioned": sanctioned_amount,
+		"sanctioned_note": sanctioned_note,
+		# The overview folds the sanctioned amount into one line under the outstanding
+		# figure instead of giving it a card of its own. Joined here rather than on the
+		# page because Builder binds one key straight into one element, and the page
+		# data script runs under safe_exec, where str.format is unavailable.
+		#
+		# Nothing sanctioned is not a figure of zero, and this is the borrower who has
+		# applied and is waiting: a card said "Total sanctioned ₹0.00" to them, and the
+		# line says nothing at all. The card's own two keys are left as they were, since
+		# the loan accounts page still shows them.
+		"sanctioned_line": (
+			_("Total sanctioned {0} · {1}").format(sanctioned_amount, sanctioned_note) if sanctioned else ""
+		),
 	}
 
 

@@ -54,9 +54,10 @@ from lending.portal.apply import (
 	submit_lead,
 	track_application,
 )
-from lending.portal.build import theme
+from lending.portal.build import overview_page, theme
+from lending.portal.build.overview_page import ACTION_HREF, content, money_block
 from lending.portal.build.script import CLIENT_SCRIPT
-from lending.portal.build.shell import SEARCH_ROUTE, tree
+from lending.portal.build.shell import ACTION_PATH, SEARCH_ROUTE, reference, tree
 from lending.portal.build.theme import (
 	NEUTRALS,
 	PORTAL_TOKENS,
@@ -64,6 +65,7 @@ from lending.portal.build.theme import (
 	SHIPPED,
 	STATES,
 	apca,
+	block_id,
 	brand_overrides,
 	channels,
 	from_hsl,
@@ -82,8 +84,11 @@ from lending.portal.core import (
 	assert_owns,
 	brand_name,
 	brand_payload,
+	build_summary,
+	empty_dashboard,
 	get_portal_customers,
 	leads_for_login,
+	money,
 	nav_items,
 	shell_payload,
 )
@@ -1925,3 +1930,112 @@ class TestPortalPalette(LendingTestSuite):
 		source = re.sub(r"var\([^)]*\)", "", source)
 
 		self.assertEqual(re.findall(r"#[0-9a-fA-F]{6}\b", source), [])
+
+
+class TestPortalMoneyBlock(LendingTestSuite):
+	"""Stage 5 of PORTAL_DESIGN_PLAN.md: the two figures the overview is opened for.
+
+	A borrower opens the portal to learn two things -- how much is owed, and when the
+	next payment falls due. Those two sat in cards, at the same weight as a third card
+	nobody comes for. What is held open here is that they no longer do: two figures at
+	the top of the scale, one button under them, and the sanctioned amount demoted to
+	a line.
+	"""
+
+	def blocks(self, node) -> list[dict]:
+		"""Every block of a page's tree, the node itself included."""
+		found = [node]
+		for child in node.get("children") or []:
+			found.extend(self.blocks(child))
+
+		return found
+
+	def money_blocks(self) -> list[dict]:
+		return self.blocks(money_block())
+
+	def test_the_two_figures_are_the_largest_thing_on_the_page(self):
+		"""The point of the stage.
+
+		Two figures at the top of the scale, and the third card gone. Asserted on the
+		size rather than on the count of children, because a figure is only the answer
+		to the page if nothing beside it is set as loud.
+		"""
+		figures = [
+			node["baseStyles"]["fontSize"]
+			for node in self.money_blocks()
+			if node["baseStyles"].get("fontSize")
+		]
+		largest = f"var(--{SCALE_TOKENS[5]['token_name']},{SCALE_TOKENS[5]['value']})"
+
+		self.assertEqual([size for size in figures if size == largest], [largest] * 2)
+
+	def test_neither_figure_stands_in_a_card(self):
+		"""A card is a container for a list, so a figure in one reads as one of several.
+
+		Asserted of everything here that holds something else: the two cards this
+		replaced were a painted box around a number, and a background or a border put
+		back on any of these wrappers rebuilds one while every other test still passes.
+		The two painted things left are the button and the "due in five days" pill, and
+		neither contains anything.
+		"""
+		for node in self.money_blocks():
+			if not node["children"]:
+				continue
+
+			self.assertNotIn("background", node["baseStyles"])
+			self.assertNotIn("border", node["baseStyles"])
+
+	def test_the_button_stands_under_the_figures_and_not_in_the_frame(self):
+		"""Both halves, because either alone leaves the page with a button it should not
+		have: the page's own must point at the repayments route, and the frame's stub
+		must be hidden rather than left to sit above the figures saying the same thing.
+		"""
+		buttons = [node for node in self.money_blocks() if node["element"] == "a"]
+
+		self.assertEqual(len(buttons), 1)
+		self.assertEqual(buttons[0]["attributes"]["href"], ACTION_HREF)
+		self.assertEqual([value["key"] for value in buttons[0]["dynamicValues"]], ["action_label"])
+
+		# Two steps, because the page asking for no header button and that request
+		# reaching the frame are separate mechanisms, and either one alone would leave
+		# the borrower with the same words on two buttons. The stub mirroring a
+		# component node is keyed on "ref/" plus that node's path.
+		self.assertIn("action_href=None", inspect.getsource(overview_page.build))
+
+		mirrored = {node["blockId"]: node for node in self.blocks(reference(content(), None))}
+
+		self.assertEqual(mirrored[block_id(f"ref/{ACTION_PATH}")]["baseStyles"], {"display": "none"})
+
+	def test_the_sanctioned_amount_is_one_line_under_the_outstanding_figure(self):
+		"""It was a card of its own, at the weight of the two figures beside it.
+
+		A borrower checks what was sanctioned once, so it reads as a sentence now. The
+		sentence is joined in the data layer because Builder binds one key into one
+		element, and the page data script cannot join two.
+		"""
+		loans = [frappe._dict(status="Active", loan_amount=500000, disbursed_amount=300000)]
+		line = build_summary(loans, [])["sanctioned_line"]
+
+		self.assertIn(money(500000), line)
+		self.assertIn(money(200000), line)
+
+	def test_a_borrower_with_no_loans_is_not_told_they_are_sanctioned_nothing(self):
+		"""An empty payload carries no line, and the block goes with it.
+
+		Both halves: a page that hid nothing would print "Total sanctioned ₹0.00" to
+		somebody who has only applied, and a payload that said nothing to a block with
+		no condition on it would leave the gap where the line was.
+
+		Two ways to have nothing sanctioned, and both are real. A visitor with no
+		customer record at all takes the empty payload. A borrower with a customer
+		record and an application still in progress does not: they have loans of zero,
+		which is the one the cards used to get wrong.
+		"""
+		self.assertEqual(empty_dashboard()["sanctioned_line"], "")
+		self.assertEqual(build_summary([], [])["sanctioned_line"], "")
+
+		conditioned = [
+			node for node in self.money_blocks() if node.get("visibilityCondition") == "sanctioned_line"
+		]
+
+		self.assertEqual(len(conditioned), 1)

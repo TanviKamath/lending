@@ -147,7 +147,9 @@ def get_statement_page() -> dict:
 	entries.sort(key=lambda row: getdate(row.get("posting_date")))
 	rows = [present_entry(row) for row in entries]
 
-	payload = shell_payload(_("Statement of account"), _("Download PDF"), customers, loans)
+	# No header button on this page -- the download lives inside it, next to the dates
+	# it obeys -- so there is no label for one either.
+	payload = shell_payload(_("Statement of account"), "", customers, loans)
 	# The header says which period is on screen; the generic note would not.
 	payload["head_note"] = _("{0} to {1}").format(long_date(from_date), long_date(to_date))
 	payload.update(
@@ -225,7 +227,9 @@ def get_certificate_page() -> dict:
 		if total:
 			rows.append({"label": _(title), "value": money(total)})
 
-	payload = shell_payload(_("Interest certificate"), _("Download PDF"), customers, loans)
+	# No header button on this page -- the download lives inside it, under the year it
+	# obeys -- so there is no label for one either.
+	payload = shell_payload(_("Interest certificate"), "", customers, loans)
 	payload["head_note"] = _("Financial year {0} · {1}").format(
 		label, _("provisional") if running else _("final")
 	)

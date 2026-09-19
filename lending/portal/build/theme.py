@@ -906,6 +906,62 @@ NUMBER_STYLES = {
 }
 NCARD_STAT_STYLES = {**TABULAR, "marginTop": "10px", "fontSize": "var(--portal-text-sm,13px)", "color": INK_MUTED}
 
+# The two figures a borrower opened the portal to read: how much is owed, and when the
+# next payment is due. See PORTAL_DESIGN_PLAN.md, stage 5.
+#
+# They are not in cards, and that is the whole change. A card is a container for a list,
+# so a figure put in one reads as an item among several -- which is what three equal
+# number cards said, with the sanctioned amount given the same weight as the two figures
+# that are the reason for the visit. Standing on the page at the top of the scale, the
+# two figures are the page's answer before anything under them is read.
+MONEY_STYLES = {
+	**COLUMN,
+	"gap": "var(--portal-gap,16px)",
+	"paddingBottom": "var(--portal-gap,16px)",
+	"borderBottom": BORDER,
+}
+# Side by side where there is room and stacked where there is not, with the next
+# repayment first either way: on a phone it is what has to stand above the fold.
+MONEY_FIGURES_STYLES = {
+	"display": "flex",
+	"flexWrap": "wrap",
+	"gap": "var(--portal-gap,16px) calc(var(--portal-gap,16px) * 3)",
+}
+MONEY_ITEM_STYLES = {**COLUMN, "gap": "2px", "minWidth": "0"}
+# A row, because the label carries the "due in five days" pill beside it.
+MONEY_LABEL_STYLES = {
+	**ROW_FLEX,
+	"gap": "8px",
+	"fontSize": "var(--portal-text-sm,13px)",
+	"color": INK_MUTED,
+}
+MONEY_FIGURE_STYLES = {
+	**TABULAR,
+	"fontSize": "var(--portal-text-2xl,32px)",
+	"fontWeight": "600",
+	"lineHeight": "115%",
+	"color": INK,
+}
+# The date the figure is due, which is half of what the borrower came for, so it is set
+# at body size rather than at the size of a footnote.
+MONEY_NOTE_STYLES = {**TABULAR, "fontSize": "var(--portal-text-md,15px)", "color": INK_MUTED}
+# What the third card held. A borrower checks the sanctioned amount once a year, so it
+# is a line under the outstanding figure rather than a figure of its own.
+MONEY_SUB_STYLES = {
+	**TABULAR,
+	"marginTop": "4px",
+	"fontSize": "var(--portal-text-sm,13px)",
+	"color": INK_SUBTLE,
+}
+# The button the page exists for. The one in the page head is 6px of padding wide and
+# sits among the furniture; this one stands under the amount it pays.
+MONEY_ACTION_STYLES = {
+	**BTN_STYLES,
+	"alignSelf": "flex-start",
+	"fontWeight": "600",
+	"padding": "10px 20px",
+}
+
 # The two-column split folds to one column on Builder's tablet breakpoint (<=1023px).
 GRID_STYLES = {
 	"display": "grid",
