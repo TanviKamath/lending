@@ -31,12 +31,34 @@ import frappe
 
 from lending.portal.build.script import CLIENT_SCRIPT, SCRIPT_NAME
 from lending.portal.build.theme import (
+	ALERTS_ACTION_STYLES,
+	ALERTS_AVATAR_STYLES,
+	ALERTS_BODY_STYLES,
+	ALERTS_DOT_STYLES,
+	ALERTS_HEAD_STYLES,
+	ALERTS_NOTE_STYLES,
+	ALERTS_ROW_BODY_STYLES,
+	ALERTS_ROW_NOTE_STYLES,
+	ALERTS_ROW_STYLES,
+	ALERTS_ROW_TITLE_STYLES,
+	ALERTS_ROW_WHEN_STYLES,
+	ALERTS_STYLES,
+	ALERTS_TAB_STYLES,
 	AVATAR_STYLES,
 	BODY_STYLES,
 	BTN_STYLES,
 	CHEVRON_LEFT,
 	CONTENT_STYLES,
 	CRUMB_STYLES,
+	DIALOG_BODY_STYLES,
+	DIALOG_FOOT_STYLES,
+	DIALOG_HEAD_STYLES,
+	DIALOG_INPUT_STYLES,
+	DIALOG_NOTE_STYLES,
+	DIALOG_ROW_KIND_STYLES,
+	DIALOG_ROW_STYLES,
+	DIALOG_ROW_TITLE_STYLES,
+	DIALOG_STYLES,
 	FOOTER_BRAND_STYLES,
 	FOOTER_LINK_STYLES,
 	FOOTER_LOGO_STYLES,
@@ -46,13 +68,18 @@ from lending.portal.build.theme import (
 	HEAD_HTML,
 	HEAD_NOTE_STYLES,
 	HIDDEN,
+	HINT_STYLES,
 	ICON_BELL,
 	ICON_BRAND,
+	ICON_CHECK_CHECK,
+	ICON_CLOSE,
 	ICON_SEARCH,
+	KEY_STYLES,
 	MAIN_STYLES,
 	MARK_STYLES,
 	NAV_ITEM_STYLES,
 	NAV_STYLES,
+	OVERLAY_STYLES,
 	PAGE_HEAD_STYLES,
 	RAIL_DIVIDER_STYLES,
 	RAIL_ICON_STYLES,
@@ -85,6 +112,16 @@ from lending.portal.build.theme import (
 COMPONENT_ID = "lending-borrower-shell"
 COMPONENT_NAME = "Borrower Portal Shell"
 
+# The one page the rail opens. It is not a sidebar row -- the rail is its way in -- so
+# it is not in lending.hooks.portal_menu_items, and the route is spelt here rather than
+# in the module that builds the page: the rail needs it too, and that module already
+# imports build_page from this one.
+#
+# The bell used to have a page of the same kind at borrower/notifications. It said the
+# same thing the panel says, so pressing the bell left a borrower with two places to
+# read one list, and the page is gone: the panel is the whole of the notifications.
+SEARCH_ROUTE = "borrower/search"
+
 FOOTER_LINKS = ("Fair practice code", "Grievance redressal", "Interest rate policy")
 
 # Paths a page overrides through its mirror. Named here so a page never types a path.
@@ -106,14 +143,36 @@ def rail():
 				path="shell/rail/search",
 				styles=RAIL_ICON_STYLES,
 				html=ICON_SEARCH,
-				attributes={"href": "#", "aria-label": "Search"},
+				# The href is the page, and the script takes the click to open the dialog
+				# over whatever the borrower is already reading. Where no script runs,
+				# the link is what happens.
+				attributes={
+					"href": f"/{SEARCH_ROUTE}",
+					"aria-label": "Search",
+					"data-search-open": "1",
+				},
 			),
 			block(
-				"a",
+				"button",
 				path="shell/rail/alerts",
 				styles=RAIL_ICON_STYLES,
 				html=ICON_BELL,
-				attributes={"href": "#", "aria-label": "Notifications"},
+				# A button and not a link, unlike the magnifier beside it. The magnifier
+				# has a page to fall back to where no script runs; the bell has nothing
+				# behind it but the panel, so a link would be an invitation to a route
+				# that does not exist.
+				#
+				# It is also a toggle: the panel sits beside the sidebar rather than
+				# over the page, so the button stays in view and has to say whether it
+				# is on. The script keeps aria-expanded true while the panel is out, and
+				# SHELL_STATE_CSS draws that as the pressed state the desk's dock gives
+				# its own selected item.
+				attributes={
+					"type": "button",
+					"aria-label": "Notifications",
+					"data-alerts-open": "1",
+					"aria-expanded": "false",
+				},
 			),
 			block("span", path="shell/rail/spacer", styles=SPACER_STYLES),
 			bound("span", "initials", path="shell/rail/avatar", styles=AVATAR_STYLES),
@@ -218,6 +277,244 @@ def sidebar():
 	)
 
 
+# What the dialog's foot says it can do, in the desk's own words and its own grouping:
+# the keys for one action sit together, and the phrase follows them. Up and down are
+# two keys and get two caps, because that is what a hand does with them.
+SEARCH_KEYS = (
+	(("↑", "↓"), "to navigate"),
+	(("↵",), "to select"),
+	(("Esc",), "to close"),
+)
+
+
+def search_dialog():
+	"""The command box the rail's magnifier opens, over whatever page is underneath.
+
+	One row is written here and the client script clones it per result, which is how
+	the rest of the portal renders a list it did not know the length of at build time
+	-- see script.fillOffer. So every style stays in theme and the script only ever
+	sets text.
+	"""
+	row = block(
+		"a",
+		path="shell/search/row",
+		styles=DIALOG_ROW_STYLES,
+		attributes={"href": "#", "data-search-row": "1", "hidden": "hidden"},
+		children=[
+			block(
+				"span",
+				path="shell/search/row/title",
+				styles=DIALOG_ROW_TITLE_STYLES,
+				attributes={"data-row-title": "1"},
+			),
+			block(
+				"span",
+				path="shell/search/row/kind",
+				styles=DIALOG_ROW_KIND_STYLES,
+				attributes={"data-row-kind": "1"},
+			),
+		],
+	)
+
+	hints = [
+		block(
+			"span",
+			path=f"shell/search/hint/{index}",
+			styles=HINT_STYLES,
+			children=[
+				*(
+					block(
+						"span",
+						path=f"shell/search/hint/{index}/key/{position}",
+						styles=KEY_STYLES,
+						html=key,
+					)
+					for position, key in enumerate(keys)
+				),
+				block("span", path=f"shell/search/hint/{index}/label", html=label),
+			],
+		)
+		for index, (keys, label) in enumerate(SEARCH_KEYS)
+	]
+
+	return block(
+		"div",
+		path="shell/search",
+		styles=OVERLAY_STYLES,
+		attributes={"data-search-overlay": "1", "hidden": "hidden"},
+		children=[
+			block(
+				"div",
+				path="shell/search/dialog",
+				styles=DIALOG_STYLES,
+				attributes={"role": "dialog", "aria-label": "Search"},
+				children=[
+					block(
+						"div",
+						path="shell/search/head",
+						styles=DIALOG_HEAD_STYLES,
+						children=[
+							block("span", path="shell/search/head/icon", html=ICON_SEARCH),
+							block(
+								"input",
+								path="shell/search/head/input",
+								styles=DIALOG_INPUT_STYLES,
+								attributes={
+									"type": "search",
+									"data-search-input": "1",
+									"placeholder": "Search or type a command",
+									# Not "Search" again: the dialog around it is already
+									# announced by that name, and a reader that says it
+									# twice has told you nothing the second time.
+									"aria-label": "What are you looking for",
+								},
+							),
+						],
+					),
+					block(
+						"div",
+						path="shell/search/results",
+						styles=DIALOG_BODY_STYLES,
+						attributes={"data-search-results": "1"},
+						children=[row],
+					),
+					# Only ever shown when the list is empty, which is a search that
+					# matched nothing: the script puts the server's wording here and
+					# hides it again the moment there is a row to read instead.
+					block(
+						"div",
+						path="shell/search/note",
+						styles=DIALOG_NOTE_STYLES,
+						attributes={"data-search-note": "1"},
+						html="Type to search your loan accounts, applications and documents",
+					),
+					block("div", path="shell/search/foot", styles=DIALOG_FOOT_STYLES, children=hints),
+				],
+			)
+		],
+	)
+
+
+def alerts_panel():
+	"""The panel the rail's bell drops down, beside the sidebar.
+
+	Two tabs over one list of rows, because the rows are one shape: the data layer
+	hands back what is waiting and what has happened in the same {title, note, when,
+	url} form, so switching tab re-renders the same block rather than a second one.
+	"""
+	tabs = [
+		block(
+			"button",
+			path=f"shell/alerts/tab/{name}",
+			styles=ALERTS_TAB_STYLES,
+			html=label,
+			attributes={
+				"type": "button",
+				"data-alerts-tab": name,
+				"aria-selected": "true" if name == "attention" else "false",
+			},
+		)
+		for name, label in (("attention", "Notifications"), ("activity", "Activity"))
+	]
+
+	row = block(
+		"a",
+		path="shell/alerts/row",
+		styles=ALERTS_ROW_STYLES,
+		attributes={"href": "#", "data-alerts-row": "1", "hidden": "hidden"},
+		children=[
+			block(
+				"span",
+				path="shell/alerts/row/dot",
+				styles=ALERTS_DOT_STYLES,
+				attributes={"data-row-dot": "1"},
+			),
+			block(
+				"span",
+				path="shell/alerts/row/mark",
+				styles=ALERTS_AVATAR_STYLES,
+				attributes={"data-row-mark": "1"},
+			),
+			block(
+				"span",
+				path="shell/alerts/row/body",
+				styles=ALERTS_ROW_BODY_STYLES,
+				children=[
+					block(
+						"span",
+						path="shell/alerts/row/title",
+						styles=ALERTS_ROW_TITLE_STYLES,
+						attributes={"data-row-title": "1"},
+					),
+					block(
+						"span",
+						path="shell/alerts/row/note",
+						styles=ALERTS_ROW_NOTE_STYLES,
+						attributes={"data-row-note": "1"},
+					),
+					block(
+						"span",
+						path="shell/alerts/row/when",
+						styles=ALERTS_ROW_WHEN_STYLES,
+						attributes={"data-row-when": "1"},
+					),
+				],
+			),
+		],
+	)
+
+	return block(
+		"aside",
+		path="shell/alerts",
+		styles=ALERTS_STYLES,
+		attributes={"data-alerts-panel": "1", "hidden": "hidden"},
+		children=[
+			block(
+				"div",
+				path="shell/alerts/head",
+				styles=ALERTS_HEAD_STYLES,
+				children=[
+					*tabs,
+					block("span", path="shell/alerts/head/spacer", styles=SPACER_STYLES),
+					block(
+						"button",
+						path="shell/alerts/head/read",
+						styles=ALERTS_ACTION_STYLES,
+						html=ICON_CHECK_CHECK,
+						attributes={
+							"type": "button",
+							"data-alerts-read": "1",
+							"aria-label": "Mark all as read",
+							"title": "Mark all as read",
+						},
+					),
+					block(
+						"button",
+						path="shell/alerts/head/close",
+						styles=ALERTS_ACTION_STYLES,
+						html=ICON_CLOSE,
+						attributes={"type": "button", "data-alerts-close": "1", "aria-label": "Close"},
+					),
+				],
+			),
+			block(
+				"div",
+				path="shell/alerts/body",
+				styles=ALERTS_BODY_STYLES,
+				attributes={"data-alerts-body": "1"},
+				children=[row],
+			),
+			block(
+				"div",
+				path="shell/alerts/note",
+				styles=ALERTS_NOTE_STYLES,
+				attributes={"data-alerts-note": "1"},
+				html="Reading your account…",
+			),
+		],
+	)
+
+
 def page_head():
 	"""The crumb, the note and the button label all arrive from the page's data script.
 
@@ -314,6 +611,10 @@ def tree():
 		children=[
 			rail(),
 			sidebar(),
+			# After the sidebar and before the main column: the panel is fixed, so it
+			# takes no width here, but SHELL_STATE_CSS finds it as the sidebar's own
+			# sibling to decide which side it is fixed to.
+			alerts_panel(),
 			block(
 				"div",
 				path="shell/main",
@@ -324,6 +625,7 @@ def tree():
 					footer(),
 				],
 			),
+			search_dialog(),
 		],
 	)
 

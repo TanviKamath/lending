@@ -357,8 +357,17 @@ def is_live(loan: dict) -> bool:
 	return loan.status in LIVE_STATUSES
 
 
+def status_label(loan: dict) -> str:
+	"""A loan's lifecycle status, in the words a borrower is meant to read.
+
+	Read from more than one page now, and a raw Loan.status leaking onto one of them is
+	exactly the wording PORTAL_PLAN.md section 6.7 is careful about.
+	"""
+	return STATUS_LABELS.get(loan.status, loan.status)
+
+
 def present_loan(loan: dict, show_customer: bool) -> dict:
-	label = STATUS_LABELS.get(loan.status, loan.status)
+	label = status_label(loan)
 	undrawn = undrawn_of(loan)
 	next_row = next_repayment_for(loan.name)
 

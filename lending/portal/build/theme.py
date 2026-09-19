@@ -175,6 +175,10 @@ SHIPPED = {
 	"surface-card": "#ffffff",
 	"surface-sunken": "#f8f8f8",
 	"surface-hover": "#f3f3f3",
+	# The same #ededed the desk reaches for as --surface-gray-3. A hover made of
+	# surface-hover is five units off surface-sunken, which on the rail and in the
+	# sidebar is a hover nobody can see; this is the step that reads against it.
+	"surface-hover-strong": "#ededed",
 	"border": "#ededed",
 	"border-strong": "#999999",
 	"ink": "#171717",
@@ -194,6 +198,7 @@ NEUTRALS = (
 	"surface-card",
 	"surface-sunken",
 	"surface-hover",
+	"surface-hover-strong",
 	"border",
 	"border-strong",
 	"ink",
@@ -217,8 +222,10 @@ SURFACE_PAGE = paint("surface-page")
 SURFACE_CARD = paint("surface-card")
 # The sidebar, a table head, the ground a card sits against.
 SURFACE_SUNKEN = paint("surface-sunken")
-# A row under the pointer.
+# A row under the pointer, on a card. And the same, for a control standing on the
+# sunken band, where the first one is too close to the ground it sits on to show.
 SURFACE_HOVER = paint("surface-hover")
+SURFACE_HOVER_STRONG = paint("surface-hover-strong")
 # A hairline, and the heavier edge a control takes when the pointer is over it.
 BORDER_COLOR = paint("border")
 BORDER_STRONG = paint("border-strong")
@@ -273,6 +280,9 @@ ICON_MONEY = ICON.format(
 	'<path d="M6 12h.01"/><path d="M18 12h.01"/>'
 )
 ICON_CHECK = ICON.format('<path d="m5 13 4 4 10-10"/>')
+ICON_CLOSE = ICON.format('<path d="M18 6 6 18"/><path d="m6 6 12 12"/>')
+# Lucide's check-check, which is the glyph the desk's own mark-all-as-read carries.
+ICON_CHECK_CHECK = ICON.format('<path d="M18 6 7 17l-5-5"/><path d="m22 10-7.5 7.5L13 16"/>')
 CHEVRON_LEFT = ICON.format('<path d="m15 18-6-6 6-6"/>')
 CHEVRON_RIGHT = ICON.format('<path d="m9 18 6-6-6-6"/>')
 
@@ -361,6 +371,12 @@ RAIL_DIVIDER_STYLES = {
 	"background": BORDER_COLOR,
 	"margin": "4px 0",
 }
+# The desk's workspace dock item, in the portal's own colours: a 28px square that is
+# nothing until the pointer is on it, and fades rather than snaps into being.
+#
+# The background is the whole of the hover. The glyph holds its colour throughout, as
+# the dock's own does -- an icon that darkens as well reads as two things happening at
+# once, and the square appearing behind it has already said everything.
 RAIL_ICON_STYLES = {
 	"width": "28px",
 	"height": "28px",
@@ -368,10 +384,12 @@ RAIL_ICON_STYLES = {
 	"flexShrink": "0",
 	"display": "grid",
 	"placeItems": "center",
+	"background": "transparent",
 	"color": INK_MUTED,
 	"textDecoration": "none",
-	"hover:background": SURFACE_HOVER,
-	"hover:color": INK,
+	"cursor": "pointer",
+	"transition": "background-color 0.15s ease",
+	"hover:background": SURFACE_HOVER_STRONG,
 }
 SPACER_STYLES = {"flex": "1 1 auto"}
 AVATAR_STYLES = {
@@ -477,13 +495,285 @@ NAV_ITEM_STYLES = {
 # its base styles, and that class's :hover rule -- which a tag and two attributes do.
 # Appended to the head after HEAD_HTML, where the rest of the portal's stylesheet is.
 
+# --- the two things the rail opens -------------------------------------------------
+#
+# The search dialog and the notifications panel belong to the frame rather than to any
+# page: they are written once into the shell component and the shared client script
+# brings them out. Both are built hidden, so where no script runs the rail's icons are
+# still plain links to /borrower/search and /borrower/notifications.
+
+OVERLAY_STYLES = {
+	"position": "fixed",
+	"top": "0",
+	"left": "0",
+	"width": "100vw",
+	"height": "100vh",
+	"zIndex": "60",
+	"display": "flex",
+	"justifyContent": "center",
+	"alignItems": "flex-start",
+	# 28px, which is the 1.75rem a bootstrap modal sits at, because that is where the
+	# desk's command box sits and this is meant to read as the same control.
+	"paddingTop": "28px",
+	# The dim arrives rather than appears. The desk drops a .modal-backdrop that fades
+	# over 150ms while the box itself does not -- awesome_bar.js takes .fade off the
+	# modal and leaves it on the backdrop -- so what transitions here is the colour and
+	# not the opacity of the overlay, which would take the dialog down with it. The
+	# shade the dim lands on is in SHELL_STATE_CSS, because the script owns the state.
+	"background": "transparent",
+	"transition": "background-color 0.15s linear",
+}
+DIALOG_STYLES = {
+	**COLUMN,
+	# 575px is the desk's $modal-md, which is what its own command box is wide. The
+	# whole control is meant to read as that one, so it takes that width rather than a
+	# width of its own.
+	"width": "min(575px, 92vw)",
+	"maxHeight": "70vh",
+	"background": SURFACE_CARD,
+	"borderRadius": "calc(var(--brand-radius,8px) * 1.5)",
+	"boxShadow": "0 12px 40px rgba(0, 0, 0, 0.22)",
+	"overflow": "hidden",
+}
+# 9px over and under a 15px line at the body's 1.5 leading is a 41px bar, which is the
+# height the desk's own command box comes to -- 8px of padding around a 28px control.
+DIALOG_HEAD_STYLES = {
+	**ROW_FLEX,
+	"gap": "12px",
+	"padding": "9px var(--portal-gap,16px)",
+	"color": INK_MUTED,
+	"borderBottom": BORDER,
+}
+# No border and no box: the dialog is the field, and a second outline inside it would
+# say there is something else on this screen to fill in. The type is the body size and
+# not a size up, because the desk's box sets what you type at the size of a form field.
+DIALOG_INPUT_STYLES = {
+	"flex": "1 1 auto",
+	"minWidth": "0",
+	"fontFamily": "inherit",
+	"fontSize": "var(--portal-text-md,15px)",
+	"color": INK,
+	"border": "none",
+	"outline": "none",
+	"background": "transparent",
+	"padding": "0",
+}
+# 12px around the list and 5px between the results, which is the rhythm the desk's
+# command box keeps. Not the portal gap token: the token is the page's spacing and this
+# list is meant to sit at the desk's.
+DIALOG_BODY_STYLES = {**COLUMN, "gap": "5px", "padding": "12px", "overflowY": "auto"}
+# A space between the name and what it is, not a gap: the pair reads as one phrase --
+# "Personal Loan Loan account" -- the way the desk reads "Loan Lead List".
+#
+# 6px over and under a 15px line at the body's 1.5 leading is a 34px result, which is
+# the height the desk's own results come to. The 8px at the sides puts the name 20px
+# in from the edge of the dialog, where the desk puts it.
+DIALOG_ROW_STYLES = {
+	**ROW_FLEX,
+	"gap": "5px",
+	"padding": "6px 8px",
+	"borderRadius": "var(--brand-radius,8px)",
+	"color": INK,
+	"textDecoration": "none",
+	"cursor": "pointer",
+}
+DIALOG_ROW_TITLE_STYLES = {"fontSize": "var(--portal-text-md,15px)", "fontWeight": "600"}
+DIALOG_ROW_KIND_STYLES = {"fontSize": "var(--portal-text-md,15px)", "color": INK_MUTED}
+DIALOG_NOTE_STYLES = {
+	"padding": "6px 20px 18px",
+	"fontSize": "var(--portal-text-md,15px)",
+	"color": INK_MUTED,
+}
+DIALOG_FOOT_STYLES = {
+	**ROW_FLEX,
+	"gap": "15px",
+	"flexWrap": "wrap",
+	"padding": "12px var(--portal-gap,16px)",
+	"borderTop": BORDER,
+	"background": SURFACE_SUNKEN,
+	"fontSize": "var(--portal-text-sm,13px)",
+	"color": INK_MUTED,
+}
+HINT_STYLES = {**ROW_FLEX, "gap": "5px"}
+# Filled rather than outlined, which is what the desk's own .help-item is: a key cap
+# reads as a solid thing to press, and an outline reads as another empty field.
+KEY_STYLES = {
+	"padding": "2px 5px",
+	"borderRadius": "4px",
+	"background": BORDER_COLOR,
+	"fontSize": "var(--portal-text-xs,11px)",
+	"fontWeight": "500",
+	"color": INK_MUTED,
+}
+
+# The bell's panel is the desk's notifications dropdown, redrawn in portal tokens. Every
+# number below is lifted from frappe/public/scss/desk/notification.scss so that a
+# borrower who has also seen the desk sees the same panel: 360px wide, the header's
+# hairline inset 10px rather than full-bleed, and rows that are 10px-inset cards.
+#
+# The colours are a rename, not a change. The desk's --text-color, --text-light,
+# --text-muted, --border-color and --fg-hover-color land on the same five values as
+# INK, INK_SUBTLE, INK_MUTED, BORDER_COLOR and SURFACE_HOVER -- see SHIPPED, which is
+# where those values are written down -- so the panel names the portal's palette and
+# still matches the desk shade for shade.
+#
+# The type is the one place this leaves the portal's scale. The desk sets rows in
+# --text-base/--font-weight-regular and timestamps in --text-xs -- 14px/420 and 12px --
+# and portal-text-md is 15px, portal-text-xs 11px. Copying the desk means copying its
+# sizes, so they are written out rather than taken from the scale; a panel at 15px is a
+# panel that only nearly matches. See SCALE_TOKENS for why the rest of the portal holds
+# at 15px.
+ALERTS_TEXT = "14px"
+ALERTS_TEXT_SMALL = "12px"
+# InterVariable's regular is 420 on the desk, not 400, and the letter-spacing comes off
+# the desk's get_letterspacing table: 0.02em at regular, tightening to 0.015em at medium.
+ALERTS_WEIGHT = "420"
+ALERTS_TRACKING = "0.02em"
+ALERTS_TRACKING_HEAVY = "0.015em"
+
+# Fixed rather than a column of the shell: opening the bell should not reflow the page
+# behind it. Which side it is fixed to depends on whether the sidebar is out, and that
+# is a state the script sets, so the `left` for both cases is in SHELL_STATE_CSS.
+ALERTS_STYLES = {
+	**COLUMN,
+	"position": "fixed",
+	"top": "0",
+	"height": "100vh",
+	"width": "min(360px, 100vw)",
+	"zIndex": "40",
+	"background": SURFACE_CARD,
+	"overflow": "hidden",
+	"boxShadow": "rgba(0, 0, 0, 0.1) 8px 0px 8px",
+}
+# Margin rather than padding, because the desk's header rule is `margin: 0px 10px`: the
+# hairline under it stops 10px short of each edge and lines up with the rows below it.
+ALERTS_HEAD_STYLES = {
+	**ROW_FLEX,
+	"margin": "0 10px",
+	"borderBottom": BORDER,
+	"flexShrink": "0",
+}
+# The tab's own hairline sits on top of the header's, hence the negative bottom margin.
+ALERTS_TAB_STYLES = {
+	"padding": "15px 0",
+	"marginRight": "20px",
+	"marginBottom": "-1px",
+	"border": "none",
+	"borderBottom": "1px solid transparent",
+	"background": "transparent",
+	"fontFamily": "inherit",
+	"fontSize": ALERTS_TEXT,
+	"fontWeight": "500",
+	"letterSpacing": ALERTS_TRACKING_HEAVY,
+	"color": INK_SUBTLE,
+	"cursor": "pointer",
+	"hover:color": INK,
+}
+ALERTS_ACTION_STYLES = {
+	"width": "26px",
+	"height": "26px",
+	"marginLeft": "4px",
+	"borderRadius": "6px",
+	"flexShrink": "0",
+	"display": "grid",
+	"placeItems": "center",
+	"border": "none",
+	"padding": "0",
+	"background": "transparent",
+	"color": INK_MUTED,
+	"cursor": "pointer",
+	"textDecoration": "none",
+	"hover:background": SURFACE_HOVER,
+	"hover:color": INK,
+}
+# No padding: the rows carry their own 10px margin, the way the desk's do.
+ALERTS_BODY_STYLES = {**COLUMN, "flex": "1 1 auto", "overflowY": "auto"}
+# A card rather than a full-bleed row, which is what makes the hover a rounded block
+# floating inside the panel instead of a band across it. Nothing on the left, because
+# the unread dot stands there and the desk's row is padded the same way.
+ALERTS_ROW_STYLES = {
+	"display": "flex",
+	"alignItems": "flex-start",
+	"gap": "10px",
+	"margin": "10px",
+	"padding": "10px 10px 10px 0",
+	"borderRadius": "var(--brand-radius,8px)",
+	"fontSize": ALERTS_TEXT,
+	"fontWeight": ALERTS_WEIGHT,
+	"letterSpacing": ALERTS_TRACKING,
+	"lineHeight": "20px",
+	"color": INK_SUBTLE,
+	"textDecoration": "none",
+	"hover:background": SURFACE_HOVER,
+	"hover:color": INK_MUTED,
+}
+# The desk's .notification-body::before: a 6px disc on the left of every row, standing
+# level with the first line of it, painted only while the row is unread.
+#
+# It is an element here rather than a ::before because the script has to turn it on and
+# off per row, and a block can only carry one state. The script hides it rather than
+# repainting it, so the colour stays here with the other colours. Whether the dot is
+# drawn is the one thing about this panel that the stylesheet in the page head would
+# normally own -- but that head is stored per page, and reaching it means rebuilding
+# all twelve and discarding whatever has been laid out on their canvases since.
+#
+# The desk paints its own dot var(--invert-neutral), which no stylesheet in frappe
+# defines: the desk's unread dot is invisible. INK is what that name was reaching for.
+ALERTS_DOT_STYLES = {
+	"width": "6px",
+	"height": "6px",
+	"minWidth": "6px",
+	"marginTop": "16px",
+	"marginLeft": "2px",
+	"borderRadius": "10px",
+	"flexShrink": "0",
+	"background": INK,
+}
+# The desk's avatar-medium, which notification.scss grows to 36px for this panel alone.
+ALERTS_AVATAR_STYLES = {
+	"width": "36px",
+	"height": "36px",
+	"borderRadius": "50%",
+	"flexShrink": "0",
+	"marginRight": "10px",
+	"background": f"var(--brand-mark-soft,{OK_SOFT})",
+	"color": f"var(--brand-mark-deep,{OK_DEEP})",
+	"display": "grid",
+	"placeItems": "center",
+	"fontSize": ALERTS_TEXT,
+	"fontWeight": ALERTS_WEIGHT,
+}
+# The desk's .message: the lines stack with nothing between them, and the 20px line
+# height off the row is what spaces them.
+ALERTS_ROW_BODY_STYLES = {**COLUMN, "minWidth": "0"}
+# What the desk's <b class="subject-title"> gets inside a notification: the same colour
+# as the line it sits in, one weight up.
+ALERTS_ROW_TITLE_STYLES = {"fontWeight": "500", "letterSpacing": ALERTS_TRACKING_HEAVY}
+# Plain message text: everything it needs is on the row, and saying so beats an empty
+# dict that reads like a style someone forgot to write.
+ALERTS_ROW_NOTE_STYLES = {"fontWeight": ALERTS_WEIGHT, "color": "inherit"}
+ALERTS_ROW_WHEN_STYLES = {"fontSize": ALERTS_TEXT_SMALL, "color": INK_MUTED}
+# The desk's .notification-null-state: not a line of text at the top of the panel but a
+# block held in the middle of it.
+ALERTS_NOTE_STYLES = {
+	"minHeight": "300px",
+	"display": "flex",
+	"alignItems": "center",
+	"placeContent": "center",
+	"padding": "0 var(--portal-card-pad,12px)",
+	"textAlign": "center",
+	"fontSize": ALERTS_TEXT,
+	"letterSpacing": ALERTS_TRACKING,
+	"color": INK_MUTED,
+}
+
 # Every rule the blocks cannot carry themselves: a state the script sets, or a position
 # that depends on another element. Appended to the head after HEAD_HTML, which is where
 # the rest of the portal's stylesheet lives.
 #
 # The nav rule has to outrank two things Builder writes for that same row -- the class
 # holding its base styles, and that class's :hover rule -- which a tag and two
-# attributes do.
+# attributes do. The others name an attribute the script owns, so nothing competes.
 SHELL_STATE_CSS = f"""
 <style>
 /* The sidebar row for the page being served. The rows are one block repeated over the
@@ -492,6 +782,42 @@ SHELL_STATE_CSS = f"""
 [data-portal-nav] a[aria-current="page"] {{
 	background: {SURFACE_CARD};
 	box-shadow: {ACTIVE_SHADOW};
+}}
+
+/* The notifications panel stands beside the sidebar, and follows it when it is shut.
+	Under the mobile breakpoint neither rail nor sidebar is there to stand beside. */
+[data-alerts-panel] {{ left: 270px; }}
+[data-sidebar][data-collapsed="1"] ~ [data-alerts-panel] {{ left: 50px; }}
+@media (max-width: 576px) {{
+	[data-alerts-panel] {{ left: 0; width: 100vw; }}
+}}
+
+/* The bell while its panel is out. The same square its own hover draws, held rather
+	than passing, which is what tells you the panel came from here. The glyph does not
+	change either way. */
+[data-alerts-open][aria-expanded="true"] {{ background: {SURFACE_HOVER_STRONG}; }}
+
+/* The tab in front of the other one. */
+[data-alerts-tab][aria-selected="true"] {{
+	color: {INK};
+	border-bottom-color: var(--brand-primary,#171717);
+}}
+
+/* The result the arrow keys are on. It is also what the pointer hovers, so the two
+	cannot both be styles on the block: one of them has to win, and it is this one. */
+[data-search-row][data-active="1"] {{ background: {SURFACE_HOVER}; }}
+
+/* The dim behind the search dialog, once the script has had a frame to turn it on --
+	a transition does not run on the frame an element stops being display:none. The
+	colour is the desk's own: $modal-backdrop-bg is --gray-800, which Espresso sets to
+	the 56 named here, and .modal-backdrop.show carries it at the 0.8. Named as an
+	rgba rather than a token because it is a scrim over the page and not a colour of
+	the portal, which is how the shadows above it are written too. */
+[data-search-overlay][data-shown="1"] {{ background: rgba(56, 56, 56, 0.8); }}
+
+/* Whoever asked for less movement gets the dim without the fade, not without the dim. */
+@media (prefers-reduced-motion: reduce) {{
+	[data-search-overlay] {{ transition: none; }}
 }}
 </style>
 """
@@ -1248,6 +1574,11 @@ INPUT_STYLES = {
 	"boxSizing": "border-box",
 	"hover:borderColor": BORDER_STRONG,
 }
+# The search page's one control. The box takes whatever width is going and the button
+# takes none, so the pair reads as one field rather than as two things side by side.
+SEARCH_ROW_STYLES = {**ROW_FLEX, "gap": "10px", "padding": "12px"}
+SEARCH_BOX_STYLES = {**INPUT_STYLES, "flex": "1 1 auto"}
+
 # An answer already given, shown back rather than asked for twice.
 ECHO_INPUT_STYLES = {**INPUT_STYLES, "background": SURFACE_HOVER, "color": INK_MUTED, "hover:borderColor": BORDER_COLOR}
 ECHO_NOTE_STYLES = {**ROW_FLEX, "gap": "5px", "fontSize": "var(--portal-text-xs,11px)", "fontWeight": "500", "color": OK_DEEP}
@@ -1579,6 +1910,12 @@ def progress_bar(steps):
 
 
 # --- panels, fields and buttons -----------------------------------------------------
+#
+# PANEL_* here is the apply wizard's step card, and has nothing to do with the bell's
+# notifications panel further up, which is ALERTS_*. They were both PANEL_* once: three
+# of the names collided, Python kept whichever was defined last, and the notifications
+# panel spent that time wearing this card's styles -- a column head and no width, in a
+# thing meant to be a fixed 360px rail. Keep the two prefixes apart.
 
 WIZARD_STYLES = {**COLUMN, "gap": "18px"}
 PANEL_STYLES = {

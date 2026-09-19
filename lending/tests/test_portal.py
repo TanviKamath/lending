@@ -24,6 +24,7 @@ records and nothing beside them.
 """
 
 import inspect
+import json
 import random
 import re
 from pathlib import Path
@@ -54,7 +55,8 @@ from lending.portal.apply import (
 	track_application,
 )
 from lending.portal.build import theme
-from lending.portal.build.shell import tree
+from lending.portal.build.script import CLIENT_SCRIPT
+from lending.portal.build.shell import SEARCH_ROUTE, tree
 from lending.portal.build.theme import (
 	NEUTRALS,
 	PORTAL_TOKENS,
@@ -86,7 +88,18 @@ from lending.portal.core import (
 	shell_payload,
 )
 from lending.portal.loans import get_loan_detail, get_loans_page
+from lending.portal.notifications import (
+	ATTENTION_LIMIT,
+	READ_KEY,
+	activity_rows,
+	attention_rows,
+	get_notifications,
+	mark_all_as_read,
+	read_keys,
+	row_key,
+)
 from lending.portal.profile import get_profile_page, save_profile
+from lending.portal.search import DIALOG_LIMIT, RESULT_LIMIT, find, get_search_page, results_note
 from lending.tests.test_utils import (
 	create_loan,
 	create_loan_accounts,
@@ -1392,6 +1405,326 @@ class TestPortalMenu(LendingTestSuite):
 		)
 
 
+class TestPortalRail(LendingTestSuite):
+	"""The two icons in the rail, and the pages behind them.
+
+	Both were links to "#" until these existed, so the first thing held open here is
+	that they go somewhere. The rest is what they answer with: a search that can only
+	return what this login already owns, and a notification list that separates what
+	the borrower has to do from what has merely happened.
+	"""
+
+	def setUp(self):
+		set_loan_settings_in_company()
+		create_loan_accounts()
+		setup_loan_demand_offset_order()
+		set_loan_accrual_frequency("Monthly")
+		create_loan_product(
+			PRODUCT,
+			PRODUCT,
+			500000,
+			8.4,
+			repayment_schedule_type="Monthly as per repayment start date",
+		)
+
+		make_website_user(ALPHA_USER)
+		make_website_user(BETA_USER)
+		make_portal_customer(ALPHA_CUSTOMER, ALPHA_USER)
+		make_portal_customer(BETA_CUSTOMER, BETA_USER)
+
+		self.alpha_loan = make_submitted_loan(ALPHA_CUSTOMER).name
+		self.beta_loan = make_submitted_loan(BETA_CUSTOMER).name
+		self.alpha_application = make_application(ALPHA_CUSTOMER)
+
+		frappe.db.commit()  # nosemgrep
+
+	def tearDown(self):
+		frappe.set_user("Administrator")
+		frappe.local.form_dict = frappe._dict()
+		super().tearDown()
+
+	def search(self, query: str) -> dict:
+		frappe.set_user(ALPHA_USER)
+		frappe.local.form_dict = frappe._dict({"q": query})
+
+		return get_search_page()
+
+	def search_dialog(self, query: str) -> dict:
+		frappe.set_user(ALPHA_USER)
+		frappe.local.form_dict = frappe._dict({"q": query})
+
+		return find()
+
+	# --- the rail -------------------------------------------------------------------
+
+	def marked(self, attribute: str) -> list[dict]:
+		"""Every block in the frame carrying `attribute`, wherever it sits in the tree."""
+		found = []
+
+		def walk(node):
+			if attribute in (node.get("attributes") or {}):
+				found.append(node)
+			for child in node.get("children") or []:
+				walk(child)
+
+		walk(tree())
+
+		return found
+
+	def test_the_frame_carries_the_dialog_and_the_panel_on_every_page(self):
+		"""Both live in the shared component, so no page can be missing one."""
+		for attribute in ("data-search-overlay", "data-alerts-panel"):
+			blocks = self.marked(attribute)
+
+			self.assertEqual(len(blocks), 1, attribute)
+			# Built shut. The rail's links are what a borrower gets with no script.
+			self.assertEqual(blocks[0]["attributes"].get("hidden"), "hidden", attribute)
+
+	def test_the_magnifier_leads_somewhere_and_the_bell_does_not_pretend_to(self):
+		"""The complaint the first half answers: an icon whose href is "#" does nothing.
+
+		The magnifier is one block carrying both: the script takes the click and opens
+		the dialog over the page, and the href is what happens where no script runs.
+		Found by the attribute the script looks for rather than by the label, because
+		the dialog is announced as "Search" too.
+
+		The bell has no page behind it any more, so it is a button. A link would be an
+		invitation to a route that would 404.
+		"""
+		magnifier = self.marked("data-search-open")
+
+		self.assertEqual(len(magnifier), 1)
+		self.assertEqual(magnifier[0]["attributes"]["href"], f"/{SEARCH_ROUTE}")
+
+		bell = self.marked("data-alerts-open")
+
+		self.assertEqual(len(bell), 1)
+		self.assertEqual(bell[0]["element"], "button")
+		self.assertNotIn("href", bell[0]["attributes"])
+
+	def test_each_list_carries_one_row_for_the_script_to_copy(self):
+		"""A hidden row in the markup is the template; theme keeps every style on it."""
+		for attribute in ("data-search-row", "data-alerts-row"):
+			rows = self.marked(attribute)
+
+			self.assertEqual(len(rows), 1, attribute)
+			self.assertEqual(rows[0]["attributes"].get("hidden"), "hidden", attribute)
+
+	def test_the_script_the_pages_ship_wires_both(self):
+		"""The blocks are inert markup until the shared script finds them."""
+		for hook in ("wireSearch", "wireAlerts", "data-search-overlay", "data-alerts-panel"):
+			self.assertIn(hook, CLIENT_SCRIPT)
+
+	def test_the_page_the_rail_opens_is_published(self):
+		self.assertIn(SEARCH_ROUTE, published_portal_routes())
+
+	def test_the_notifications_page_is_gone(self):
+		"""The panel says everything the page said, and a bell with two answers is one
+		answer too many. Asserted on the served routes rather than on the source,
+		because a Builder Page left published outlives the module that built it."""
+		self.assertNotIn("borrower/notifications", published_portal_routes())
+
+	# --- search ---------------------------------------------------------------------
+
+	def test_a_product_finds_loans_and_nothing_that_is_not_one(self):
+		"""Asserted on the answer rather than on the fixture: this database is not rolled
+		back between runs, so the borrower holds hundreds of loans by now and the one
+		this test made need not be among the first page of them."""
+		results = self.search(PRODUCT)["results"]
+
+		self.assertTrue(results)
+		for row in results:
+			self.assertIn(PRODUCT.lower(), " ".join(row.values()).lower())
+
+	def test_a_loan_is_found_by_its_number(self):
+		results = self.search(self.alpha_loan)["results"]
+
+		self.assertEqual([row["url"] for row in results], [f"/borrower/loan/{self.alpha_loan}"])
+
+	def test_an_application_is_found_and_opens_its_own_page(self):
+		results = self.search(self.alpha_application)["results"]
+
+		self.assertEqual(
+			[(row["kind"], row["url"]) for row in results],
+			[("Application", f"/borrower/application/{self.alpha_application}")],
+		)
+
+	def test_a_search_cannot_reach_another_borrowers_loan(self):
+		"""The one that matters. Search reads the same scoped lists every page reads."""
+		results = self.search(self.beta_loan)["results"]
+
+		self.assertEqual(results, [])
+
+	def test_every_word_has_to_match(self):
+		"""Two words narrow the answer; they do not widen it."""
+		self.assertTrue(self.search(PRODUCT)["results"])
+		self.assertEqual(self.search(f"{PRODUCT} nothing-matches-this")["results"], [])
+
+	def test_an_empty_box_opens_holding_somewhere_to_go(self):
+		"""The desk's command bar offers the places you can go before you type, and a
+		borrower with no loans yet has nothing else worth offering."""
+		payload = self.search("")
+
+		self.assertEqual(payload["query"], "")
+		self.assertEqual(
+			[row["url"] for row in payload["results"]],
+			[item["route"] for item in frappe.get_hooks("portal_menu_items")],
+		)
+		self.assertEqual({row["kind"] for row in payload["results"]}, {"Page"})
+		self.assertIn("Type to search", payload["results_note"])
+
+	def test_a_page_is_findable_by_name_like_anything_else(self):
+		"""The pages are in the same list the records are, so one query searches both."""
+		results = self.search("interest certificate")["results"]
+
+		self.assertEqual(
+			[(row["kind"], row["url"]) for row in results], [("Page", "/borrower/certificate")]
+		)
+
+	def test_a_search_that_matches_everything_is_cut_down(self):
+		"""Held open without the hundreds of records it would take to cause it."""
+		self.assertIn(str(RESULT_LIMIT), results_note("loan", RESULT_LIMIT + 10))
+		self.assertIn(str(RESULT_LIMIT + 10), results_note("loan", RESULT_LIMIT + 10))
+
+	def test_the_dialog_shows_five_where_the_page_shows_them_all(self):
+		"""The dialog is a peek over the page behind it; the page is the list. The menu
+		is longer than five, so an empty box is enough to tell the two apart."""
+		self.assertGreater(len(frappe.get_hooks("portal_menu_items")), DIALOG_LIMIT)
+
+		self.assertEqual(len(self.search_dialog("")["results"]), DIALOG_LIMIT)
+		self.assertGreater(len(self.search("")["results"]), DIALOG_LIMIT)
+
+	# --- notifications --------------------------------------------------------------
+
+	def test_a_draft_application_is_work_waiting_on_the_borrower(self):
+		"""A draft is the borrower's to submit, so it belongs on the list that asks."""
+		rows = attention_rows(
+			[
+				{"name": "APP-1", "product": PRODUCT, "note": "Submit to start the review",
+					"stage": "Action required", "needs_borrower": True},
+				{"name": "APP-2", "product": PRODUCT, "note": "", "stage": "Under review",
+					"needs_borrower": False},
+			],
+			[],
+		)
+
+		self.assertEqual([row["url"] for row in rows], ["/borrower/application/APP-1"])
+
+	def test_an_instalment_coming_due_is_on_the_list_too(self):
+		rows = attention_rows(
+			[], [{"product": PRODUCT, "detail": "Principal 900 · interest 100", "date": "12 Oct 2026", "amount": "1,000"}]
+		)
+
+		self.assertEqual(rows[0]["when"], "Due 12 Oct 2026 · 1,000")
+		self.assertEqual(rows[0]["url"], "/borrower/loans")
+
+	def test_the_borrowers_own_list_is_capped_and_says_how_long_it_really_is(self):
+		frappe.set_user(ALPHA_USER)
+		payload = get_notifications()
+
+		self.assertLessEqual(len(payload["attention"]), ATTENTION_LIMIT)
+		for row in payload["attention"]:
+			self.assertTrue(row["url"].startswith("/borrower/"))
+		self.assertTrue(
+			payload["attention_note"] == "Nothing to do" or "waiting on you" in payload["attention_note"]
+		)
+
+	def test_another_borrowers_work_is_not_on_this_ones_list(self):
+		frappe.set_user(BETA_USER)
+		urls = [row["url"] for row in get_notifications()["attention"]]
+
+		self.assertNotIn(f"/borrower/application/{self.alpha_application}", urls)
+
+	def test_what_has_happened_comes_out_in_the_same_shape_as_what_is_waiting(self):
+		"""One shape is what lets the two tabs share a single row block."""
+		rows = activity_rows(
+			[{"title": "Repayment received", "sub": PRODUCT, "date": "12 Sep 2026", "amount": "1,000"}]
+		)
+
+		self.assertEqual(
+			rows,
+			[
+				{
+					"title": "Repayment received",
+					"note": PRODUCT,
+					"when": "1,000 · 12 Sep 2026",
+					# A record of a repayment is still worth opening: it is a line of
+					# the statement. No row in either list is a dead end.
+					"url": "/borrower/statement",
+				}
+			],
+		)
+		self.assertEqual(
+			set(rows[0]),
+			set(attention_rows([], [{"product": "x", "detail": "y", "date": "z", "amount": "1"}])[0]),
+		)
+
+	# --- the double tick -------------------------------------------------------------
+
+	def test_every_row_says_whether_it_has_been_read(self):
+		"""The dot on the row is drawn from this and nothing else."""
+		frappe.set_user(ALPHA_USER)
+		payload = get_notifications()
+
+		for row in payload["attention"] + payload["activity"]:
+			self.assertIn("read", row)
+			self.assertIsInstance(row["read"], bool)
+
+	def test_the_double_tick_marks_everything_on_the_panel(self):
+		frappe.set_user(ALPHA_USER)
+		frappe.defaults.clear_user_default(READ_KEY)
+
+		before = get_notifications()
+		self.assertTrue(any(not row["read"] for row in before["attention"] + before["activity"]))
+
+		mark_all_as_read()
+		after = get_notifications()
+
+		self.assertTrue(all(row["read"] for row in after["attention"] + after["activity"]))
+
+	def test_a_row_that_changes_what_it_says_comes_back_unread(self):
+		"""A notification is only the same notification while it says the same thing:
+		an instalment whose amount moves is news again, and has to look like it."""
+		frappe.set_user(ALPHA_USER)
+		mark_all_as_read()
+		seen = read_keys()
+
+		row = {"title": PRODUCT, "note": "Principal 900", "when": "Due 12 Oct 2026 · 1,000", "url": "/borrower/loans"}
+		moved = dict(row, when="Due 12 Oct 2026 · 1,200")
+
+		self.assertNotEqual(row_key(row), row_key(moved))
+		self.assertNotIn(row_key(moved), seen)
+
+	def test_one_borrowers_double_tick_does_not_clear_anothers(self):
+		frappe.set_user(BETA_USER)
+		frappe.defaults.clear_user_default(READ_KEY)
+
+		frappe.set_user(ALPHA_USER)
+		mark_all_as_read()
+		self.assertTrue(read_keys())
+
+		frappe.set_user(BETA_USER)
+		self.assertEqual(read_keys(), set())
+
+	def test_the_double_tick_writes_only_what_the_server_can_see(self):
+		"""Nothing arrives from the browser, so there is nothing to forge: the keys are
+		recomputed from this borrower's own rows. It is also what prunes the list --
+		a key for a row that has dropped off the panel is simply not rewritten."""
+		frappe.set_user(ALPHA_USER)
+		frappe.defaults.set_user_default(READ_KEY, json.dumps(["stale-key-from-before"]))
+		mark_all_as_read()
+
+		self.assertNotIn("stale-key-from-before", read_keys())
+
+	def test_a_borrower_whose_marks_are_unreadable_is_not_an_error(self):
+		"""A hand-edited DefaultValue should cost a borrower their dots, not their page."""
+		frappe.set_user(ALPHA_USER)
+		frappe.defaults.set_user_default(READ_KEY, "not json")
+
+		self.assertEqual(read_keys(), set())
+		self.assertTrue(get_notifications()["activity_note"])
+
+
 class TestPortalScale(LendingTestSuite):
 	"""Stage 1 of PORTAL_DESIGN_PLAN.md: the size scale.
 
@@ -1427,12 +1760,33 @@ class TestPortalScale(LendingTestSuite):
 		"""The guard on the next person who adds a style.
 
 		A literal size is invisible: the page still renders, and the one block that
-		ignores the scale is the one nobody looks at. Three are allowed, and each is a
+		ignores the scale is the one nobody looks at. Five are allowed. Three are a
 		glyph centred in a circle of a fixed width, which cannot grow with the text.
-		"""
-		literals = re.findall(r'"fontSize": "(\d+px)"', theme_source())
+		The other two are the notifications panel, which is a copy of the desk's own
+		dropdown down to its type, and the desk sets that at 14px over a 12px
+		timestamp where the portal scale would put 15px over 11px.
 
-		self.assertEqual(sorted(literals), ["10px", "10px", "11px"])
+		Both spellings count: a size written into a style, and a size held in a name
+		that styles then point at. A constant is the honest way to say the panel is
+		off-scale on purpose, but it must not also be the way around this test.
+		"""
+		literals = re.findall(r'(?:"fontSize": "|^[A-Z][A-Z_]* = ")(\d+px)"', theme_source(), re.M)
+
+		self.assertEqual(sorted(literals), ["10px", "10px", "11px", "12px", "14px"])
+
+	def test_no_style_is_named_twice_in_the_file(self):
+		"""The guard on a file long enough to forget what is already in it.
+
+		A redefinition is not an error. Python keeps the last one, the page still
+		renders, and the block that named the earlier style silently wears the later
+		one. The notifications panel spent a while wearing the apply wizard's card
+		because both families called themselves PANEL_STYLES: the panel lost its fixed
+		position and its width, its header turned into a column, and every test here
+		still passed.
+		"""
+		names = re.findall(r"^([A-Z][A-Z0-9_]*) = ", theme_source(), re.M)
+
+		self.assertEqual(sorted({name for name in names if names.count(name) > 1}), [])
 
 	def test_the_fallback_beside_a_token_is_the_value_that_token_holds(self):
 		"""A fallback is what renders wherever the tokens have not been written yet.
@@ -1517,7 +1871,13 @@ class TestPortalPalette(LendingTestSuite):
 		five percent. That failure is what the second step in hue_shift is for.
 		"""
 		marks = ("ink", "ink-muted", "ink-subtle", "ink-faint", "border", "border-strong")
-		surfaces = ("surface-page", "surface-card", "surface-sunken", "surface-hover")
+		surfaces = (
+			"surface-page",
+			"surface-card",
+			"surface-sunken",
+			"surface-hover",
+			"surface-hover-strong",
+		)
 
 		for step in range(36):
 			shifted = {name: hue_shift(SHIPPED[name], step / 36) for name in NEUTRALS}
