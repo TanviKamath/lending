@@ -1,16 +1,16 @@
 {
  "creation": "2026-09-09 14:21:02.504119",
- "dark_value": "#0b1d51",
+ "dark_value": "#f8f8f8",
  "docstatus": 0,
  "doctype": "Builder Token",
  "group": null,
  "idx": 0,
  "is_standard": 0,
- "modified": "2026-09-18 14:38:57.102860",
+ "modified": "2026-09-20 03:19:02.259102",
  "modified_by": "Administrator",
  "name": "brand-primary",
  "owner": "Administrator",
  "token_name": "brand-primary",
  "type": "Color",
- "value": "#0b1d51"
+ "value": "#171717"
 }

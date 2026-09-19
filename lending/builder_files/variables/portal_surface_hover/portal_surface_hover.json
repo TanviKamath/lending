@@ -6,11 +6,11 @@
  "group": null,
  "idx": 0,
  "is_standard": 0,
- "modified": "2026-09-18 14:38:57.160945",
+ "modified": "2026-09-20 03:19:02.298187",
  "modified_by": "Administrator",
  "name": "portal-surface-hover",
  "owner": "Administrator",
  "token_name": "portal-surface-hover",
  "type": "Color",
- "value": "#f1f3f9"
+ "value": "#f3f3f3"
 }

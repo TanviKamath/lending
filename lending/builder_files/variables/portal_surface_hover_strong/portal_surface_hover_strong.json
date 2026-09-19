@@ -1,16 +1,16 @@
 {
- "creation": "2026-09-18 14:14:39.282969",
+ "creation": "2026-09-20 01:13:35.977488",
  "dark_value": null,
  "docstatus": 0,
  "doctype": "Builder Token",
  "group": null,
  "idx": 0,
  "is_standard": 0,
- "modified": "2026-09-20 03:19:02.323736",
+ "modified": "2026-09-20 03:19:02.306217",
  "modified_by": "Administrator",
- "name": "portal-border-strong",
+ "name": "portal-surface-hover-strong",
  "owner": "Administrator",
- "token_name": "portal-border-strong",
+ "token_name": "portal-surface-hover-strong",
  "type": "Color",
- "value": "#999999"
+ "value": "#ededed"
 }

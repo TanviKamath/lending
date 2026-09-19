@@ -6,11 +6,11 @@
  "group": null,
  "idx": 0,
  "is_standard": 0,
- "modified": "2026-09-18 14:38:57.228461",
+ "modified": "2026-09-20 03:19:02.349839",
  "modified_by": "Administrator",
  "name": "portal-ink-subtle",
  "owner": "Administrator",
  "token_name": "portal-ink-subtle",
  "type": "Color",
- "value": "#7a7c82"
+ "value": "#7c7c7c"
 }

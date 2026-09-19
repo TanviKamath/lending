@@ -6,11 +6,11 @@
  "group": null,
  "idx": 0,
  "is_standard": 0,
- "modified": "2026-09-18 14:38:57.174677",
+ "modified": "2026-09-20 03:19:02.315032",
  "modified_by": "Administrator",
  "name": "portal-border",
  "owner": "Administrator",
  "token_name": "portal-border",
  "type": "Color",
- "value": "#ebedf3"
+ "value": "#ededed"
 }

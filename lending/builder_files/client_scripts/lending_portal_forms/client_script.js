@@ -6,15 +6,38 @@
 	}
 
 	function post(endpoint, body) {
-		var options = { method: "POST", body: body };
+		var options = { method: "POST", body: body, headers: {} };
 		// A multipart body sets its own boundary in the Content-Type, so naming the
 		// header here would produce one without a boundary and the upload would fail.
 		if (!(body instanceof FormData)) {
-			options.headers = { "Content-Type": "application/x-www-form-urlencoded" };
+			options.headers["Content-Type"] = "application/x-www-form-urlencoded";
 			options.body = body.toString();
 		}
 
+		// frappe refuses an unsafe method from a signed-in session without this. The
+		// page does carry it: the website renderer writes frappe.csrf_token into the
+		// head of every rendered page, and a Builder page is rendered the same way.
+		// A guest session has no token and frappe asks for none, which is why the
+		// apply wizard has always posted without one.
+		var token = window.frappe && window.frappe.csrf_token;
+		if (token) options.headers["X-Frappe-CSRF-Token"] = token;
+
 		return fetch("/api/method/" + endpoint, options).then(function (response) {
+			return response.json().then(function (data) {
+				return { ok: response.ok, data: data };
+			});
+		});
+	}
+
+	// Reading is a GET. It is the honest method for an endpoint that changes nothing,
+	// and it is also the one frappe does not ask a CSRF token for -- which this page
+	// has no way to supply, having none of the frappe bundle that would carry it.
+	function get(endpoint, params) {
+		var query = new URLSearchParams(params || {}).toString();
+
+		return fetch("/api/method/" + endpoint + (query ? "?" + query : ""), {
+			headers: { Accept: "application/json" },
+		}).then(function (response) {
 			return response.json().then(function (data) {
 				return { ok: response.ok, data: data };
 			});
@@ -296,6 +319,274 @@
 			var collapsed = sidebar.dataset.collapsed !== "1";
 			apply(collapsed);
 			remember(SIDEBAR_KEY, collapsed ? "1" : "0");
+		});
+	}
+
+	// --- the two things the rail opens ---------------------------------------------
+	//
+	// Both are written into the shell hidden, and both have a page behind them: the
+	// rail's icons are real links, and these handlers only take the click when they
+	// are there to take it. Nothing below runs on a page that does not carry them.
+
+	// One row is in the markup; the rest are copies of it. Same trick as the offer
+	// grid above, and for the same reason -- every style stays in theme, and this
+	// only ever sets text.
+	function fillRows(list, template, rows, paint) {
+		list.querySelectorAll("[data-copy]").forEach(function (copy) {
+			copy.remove();
+		});
+
+		return rows.map(function (row) {
+			var node = template.cloneNode(true);
+			node.dataset.copy = "1";
+			paint(node, row);
+			node.hidden = false;
+			list.appendChild(node);
+			return node;
+		});
+	}
+
+	function text(node, selector, value) {
+		var slot = node.querySelector(selector);
+		if (slot) slot.textContent = value || "";
+	}
+
+	function wireSearch() {
+		var overlay = document.querySelector("[data-search-overlay]");
+		if (!overlay) return;
+
+		var input = overlay.querySelector("[data-search-input]");
+		var list = overlay.querySelector("[data-search-results]");
+		var note = overlay.querySelector("[data-search-note]");
+		var template = list.querySelector("[data-search-row]");
+		var rows = [];
+		var cursor = -1;
+		var timer = null;
+		// Answers can come back out of order. Only the newest one is allowed to land.
+		var asked = 0;
+
+		function mark() {
+			rows.forEach(function (row, index) {
+				if (index === cursor) row.dataset.active = "1";
+				else delete row.dataset.active;
+			});
+			if (rows[cursor]) rows[cursor].scrollIntoView({ block: "nearest" });
+		}
+
+		function show(results, message) {
+			rows = fillRows(list, template, results, function (node, result) {
+				text(node, "[data-row-title]", result.title);
+				text(node, "[data-row-kind]", result.kind);
+				node.href = result.url;
+			});
+			cursor = rows.length ? 0 : -1;
+			mark();
+			note.textContent = message;
+			note.hidden = rows.length > 0;
+		}
+
+		// An empty box is asked too. The server answers it with the pages the borrower
+		// can open, so the dialog comes up holding somewhere to go rather than a
+		// sentence repeating what the placeholder already said.
+		function look() {
+			var mine = ++asked;
+			get("lending.portal.search.find", { q: input.value.trim() })
+				.then(function (outcome) {
+					if (mine !== asked) return;
+					var payload = (outcome.ok && outcome.data.message) || { results: [] };
+					show(payload.results || [], payload.note || "");
+				})
+				.catch(function () {
+					if (mine === asked) show([], "We could not reach the server.");
+				});
+		}
+
+		function open() {
+			closeAlerts();
+			overlay.hidden = false;
+			// The dim fades, and a transition does not run on the frame the element
+			// stops being display:none: it needs one frame at the colour it starts
+			// from. The box itself is up straight away, which is what the desk does.
+			requestAnimationFrame(function () {
+				overlay.dataset.shown = "1";
+			});
+			input.value = "";
+			show([], "");
+			look();
+			input.focus();
+		}
+
+		function close() {
+			delete overlay.dataset.shown;
+			overlay.hidden = true;
+		}
+
+		overlay.searchClose = close;
+
+		document.querySelectorAll("[data-search-open]").forEach(function (button) {
+			button.addEventListener("click", function (event) {
+				event.preventDefault();
+				open();
+			});
+		});
+
+		input.addEventListener("input", function () {
+			// A keystroke is not a question. Waiting for the pause between them turns
+			// a typed word into one request rather than one per letter.
+			clearTimeout(timer);
+			timer = setTimeout(look, 180);
+		});
+
+		input.addEventListener("keydown", function (event) {
+			if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+				if (!rows.length) return;
+				event.preventDefault();
+				cursor = (cursor + (event.key === "ArrowDown" ? 1 : rows.length - 1)) % rows.length;
+				mark();
+			} else if (event.key === "Enter") {
+				event.preventDefault();
+				if (rows[cursor]) rows[cursor].click();
+			}
+		});
+
+		// Pressing the dimmed page is the other way of saying no.
+		overlay.addEventListener("click", function (event) {
+			if (event.target === overlay) close();
+		});
+
+		document.addEventListener("keydown", function (event) {
+			if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+				event.preventDefault();
+				overlay.hidden ? open() : close();
+			} else if (event.key === "Escape" && !overlay.hidden) {
+				close();
+			}
+		});
+	}
+
+	// The bell says whether its panel is out, so opening and shutting go through here
+	// rather than each caller remembering to turn the button over as well.
+	function setAlerts(open) {
+		var panel = document.querySelector("[data-alerts-panel]");
+		if (panel) panel.hidden = !open;
+
+		document.querySelectorAll("[data-alerts-open]").forEach(function (button) {
+			button.setAttribute("aria-expanded", open ? "true" : "false");
+		});
+	}
+
+	function closeAlerts() {
+		setAlerts(false);
+	}
+
+	function wireAlerts() {
+		var panel = document.querySelector("[data-alerts-panel]");
+		if (!panel) return;
+
+		var list = panel.querySelector("[data-alerts-body]");
+		var note = panel.querySelector("[data-alerts-note]");
+		var template = list.querySelector("[data-alerts-row]");
+		var tabs = panel.querySelectorAll("[data-alerts-tab]");
+		var lists = null;
+		var showing = "attention";
+
+		function paint(node, row) {
+			text(node, "[data-row-mark]", (row.title || "?").charAt(0).toUpperCase());
+			text(node, "[data-row-title]", row.title);
+			text(node, "[data-row-note]", row.note);
+			text(node, "[data-row-when]", row.when);
+			node.href = row.url;
+
+			// Hidden rather than unpainted, so the dot keeps its 6px either way and the
+			// text of a read row starts where the text of an unread one does. The colour
+			// stays in the theme; this only says whether to draw it.
+			var dot = node.querySelector("[data-row-dot]");
+			if (dot) dot.style.visibility = row.read ? "hidden" : "visible";
+		}
+
+		// Both lists at once, which is what the button says it does. The cached lists
+		// are turned over too: switching tab re-renders from them, and a dot that came
+		// back after being cleared would look like the server had refused.
+		function markAllRead() {
+			["attention", "activity"].forEach(function (name) {
+				((lists && lists[name]) || []).forEach(function (row) {
+					row.read = true;
+				});
+			});
+			show(showing);
+
+			post("lending.portal.notifications.mark_all_as_read", new URLSearchParams()).catch(
+				function () {
+					// The dots are already gone and the next open re-reads the truth from
+					// the server, so there is nothing here worth interrupting a borrower
+					// over: the worst case is that they come back.
+				}
+			);
+		}
+
+		function show(name) {
+			showing = name;
+			tabs.forEach(function (tab) {
+				tab.setAttribute("aria-selected", tab.dataset.alertsTab === name ? "true" : "false");
+			});
+
+			var rows = (lists && lists[name]) || [];
+			fillRows(list, template, rows, paint);
+			note.textContent = (lists && lists[name + "_note"]) || "";
+			note.hidden = rows.length > 0;
+		}
+
+		function load() {
+			if (lists) return show(showing);
+
+			get("lending.portal.notifications.get_notifications")
+				.then(function (outcome) {
+					lists = (outcome.ok && outcome.data.message) || {};
+					show(showing);
+				})
+				.catch(function () {
+					note.textContent = "We could not reach the server.";
+					note.hidden = false;
+				});
+		}
+
+		function open() {
+			var overlay = document.querySelector("[data-search-overlay]");
+			if (overlay && overlay.searchClose) overlay.searchClose();
+			setAlerts(true);
+			load();
+		}
+
+		document.querySelectorAll("[data-alerts-open]").forEach(function (button) {
+			button.addEventListener("click", function (event) {
+				event.preventDefault();
+				panel.hidden ? open() : closeAlerts();
+			});
+		});
+
+		panel.querySelectorAll("[data-alerts-close]").forEach(function (button) {
+			button.addEventListener("click", closeAlerts);
+		});
+
+		panel.querySelectorAll("[data-alerts-read]").forEach(function (button) {
+			button.addEventListener("click", markAllRead);
+		});
+
+		tabs.forEach(function (tab) {
+			tab.addEventListener("click", function () {
+				show(tab.dataset.alertsTab);
+			});
+		});
+
+		document.addEventListener("keydown", function (event) {
+			if (event.key === "Escape") closeAlerts();
+		});
+
+		// Anywhere outside it, including the page it is standing over.
+		document.addEventListener("click", function (event) {
+			if (panel.hidden) return;
+			if (panel.contains(event.target) || event.target.closest("[data-alerts-open]")) return;
+			closeAlerts();
 		});
 	}
 
@@ -596,6 +887,8 @@
 
 	ready(function () {
 		wireSidebar();
+		wireSearch();
+		wireAlerts();
 		wireReveals();
 		wireForms();
 		wireApply();
