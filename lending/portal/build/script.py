@@ -38,13 +38,21 @@ CLIENT_SCRIPT = """
 	}
 
 	function post(endpoint, body) {
-		var options = { method: "POST", body: body };
+		var options = { method: "POST", body: body, headers: {} };
 		// A multipart body sets its own boundary in the Content-Type, so naming the
 		// header here would produce one without a boundary and the upload would fail.
 		if (!(body instanceof FormData)) {
-			options.headers = { "Content-Type": "application/x-www-form-urlencoded" };
+			options.headers["Content-Type"] = "application/x-www-form-urlencoded";
 			options.body = body.toString();
 		}
+
+		// frappe refuses an unsafe method from a signed-in session without this. The
+		// page does carry it: the website renderer writes frappe.csrf_token into the
+		// head of every rendered page, and a Builder page is rendered the same way.
+		// A guest session has no token and frappe asks for none, which is why the
+		// apply wizard has always posted without one.
+		var token = window.frappe && window.frappe.csrf_token;
+		if (token) options.headers["X-Frappe-CSRF-Token"] = token;
 
 		return fetch("/api/method/" + endpoint, options).then(function (response) {
 			return response.json().then(function (data) {
