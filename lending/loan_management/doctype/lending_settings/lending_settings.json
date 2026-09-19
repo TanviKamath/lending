@@ -73,9 +73,11 @@
    "fieldtype": "Column Break"
   },
   {
+   "description": "Served to every visitor, so the upload is public. A private attachment answers 403 and the portal shows a broken image.",
    "fieldname": "portal_logo",
    "fieldtype": "Attach Image",
-   "label": "Portal Logo"
+   "label": "Portal Logo",
+   "make_attachment_public": 1
   },
   {
    "description": "Buttons, the focus ring and a chosen answer. The text on it is worked out from it.",
@@ -94,7 +96,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-09-18 11:00:00.000000",
+ "modified": "2026-09-18 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Lending Settings",
