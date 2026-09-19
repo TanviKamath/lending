@@ -60,27 +60,11 @@ APPLICATION_STAGES = {
 
 
 def assert_portal_enabled():
-	"""Refuse every portal route unless the lender has switched the portal on.
-
-	A 404 and not a 403. "Not permitted" confirms the page is there, and a lender who
-	turned the portal off wants it gone rather than hidden. frappe.PageDoesNotExistError
-	is what website/serve.py maps to the not-found page, so raising it from a Builder
-	data script renders the same 404 as a route that was never registered.
-	"""
 	if not frappe.db.get_single_value("Lending Settings", "enable_borrower_portal"):
 		raise frappe.PageDoesNotExistError
 
 
 def assert_public_apply_enabled():
-	"""Refuse the public application form unless both switches are on.
-
-	Applying ends by creating a login and landing the borrower on /borrower/overview,
-	so a public funnel into a portal that is switched off leads nowhere. The portal
-	switch therefore governs this one too.
-
-	/track is deliberately not behind this. A lead keyed in by a sales rep still
-	deserves a tracker, so the tracker follows the portal switch alone.
-	"""
 	assert_portal_enabled()
 
 	if not frappe.db.get_single_value("Lending Settings", "enable_public_apply"):
@@ -88,15 +72,6 @@ def assert_public_apply_enabled():
 
 
 def get_portal_customers() -> list[str]:
-	"""Every Customer record that lists the logged-in user in its Portal Users table.
-
-	One login maps to many customers, so this returns a list. See PORTAL_PLAN.md
-	section 7: dropping the extra records silently hides a borrower's own loans.
-
-	The portal switch is checked here rather than on each page, because this is the one
-	call every signed-in page and every borrower write already makes. A check copied
-	into eleven modules is a check that gets missed in the twelfth.
-	"""
 	assert_portal_enabled()
 
 	user = frappe.session.user
@@ -120,11 +95,6 @@ def assert_owns(doctype: str, name: str) -> str:
 
 
 def clean(value) -> str:
-	"""Text as it arrived from a browser, stripped of markup and whitespace.
-
-	Every portal endpoint that reads a value from the request runs it through this
-	first, so there is one place to harden rather than one per module.
-	"""
 	return frappe.utils.strip_html(str(value or "")).strip()
 
 
@@ -145,12 +115,7 @@ def days_until(value) -> int:
 
 
 def shell_payload(crumb: str, action_label: str, customers: list[str], loans: list[dict]) -> dict:
-	"""The keys the portal shell binds, which every page owes it.
 
-	The shell is one Builder Component shared by every route, so each page's endpoint
-	answers for the same frame: who is signed in, how many customer records they hold,
-	what this page is called and where its header button goes.
-	"""
 	return {
 		"as_on": long_date(nowdate()),
 		**brand_payload(),

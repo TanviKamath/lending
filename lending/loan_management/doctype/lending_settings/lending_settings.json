@@ -42,7 +42,7 @@
   },
   {
    "default": "0",
-   "description": "Serves the borrower portal. Off, every /borrower page and the public application form return 404. Off is the default: a portal is a public surface, so a lender switches it on rather than finding it switched on after an upgrade.",
+   "description": "Serves the borrower portal.",
    "fieldname": "enable_borrower_portal",
    "fieldtype": "Check",
    "label": "Enable Borrower Portal"
@@ -94,7 +94,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-09-18 10:00:00.000000",
+ "modified": "2026-09-18 11:00:00.000000",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Lending Settings",

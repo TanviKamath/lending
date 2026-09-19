@@ -76,11 +76,6 @@ def get_loans_page() -> dict:
 
 @frappe.whitelist()
 def get_loan_detail() -> dict:
-	"""One loan: its terms, its schedule, what was drawn, what it costs to close.
-
-	The loan name arrives from the route, so it is checked against the borrower's own
-	customers before it is used. Nothing here trusts the URL.
-	"""
 	name = frappe.form_dict.get("name")
 	if not name:
 		raise frappe.PermissionError(_("Not permitted"))
@@ -147,11 +142,6 @@ def current_schedule(loan: str) -> str | None:
 
 
 def demands_by_instalment(loan: str) -> dict:
-	"""What has actually been demanded and settled, keyed by schedule row.
-
-	Loan Demand carries the truth about an instalment. The schedule alone only says
-	what was planned, so "paid" is read from the demand, never inferred from a date.
-	"""
 	index = {}
 	rows = frappe.get_all(
 		"Loan Demand",
@@ -171,7 +161,6 @@ def demands_by_instalment(loan: str) -> dict:
 
 
 def instalment_state(row: dict, demands: dict) -> str:
-	"""Paid, due or upcoming -- and overdue said plainly, without a risk grade."""
 	entry = demands.get(row.name)
 	if not entry:
 		return _("Upcoming")
@@ -187,8 +176,6 @@ def schedule_rows(loan: str) -> list[dict]:
 	if not schedule:
 		return []
 
-	# Repayment Schedule is a child table with no permission rules of its own, and the
-	# parent schedule already belongs to a loan this borrower was proven to own.
 	rows = frappe.get_all(
 		"Repayment Schedule",
 		filters={"parent": schedule, "parenttype": "Loan Repayment Schedule"},

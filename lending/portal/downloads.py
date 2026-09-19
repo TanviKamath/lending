@@ -51,11 +51,6 @@ def as_download(html: str, filename: str):
 
 @frappe.whitelist()
 def download_statement():
-	"""The statement on screen, as a PDF, for the same period the page is showing.
-
-	The page passes its own filters through in the link, so a borrower looking at
-	last quarter downloads last quarter rather than the default period.
-	"""
 	payload = get_statement_page()
 	period = _("{0} to {1}").format(
 		long_date(payload["from_date"]), long_date(payload["to_date"])
@@ -83,13 +78,6 @@ def download_statement():
 
 @frappe.whitelist()
 def download_certificate():
-	"""The interest certificate as a PDF.
-
-	It prints amounts paid and nothing else. Section 6.10 of the plan is explicit:
-	no tax figure, no section of the Act, no relief computed. The app holds no tax
-	logic, and a wrong number on a document somebody files with their return is a
-	real liability.
-	"""
 	payload = get_certificate_page()
 
 	html = render(

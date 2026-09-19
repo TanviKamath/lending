@@ -102,13 +102,6 @@ MINIMUM_PASSWORD_LENGTH = 8
 
 @frappe.whitelist(allow_guest=True)
 def get_apply_page() -> dict:
-	"""Products a visitor can browse, plus every word the page shows.
-
-	show_on_portal and not disabled. They answer different questions: disabled means
-	nobody may take this product, show_on_portal means nobody is told it exists. A
-	lender needs the second one on its own, for a staff-only product and for the test
-	records every bench carries.
-	"""
 	assert_public_apply_enabled()
 
 	products = frappe.get_all(
@@ -186,11 +179,6 @@ def get_apply_page() -> dict:
 
 @frappe.whitelist(allow_guest=True)
 def get_track_page() -> dict:
-	"""Copy for the public tracker. It needs no records, only words.
-
-	A data script runs under safe_exec, where _() is unavailable, so even a page whose
-	content is entirely static reads its wording from here to stay translatable.
-	"""
 	assert_portal_enabled()
 
 	return {
@@ -228,7 +216,6 @@ def mask(number: str) -> str:
 
 
 def telephony_otp():
-	"""The telephony app owns the codes; Loan Lead only ever held their status."""
 	if "telephony" not in frappe.get_installed_apps():
 		frappe.throw(_("Mobile verification is not switched on. Please try again later."))
 
@@ -240,12 +227,6 @@ def telephony_otp():
 @frappe.whitelist(allow_guest=True, methods=["POST"])
 @rate_limit(limit=5, seconds=60 * 60, ip_based=True)
 def send_mobile_code() -> dict:
-	"""Send a code to the number the visitor typed.
-
-	Two limits stack here. This one caps how many numbers a single address may try,
-	which is the flooding case. The telephony app caps how many codes one number may
-	receive, which is the harassment case. Neither alone is enough.
-	"""
 	assert_public_apply_enabled()
 
 	mobile = with_country_code(clean(frappe.form_dict.get("mobile_number")))
