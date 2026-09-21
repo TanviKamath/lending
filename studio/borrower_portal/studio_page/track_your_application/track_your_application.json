@@ -1,0 +1,480 @@
+{
+ "allow_guest": 1,
+ "blocks": [
+  {
+   "baseStyles": {
+    "display": "flex",
+    "flexDirection": "column",
+    "height": "100%",
+    "overflowX": "hidden",
+    "width": "100%"
+   },
+   "blockName": "body",
+   "children": [
+    {
+     "baseStyles": {
+      "display": "flex",
+      "flexDirection": "column",
+      "height": "100%",
+      "overflowY": "auto",
+      "width": "100%"
+     },
+     "children": [
+      {
+       "baseStyles": {
+        "alignItems": "center",
+        "borderColor": "var(--outline-gray-2)",
+        "borderStyle": "solid",
+        "borderWidth": "0px 0px 1px 0px",
+        "display": "flex",
+        "flexDirection": "row",
+        "gap": "8px",
+        "padding": "12px 20px",
+        "width": "100%"
+       },
+       "children": [
+        {
+         "baseStyles": {
+          "fontWeight": "600"
+         },
+         "children": [],
+         "componentName": "TextBlock",
+         "componentProps": {
+          "fontSize": "text-lg",
+          "tag": "span",
+          "text": "{{ track.data.brand_name }}"
+         }
+        },
+        {
+         "baseStyles": {
+          "flex": "1 1 auto"
+         },
+         "children": [],
+         "componentName": "container",
+         "originalElement": "div"
+        },
+        {
+         "children": [],
+         "componentEvents": {
+          "click": {
+           "action": "Run Script",
+           "event": "click",
+           "script": "window.location.href = '/apply'"
+          }
+         },
+         "componentName": "Button",
+         "componentProps": {
+          "label": "Apply for a loan",
+          "size": "sm",
+          "variant": "ghost"
+         }
+        },
+        {
+         "children": [],
+         "componentEvents": {
+          "click": {
+           "action": "Run Script",
+           "event": "click",
+           "script": "window.location.href = '/login'"
+          }
+         },
+         "componentName": "Button",
+         "componentProps": {
+          "label": "Log in",
+          "size": "sm",
+          "variant": "ghost"
+         }
+        }
+       ],
+       "componentName": "container",
+       "originalElement": "div"
+      },
+      {
+       "baseStyles": {
+        "display": "flex",
+        "flexDirection": "column",
+        "gap": "16px",
+        "margin": "0 auto",
+        "maxWidth": "720px",
+        "padding": "24px 20px",
+        "width": "100%"
+       },
+       "children": [
+        {
+         "baseStyles": {
+          "fontWeight": "600"
+         },
+         "children": [],
+         "componentName": "TextBlock",
+         "componentProps": {
+          "fontSize": "text-5xl",
+          "tag": "h1",
+          "text": "{{ track.data.heading }}"
+         }
+        },
+        {
+         "baseStyles": {
+          "color": "var(--ink-gray-6)"
+         },
+         "children": [],
+         "componentName": "TextBlock",
+         "componentProps": {
+          "fontSize": "text-p-xs",
+          "tag": "p",
+          "text": "{{ track.data.intro }}"
+         }
+        },
+        {
+         "baseStyles": {
+          "backgroundColor": "var(--surface-base)",
+          "borderColor": "var(--outline-gray-2)",
+          "borderRadius": "0.5rem",
+          "borderStyle": "solid",
+          "borderWidth": "1px",
+          "display": "flex",
+          "flexDirection": "column",
+          "gap": "12px",
+          "padding": "16px"
+         },
+         "children": [
+          {
+           "baseStyles": {
+            "display": "flex",
+            "flexDirection": "column",
+            "gap": "2px"
+           },
+           "children": [
+            {
+             "baseStyles": {
+              "fontWeight": "600"
+             },
+             "children": [],
+             "componentName": "TextBlock",
+             "componentProps": {
+              "fontSize": "text-lg",
+              "tag": "h2",
+              "text": "Find your application"
+             }
+            },
+            {
+             "baseStyles": {
+              "color": "var(--ink-gray-6)"
+             },
+             "children": [],
+             "componentName": "TextBlock",
+             "componentProps": {
+              "fontSize": "text-p-xs",
+              "tag": "p",
+              "text": "{{ track.data.track_note }}"
+             }
+            }
+           ],
+           "componentName": "container",
+           "originalElement": "div"
+          },
+          {
+           "baseStyles": {
+            "display": "flex",
+            "flexDirection": "column",
+            "gap": "12px"
+           },
+           "children": [
+            {
+             "baseStyles": {
+              "alignItems": "end",
+              "display": "flex",
+              "flexDirection": "row",
+              "gap": "12px"
+             },
+             "children": [
+              {
+               "baseStyles": {
+                "flex": "1",
+                "minWidth": "0px"
+               },
+               "children": [],
+               "componentName": "FormControl",
+               "componentProps": {
+                "label": "Reference number",
+                "modelValue": {
+                 "$type": "variable",
+                 "name": "reference"
+                },
+                "placeholder": "LEAD-0001",
+                "type": "text"
+               }
+              },
+              {
+               "baseStyles": {
+                "flex": "1",
+                "minWidth": "0px"
+               },
+               "children": [],
+               "componentName": "FormControl",
+               "componentProps": {
+                "label": "Mobile number",
+                "modelValue": {
+                 "$type": "variable",
+                 "name": "mobileNumber"
+                },
+                "placeholder": "98765 43210",
+                "type": "tel"
+               }
+              }
+             ],
+             "componentName": "container",
+             "originalElement": "div"
+            },
+            {
+             "children": [],
+             "componentEvents": {
+              "click": {
+               "action": "Run Script",
+               "event": "click",
+               "script": "track()"
+              }
+             },
+             "componentName": "Button",
+             "componentProps": {
+              "label": "Show me where it is",
+              "size": "sm",
+              "variant": "solid"
+             }
+            }
+           ],
+           "componentName": "container",
+           "originalElement": "div"
+          }
+         ],
+         "componentName": "container",
+         "originalElement": "div"
+        },
+        {
+         "baseStyles": {
+          "backgroundColor": "var(--surface-base)",
+          "borderColor": "var(--outline-gray-2)",
+          "borderRadius": "0.5rem",
+          "borderStyle": "solid",
+          "borderWidth": "1px",
+          "display": "flex",
+          "flexDirection": "column",
+          "gap": "12px",
+          "padding": "16px"
+         },
+         "children": [
+          {
+           "baseStyles": {
+            "display": "flex",
+            "flexDirection": "column",
+            "gap": "2px"
+           },
+           "children": [
+            {
+             "baseStyles": {
+              "fontWeight": "600"
+             },
+             "children": [],
+             "componentName": "TextBlock",
+             "componentProps": {
+              "fontSize": "text-lg",
+              "tag": "h2",
+              "text": "{{ result.headline }}"
+             }
+            },
+            {
+             "baseStyles": {
+              "color": "var(--ink-gray-6)"
+             },
+             "children": [],
+             "componentName": "TextBlock",
+             "componentProps": {
+              "fontSize": "text-p-xs",
+              "tag": "p",
+              "text": "{{ result.message }}"
+             }
+            }
+           ],
+           "componentName": "container",
+           "originalElement": "div"
+          },
+          {
+           "baseStyles": {
+            "display": "flex",
+            "flexDirection": "column",
+            "gap": "12px"
+           },
+           "children": [
+            {
+             "baseStyles": {
+              "display": "flex",
+              "flexDirection": "row",
+              "gap": "12px"
+             },
+             "children": [
+              {
+               "baseStyles": {
+                "display": "flex",
+                "flex": "1",
+                "flexDirection": "column",
+                "gap": "2px",
+                "minWidth": "0px"
+               },
+               "children": [
+                {
+                 "baseStyles": {
+                  "alignItems": "center",
+                  "display": "flex",
+                  "flexDirection": "row",
+                  "gap": "6px"
+                 },
+                 "children": [
+                  {
+                   "baseStyles": {
+                    "color": "var(--ink-gray-6)"
+                   },
+                   "children": [],
+                   "componentName": "TextBlock",
+                   "componentProps": {
+                    "fontSize": "text-p-xs",
+                    "tag": "p",
+                    "text": "{{ dataItem.mark }}"
+                   }
+                  },
+                  {
+                   "children": [],
+                   "componentName": "TextBlock",
+                   "componentProps": {
+                    "fontSize": "text-base",
+                    "tag": "p",
+                    "text": "{{ dataItem.title }}"
+                   }
+                  }
+                 ],
+                 "componentName": "container",
+                 "originalElement": "div"
+                },
+                {
+                 "baseStyles": {
+                  "color": "var(--ink-gray-6)"
+                 },
+                 "children": [],
+                 "componentName": "TextBlock",
+                 "componentProps": {
+                  "fontSize": "text-p-xs",
+                  "tag": "p",
+                  "text": "{{ dataItem.note }}"
+                 }
+                }
+               ],
+               "componentName": "container",
+               "originalElement": "div"
+              }
+             ],
+             "componentName": "Repeater",
+             "componentProps": {
+              "data": "{{ result.steps }}",
+              "dataKey": "title",
+              "emptyStateMessage": ""
+             },
+             "mobileStyles": {
+              "flexDirection": "column"
+             }
+            },
+            {
+             "children": [
+              {
+               "baseStyles": {
+                "display": "flex",
+                "flexDirection": "column",
+                "gap": "2px",
+                "padding": "8px 0"
+               },
+               "children": [
+                {
+                 "baseStyles": {
+                  "color": "var(--ink-gray-6)"
+                 },
+                 "children": [],
+                 "componentName": "TextBlock",
+                 "componentProps": {
+                  "fontSize": "text-p-xs",
+                  "tag": "p",
+                  "text": "{{ dataItem.label }}"
+                 }
+                },
+                {
+                 "children": [],
+                 "componentName": "TextBlock",
+                 "componentProps": {
+                  "fontSize": "text-base",
+                  "tag": "p",
+                  "text": "{{ dataItem.value }}"
+                 }
+                }
+               ],
+               "componentName": "container",
+               "originalElement": "div"
+              }
+             ],
+             "componentName": "Repeater",
+             "componentProps": {
+              "data": "{{ result.offer }}",
+              "dataKey": "label",
+              "emptyStateMessage": "Nothing to show"
+             }
+            },
+            {
+             "children": [],
+             "componentName": "Alert",
+             "componentProps": {
+              "theme": "blue",
+              "title": "{{ result.reference_note }}"
+             }
+            }
+           ],
+           "componentName": "container",
+           "originalElement": "div"
+          }
+         ],
+         "componentName": "container",
+         "originalElement": "div",
+         "visibilityCondition": "{{ result.reference }}"
+        }
+       ],
+       "componentName": "container",
+       "originalElement": "div"
+      }
+     ],
+     "componentName": "container",
+     "originalElement": "div"
+    }
+   ],
+   "componentName": "div",
+   "originalElement": "body"
+  }
+ ],
+ "creation": "2026-09-21 17:39:41.195168",
+ "doctype": "Studio Page",
+ "frappe_app": "lending",
+ "is_standard": 1,
+ "modified": "2026-09-21 23:14:51.417141",
+ "modified_by": "Administrator",
+ "name": "track_your_application",
+ "owner": "Administrator",
+ "page_name": "page-df94d066",
+ "page_title": "Track your application",
+ "published": 1,
+ "resources": [
+  {
+   "__unsaved": 1,
+   "auto": 1,
+   "method": "GET",
+   "resource_name": "track",
+   "resource_type": "API Resource",
+   "url": "lending.portal.apply.get_track_page"
+  }
+ ],
+ "route": "/track",
+ "studio_app": "borrower-portal",
+ "variables": []
+}

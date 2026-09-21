@@ -1,0 +1,17 @@
+import { computed, ref, watch } from "vue"
+import { call, toast } from "frappe-ui"
+import { tone, appRoute } from "@app/utils/portal"
+
+export default function setup(context: any) {
+	const { router } = context
+	const showAlerts = ref(false)
+	const alertsTab = ref("attention")
+	const previewTab = ref("terms")
+
+	const open = (url?: string) => {
+		const to = appRoute(url)
+		if (to) router.push(to)
+	}
+
+	return { tone, open, showAlerts, alertsTab, previewTab }
+}

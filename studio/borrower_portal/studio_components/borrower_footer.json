@@ -1,0 +1,116 @@
+{
+ "block": {
+  "baseStyles": {
+   "alignItems": "center",
+   "borderColor": "var(--outline-gray-2)",
+   "borderStyle": "solid",
+   "borderWidth": "1px 0px 0px 0px",
+   "display": "flex",
+   "flexDirection": "row",
+   "gap": "10px",
+   "padding": "12px 20px",
+   "width": "100%"
+  },
+  "children": [
+   {
+    "baseStyles": {
+     "color": "var(--ink-gray-6)"
+    },
+    "children": [],
+    "componentEvents": {},
+    "componentName": "TextBlock",
+    "componentProps": {
+     "fontSize": "text-p-xs",
+     "tag": "p",
+     "text": "{{ inputs.note }}"
+    },
+    "componentSlots": {},
+    "mobileStyles": {},
+    "tabletStyles": {}
+   },
+   {
+    "baseStyles": {
+     "flex": "1 1 auto"
+    },
+    "children": [],
+    "componentEvents": {},
+    "componentName": "container",
+    "componentProps": {},
+    "componentSlots": {},
+    "mobileStyles": {},
+    "originalElement": "div",
+    "tabletStyles": {}
+   },
+   {
+    "baseStyles": {
+     "display": "flex",
+     "gap": "4px"
+    },
+    "children": [
+     {
+      "baseStyles": {},
+      "children": [],
+      "componentEvents": {
+       "click": {
+        "action": "Run Script",
+        "event": "click",
+        "script": "window.location.href = dataItem.href"
+       }
+      },
+      "componentName": "Button",
+      "componentProps": {
+       "label": "{{ dataItem.label }}",
+       "size": "sm",
+       "variant": "ghost"
+      },
+      "componentSlots": {},
+      "mobileStyles": {},
+      "tabletStyles": {}
+     }
+    ],
+    "componentEvents": {},
+    "componentName": "Repeater",
+    "componentProps": {
+     "data": "{{ inputs.links }}",
+     "dataKey": "label",
+     "emptyStateMessage": ""
+    },
+    "componentSlots": {},
+    "mobileStyles": {},
+    "tabletStyles": {}
+   }
+  ],
+  "componentEvents": {},
+  "componentName": "container",
+  "componentProps": {},
+  "componentSlots": {},
+  "mobileStyles": {},
+  "originalElement": "div",
+  "tabletStyles": {}
+ },
+ "component_id": "borrower_footer",
+ "component_name": "Borrower Footer",
+ "creation": "2026-09-21 17:39:40.999692",
+ "docstatus": 0,
+ "doctype": "Studio Component",
+ "idx": 0,
+ "inputs": [
+  {
+   "description": "The lender's copyright line",
+   "input_name": "note",
+   "required": 0,
+   "type": "string"
+  },
+  {
+   "description": "The policy links, as {label, href} rows",
+   "input_name": "links",
+   "required": 0,
+   "type": "string"
+  }
+ ],
+ "is_disabled": 0,
+ "modified": "2026-09-21 17:39:40.999692",
+ "modified_by": "Administrator",
+ "name": "borrower_footer",
+ "owner": "Administrator"
+}

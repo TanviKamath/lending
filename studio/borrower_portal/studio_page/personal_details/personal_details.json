@@ -1,0 +1,616 @@
+{
+ "blocks": [
+  {
+   "baseStyles": {
+    "display": "flex",
+    "flexDirection": "row",
+    "height": "100%",
+    "overflowX": "hidden",
+    "width": "100%"
+   },
+   "blockName": "body",
+   "children": [
+    {
+     "children": [],
+     "componentName": "Sidebar",
+     "componentProps": {
+      "header": {
+       "title": "{{ profile.data.brand_name }}"
+      },
+      "sections": [
+       {
+        "items": [
+         {
+          "icon": "{{ getIcon('layout-dashboard') }}",
+          "label": "Account overview",
+          "to": "/overview"
+         },
+         {
+          "icon": "{{ getIcon('wallet') }}",
+          "label": "Loan accounts",
+          "to": "/loans"
+         },
+         {
+          "icon": "{{ getIcon('file-text') }}",
+          "label": "Applications",
+          "to": "/applications"
+         },
+         {
+          "icon": "{{ getIcon('paperclip') }}",
+          "label": "Documents",
+          "to": "/documents"
+         },
+         {
+          "icon": "{{ getIcon('receipt') }}",
+          "label": "Statement of account",
+          "to": "/statement"
+         },
+         {
+          "icon": "{{ getIcon('award') }}",
+          "label": "Interest certificate",
+          "to": "/certificate"
+         },
+         {
+          "icon": "{{ getIcon('user') }}",
+          "label": "Personal details",
+          "to": "/profile"
+         },
+         {
+          "icon": "{{ getIcon('search') }}",
+          "label": "Search",
+          "to": "/search"
+         }
+        ],
+        "label": ""
+       }
+      ]
+     },
+     "componentSlots": {
+      "footer-items": {
+       "slotContent": [
+        {
+         "baseStyles": {
+          "display": "flex",
+          "flexDirection": "column",
+          "gap": "2px",
+          "padding": "12px"
+         },
+         "children": [
+          {
+           "baseStyles": {
+            "fontWeight": "600"
+           },
+           "children": [],
+           "componentEvents": {},
+           "componentName": "TextBlock",
+           "componentProps": {
+            "fontSize": "text-sm",
+            "tag": "p",
+            "text": "{{ profile.data.holder_name }}"
+           },
+           "componentSlots": {},
+           "mobileStyles": {},
+           "tabletStyles": {}
+          },
+          {
+           "baseStyles": {
+            "color": "var(--ink-gray-6)"
+           },
+           "children": [],
+           "componentEvents": {},
+           "componentName": "TextBlock",
+           "componentProps": {
+            "fontSize": "text-p-xs",
+            "tag": "p",
+            "text": "{{ profile.data.customer_note }}"
+           },
+           "componentSlots": {},
+           "mobileStyles": {},
+           "tabletStyles": {}
+          }
+         ],
+         "componentEvents": {},
+         "componentName": "container",
+         "componentProps": {},
+         "componentSlots": {},
+         "mobileStyles": {},
+         "originalElement": "div",
+         "tabletStyles": {}
+        }
+       ],
+       "slotName": "footer-items"
+      }
+     },
+     "mobileStyles": {
+      "display": "none"
+     }
+    },
+    {
+     "baseStyles": {
+      "display": "flex",
+      "flex": "1",
+      "flexDirection": "column",
+      "height": "100%",
+      "minWidth": "0px",
+      "overflowY": "auto"
+     },
+     "children": [
+      {
+       "children": [],
+       "componentName": "borrower_header",
+       "componentProps": {
+        "action_label": "Contact us",
+        "action_route": "/borrower/documents",
+        "crumb": "{{ profile.data.crumb }}",
+        "note": "{{ profile.data.head_note }}",
+        "status": "{{ profile.data.account_status }}",
+        "status_tone": "{{ profile.data.account_tone }}"
+       },
+       "isStudioComponent": true
+      },
+      {
+       "baseStyles": {
+        "display": "flex",
+        "flex": "1",
+        "flexDirection": "column",
+        "gap": "16px",
+        "padding": "20px",
+        "width": "100%"
+       },
+       "children": [
+        {
+         "baseStyles": {
+          "backgroundColor": "var(--surface-base)",
+          "borderColor": "var(--outline-gray-2)",
+          "borderRadius": "0.5rem",
+          "borderStyle": "solid",
+          "borderWidth": "1px",
+          "display": "flex",
+          "flexDirection": "column",
+          "gap": "12px",
+          "padding": "16px"
+         },
+         "children": [
+          {
+           "baseStyles": {
+            "alignItems": "start",
+            "display": "flex",
+            "flexDirection": "row",
+            "gap": "8px"
+           },
+           "children": [
+            {
+             "baseStyles": {
+              "display": "flex",
+              "flexDirection": "column",
+              "gap": "2px"
+             },
+             "children": [
+              {
+               "baseStyles": {
+                "fontWeight": "600"
+               },
+               "children": [],
+               "componentName": "TextBlock",
+               "componentProps": {
+                "fontSize": "text-lg",
+                "tag": "h2",
+                "text": "On record"
+               }
+              },
+              {
+               "baseStyles": {
+                "color": "var(--ink-gray-6)"
+               },
+               "children": [],
+               "componentName": "TextBlock",
+               "componentProps": {
+                "fontSize": "text-p-xs",
+                "tag": "p",
+                "text": "{{ profile.data.records_note }}"
+               }
+              }
+             ],
+             "componentName": "container",
+             "originalElement": "div"
+            },
+            {
+             "baseStyles": {
+              "flex": "1 1 auto"
+             },
+             "children": [],
+             "componentName": "container",
+             "originalElement": "div"
+            },
+            {
+             "children": [],
+             "componentEvents": {
+              "click": {
+               "action": "Run Script",
+               "event": "click",
+               "script": "edit()"
+              }
+             },
+             "componentName": "Button",
+             "componentProps": {
+              "label": "Edit",
+              "size": "sm",
+              "variant": "subtle"
+             }
+            }
+           ],
+           "componentName": "container",
+           "originalElement": "div"
+          },
+          {
+           "children": [
+            {
+             "baseStyles": {
+              "display": "flex",
+              "flexDirection": "column",
+              "gap": "2px",
+              "padding": "8px 0"
+             },
+             "children": [
+              {
+               "baseStyles": {
+                "color": "var(--ink-gray-6)"
+               },
+               "children": [],
+               "componentName": "TextBlock",
+               "componentProps": {
+                "fontSize": "text-p-xs",
+                "tag": "p",
+                "text": "{{ dataItem.label }}"
+               }
+              },
+              {
+               "children": [],
+               "componentName": "TextBlock",
+               "componentProps": {
+                "fontSize": "text-base",
+                "tag": "p",
+                "text": "{{ dataItem.value }}"
+               }
+              },
+              {
+               "baseStyles": {
+                "color": "var(--ink-gray-6)"
+               },
+               "children": [],
+               "componentName": "TextBlock",
+               "componentProps": {
+                "fontSize": "text-p-xs",
+                "tag": "p",
+                "text": "{{ dataItem.detail }}"
+               },
+               "visibilityCondition": "{{ dataItem.detail }}"
+              }
+             ],
+             "componentName": "container",
+             "originalElement": "div"
+            }
+           ],
+           "componentName": "Repeater",
+           "componentProps": {
+            "data": "{{ profile.data.records }}",
+            "dataKey": "name",
+            "emptyStateMessage": "Nothing to show"
+           }
+          }
+         ],
+         "componentName": "container",
+         "originalElement": "div"
+        },
+        {
+         "children": [],
+         "componentName": "Alert",
+         "componentProps": {
+          "theme": "blue",
+          "title": "{{ profile.data.edit_note }}"
+         }
+        },
+        {
+         "baseStyles": {
+          "backgroundColor": "var(--surface-base)",
+          "borderColor": "var(--outline-gray-2)",
+          "borderRadius": "0.5rem",
+          "borderStyle": "solid",
+          "borderWidth": "1px",
+          "display": "flex",
+          "flexDirection": "column",
+          "gap": "12px",
+          "padding": "16px"
+         },
+         "children": [
+          {
+           "baseStyles": {
+            "display": "flex",
+            "flexDirection": "column",
+            "gap": "2px"
+           },
+           "children": [
+            {
+             "baseStyles": {
+              "fontWeight": "600"
+             },
+             "children": [],
+             "componentName": "TextBlock",
+             "componentProps": {
+              "fontSize": "text-lg",
+              "tag": "h2",
+              "text": "Edit your details"
+             }
+            },
+            {
+             "baseStyles": {
+              "color": "var(--ink-gray-6)"
+             },
+             "children": [],
+             "componentName": "TextBlock",
+             "componentProps": {
+              "fontSize": "text-p-xs",
+              "tag": "p",
+              "text": "{{ profile.data.form_note }}"
+             }
+            }
+           ],
+           "componentName": "container",
+           "originalElement": "div"
+          },
+          {
+           "baseStyles": {
+            "display": "flex",
+            "flexDirection": "column",
+            "gap": "12px"
+           },
+           "children": [
+            {
+             "children": [],
+             "componentName": "FormControl",
+             "componentProps": {
+              "label": "Which record",
+              "modelValue": {
+               "$type": "variable",
+               "name": "customer"
+              },
+              "options": "{{ profile.data.customer_options }}",
+              "type": "select"
+             },
+             "visibilityCondition": "{{ profile.data.customer_options.length > 1 }}"
+            },
+            {
+             "baseStyles": {
+              "display": "grid",
+              "gap": "12px",
+              "gridTemplateColumns": "repeat(2, minmax(0, 1fr))",
+              "width": "100%"
+             },
+             "children": [
+              {
+               "children": [],
+               "componentName": "FormControl",
+               "componentProps": {
+                "label": "Email",
+                "modelValue": {
+                 "$type": "variable",
+                 "name": "form.email"
+                },
+                "type": "email"
+               }
+              },
+              {
+               "children": [],
+               "componentName": "FormControl",
+               "componentProps": {
+                "label": "Mobile",
+                "modelValue": {
+                 "$type": "variable",
+                 "name": "form.mobile"
+                },
+                "type": "tel"
+               }
+              },
+              {
+               "children": [],
+               "componentName": "FormControl",
+               "componentProps": {
+                "label": "Phone",
+                "modelValue": {
+                 "$type": "variable",
+                 "name": "form.phone"
+                },
+                "type": "tel"
+               }
+              },
+              {
+               "children": [],
+               "componentName": "FormControl",
+               "componentProps": {
+                "label": "Address line 1",
+                "modelValue": {
+                 "$type": "variable",
+                 "name": "form.address_line1"
+                },
+                "type": "text"
+               }
+              },
+              {
+               "children": [],
+               "componentName": "FormControl",
+               "componentProps": {
+                "label": "Address line 2",
+                "modelValue": {
+                 "$type": "variable",
+                 "name": "form.address_line2"
+                },
+                "type": "text"
+               }
+              },
+              {
+               "children": [],
+               "componentName": "FormControl",
+               "componentProps": {
+                "label": "City",
+                "modelValue": {
+                 "$type": "variable",
+                 "name": "form.city"
+                },
+                "type": "text"
+               }
+              },
+              {
+               "children": [],
+               "componentName": "FormControl",
+               "componentProps": {
+                "label": "State",
+                "modelValue": {
+                 "$type": "variable",
+                 "name": "form.state"
+                },
+                "type": "text"
+               }
+              },
+              {
+               "children": [],
+               "componentName": "FormControl",
+               "componentProps": {
+                "label": "Pin code",
+                "modelValue": {
+                 "$type": "variable",
+                 "name": "form.pincode"
+                },
+                "type": "text"
+               }
+              },
+              {
+               "children": [],
+               "componentName": "FormControl",
+               "componentProps": {
+                "label": "Country",
+                "modelValue": {
+                 "$type": "variable",
+                 "name": "form.country"
+                },
+                "type": "text"
+               }
+              }
+             ],
+             "componentName": "container",
+             "mobileStyles": {
+              "gridTemplateColumns": "minmax(0, 1fr)"
+             },
+             "originalElement": "div"
+            },
+            {
+             "baseStyles": {
+              "alignItems": "center",
+              "display": "flex",
+              "flexDirection": "row",
+              "gap": "8px"
+             },
+             "children": [
+              {
+               "children": [],
+               "componentEvents": {
+                "click": {
+                 "action": "Run Script",
+                 "event": "click",
+                 "script": "save()"
+                }
+               },
+               "componentName": "Button",
+               "componentProps": {
+                "label": "{{ profile.data.save_label }}",
+                "size": "sm",
+                "variant": "solid"
+               }
+              },
+              {
+               "children": [],
+               "componentEvents": {
+                "click": {
+                 "action": "Run Script",
+                 "event": "click",
+                 "script": "editing.value = false"
+                }
+               },
+               "componentName": "Button",
+               "componentProps": {
+                "label": "Cancel",
+                "size": "sm",
+                "variant": "subtle"
+               }
+              }
+             ],
+             "componentName": "container",
+             "originalElement": "div"
+            }
+           ],
+           "componentName": "container",
+           "originalElement": "div"
+          }
+         ],
+         "componentName": "container",
+         "originalElement": "div",
+         "visibilityCondition": "{{ editing }}"
+        }
+       ],
+       "componentName": "container",
+       "originalElement": "div"
+      },
+      {
+       "children": [],
+       "componentName": "borrower_footer",
+       "componentProps": {
+        "links": "{{ profile.data.footer_links }}",
+        "note": "{{ profile.data.copyright_note }}"
+       },
+       "isStudioComponent": true
+      },
+      {
+       "children": [],
+       "componentName": "borrower_alerts",
+       "isStudioComponent": true
+      }
+     ],
+     "componentName": "container",
+     "originalElement": "div"
+    }
+   ],
+   "componentName": "div",
+   "originalElement": "body"
+  }
+ ],
+ "creation": "2026-09-21 17:39:41.148588",
+ "doctype": "Studio Page",
+ "frappe_app": "lending",
+ "is_standard": 1,
+ "modified": "2026-09-21 23:14:51.365077",
+ "modified_by": "Administrator",
+ "name": "personal_details",
+ "owner": "Administrator",
+ "page_name": "page-1c46f55b",
+ "page_title": "Personal details",
+ "published": 1,
+ "resources": [
+  {
+   "__unsaved": 1,
+   "auto": 1,
+   "method": "GET",
+   "resource_name": "profile",
+   "resource_type": "API Resource",
+   "url": "lending.portal.profile.get_profile_page"
+  },
+  {
+   "__unsaved": 1,
+   "method": "GET",
+   "resource_name": "alerts",
+   "resource_type": "API Resource",
+   "url": "lending.portal.notifications.get_notifications"
+  }
+ ],
+ "route": "/profile",
+ "studio_app": "borrower-portal",
+ "variables": []
+}
