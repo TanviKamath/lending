@@ -1,0 +1,480 @@
+{
+ "blocks": [
+  {
+   "baseStyles": {
+    "display": "flex",
+    "flexDirection": "row",
+    "height": "100%",
+    "overflowX": "hidden",
+    "width": "100%"
+   },
+   "blockName": "body",
+   "children": [
+    {
+     "children": [],
+     "componentName": "Sidebar",
+     "componentProps": {
+      "header": {
+       "title": "{{ search.data.brand_name }}"
+      },
+      "sections": [
+       {
+        "items": [
+         {
+          "icon": "{{ getIcon('layout-dashboard') }}",
+          "label": "Account overview",
+          "to": "/overview"
+         },
+         {
+          "icon": "{{ getIcon('wallet') }}",
+          "label": "Loan accounts",
+          "to": "/loans"
+         },
+         {
+          "icon": "{{ getIcon('file-text') }}",
+          "label": "Applications",
+          "to": "/applications"
+         },
+         {
+          "icon": "{{ getIcon('paperclip') }}",
+          "label": "Documents",
+          "to": "/documents"
+         },
+         {
+          "icon": "{{ getIcon('receipt') }}",
+          "label": "Statement of account",
+          "to": "/statement"
+         },
+         {
+          "icon": "{{ getIcon('award') }}",
+          "label": "Interest certificate",
+          "to": "/certificate"
+         },
+         {
+          "icon": "{{ getIcon('user') }}",
+          "label": "Personal details",
+          "to": "/profile"
+         },
+         {
+          "icon": "{{ getIcon('search') }}",
+          "label": "Search",
+          "to": "/search"
+         }
+        ],
+        "label": ""
+       }
+      ]
+     },
+     "componentSlots": {
+      "footer-items": {
+       "slotContent": [
+        {
+         "baseStyles": {
+          "display": "flex",
+          "flexDirection": "column",
+          "gap": "2px",
+          "padding": "12px"
+         },
+         "children": [
+          {
+           "baseStyles": {
+            "fontWeight": "600"
+           },
+           "children": [],
+           "componentEvents": {},
+           "componentName": "TextBlock",
+           "componentProps": {
+            "fontSize": "text-sm",
+            "tag": "p",
+            "text": "{{ search.data.holder_name }}"
+           },
+           "componentSlots": {},
+           "mobileStyles": {},
+           "tabletStyles": {}
+          },
+          {
+           "baseStyles": {
+            "color": "var(--ink-gray-6)"
+           },
+           "children": [],
+           "componentEvents": {},
+           "componentName": "TextBlock",
+           "componentProps": {
+            "fontSize": "text-p-xs",
+            "tag": "p",
+            "text": "{{ search.data.customer_note }}"
+           },
+           "componentSlots": {},
+           "mobileStyles": {},
+           "tabletStyles": {}
+          }
+         ],
+         "componentEvents": {},
+         "componentName": "container",
+         "componentProps": {},
+         "componentSlots": {},
+         "mobileStyles": {},
+         "originalElement": "div",
+         "tabletStyles": {}
+        }
+       ],
+       "slotName": "footer-items"
+      }
+     },
+     "mobileStyles": {
+      "display": "none"
+     }
+    },
+    {
+     "baseStyles": {
+      "display": "flex",
+      "flex": "1",
+      "flexDirection": "column",
+      "height": "100%",
+      "minWidth": "0px",
+      "overflowY": "auto"
+     },
+     "children": [
+      {
+       "children": [],
+       "componentName": "borrower_header",
+       "componentProps": {
+        "action_label": "Account overview",
+        "action_route": "/borrower/overview",
+        "crumb": "{{ search.data.crumb }}",
+        "note": "{{ search.data.head_note }}",
+        "status": "{{ search.data.account_status }}",
+        "status_tone": "{{ search.data.account_tone }}"
+       },
+       "isStudioComponent": true
+      },
+      {
+       "baseStyles": {
+        "display": "flex",
+        "flex": "1",
+        "flexDirection": "column",
+        "gap": "16px",
+        "padding": "20px",
+        "width": "100%"
+       },
+       "children": [
+        {
+         "baseStyles": {
+          "backgroundColor": "var(--surface-base)",
+          "borderColor": "var(--outline-gray-2)",
+          "borderRadius": "0.5rem",
+          "borderStyle": "solid",
+          "borderWidth": "1px",
+          "display": "flex",
+          "flexDirection": "column",
+          "gap": "12px",
+          "padding": "16px"
+         },
+         "children": [
+          {
+           "baseStyles": {
+            "display": "flex",
+            "flexDirection": "column",
+            "gap": "2px"
+           },
+           "children": [
+            {
+             "baseStyles": {
+              "fontWeight": "600"
+             },
+             "children": [],
+             "componentName": "TextBlock",
+             "componentProps": {
+              "fontSize": "text-lg",
+              "tag": "h2",
+              "text": "Search"
+             }
+            },
+            {
+             "baseStyles": {
+              "color": "var(--ink-gray-6)"
+             },
+             "children": [],
+             "componentName": "TextBlock",
+             "componentProps": {
+              "fontSize": "text-p-xs",
+              "tag": "p",
+              "text": "{{ search.data.results_note }}"
+             }
+            }
+           ],
+           "componentName": "container",
+           "originalElement": "div"
+          },
+          {
+           "baseStyles": {
+            "display": "flex",
+            "flexDirection": "column",
+            "gap": "12px"
+           },
+           "children": [
+            {
+             "baseStyles": {
+              "alignItems": "center",
+              "display": "flex",
+              "flexDirection": "row",
+              "gap": "8px"
+             },
+             "children": [
+              {
+               "baseStyles": {
+                "flex": "1",
+                "minWidth": "0px"
+               },
+               "children": [],
+               "componentEvents": {
+                "keyup.enter": {
+                 "action": "Run Script",
+                 "event": "keyup.enter",
+                 "script": "query.value = draft.value"
+                }
+               },
+               "componentName": "TextInput",
+               "componentProps": {
+                "modelValue": {
+                 "$type": "variable",
+                 "name": "draft"
+                },
+                "placeholder": "Search your loan accounts, applications and documents"
+               }
+              },
+              {
+               "children": [],
+               "componentEvents": {
+                "click": {
+                 "action": "Run Script",
+                 "event": "click",
+                 "script": "query.value = draft.value"
+                }
+               },
+               "componentName": "Button",
+               "componentProps": {
+                "label": "Search",
+                "size": "sm",
+                "variant": "solid"
+               }
+              }
+             ],
+             "componentName": "container",
+             "originalElement": "div"
+            },
+            {
+             "children": [
+              {
+               "children": [
+                {
+                 "children": [
+                  {
+                   "children": [],
+                   "componentName": "TextBlock",
+                   "componentProps": {
+                    "fontSize": "text-xs",
+                    "tag": "p",
+                    "text": "Result"
+                   }
+                  }
+                 ],
+                 "componentName": "ListHeaderCell"
+                },
+                {
+                 "children": [
+                  {
+                   "children": [],
+                   "componentName": "TextBlock",
+                   "componentProps": {
+                    "fontSize": "text-xs",
+                    "tag": "p",
+                    "text": "Kind"
+                   }
+                  }
+                 ],
+                 "componentName": "ListHeaderCell"
+                }
+               ],
+               "componentName": "ListHeader"
+              },
+              {
+               "children": [],
+               "componentName": "ListRows",
+               "componentProps": {
+                "items": "{{ search.data.results }}",
+                "rowKey": "url"
+               },
+               "componentSlots": {
+                "default": {
+                 "slotContent": [
+                  {
+                   "baseStyles": {},
+                   "children": [
+                    {
+                     "baseStyles": {},
+                     "children": [
+                      {
+                       "baseStyles": {},
+                       "children": [],
+                       "componentEvents": {},
+                       "componentName": "TextBlock",
+                       "componentProps": {
+                        "fontSize": "text-base",
+                        "tag": "p",
+                        "text": "{{ item.title }}"
+                       },
+                       "componentSlots": {},
+                       "mobileStyles": {},
+                       "tabletStyles": {}
+                      },
+                      {
+                       "baseStyles": {
+                        "color": "var(--ink-gray-6)"
+                       },
+                       "children": [],
+                       "componentEvents": {},
+                       "componentName": "TextBlock",
+                       "componentProps": {
+                        "fontSize": "text-p-xs",
+                        "tag": "p",
+                        "text": "{{ item.note }}"
+                       },
+                       "componentSlots": {},
+                       "mobileStyles": {},
+                       "tabletStyles": {}
+                      }
+                     ],
+                     "componentEvents": {},
+                     "componentName": "ListCell",
+                     "componentProps": {},
+                     "componentSlots": {},
+                     "mobileStyles": {},
+                     "tabletStyles": {}
+                    },
+                    {
+                     "baseStyles": {},
+                     "children": [
+                      {
+                       "baseStyles": {
+                        "color": "var(--ink-gray-6)"
+                       },
+                       "children": [],
+                       "componentEvents": {},
+                       "componentName": "TextBlock",
+                       "componentProps": {
+                        "fontSize": "text-p-xs",
+                        "tag": "p",
+                        "text": "{{ item.kind }}"
+                       },
+                       "componentSlots": {},
+                       "mobileStyles": {},
+                       "tabletStyles": {}
+                      }
+                     ],
+                     "componentEvents": {},
+                     "componentName": "ListCell",
+                     "componentProps": {},
+                     "componentSlots": {},
+                     "mobileStyles": {},
+                     "tabletStyles": {}
+                    }
+                   ],
+                   "componentEvents": {
+                    "click": {
+                     "action": "Run Script",
+                     "event": "click",
+                     "script": "open(item.url)"
+                    }
+                   },
+                   "componentName": "ListRow",
+                   "componentProps": {
+                    "value": "{{ value }}"
+                   },
+                   "componentSlots": {},
+                   "mobileStyles": {},
+                   "tabletStyles": {}
+                  }
+                 ],
+                 "slotName": "default"
+                }
+               }
+              }
+             ],
+             "componentName": "List",
+             "componentProps": {
+              "columns": [
+               "minmax(0, 1fr)",
+               "10rem"
+              ],
+              "rowHeight": 56
+             }
+            }
+           ],
+           "componentName": "container",
+           "originalElement": "div"
+          }
+         ],
+         "componentName": "container",
+         "originalElement": "div"
+        }
+       ],
+       "componentName": "container",
+       "originalElement": "div"
+      },
+      {
+       "children": [],
+       "componentName": "borrower_footer",
+       "componentProps": {
+        "links": "{{ search.data.footer_links }}",
+        "note": "{{ search.data.copyright_note }}"
+       },
+       "isStudioComponent": true
+      },
+      {
+       "children": [],
+       "componentName": "borrower_alerts",
+       "isStudioComponent": true
+      }
+     ],
+     "componentName": "container",
+     "originalElement": "div"
+    }
+   ],
+   "componentName": "div",
+   "originalElement": "body"
+  }
+ ],
+ "creation": "2026-09-21 17:39:41.164653",
+ "doctype": "Studio Page",
+ "frappe_app": "lending",
+ "is_standard": 1,
+ "modified": "2026-09-21 23:14:51.382815",
+ "modified_by": "Administrator",
+ "name": "search",
+ "owner": "Administrator",
+ "page_name": "page-0ca0b178",
+ "page_title": "Search",
+ "published": 1,
+ "resources": [
+  {
+   "__unsaved": 1,
+   "auto": 1,
+   "method": "GET",
+   "params": "{\"q\": \"{{ query }}\"}",
+   "resource_name": "search",
+   "resource_type": "API Resource",
+   "url": "lending.portal.search.get_search_page"
+  },
+  {
+   "__unsaved": 1,
+   "method": "GET",
+   "resource_name": "alerts",
+   "resource_type": "API Resource",
+   "url": "lending.portal.notifications.get_notifications"
+  }
+ ],
+ "route": "/search",
+ "studio_app": "borrower-portal",
+ "variables": []
+}

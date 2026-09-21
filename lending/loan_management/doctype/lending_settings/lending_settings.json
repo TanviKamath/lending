@@ -9,7 +9,17 @@
   "auto_create_customer",
   "column_break_hwkk",
   "borrower_portal_section",
-  "portal_logo"
+  "enable_borrower_portal",
+  "enable_public_apply",
+  "portal_brand_name",
+  "portal_support_email",
+  "column_break_portal",
+  "portal_logo",
+  "portal_brand_color",
+  "portal_accent_color",
+  "portal_footer_section",
+  "portal_copyright",
+  "portal_footer_links"
  ],
  "fields": [
   {
@@ -34,16 +44,81 @@
    "label": "Borrower Portal"
   },
   {
+   "default": "0",
+   "description": "Serves the borrower portal.",
+   "fieldname": "enable_borrower_portal",
+   "fieldtype": "Check",
+   "label": "Enable Borrower Portal"
+  },
+  {
+   "default": "0",
+   "depends_on": "enable_borrower_portal",
+   "description": "Serves the public application form at /apply, where a visitor raises a lead and opens a login. Off, a borrower still signs in, but only staff can raise a lead.",
+   "fieldname": "enable_public_apply",
+   "fieldtype": "Check",
+   "label": "Enable Public Application Form"
+  },
+  {
+   "description": "Shown wherever no logo is set. Left blank, the portal calls itself Frappe Lending.",
+   "fieldname": "portal_brand_name",
+   "fieldtype": "Data",
+   "label": "Portal Brand Name"
+  },
+  {
+   "description": "The grievance address. Every portal page ends in a Contact us link that opens a mail to it.",
+   "fieldname": "portal_support_email",
+   "fieldtype": "Data",
+   "label": "Portal Support Email",
+   "options": "Email"
+  },
+  {
+   "fieldname": "column_break_portal",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Served to every visitor, so the upload is public. A private attachment answers 403 and the portal shows a broken image.",
    "fieldname": "portal_logo",
    "fieldtype": "Attach Image",
-   "label": "Portal Logo"
+   "label": "Portal Logo",
+   "make_attachment_public": 1
+  },
+  {
+   "description": "Buttons, the focus ring and a chosen answer. The text on it is worked out from it.",
+   "fieldname": "portal_brand_color",
+   "fieldtype": "Color",
+   "label": "Portal Brand Colour"
+  },
+  {
+   "description": "The mark beside the brand name, and the quieter tints taken from it.",
+   "fieldname": "portal_accent_color",
+   "fieldtype": "Color",
+   "label": "Portal Accent Colour"
+  },
+  {
+   "depends_on": "enable_borrower_portal",
+   "fieldname": "portal_footer_section",
+   "fieldtype": "Section Break",
+   "label": "Portal Footer"
+  },
+  {
+   "description": "The line at the foot of every portal page. Write {year} where the current year belongs. Left blank, it reads Copyright © <year> <brand name>. All rights reserved.",
+   "fieldname": "portal_copyright",
+   "fieldtype": "Data",
+   "label": "Portal Copyright Notice"
+  },
+  {
+   "description": "Shown at the foot of every portal page, in this order. A Contact us link follows them, pointing at the Portal Support Email above.",
+   "fieldname": "portal_footer_links",
+   "fieldtype": "Table",
+   "label": "Portal Footer Links",
+   "options": "Portal Footer Link"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-02-18 16:26:49.539993",
+ "modified": "2026-09-21 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Lending Settings",

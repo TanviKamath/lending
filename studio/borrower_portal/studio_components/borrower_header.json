@@ -1,0 +1,192 @@
+{
+ "block": {
+  "baseStyles": {
+   "alignItems": "center",
+   "borderColor": "var(--outline-gray-2)",
+   "borderStyle": "solid",
+   "borderWidth": "0px 0px 1px 0px",
+   "display": "flex",
+   "flexDirection": "row",
+   "gap": "10px",
+   "padding": "16px 20px",
+   "width": "100%"
+  },
+  "children": [
+   {
+    "baseStyles": {
+     "display": "flex",
+     "flexDirection": "column",
+     "gap": "2px"
+    },
+    "children": [
+     {
+      "baseStyles": {
+       "fontWeight": "600"
+      },
+      "children": [],
+      "componentEvents": {},
+      "componentName": "TextBlock",
+      "componentProps": {
+       "fontSize": "text-xl",
+       "tag": "h1",
+       "text": "{{ inputs.crumb }}"
+      },
+      "componentSlots": {},
+      "mobileStyles": {},
+      "tabletStyles": {}
+     },
+     {
+      "baseStyles": {
+       "color": "var(--ink-gray-6)"
+      },
+      "children": [],
+      "componentEvents": {},
+      "componentName": "TextBlock",
+      "componentProps": {
+       "fontSize": "text-p-xs",
+       "tag": "p",
+       "text": "{{ inputs.note }}"
+      },
+      "componentSlots": {},
+      "mobileStyles": {},
+      "tabletStyles": {}
+     }
+    ],
+    "componentEvents": {},
+    "componentName": "container",
+    "componentProps": {},
+    "componentSlots": {},
+    "mobileStyles": {},
+    "originalElement": "div",
+    "tabletStyles": {}
+   },
+   {
+    "baseStyles": {
+     "flex": "1 1 auto"
+    },
+    "children": [],
+    "componentEvents": {},
+    "componentName": "container",
+    "componentProps": {},
+    "componentSlots": {},
+    "mobileStyles": {},
+    "originalElement": "div",
+    "tabletStyles": {}
+   },
+   {
+    "baseStyles": {},
+    "children": [],
+    "componentEvents": {},
+    "componentName": "Badge",
+    "componentProps": {
+     "label": "{{ inputs.status }}",
+     "size": "sm",
+     "theme": "{{ tone(inputs.status_tone) }}",
+     "variant": "subtle"
+    },
+    "componentSlots": {},
+    "mobileStyles": {},
+    "tabletStyles": {},
+    "visibilityCondition": "{{ inputs.status }}"
+   },
+   {
+    "baseStyles": {},
+    "children": [],
+    "componentEvents": {
+     "click": {
+      "action": "Run Script",
+      "event": "click",
+      "script": "showAlerts.value = true; alerts.reload()"
+     }
+    },
+    "componentName": "Button",
+    "componentProps": {
+     "icon": "lucide-bell",
+     "label": "Notifications",
+     "size": "sm",
+     "variant": "ghost"
+    },
+    "componentSlots": {},
+    "mobileStyles": {},
+    "tabletStyles": {}
+   },
+   {
+    "baseStyles": {},
+    "children": [],
+    "componentEvents": {
+     "click": {
+      "action": "Run Script",
+      "event": "click",
+      "script": "open(inputs.action_route)"
+     }
+    },
+    "componentName": "Button",
+    "componentProps": {
+     "label": "{{ inputs.action_label }}",
+     "size": "sm",
+     "variant": "solid"
+    },
+    "componentSlots": {},
+    "mobileStyles": {},
+    "tabletStyles": {},
+    "visibilityCondition": "{{ inputs.action_label }}"
+   }
+  ],
+  "componentEvents": {},
+  "componentName": "container",
+  "componentProps": {},
+  "componentSlots": {},
+  "mobileStyles": {},
+  "originalElement": "div",
+  "tabletStyles": {}
+ },
+ "component_id": "borrower_header",
+ "component_name": "Borrower Page Header",
+ "creation": "2026-09-21 17:39:40.990050",
+ "docstatus": 0,
+ "doctype": "Studio Component",
+ "idx": 0,
+ "inputs": [
+  {
+   "description": "What this page is",
+   "input_name": "crumb",
+   "required": 0,
+   "type": "string"
+  },
+  {
+   "description": "Who is reading it, and as on when",
+   "input_name": "note",
+   "required": 0,
+   "type": "string"
+  },
+  {
+   "description": "How the borrower's accounts stand, where that is worth saying",
+   "input_name": "status",
+   "required": 0,
+   "type": "string"
+  },
+  {
+   "description": "'', 'ok', 'warn' or 'danger'",
+   "input_name": "status_tone",
+   "required": 0,
+   "type": "string"
+  },
+  {
+   "description": "The one thing the page offers to press; empty hides it",
+   "input_name": "action_label",
+   "required": 0,
+   "type": "string"
+  },
+  {
+   "description": "Where that button goes, as a data-layer URL",
+   "input_name": "action_route",
+   "required": 0,
+   "type": "string"
+  }
+ ],
+ "is_disabled": 0,
+ "modified": "2026-09-21 17:39:40.990050",
+ "modified_by": "Administrator",
+ "name": "borrower_header",
+ "owner": "Administrator"
+}

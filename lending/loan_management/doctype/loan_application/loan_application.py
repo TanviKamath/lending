@@ -22,6 +22,7 @@ from lending.loan_management.doctype.loan_repayment_schedule.loan_repayment_sche
 from lending.loan_management.doctype.loan_security_price.loan_security_price import (
 	get_loan_security_price,
 )
+from lending.portal.accounts import customer_for_email, link_portal_user
 
 
 class LoanApplication(Document):
@@ -52,13 +53,11 @@ class LoanApplication(Document):
 		city: DF.Data | None
 		co_applicants: DF.Table[LoanCoApplicants]
 		company: DF.Link
-		decision: DF.Link | None
 		country: DF.Link | None
 		documents: DF.Table[LoanApplicationDocument]
 		is_secured_loan: DF.Check
 		is_term_loan: DF.Check
 		loan_amount: DF.Currency
-		loan_lead: DF.Link | None
 		loan_product: DF.Link
 		loan_purpose: DF.Link | None
 		maximum_loan_amount: DF.Currency
@@ -92,11 +91,19 @@ class LoanApplication(Document):
 	def before_save(self):
 		if self.applicant_type == "Customer":
 			if not self.applicant:
+				existing = customer_for_email(self.applicant_email_address)
+				if existing:
+					self.applicant = existing
+					link_portal_user(existing, self.applicant_email_address)
+					return
+
 				customer = frappe.new_doc("Customer")
 				customer.customer_name = self.applicant_name
-				customer.type = "Company"
-				customer.mobile_number = self.applicant_phone_number
-				customer.email_address = self.applicant_email_address
+				# customer_type, mobile_no and email_id are the real fieldnames. The
+				# names used before -- type, mobile_number, email_address -- are on no
+				# Customer, so every value written through them was dropped.
+				customer.customer_type = "Company"
+				customer.mobile_no = self.applicant_phone_number
 				# need to save customer first to link back from contact and address
 				customer.save()
 
@@ -136,6 +143,12 @@ class LoanApplication(Document):
 				customer.save()
 
 				self.applicant = customer.name
+
+				# PORTAL_PLAN.md section 12.1.3. Without this row the borrower can log
+				# in and still be told they have no loans, because every portal page
+				# reads Customer.portal_users to decide what is theirs. Silent when
+				# there is no login yet; opening one adds the row then.
+				link_portal_user(customer.name, self.applicant_email_address)
 
 	def validate_repayment_method(self):
 		if self.repayment_method == "Repay Over Number of Periods" and not self.repayment_periods:
