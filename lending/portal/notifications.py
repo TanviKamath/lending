@@ -158,7 +158,7 @@ def attention_rows(applications: list[dict], schedule: list[dict]) -> list[dict]
 			"title": application["product"],
 			"note": application["note"],
 			"when": application["stage"],
-			"url": "/borrower/application/{0}".format(application["name"]),
+			"url": application["url"],
 		}
 		for application in applications
 		if application["needs_borrower"]
@@ -170,8 +170,11 @@ def attention_rows(applications: list[dict], schedule: list[dict]) -> list[dict]
 			"note": instalment["detail"],
 			"when": _("Due {0} · {1}").format(instalment["date"], instalment["amount"]),
 			# An instalment is a line of a schedule rather than a document, so the row
-			# opens the accounts list, which is the nearest page that holds it.
-			"url": "/borrower/loans",
+			# opens the loan whose schedule it is on. Where the loan behind the line
+			# cannot be named, the accounts list is the nearest page that holds it --
+			# an empty href would leave the row looking like a link and acting like a
+			# dead end.
+			"url": instalment.get("url") or "/borrower/loans",
 		}
 		for instalment in schedule
 	)

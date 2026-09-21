@@ -47,7 +47,18 @@ STATUS_LABELS = {
 	"Settled": "Settled",
 }
 
-REGULAR_LABELS = ("Regular",)
+# The tone the status badge carries, for the statuses that mean something to a borrower
+# beyond where in the lifecycle the loan is. A loan being paid as agreed is good news; a
+# written-off one is the borrower's to act on. The rest are neither, and say so by
+# taking the badge's neutral: a sanctioned loan awaiting disbursement is not a warning.
+#
+# Nothing here is red. The portal's palette has one danger colour and no shade to lay it
+# on, so a status that would be red in the desk takes the warn pair instead.
+STATUS_TONES = {
+	"Disbursed": "ok",
+	"Active": "ok",
+	"Written Off": "warn",
+}
 
 # What the portal calls itself before a lender has named it. Every page reads the
 # name through brand_name(), so this is the only place the words appear.
@@ -61,6 +72,13 @@ APPLICATION_STAGES = {
 	"Open": "Under review",
 	"Approved": "Approved",
 	"Rejected": "Not approved",
+}
+
+# Under review is the ordinary state of an application and takes the neutral badge. A
+# rejection takes warn for the reason STATUS_TONES gives: there is no red to give it.
+STAGE_TONES = {
+	"Approved": "ok",
+	"Rejected": "warn",
 }
 
 
@@ -119,6 +137,54 @@ def days_until(value) -> int:
 	return (getdate(value) - getdate(nowdate())).days
 
 
+def days_ago(value) -> str:
+	"""How long ago, for an event whose record keeps a date and no time.
+
+	frappe.utils.pretty_date would do this from a timestamp, but these events carry a
+	posting date, which it reads as midnight: a repayment entered this morning came out
+	as "14 hours ago" and one entered late last night as "yesterday", though both
+	happened on the same day.
+
+	Written out rather than composed from a unit and a count because a translator needs
+	the whole phrase: the languages this portal is read in do not all pluralise by
+	adding an s, and several put the number somewhere else in the sentence.
+	"""
+	days = -days_until(value)
+
+	if days <= 0:
+		return _("Today")
+	if days == 1:
+		return _("Yesterday")
+	if days < 7:
+		return _("{0} days ago").format(days)
+
+	if days < 30:
+		weeks = days // 7
+		return _("1 week ago") if weeks == 1 else _("{0} weeks ago").format(weeks)
+
+	if days < 365:
+		months = days // 30
+		return _("1 month ago") if months == 1 else _("{0} months ago").format(months)
+
+	years = days // 365
+
+	return _("1 year ago") if years == 1 else _("{0} years ago").format(years)
+
+
+def loan_url(name: str) -> str:
+	"""Where a row about a loan goes when it is pressed.
+
+	Written here rather than at each list that renders one: a row the borrower cannot
+	open is a dead end, and four pages were spelling this path out for themselves --
+	or, on the overview, not at all.
+	"""
+	return f"/borrower/loan/{name}" if name else ""
+
+
+def application_url(name: str) -> str:
+	return f"/borrower/application/{name}" if name else ""
+
+
 def current_route() -> str:
 	"""The route being served, spelt the way a menu row spells its own.
 
@@ -173,6 +239,7 @@ def shell_payload(crumb: str, action_label: str, customers: list[str], loans: li
 		"as_on": long_date(nowdate()),
 		"nav_items": nav_items(),
 		**brand_payload(),
+		**footer_payload(),
 		"initials": initials(),
 		"holder_name": holder_name(),
 		"head_note": head_note(),
@@ -181,7 +248,7 @@ def shell_payload(crumb: str, action_label: str, customers: list[str], loans: li
 			if customers
 			else _("No customer record is linked to this login")
 		),
-		"account_status": account_status(loans),
+		**account_status(loans),
 		"crumb": crumb,
 		"action_label": action_label,
 	}
@@ -201,21 +268,32 @@ def get_dashboard() -> dict:
 	loans = get_loans(customers)
 	schedule = get_upcoming_repayments(loans)
 	applications = get_applications(customers)
+	activity = get_activity(loans)
 	accounts = [present_loan(loan, len(customers) > 1) for loan in loans]
 
 	payload = {
 		"accounts": accounts,
 		"applications": applications,
 		"schedule": schedule,
-		"activity": get_activity(loans),
-		"accounts_note": _("{0} accounts").format(len(accounts)),
+		"activity": activity,
+		"accounts_note": (
+			_("1 account") if len(accounts) == 1 else _("{0} accounts").format(len(accounts))
+		),
 		"applications_note": _("{0} in progress").format(len(applications)),
-		"schedule_note": _("Next four instalments"),
-		"activity_note": _("Last 60 days"),
+		# The subtitle takes the loan's name when the rows have given it up, so it is
+		# still on the card -- once, where a heading belongs -- rather than down it.
+		"schedule_note": one_loan_note(_("Next four instalments"), schedule),
+		"activity_note": one_loan_note(_("Last 60 days"), activity),
 	}
 	payload.update(shell_payload(_("Account overview"), _("View payment details"), customers, loans))
 	payload.update(labels())
 	payload.update(build_summary(loans, schedule))
+	payload["tasks"] = waiting_on_borrower(applications)
+	payload["tasks_note"] = tasks_note(payload["tasks"])
+	payload.update(application_lead(applications))
+	# After build_summary, which is what decides whether an instalment is near enough
+	# to be anyone's business today. next_flag is empty when none is.
+	payload.update(next_action(bool(payload["next_flag"])))
 
 	return payload
 
@@ -240,11 +318,114 @@ def empty_dashboard() -> dict:
 		# Nothing sanctioned is not a figure of zero. The line hides itself rather than
 		# telling a borrower with no loans that they have been sanctioned nothing.
 		"sanctioned_line": "",
+		"tasks": [],
+		"tasks_note": "",
 	}
+	payload.update(application_lead([]))
 	payload.update(shell_payload(_("Account overview"), _("View payment details"), [], []))
 	payload.update(labels())
+	payload.update(next_action(due_soon=False))
 
 	return payload
+
+
+REPAYMENTS_ROUTE = "/borrower/repayments"
+
+
+def waiting_on_borrower(applications: list[dict]) -> list[dict]:
+	"""The rows the borrower has to do something about: their own unsent applications.
+
+	Only applications. An instalment coming due is urgent too, but it already has the
+	button under the figures, and a strip that also carried it would put the same
+	request on the page twice -- which is the habit this strip was added to break.
+	The two divide the work: the strip is what is blocked on the borrower and has
+	nowhere else to be said, the button is the payment.
+
+	The rows are shaped like the ones in the Applications table on purpose. The strip
+	and the table are two views of the same work, and a borrower should not have to
+	notice they are reading different things.
+	"""
+	return [
+		{
+			"product": row["product"],
+			"note": row["note"] or row["reference"],
+			"stage": row["stage"],
+			"stage_tone": row["stage_tone"],
+			"url": row["url"],
+		}
+		for row in applications
+		if row["needs_borrower"]
+	]
+
+
+def tasks_note(tasks: list[dict]) -> str:
+	if not tasks:
+		return ""
+
+	return _("1 thing waiting on you") if len(tasks) == 1 else _("{0} things waiting on you").format(len(tasks))
+
+
+def application_lead(applications: list[dict]) -> dict:
+	"""The application the overview's first card stands on: the most recent one open.
+
+	It is the third figure card at the top of the page, next to the next repayment and
+	the total outstanding, because for a borrower who is still applying it is the only
+	one of the three that has any news in it -- the other two read "Nothing due" and
+	"No live accounts" until the loan is booked.
+
+	An application has no figure, so the card carries words: the product on the line
+	where a figure would go, the stage as the badge beside the title, and the
+	reference under it. The amount sought is deliberately not here. It is in the
+	Application status table below, and it is not the thing a borrower opens this page
+	to check -- they know what they asked for, they want to know where it has got to.
+
+	Flat keys, one per element: Builder binds a key straight into a block, so the card
+	cannot reach into the applications list for the first row itself.
+	"""
+	if not applications:
+		return {
+			"application_headline": "—",
+			"application_stage": "",
+			"application_stage_tone": "",
+			"application_note": _("Nothing in progress"),
+			"application_more": "",
+		}
+
+	# get_applications orders by posting_date desc, so the first row is the newest.
+	first = applications[0]
+
+	return {
+		"application_headline": first["product"],
+		"application_stage": first["stage"],
+		"application_stage_tone": first["stage_tone"],
+		"application_note": first["note"] or first["reference"],
+		# Only when the card is showing one of several, so the borrower knows the
+		# table below holds more than the row they are reading here.
+		"application_more": (
+			_("{0} in progress").format(len(applications)) if len(applications) > 1 else ""
+		),
+	}
+
+
+def next_action(due_soon: bool) -> dict:
+	"""The button under the figures: always the payment page, not always insisting.
+
+	The destination was never the problem -- a borrower who wants to pay wants this
+	page. The emphasis was. A filled black button is a page saying "do this now", and
+	it said that every day, including the eighteen days before anything was due, while
+	the things that were actually waiting sat further down in grey.
+
+	So the words and the route hold and the weight moves. `action_urgent` is read into
+	a data attribute rather than a style because the anchor is one block and cannot
+	carry two sets of styles: the quiet variant is a rule in ACTION_TONE_CSS keyed on
+	what this puts here. Quiet, the button still offers the payment page; it just
+	stops being the loudest thing on a page where nothing is due.
+	"""
+	return {
+		"action_label": _("View payment details"),
+		"action_href": REPAYMENTS_ROUTE,
+		"action_urgent": "1" if due_soon else "0",
+	}
 
 
 def labels() -> dict:
@@ -255,6 +436,7 @@ def labels() -> dict:
 	A function, not a constant: a module-level _() would resolve once at import.
 	"""
 	return {
+		"label_application": _("Loan application"),
 		"label_next": _("Next repayment"),
 		"label_outstanding": _("Total outstanding"),
 		"label_sanctioned": _("Total sanctioned"),
@@ -313,6 +495,64 @@ def brand_payload() -> dict:
 		"support_email": support,
 		"support_href": f"mailto:{support}" if support else "#",
 	}
+
+
+def copyright_note() -> str:
+	"""The line of ownership at the foot of the page, in the lender's own words.
+
+	A lender that types its own notice gets it verbatim, except for {year}: a notice
+	with the year written into it is wrong every January, and nobody edits settings to
+	fix that. The substitution is a replace rather than a format so that a notice
+	carrying a stray brace is text, not a ValueError on every page of the portal.
+	"""
+	settings = portal_settings("portal_copyright", "portal_brand_name")
+	brand = settings.portal_brand_name or DEFAULT_BRAND_NAME
+	year = str(getdate(nowdate()).year)
+
+	written = clean(settings.portal_copyright)
+	if written:
+		return written.replace("{year}", year)
+
+	# The sentence supplies the stop after the name, so a name that ends in one of its
+	# own -- most of them do, being an Ltd. or a Pvt. Ltd. -- does not get two.
+	return _("Copyright © {0} {1}. All rights reserved.").format(year, brand.rstrip("."))
+
+
+def footer_links() -> list[dict]:
+	"""The policies a lender publishes, and the address to complain to.
+
+	The rows are a setting read per request and rendered by a repeater, so a lender
+	adding a policy needs no rebuild of the pages -- see build.shell.footer. Contact
+	us comes last because it is the one link the app supplies itself: a lender is
+	required to publish a grievance address, and leaving it to a row someone remembers
+	to add would mean the pages that need it most are the ones without it.
+
+	It reads Contact us rather than the address itself. The address is what the link
+	does, not what it is for, and a borrower looking for somewhere to complain scans
+	the row for the words, not for an @.
+	"""
+	rows = frappe.get_all(
+		"Portal Footer Link",
+		filters={"parent": "Lending Settings", "parentfield": "portal_footer_links"},
+		fields=["link_label", "url"],
+		order_by="idx asc",
+	)
+
+	links = [
+		{"footer_label": clean(row.link_label), "footer_href": clean(row.url)}
+		for row in rows
+		if clean(row.link_label) and clean(row.url)
+	]
+
+	support = (portal_settings("portal_support_email").portal_support_email or "").strip()
+	if support:
+		links.append({"footer_label": _("Contact us"), "footer_href": f"mailto:{support}"})
+
+	return links
+
+
+def footer_payload() -> dict:
+	return {"copyright_note": copyright_note(), "footer_links": footer_links()}
 
 
 def get_loans(customers: list[str]) -> list[dict]:
@@ -375,6 +615,7 @@ def present_loan(loan: dict, show_customer: bool) -> dict:
 
 	return {
 		"name": loan.name,
+		"url": loan_url(loan.name),
 		"product": loan.loan_product,
 		"terms": "{0} · {1}% p.a. · {2} {3}".format(
 			loan.name,
@@ -383,7 +624,7 @@ def present_loan(loan: dict, show_customer: bool) -> dict:
 			(loan.repayment_frequency or "Monthly").lower(),
 		),
 		"status_label": label,
-		"is_regular": label in REGULAR_LABELS,
+		"tone": STATUS_TONES.get(loan.status, ""),
 		"customer": loan.applicant if show_customer else "",
 		"next_date": short_date(next_row.get("payment_date")) if next_row else "—",
 		"next_amount": money(next_row.get("total_payment")) if next_row else "",
@@ -469,10 +710,38 @@ def get_upcoming_repayments(loans: list[dict], limit: int = 4) -> list[dict]:
 					money(row.principal_amount), money(row.interest_amount)
 				),
 				"amount": money(row.total_payment),
+				"url": loan_url(loan_name),
 			}
 		)
 
-	return presented
+	return name_once(presented)
+
+
+def one_loan_note(base: str, rows: list[dict]) -> str:
+	"""A card's subtitle, carrying the loan's name when its rows have stopped carrying it."""
+	products = {row["product"] for row in rows}
+
+	return _("{0} · {1}").format(base, products.pop()) if len(products) == 1 else base
+
+
+def name_once(rows: list[dict]) -> list[dict]:
+	"""Fill each row's two lines, dropping the loan's name when every row shares it.
+
+	A borrower with one loan was reading its name down all four rows of the schedule,
+	next to an amount that on a fixed instalment does not move either -- four rows
+	saying one thing. Where the rows are all the same loan the name goes up into the
+	card's subtitle, said once, and the row leads with what actually changes.
+
+	`product` and `detail` are left on the rows. The notifications panel builds its
+	own wording from them, and this is only about what the timeline renders.
+	"""
+	one_loan = len({row["product"] for row in rows}) == 1
+
+	for row in rows:
+		row["title"] = row["detail"] if one_loan else row["product"]
+		row["sub"] = "" if one_loan else row["detail"]
+
+	return rows
 
 
 def build_summary(loans: list[dict], schedule: list[dict]) -> dict:
@@ -480,6 +749,8 @@ def build_summary(loans: list[dict], schedule: list[dict]) -> dict:
 	outstanding = sum(outstanding_of(loan) for loan in live)
 	sanctioned = sum(flt(loan.loan_amount) for loan in loans)
 	undrawn = sum(undrawn_of(loan) for loan in live)
+	drawn = sum(flt(loan.disbursed_amount) for loan in live)
+	repaid = sum(flt(loan.total_principal_paid) for loan in live)
 	first = schedule[0] if schedule else {}
 	sanctioned_amount = money(sanctioned)
 	sanctioned_note = _("{0} undrawn").format(money(undrawn)) if undrawn else _("Fully drawn")
@@ -491,22 +762,46 @@ def build_summary(loans: list[dict], schedule: list[dict]) -> dict:
 		),
 		"next_flag": next_flag(loans),
 		"outstanding": money(outstanding),
-		"outstanding_note": _("Across {0} live accounts").format(len(live)),
+		"outstanding_note": (
+			_("Across 1 live account")
+			if len(live) == 1
+			else _("Across {0} live accounts").format(len(live))
+		),
 		"sanctioned": sanctioned_amount,
 		"sanctioned_note": sanctioned_note,
-		# The overview folds the sanctioned amount into one line under the outstanding
-		# figure instead of giving it a card of its own. Joined here rather than on the
-		# page because Builder binds one key straight into one element, and the page
-		# data script runs under safe_exec, where str.format is unavailable.
-		#
-		# Nothing sanctioned is not a figure of zero, and this is the borrower who has
-		# applied and is waiting: a card said "Total sanctioned ₹0.00" to them, and the
-		# line says nothing at all. The card's own two keys are left as they were, since
-		# the loan accounts page still shows them.
-		"sanctioned_line": (
-			_("Total sanctioned {0} · {1}").format(sanctioned_amount, sanctioned_note) if sanctioned else ""
-		),
+		"sanctioned_line": standing_line(sanctioned, undrawn, drawn, repaid),
 	}
+
+
+def standing_line(sanctioned: float, undrawn: float, drawn: float, repaid: float) -> str:
+	"""The one line under the outstanding figure, carrying whatever is not already said.
+
+	The overview folds this in under the figure instead of giving it a card of its
+	own. Joined here rather than on the page because Builder binds one key straight
+	into one element, and the page data script runs under safe_exec, where str.format
+	is unavailable.
+
+	Which fact it carries depends on the account, because only one of them is ever
+	news. Money still undrawn is news: the borrower can draw it. But on a fully drawn
+	loan the sanctioned amount is the disbursed amount, which the figure above has
+	already given -- the line read "Total sanctioned 3,00,000 · Fully drawn" over an
+	outstanding of 3,00,000, and said nothing twice. What that borrower cannot see
+	anywhere on the page is how far through it they are, so the line says that.
+
+	Nothing sanctioned is not a figure of zero, and this is the borrower who has
+	applied and is waiting: a card said "Total sanctioned 0.00" to them, and the line
+	says nothing at all.
+	"""
+	if not sanctioned:
+		return ""
+
+	if undrawn:
+		return _("Total sanctioned {0} · {1} undrawn").format(money(sanctioned), money(undrawn))
+
+	if drawn:
+		return _("{0} of {1} principal repaid").format(money(repaid), money(drawn))
+
+	return _("Total sanctioned {0} · {1}").format(money(sanctioned), _("Fully drawn"))
 
 
 def next_flag(loans: list[dict]) -> str:
@@ -521,10 +816,16 @@ def next_flag(loans: list[dict]) -> str:
 	return _("Due in {0} days").format(days) if days <= 7 else ""
 
 
-def account_status(loans: list[dict]) -> str:
+def account_status(loans: list[dict]) -> dict:
+	"""The badge in the page head: how the borrower's accounts stand, and how loudly.
+
+	Both halves at once, because the tone is the same sentence said in colour: a head
+	that reported an overdue payment in the green it uses for a regular account would
+	be contradicting itself.
+	"""
 	live = [loan for loan in loans if is_live(loan)]
 	if not live:
-		return _("No live accounts")
+		return {"account_status": _("No live accounts"), "account_tone": ""}
 
 	overdue = frappe.db.count(
 		"Loan Demand",
@@ -536,7 +837,17 @@ def account_status(loans: list[dict]) -> str:
 		},
 	)
 
-	return _("Payment overdue") if overdue else _("All accounts regular")
+	if overdue:
+		return {"account_status": _("Payment overdue"), "account_tone": "warn"}
+
+	# A borrower with one live account reads its standing in its own row, in the same
+	# words and the same green. Saying it again in the head is the page agreeing with
+	# itself. With several accounts there is no single row that speaks for all of
+	# them, so the sum is worth stating; with one there is nothing to sum.
+	if len(live) == 1:
+		return {"account_status": "", "account_tone": "ok"}
+
+	return {"account_status": _("All accounts regular"), "account_tone": "ok"}
 
 
 def loans_by_application(applications: list[str]) -> dict:
@@ -558,14 +869,22 @@ def loans_by_application(applications: list[str]) -> dict:
 	return {row.loan_application: row for row in rows}
 
 
-def application_stage(application: dict, needs_borrower: bool, loan: dict | None) -> str:
+def application_stage(application: dict, needs_borrower: bool, loan: dict | None) -> tuple[str, str]:
+	"""Where an application has got to, and the tone its badge carries.
+
+	The two come back together because they are one decision. Split across two
+	functions they would be the same three branches written twice, and the day a
+	fourth stage is added is the day one of the two copies is forgotten.
+	"""
 	if needs_borrower:
-		return _("Action required")
+		return _("Action required"), "warn"
 
 	if loan:
-		return _("Loan sanctioned")
+		return _("Loan sanctioned"), "ok"
 
-	return APPLICATION_STAGES.get(application.status, application.status)
+	return APPLICATION_STAGES.get(application.status, application.status), STAGE_TONES.get(
+		application.status, ""
+	)
 
 
 def leads_for_login() -> list[dict]:
@@ -612,16 +931,18 @@ def get_applications(customers: list[str]) -> list[dict]:
 	presented = []
 	for row in rows:
 		needs_borrower = row.docstatus == 0
+		stage, stage_tone = application_stage(row, needs_borrower, booked.get(row.name))
 		presented.append(
 			{
 				"name": row.name,
+				"url": application_url(row.name),
 				"product": row.loan_product,
 				"reference": "{0} · initiated {1}".format(row.name, long_date(row.posting_date)),
-				"stage": application_stage(row, needs_borrower, booked.get(row.name)),
+				"stage": stage,
+				"stage_tone": stage_tone,
 				"needs_borrower": needs_borrower,
 				"amount": money(row.loan_amount),
 				"note": draft_note(row.name) if needs_borrower else "",
-				"tag": "you" if needs_borrower else "us",
 			}
 		)
 
@@ -666,10 +987,12 @@ def get_activity(loans: list[dict], limit: int = 5) -> list[dict]:
 		events.append(
 			{
 				"date": short_date(row.posting_date),
+				"when": days_ago(row.posting_date),
 				"sort": str(getdate(row.posting_date)),
 				"title": _("Repayment received"),
-				"sub": product_of.get(row.against_loan, ""),
+				"product": product_of.get(row.against_loan, ""),
 				"amount": money(row.amount_paid),
+				"url": loan_url(row.against_loan),
 			}
 		)
 
@@ -683,10 +1006,12 @@ def get_activity(loans: list[dict], limit: int = 5) -> list[dict]:
 		events.append(
 			{
 				"date": short_date(row.disbursement_date),
+				"when": days_ago(row.disbursement_date),
 				"sort": str(getdate(row.disbursement_date)),
 				"title": _("Amount disbursed"),
-				"sub": product_of.get(row.against_loan, ""),
+				"product": product_of.get(row.against_loan, ""),
 				"amount": money(row.disbursed_amount),
+				"url": loan_url(row.against_loan),
 			}
 		)
 
@@ -694,4 +1019,20 @@ def get_activity(loans: list[dict], limit: int = 5) -> list[dict]:
 	for event in events:
 		event.pop("sort", None)
 
-	return events[:limit]
+	events = events[:limit]
+
+	# Same rule as the schedule, but the other way up: an event's title already varies
+	# -- received, disbursed -- so here it is the rest of the sentence that gives up the
+	# loan's name when every event shares one.
+	one_loan = len({event["product"] for event in events}) == 1
+	for event in events:
+		event["sub"] = "" if one_loan else event["product"]
+		# The grey half of the sentence beside the dot, joined here because Builder
+		# binds one key into one element and a data script running under safe_exec
+		# cannot join two. The empty parts drop out, so a single-loan list carries no
+		# stray separator where the product would have been.
+		event["note"] = " · ".join(
+			part for part in (event["amount"], event["sub"], event["when"]) if part
+		)
+
+	return events

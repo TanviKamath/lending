@@ -23,8 +23,6 @@ from lending.portal.build.theme import (
 	COL_MAIN_STYLES,
 	COL_NEXT_STYLES,
 	COL_STATUS_STYLES,
-	DOT_STYLES,
-	FLAG_STYLES,
 	NCARD_BODY_STYLES,
 	NCARD_HEAD_STYLES,
 	NCARD_STAT_STYLES,
@@ -34,10 +32,10 @@ from lending.portal.build.theme import (
 	PRIMARY_TEXT_STYLES,
 	ROW_STYLES,
 	SECONDARY_TEXT_STYLES,
-	STATE_STYLES,
 	TABULAR,
 	THEAD_LABEL_STYLES,
 	THEAD_STYLES,
+	badge,
 	block,
 	bound,
 	linked,
@@ -58,7 +56,7 @@ data.update(frappe.call("lending.portal.loans.get_loans_page"))  # noqa: F821
 def number_card(title_key, value_key, stat_key, flag_key=None):
 	head_children = [bound("span", title_key, styles=NCARD_TITLE_STYLES)]
 	if flag_key:
-		flag = bound("span", flag_key, styles=FLAG_STYLES)
+		flag = badge(flag_key, tone="warn")
 		flag["visibilityCondition"] = flag_key
 		head_children.append(flag)
 
@@ -120,16 +118,7 @@ def accounts_body():
 			block(
 				"div",
 				styles=COL_STATUS_STYLES,
-				children=[
-					block(
-						"span",
-						styles=STATE_STYLES,
-						children=[
-							block("span", styles=DOT_STYLES),
-							bound("span", "status_label"),
-						],
-					)
-				],
+				children=[badge("status_label", tone_key="tone")],
 			),
 			block(
 				"div",

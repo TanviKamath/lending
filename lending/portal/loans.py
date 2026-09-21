@@ -59,10 +59,6 @@ def get_loans_page() -> dict:
 	customers = get_portal_customers()
 	loans = get_loans(customers) if customers else []
 	accounts = [present_loan(loan, len(customers) > 1) for loan in loans]
-
-	for row in accounts:
-		row["url"] = f"/borrower/loan/{row['name']}"
-
 	payload = shell_payload(_("Loan accounts"), _("Apply for a loan"), customers, loans)
 	payload.update(labels())
 	payload.update(build_summary(loans, get_upcoming_repayments(loans)))
@@ -160,15 +156,21 @@ def demands_by_instalment(loan: str) -> dict:
 	return index
 
 
-def instalment_state(row: dict, demands: dict) -> str:
+def instalment_state(row: dict, demands: dict) -> tuple[str, str]:
+	"""What an instalment is, and how loudly the badge says it.
+
+	An instalment the lender has not yet asked for is neutral; one it has asked for is
+	a nudge whether or not the date has passed, because the words already tell the two
+	apart and the colour would only be repeating them.
+	"""
 	entry = demands.get(row.name)
 	if not entry:
-		return _("Upcoming")
+		return _("Upcoming"), ""
 
 	if entry["outstanding"] <= 0:
-		return _("Paid")
+		return _("Paid"), "ok"
 
-	return _("Payment overdue") if row.payment_date < nowdate() else _("Due")
+	return (_("Payment overdue"), "warn") if row.payment_date < nowdate() else (_("Due"), "warn")
 
 
 def schedule_rows(loan: str) -> list[dict]:
@@ -193,18 +195,23 @@ def schedule_rows(loan: str) -> list[dict]:
 
 	demands = demands_by_instalment(loan)
 
-	return [
-		{
-			"date": short_date(row.payment_date),
-			"detail": _("Principal {0} · interest {1}").format(
-				money(row.principal_amount), money(row.interest_amount)
-			),
-			"amount": money(row.total_payment),
-			"state": instalment_state(row, demands),
-			"balance": _("{0} outstanding after").format(money(row.balance_loan_amount)),
-		}
-		for row in rows
-	]
+	presented = []
+	for row in rows:
+		state, tone = instalment_state(row, demands)
+		presented.append(
+			{
+				"date": short_date(row.payment_date),
+				"detail": _("Principal {0} · interest {1}").format(
+					money(row.principal_amount), money(row.interest_amount)
+				),
+				"amount": money(row.total_payment),
+				"state": state,
+				"state_tone": tone,
+				"balance": _("{0} outstanding after").format(money(row.balance_loan_amount)),
+			}
+		)
+
+	return presented
 
 
 def disbursement_rows(loan: dict) -> list[dict]:

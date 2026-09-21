@@ -9,13 +9,13 @@
     "background": "var(--portal-surface-page,#ffffff)",
     "color": "var(--portal-ink,#171717)",
     "fontFamily": "var(--brand-font,InterVariable),Inter,-apple-system,BlinkMacSystemFont,\"Segoe UI\",Roboto,Oxygen,Ubuntu,Cantarell,\"Fira Sans\",\"Droid Sans\",\"Helvetica Neue\",sans-serif",
-    "fontSize": "var(--portal-text-md,15px)",
+    "fontSize": "var(--portal-text-md,13px)",
     "fontVariationSettings": "\"opsz\" 24",
     "fontWeight": "400",
     "lineHeight": "1.5",
     "margin": "0"
    },
-   "blockId": "145aa2b5b",
+   "blockId": "f5e4e4760",
    "children": [
     {
      "attributes": {},
@@ -484,32 +484,7 @@
              "attributes": {},
              "baseStyles": {},
              "blockId": "bd70617c8",
-             "children": [
-              {
-               "attributes": {},
-               "baseStyles": {},
-               "blockId": "493dd7db7",
-               "children": [],
-               "classes": [],
-               "customAttributes": {},
-               "isChildOfComponent": "lending-borrower-shell",
-               "mobileStyles": {},
-               "referenceBlockId": "ec3aee1a4",
-               "tabletStyles": {}
-              },
-              {
-               "attributes": {},
-               "baseStyles": {},
-               "blockId": "8a9fa0fb8",
-               "children": [],
-               "classes": [],
-               "customAttributes": {},
-               "isChildOfComponent": "lending-borrower-shell",
-               "mobileStyles": {},
-               "referenceBlockId": "119671b49",
-               "tabletStyles": {}
-              }
-             ],
+             "children": [],
              "classes": [],
              "customAttributes": {},
              "isChildOfComponent": "lending-borrower-shell",
@@ -555,65 +530,110 @@
           {
            "attributes": {},
            "baseStyles": {
-            "display": "grid",
-            "gap": "var(--portal-gap,16px)",
-            "gridTemplateColumns": "repeat(auto-fit, minmax(240px, 1fr))"
+            "background": "var(--portal-surface-card,#ffffff)",
+            "border": "1px solid var(--portal-border,#ededed)",
+            "borderRadius": "12px",
+            "display": "flex",
+            "flexDirection": "column",
+            "minWidth": "0"
            },
-           "blockId": "00c73ea2a",
+           "blockId": "c1cc52ea3",
            "children": [
             {
              "attributes": {},
-             "baseStyles": {},
-             "blockId": "0f517490a",
+             "baseStyles": {
+              "padding": "var(--portal-card-pad,12px)"
+             },
+             "blockId": "fec770466",
              "children": [
               {
                "attributes": {},
                "baseStyles": {
-                "background": "var(--portal-surface-card,#ffffff)",
-                "border": "1px solid var(--portal-border,#ededed)",
-                "borderRadius": "12px",
+                "color": "var(--portal-ink,#171717)",
+                "fontSize": "var(--portal-text-lg,14px)",
+                "fontWeight": "600",
+                "lineHeight": "1.3em",
+                "margin": "0"
+               },
+               "blockId": "ba66ec2eb",
+               "children": [],
+               "classes": [],
+               "customAttributes": {},
+               "element": "h2",
+               "innerHTML": "Loan details",
+               "mobileStyles": {},
+               "tabletStyles": {}
+              },
+              {
+               "attributes": {},
+               "baseStyles": {
+                "color": "var(--portal-ink-muted,#525252)",
+                "fontSize": "var(--portal-text-sm,12px)",
+                "fontVariantNumeric": "tabular-nums",
+                "marginTop": "5px"
+               },
+               "blockId": "2bd7bb863",
+               "children": [],
+               "classes": [],
+               "customAttributes": {},
+               "dynamicValues": [
+                {
+                 "comesFrom": "dataScript",
+                 "key": "summary_note",
+                 "property": "innerHTML",
+                 "type": "key"
+                }
+               ],
+               "element": "div",
+               "mobileStyles": {},
+               "tabletStyles": {}
+              }
+             ],
+             "classes": [],
+             "customAttributes": {},
+             "element": "div",
+             "mobileStyles": {},
+             "tabletStyles": {}
+            },
+            {
+             "attributes": {},
+             "baseStyles": {
+              "display": "grid",
+              "gap": "18px var(--portal-gap,16px)",
+              "gridTemplateColumns": "repeat(3, minmax(0, 1fr))",
+              "padding": "var(--portal-card-pad,12px)"
+             },
+             "blockId": "e94990668",
+             "children": [
+              {
+               "attributes": {},
+               "baseStyles": {
                 "display": "flex",
                 "flexDirection": "column",
-                "minHeight": "110px",
-                "padding": "var(--portal-card-pad,12px)"
+                "gap": "4px",
+                "minWidth": "0"
                },
-               "blockId": "a973b98b5",
+               "blockId": "99a0daed7",
                "children": [
                 {
                  "attributes": {},
                  "baseStyles": {
-                  "alignItems": "flex-start",
-                  "display": "flex",
-                  "gap": "8px",
-                  "justifyContent": "space-between"
+                  "color": "var(--portal-ink-subtle,#7c7c7c)",
+                  "fontSize": "var(--portal-text-sm,12px)",
+                  "fontVariantNumeric": "tabular-nums"
                  },
-                 "blockId": "2e2c4aaf5",
-                 "children": [
-                  {
-                   "attributes": {},
-                   "baseStyles": {
-                    "fontSize": "var(--portal-text-sm,13px)",
-                    "fontWeight": "500"
-                   },
-                   "blockId": "3779e9c94",
-                   "children": [],
-                   "classes": [],
-                   "customAttributes": {},
-                   "dynamicValues": [
-                    {
-                     "comesFrom": "dataScript",
-                     "key": "label",
-                     "property": "innerHTML",
-                     "type": "key"
-                    }
-                   ],
-                   "element": "span",
-                   "mobileStyles": {},
-                   "tabletStyles": {}
-                  }
-                 ],
+                 "blockId": "808509c3e",
+                 "children": [],
                  "classes": [],
                  "customAttributes": {},
+                 "dynamicValues": [
+                  {
+                   "comesFrom": "dataScript",
+                   "key": "label",
+                   "property": "innerHTML",
+                   "type": "key"
+                  }
+                 ],
                  "element": "div",
                  "mobileStyles": {},
                  "tabletStyles": {}
@@ -621,39 +641,21 @@
                 {
                  "attributes": {},
                  "baseStyles": {
-                  "display": "flex",
-                  "flexDirection": "column",
-                  "paddingTop": "var(--portal-card-pad,12px)"
+                  "fontSize": "var(--portal-text-md,13px)",
+                  "fontWeight": "500"
                  },
-                 "blockId": "de39a0385",
-                 "children": [
-                  {
-                   "attributes": {},
-                   "baseStyles": {
-                    "fontSize": "var(--portal-text-xl,24px)",
-                    "fontVariantNumeric": "tabular-nums",
-                    "fontWeight": "600",
-                    "lineHeight": "115%"
-                   },
-                   "blockId": "4c948bbd6",
-                   "children": [],
-                   "classes": [],
-                   "customAttributes": {},
-                   "dynamicValues": [
-                    {
-                     "comesFrom": "dataScript",
-                     "key": "value",
-                     "property": "innerHTML",
-                     "type": "key"
-                    }
-                   ],
-                   "element": "div",
-                   "mobileStyles": {},
-                   "tabletStyles": {}
-                  }
-                 ],
+                 "blockId": "8e54d9288",
+                 "children": [],
                  "classes": [],
                  "customAttributes": {},
+                 "dynamicValues": [
+                  {
+                   "comesFrom": "dataScript",
+                   "key": "value",
+                   "property": "innerHTML",
+                   "type": "key"
+                  }
+                 ],
                  "element": "div",
                  "mobileStyles": {},
                  "tabletStyles": {}
@@ -676,8 +678,12 @@
              },
              "element": "div",
              "isRepeaterBlock": true,
-             "mobileStyles": {},
-             "tabletStyles": {}
+             "mobileStyles": {
+              "gridTemplateColumns": "minmax(0, 1fr)"
+             },
+             "tabletStyles": {
+              "gridTemplateColumns": "repeat(2, minmax(0, 1fr))"
+             }
             }
            ],
            "classes": [],
@@ -694,7 +700,7 @@
             "gap": "var(--portal-gap,16px)",
             "gridTemplateColumns": "minmax(0, 1.9fr) minmax(0, 1fr)"
            },
-           "blockId": "666127ef9",
+           "blockId": "a468f2b84",
            "children": [
             {
              "attributes": {},
@@ -704,7 +710,7 @@
               "gap": "var(--portal-gap,16px)",
               "minWidth": "0"
              },
-             "blockId": "84ac58bca",
+             "blockId": "0a9961a1d",
              "children": [
               {
                "attributes": {},
@@ -716,25 +722,25 @@
                 "flexDirection": "column",
                 "minWidth": "0"
                },
-               "blockId": "5f22f86a9",
+               "blockId": "533613020",
                "children": [
                 {
                  "attributes": {},
                  "baseStyles": {
                   "padding": "var(--portal-card-pad,12px)"
                  },
-                 "blockId": "ff7b977f3",
+                 "blockId": "1e302ccdc",
                  "children": [
                   {
                    "attributes": {},
                    "baseStyles": {
                     "color": "var(--portal-ink,#171717)",
-                    "fontSize": "var(--portal-text-lg,18px)",
+                    "fontSize": "var(--portal-text-lg,14px)",
                     "fontWeight": "600",
                     "lineHeight": "1.3em",
                     "margin": "0"
                    },
-                   "blockId": "44d190814",
+                   "blockId": "dd070d514",
                    "children": [],
                    "classes": [],
                    "customAttributes": {},
@@ -747,11 +753,11 @@
                    "attributes": {},
                    "baseStyles": {
                     "color": "var(--portal-ink-muted,#525252)",
-                    "fontSize": "var(--portal-text-sm,13px)",
+                    "fontSize": "var(--portal-text-sm,12px)",
                     "fontVariantNumeric": "tabular-nums",
                     "marginTop": "5px"
                    },
-                   "blockId": "c681cf083",
+                   "blockId": "b3479fd88",
                    "children": [],
                    "classes": [],
                    "customAttributes": {},
@@ -777,7 +783,7 @@
                 {
                  "attributes": {},
                  "baseStyles": {},
-                 "blockId": "dc7c4d084",
+                 "blockId": "5f7c4630f",
                  "children": [
                   {
                    "attributes": {},
@@ -789,7 +795,7 @@
                     "hover:background": "var(--portal-surface-sunken,#f8f8f8)",
                     "padding": "var(--portal-row-pad,10px) var(--portal-card-pad,12px)"
                    },
-                   "blockId": "d0b5f8933",
+                   "blockId": "23b7b268e",
                    "children": [
                     {
                      "attributes": {},
@@ -800,15 +806,15 @@
                       "gap": "2px",
                       "minWidth": "0"
                      },
-                     "blockId": "5d9bf2ebf",
+                     "blockId": "e1e23fb98",
                      "children": [
                       {
                        "attributes": {},
                        "baseStyles": {
-                        "fontSize": "var(--portal-text-md,15px)",
+                        "fontSize": "var(--portal-text-md,13px)",
                         "fontWeight": "500"
                        },
-                       "blockId": "73a05d6ff",
+                       "blockId": "b075cac4c",
                        "children": [],
                        "classes": [],
                        "customAttributes": {},
@@ -828,10 +834,10 @@
                        "attributes": {},
                        "baseStyles": {
                         "color": "var(--portal-ink-subtle,#7c7c7c)",
-                        "fontSize": "var(--portal-text-sm,13px)",
+                        "fontSize": "var(--portal-text-sm,12px)",
                         "fontVariantNumeric": "tabular-nums"
                        },
-                       "blockId": "7138253a1",
+                       "blockId": "bdedf1878",
                        "children": [],
                        "classes": [],
                        "customAttributes": {},
@@ -860,18 +866,34 @@
                       "flexShrink": "0",
                       "width": "150px"
                      },
-                     "blockId": "43185a289",
+                     "blockId": "bb7f14e90",
                      "children": [
                       {
-                       "attributes": {},
+                       "attributes": {
+                        "data-tone": ""
+                       },
                        "baseStyles": {
                         "alignItems": "center",
+                        "background": "var(--portal-surface-sunken,#f8f8f8)",
+                        "border": "1px solid transparent",
+                        "borderRadius": "999px",
                         "color": "var(--portal-ink-muted,#525252)",
                         "display": "inline-flex",
-                        "fontSize": "var(--portal-text-sm,13px)",
-                        "gap": "6px"
+                        "flexShrink": "0",
+                        "fontSize": "12px",
+                        "fontWeight": "420",
+                        "gap": "4px",
+                        "height": "20px",
+                        "justifyContent": "center",
+                        "letterSpacing": "0.28px",
+                        "lineHeight": "1",
+                        "overflow": "clip",
+                        "padding": "0 6px",
+                        "userSelect": "none",
+                        "whiteSpace": "nowrap",
+                        "width": "fit-content"
                        },
-                       "blockId": "2778e6c44",
+                       "blockId": "b073630bb",
                        "children": [],
                        "classes": [],
                        "customAttributes": {},
@@ -881,6 +903,12 @@
                          "key": "state",
                          "property": "innerHTML",
                          "type": "key"
+                        },
+                        {
+                         "comesFrom": "dataScript",
+                         "key": "state_tone",
+                         "property": "data-tone",
+                         "type": "attribute"
                         }
                        ],
                        "element": "span",
@@ -904,16 +932,16 @@
                       "textAlign": "right",
                       "width": "150px"
                      },
-                     "blockId": "37a0a23c6",
+                     "blockId": "6fa011953",
                      "children": [
                       {
                        "attributes": {},
                        "baseStyles": {
-                        "fontSize": "var(--portal-text-md,15px)",
+                        "fontSize": "var(--portal-text-md,13px)",
                         "fontVariantNumeric": "tabular-nums",
                         "fontWeight": "500"
                        },
-                       "blockId": "054e65c8d",
+                       "blockId": "dfe5ded3c",
                        "children": [],
                        "classes": [],
                        "customAttributes": {},
@@ -933,10 +961,10 @@
                        "attributes": {},
                        "baseStyles": {
                         "color": "var(--portal-ink-subtle,#7c7c7c)",
-                        "fontSize": "var(--portal-text-sm,13px)",
+                        "fontSize": "var(--portal-text-sm,12px)",
                         "fontVariantNumeric": "tabular-nums"
                        },
-                       "blockId": "09e25a3c1",
+                       "blockId": "b3dab2f76",
                        "children": [],
                        "classes": [],
                        "customAttributes": {},
@@ -997,25 +1025,25 @@
                 "flexDirection": "column",
                 "minWidth": "0"
                },
-               "blockId": "47b458ecc",
+               "blockId": "97db6d71c",
                "children": [
                 {
                  "attributes": {},
                  "baseStyles": {
                   "padding": "var(--portal-card-pad,12px)"
                  },
-                 "blockId": "80320de24",
+                 "blockId": "7598ed9c5",
                  "children": [
                   {
                    "attributes": {},
                    "baseStyles": {
                     "color": "var(--portal-ink,#171717)",
-                    "fontSize": "var(--portal-text-lg,18px)",
+                    "fontSize": "var(--portal-text-lg,14px)",
                     "fontWeight": "600",
                     "lineHeight": "1.3em",
                     "margin": "0"
                    },
-                   "blockId": "721a674e1",
+                   "blockId": "e76d2302e",
                    "children": [],
                    "classes": [],
                    "customAttributes": {},
@@ -1028,11 +1056,11 @@
                    "attributes": {},
                    "baseStyles": {
                     "color": "var(--portal-ink-muted,#525252)",
-                    "fontSize": "var(--portal-text-sm,13px)",
+                    "fontSize": "var(--portal-text-sm,12px)",
                     "fontVariantNumeric": "tabular-nums",
                     "marginTop": "5px"
                    },
-                   "blockId": "d2068825f",
+                   "blockId": "02de777b7",
                    "children": [],
                    "classes": [],
                    "customAttributes": {},
@@ -1058,7 +1086,7 @@
                 {
                  "attributes": {},
                  "baseStyles": {},
-                 "blockId": "3aa562496",
+                 "blockId": "84d4718c8",
                  "children": [
                   {
                    "attributes": {},
@@ -1069,18 +1097,18 @@
                     "gap": "12px",
                     "padding": "var(--portal-row-pad,10px) var(--portal-card-pad,12px)"
                    },
-                   "blockId": "380da55a4",
+                   "blockId": "538c36b70",
                    "children": [
                     {
                      "attributes": {},
                      "baseStyles": {
                       "color": "var(--portal-ink-muted,#525252)",
                       "flexShrink": "0",
-                      "fontSize": "var(--portal-text-sm,13px)",
+                      "fontSize": "var(--portal-text-sm,12px)",
                       "fontVariantNumeric": "tabular-nums",
                       "width": "80px"
                      },
-                     "blockId": "98d2e2955",
+                     "blockId": "9d610e6f2",
                      "children": [],
                      "classes": [],
                      "customAttributes": {},
@@ -1105,15 +1133,15 @@
                       "gap": "2px",
                       "minWidth": "0"
                      },
-                     "blockId": "05a391477",
+                     "blockId": "a28123749",
                      "children": [
                       {
                        "attributes": {},
                        "baseStyles": {
-                        "fontSize": "var(--portal-text-md,15px)",
+                        "fontSize": "var(--portal-text-md,13px)",
                         "fontWeight": "500"
                        },
-                       "blockId": "cf6f70afe",
+                       "blockId": "8a2ba25f5",
                        "children": [],
                        "classes": [],
                        "customAttributes": {},
@@ -1133,10 +1161,10 @@
                        "attributes": {},
                        "baseStyles": {
                         "color": "var(--portal-ink-subtle,#7c7c7c)",
-                        "fontSize": "var(--portal-text-sm,13px)",
+                        "fontSize": "var(--portal-text-sm,12px)",
                         "fontVariantNumeric": "tabular-nums"
                        },
-                       "blockId": "7fc0664c4",
+                       "blockId": "f5a888468",
                        "children": [],
                        "classes": [],
                        "customAttributes": {},
@@ -1150,7 +1178,8 @@
                        ],
                        "element": "div",
                        "mobileStyles": {},
-                       "tabletStyles": {}
+                       "tabletStyles": {},
+                       "visibilityCondition": "running"
                       }
                      ],
                      "classes": [],
@@ -1163,11 +1192,11 @@
                      "attributes": {},
                      "baseStyles": {
                       "flexShrink": "0",
-                      "fontSize": "var(--portal-text-md,15px)",
+                      "fontSize": "var(--portal-text-md,13px)",
                       "fontVariantNumeric": "tabular-nums",
                       "fontWeight": "500"
                      },
-                     "blockId": "d5efd54ba",
+                     "blockId": "80b6312e6",
                      "children": [],
                      "classes": [],
                      "customAttributes": {},
@@ -1226,7 +1255,7 @@
               "gap": "var(--portal-gap,16px)",
               "minWidth": "0"
              },
-             "blockId": "a4eea2cdc",
+             "blockId": "6c3a7994f",
              "children": [
               {
                "attributes": {},
@@ -1238,25 +1267,25 @@
                 "flexDirection": "column",
                 "minWidth": "0"
                },
-               "blockId": "681fa212e",
+               "blockId": "ba9778368",
                "children": [
                 {
                  "attributes": {},
                  "baseStyles": {
                   "padding": "var(--portal-card-pad,12px)"
                  },
-                 "blockId": "04b097dc1",
+                 "blockId": "928ea14cd",
                  "children": [
                   {
                    "attributes": {},
                    "baseStyles": {
                     "color": "var(--portal-ink,#171717)",
-                    "fontSize": "var(--portal-text-lg,18px)",
+                    "fontSize": "var(--portal-text-lg,14px)",
                     "fontWeight": "600",
                     "lineHeight": "1.3em",
                     "margin": "0"
                    },
-                   "blockId": "92dc5102a",
+                   "blockId": "f5841d4d1",
                    "children": [],
                    "classes": [],
                    "customAttributes": {},
@@ -1269,11 +1298,11 @@
                    "attributes": {},
                    "baseStyles": {
                     "color": "var(--portal-ink-muted,#525252)",
-                    "fontSize": "var(--portal-text-sm,13px)",
+                    "fontSize": "var(--portal-text-sm,12px)",
                     "fontVariantNumeric": "tabular-nums",
                     "marginTop": "5px"
                    },
-                   "blockId": "964bdbdf1",
+                   "blockId": "4a84aeb8e",
                    "children": [],
                    "classes": [],
                    "customAttributes": {},
@@ -1299,12 +1328,12 @@
                 {
                  "attributes": {},
                  "baseStyles": {},
-                 "blockId": "f928d67da",
+                 "blockId": "18545ca3e",
                  "children": [
                   {
                    "attributes": {},
                    "baseStyles": {},
-                   "blockId": "94153dd0e",
+                   "blockId": "63d776210",
                    "children": [
                     {
                      "attributes": {},
@@ -1316,7 +1345,7 @@
                       "hover:background": "var(--portal-surface-sunken,#f8f8f8)",
                       "padding": "var(--portal-row-pad,10px) var(--portal-card-pad,12px)"
                      },
-                     "blockId": "f191b3b15",
+                     "blockId": "9a1c1f675",
                      "children": [
                       {
                        "attributes": {},
@@ -1327,16 +1356,16 @@
                         "gap": "2px",
                         "minWidth": "0"
                        },
-                       "blockId": "d4880ffd1",
+                       "blockId": "896352104",
                        "children": [
                         {
                          "attributes": {},
                          "baseStyles": {
                           "color": "var(--portal-ink-subtle,#7c7c7c)",
-                          "fontSize": "var(--portal-text-sm,13px)",
+                          "fontSize": "var(--portal-text-sm,12px)",
                           "fontVariantNumeric": "tabular-nums"
                          },
-                         "blockId": "d3cfe957d",
+                         "blockId": "96220a4c5",
                          "children": [],
                          "classes": [],
                          "customAttributes": {},
@@ -1355,10 +1384,10 @@
                         {
                          "attributes": {},
                          "baseStyles": {
-                          "fontSize": "var(--portal-text-md,15px)",
+                          "fontSize": "var(--portal-text-md,13px)",
                           "fontWeight": "500"
                          },
-                         "blockId": "0e8620b51",
+                         "blockId": "53721a4af",
                          "children": [],
                          "classes": [],
                          "customAttributes": {},
@@ -1407,7 +1436,7 @@
                    "baseStyles": {
                     "padding": "12px"
                    },
-                   "blockId": "4246de5a8",
+                   "blockId": "bff95642d",
                    "children": [
                     {
                      "attributes": {
@@ -1420,14 +1449,14 @@
                       "color": "var(--brand-primary-ink,#ffffff)",
                       "cursor": "pointer",
                       "fontFamily": "inherit",
-                      "fontSize": "var(--portal-text-md,15px)",
+                      "fontSize": "var(--portal-text-md,13px)",
                       "fontWeight": "500",
                       "hover:filter": "brightness(1.4)",
                       "padding": "6px 12px",
                       "textDecoration": "none",
                       "whiteSpace": "nowrap"
                      },
-                     "blockId": "9a8db4c96",
+                     "blockId": "1a967afae",
                      "children": [],
                      "classes": [],
                      "customAttributes": {},
@@ -1467,25 +1496,25 @@
                 "flexDirection": "column",
                 "minWidth": "0"
                },
-               "blockId": "ef6d76181",
+               "blockId": "b365e7358",
                "children": [
                 {
                  "attributes": {},
                  "baseStyles": {
                   "padding": "var(--portal-card-pad,12px)"
                  },
-                 "blockId": "899e362d4",
+                 "blockId": "fe9955268",
                  "children": [
                   {
                    "attributes": {},
                    "baseStyles": {
                     "color": "var(--portal-ink,#171717)",
-                    "fontSize": "var(--portal-text-lg,18px)",
+                    "fontSize": "var(--portal-text-lg,14px)",
                     "fontWeight": "600",
                     "lineHeight": "1.3em",
                     "margin": "0"
                    },
-                   "blockId": "0126859fe",
+                   "blockId": "2501eb1c2",
                    "children": [],
                    "classes": [],
                    "customAttributes": {},
@@ -1498,11 +1527,11 @@
                    "attributes": {},
                    "baseStyles": {
                     "color": "var(--portal-ink-muted,#525252)",
-                    "fontSize": "var(--portal-text-sm,13px)",
+                    "fontSize": "var(--portal-text-sm,12px)",
                     "fontVariantNumeric": "tabular-nums",
                     "marginTop": "5px"
                    },
-                   "blockId": "d2dbe6895",
+                   "blockId": "0c3b5bfe7",
                    "children": [],
                    "classes": [],
                    "customAttributes": {},
@@ -1528,7 +1557,7 @@
                 {
                  "attributes": {},
                  "baseStyles": {},
-                 "blockId": "9b1fdce51",
+                 "blockId": "4f4c149b3",
                  "children": [
                   {
                    "attributes": {},
@@ -1540,7 +1569,7 @@
                     "hover:background": "var(--portal-surface-sunken,#f8f8f8)",
                     "padding": "var(--portal-row-pad,10px) var(--portal-card-pad,12px)"
                    },
-                   "blockId": "259c6a579",
+                   "blockId": "7be5cb350",
                    "children": [
                     {
                      "attributes": {},
@@ -1551,16 +1580,16 @@
                       "gap": "2px",
                       "minWidth": "0"
                      },
-                     "blockId": "8a2a5eb9c",
+                     "blockId": "c7633e873",
                      "children": [
                       {
                        "attributes": {},
                        "baseStyles": {
                         "color": "var(--portal-ink-subtle,#7c7c7c)",
-                        "fontSize": "var(--portal-text-sm,13px)",
+                        "fontSize": "var(--portal-text-sm,12px)",
                         "fontVariantNumeric": "tabular-nums"
                        },
-                       "blockId": "3b97b5acc",
+                       "blockId": "c7fb9e878",
                        "children": [],
                        "classes": [],
                        "customAttributes": {},
@@ -1579,10 +1608,10 @@
                       {
                        "attributes": {},
                        "baseStyles": {
-                        "fontSize": "var(--portal-text-md,15px)",
+                        "fontSize": "var(--portal-text-md,13px)",
                         "fontWeight": "500"
                        },
-                       "blockId": "31d862e38",
+                       "blockId": "213fdbeb6",
                        "children": [],
                        "classes": [],
                        "customAttributes": {},
@@ -1665,63 +1694,13 @@
           {
            "attributes": {},
            "baseStyles": {},
-           "blockId": "e170960b2",
-           "children": [
-            {
-             "attributes": {},
-             "baseStyles": {},
-             "blockId": "3b67b3822",
-             "children": [],
-             "classes": [],
-             "customAttributes": {},
-             "isChildOfComponent": "lending-borrower-shell",
-             "mobileStyles": {},
-             "referenceBlockId": "7546d49c1",
-             "tabletStyles": {}
-            },
-            {
-             "attributes": {},
-             "baseStyles": {},
-             "blockId": "126a91f44",
-             "children": [
-              {
-               "attributes": {},
-               "baseStyles": {},
-               "blockId": "e5ab1a0dc",
-               "children": [],
-               "classes": [],
-               "customAttributes": {},
-               "isChildOfComponent": "lending-borrower-shell",
-               "mobileStyles": {},
-               "referenceBlockId": "83808a589",
-               "tabletStyles": {}
-              }
-             ],
-             "classes": [],
-             "customAttributes": {},
-             "isChildOfComponent": "lending-borrower-shell",
-             "mobileStyles": {},
-             "referenceBlockId": "1ffb79728",
-             "tabletStyles": {}
-            }
-           ],
-           "classes": [],
-           "customAttributes": {},
-           "isChildOfComponent": "lending-borrower-shell",
-           "mobileStyles": {},
-           "referenceBlockId": "d0c7f620c",
-           "tabletStyles": {}
-          },
-          {
-           "attributes": {},
-           "baseStyles": {},
-           "blockId": "7cdb46a97",
+           "blockId": "8a4539d6e",
            "children": [],
            "classes": [],
            "customAttributes": {},
            "isChildOfComponent": "lending-borrower-shell",
            "mobileStyles": {},
-           "referenceBlockId": "67205fd02",
+           "referenceBlockId": "c02b7f725",
            "tabletStyles": {}
           },
           {
@@ -1732,37 +1711,13 @@
             {
              "attributes": {},
              "baseStyles": {},
-             "blockId": "687d24982",
+             "blockId": "28ec6f8c2",
              "children": [],
              "classes": [],
              "customAttributes": {},
              "isChildOfComponent": "lending-borrower-shell",
              "mobileStyles": {},
-             "referenceBlockId": "f47af7800",
-             "tabletStyles": {}
-            },
-            {
-             "attributes": {},
-             "baseStyles": {},
-             "blockId": "41ecb65ee",
-             "children": [],
-             "classes": [],
-             "customAttributes": {},
-             "isChildOfComponent": "lending-borrower-shell",
-             "mobileStyles": {},
-             "referenceBlockId": "256918724",
-             "tabletStyles": {}
-            },
-            {
-             "attributes": {},
-             "baseStyles": {},
-             "blockId": "ae2e4bab9",
-             "children": [],
-             "classes": [],
-             "customAttributes": {},
-             "isChildOfComponent": "lending-borrower-shell",
-             "mobileStyles": {},
-             "referenceBlockId": "079ed88b3",
+             "referenceBlockId": "1dc3317e8",
              "tabletStyles": {}
             }
            ],
@@ -2079,11 +2034,11 @@
  "doctype": "Builder Page",
  "draft_blocks": null,
  "dynamic_route": 1,
- "head_html": "\n<!-- Builder Token records are served as :root custom properties by these routes, and the\n\tBuilder canvas serves the same records itself, so var(--brand-*) resolves in the\n\teditor and on the published page alike. -->\n<link rel=\"stylesheet\" href=\"/builder_assets/tokens.css\">\n<style>\n/* Website pages do not load the desk bundle, so the font ships with the page. */\n@font-face {\n\tfont-family: InterVariable;\n\tfont-style: normal;\n\tfont-weight: 100 900;\n\tfont-display: swap;\n\tsrc: url(\"/assets/frappe/css/fonts/inter/InterVariable.woff2\") format(\"woff2\");\n}\n\n:root { color-scheme: light; }\nhtml { background: var(--portal-surface-page, #ffffff); }\n\n/* Every block carries its display inline, which outranks the browser's own\n\t[hidden] { display: none } rule. Without this, hiding a panel does nothing. */\n[hidden] { display: none !important; }\n\n/* State and interaction, which a block's inline styles cannot express. A block can\n\tcarry its own :hover through a \"hover:property\" style key, but the chosen tile and\n\tthe filled code box are states the script sets on an attribute, so the appearance\n\tof a choice lives here rather than in the script. */\ninput:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible {\n\toutline: 2px solid var(--brand-primary, #0f0f0f); outline-offset: 2px;\n}\ninput:focus, select:focus { border-color: var(--brand-primary, #0f0f0f); }\n[data-code] input:not(:placeholder-shown) { border-color: var(--brand-primary, #0f0f0f); }\n\n/* The tiles are this page's radio buttons, at the size the question deserves. The\n\tdot is the smallest part of the control, so choosing one restyles the whole tile. */\n[data-tile][data-chosen=\"1\"] {\n\tborder-color: var(--brand-primary, #0f0f0f);\n\tbox-shadow: inset 0 0 0 1px var(--brand-primary, #0f0f0f);\n}\n[data-tile][data-chosen=\"1\"] [data-tile-icon] {\n\tbackground: var(--brand-primary, #0f0f0f); color: var(--brand-primary-ink, #ffffff);\n}\n[data-tile][data-chosen=\"1\"] [data-tile-radio] {\n\tbackground: var(--brand-primary, #0f0f0f); border-color: var(--brand-primary, #0f0f0f);\n}\n[data-tile-icon] svg { width: 19px; height: 19px; }\n[data-tile-radio] svg { width: 13px; height: 13px; }\n[data-echo-note] svg { width: 13px; height: 13px; }\n\n/* The tick is always in the dot, so the dot never changes size when it is chosen. */\n[data-tile-radio] svg { opacity: 0; }\n[data-tile][data-chosen=\"1\"] [data-tile-radio] svg { opacity: 1; }\n\n/* A step whose question is unanswered offers a button that cannot be pressed, which\n\tis quieter than letting it through and then refusing the form. */\nbutton[disabled], button[disabled]:hover { opacity: 0.45; cursor: default; filter: none; }\n\n/* The sidebar's collapse toggle. Out of the way until the pointer is over the\n\tsidebar, and always in reach while the sidebar is shut, because a control that\n\thides the menu has to be the control that brings it back. */\n[data-sidebar-toggle] { opacity: 0; transition: opacity 120ms ease, transform 160ms ease; }\n[data-sidebar]:hover [data-sidebar-toggle],\n[data-sidebar-toggle]:focus-visible { opacity: 1; }\n\n[data-sidebar][data-collapsed=\"1\"] {\n\twidth: 0; min-width: 0; padding-left: 0; padding-right: 0; border-right-color: transparent;\n}\n/* Every row carries its display inline, so hiding the list needs to outrank that.\n\tThe toggle is the one child that stays. */\n[data-sidebar][data-collapsed=\"1\"] > *:not([data-sidebar-toggle]) { display: none; }\n[data-sidebar][data-collapsed=\"1\"] [data-sidebar-toggle] { opacity: 1; transform: rotate(180deg); }\n\n/* The offer grid is three columns of figures. Two of them on a phone would wrap\n\tmid-number, so it drops to one. */\n@media (max-width: 600px) {\n\t[data-offer-grid] { grid-template-columns: minmax(0, 1fr); }\n}\n</style>\n\n<style>\n/* The sidebar row for the page being served. The rows are one block repeated over the\n\tmenu, so the current one cannot carry different styles: it says which page it is on\n\twith aria-current, and this is what that looks like. */\n[data-portal-nav] a[aria-current=\"page\"] {\n\tbackground: var(--portal-surface-card,#ffffff);\n\tbox-shadow: 0 0 1px 0 rgba(0, 0, 0, 0.14), 0 1px 3px 0 rgba(0, 0, 0, 0.14);\n}\n\n/* The notifications panel stands beside the sidebar, and follows it when it is shut.\n\tUnder the mobile breakpoint neither rail nor sidebar is there to stand beside. */\n[data-alerts-panel] { left: 270px; }\n[data-sidebar][data-collapsed=\"1\"] ~ [data-alerts-panel] { left: 50px; }\n@media (max-width: 576px) {\n\t[data-alerts-panel] { left: 0; width: 100vw; }\n}\n\n/* The bell while its panel is out. The same square its own hover draws, held rather\n\tthan passing, which is what tells you the panel came from here. The glyph does not\n\tchange either way. */\n[data-alerts-open][aria-expanded=\"true\"] { background: var(--portal-surface-hover-strong,#ededed); }\n\n/* The tab in front of the other one. */\n[data-alerts-tab][aria-selected=\"true\"] {\n\tcolor: var(--portal-ink,#171717);\n\tborder-bottom-color: var(--brand-primary,#171717);\n}\n\n/* The result the arrow keys are on. It is also what the pointer hovers, so the two\n\tcannot both be styles on the block: one of them has to win, and it is this one. */\n[data-search-row][data-active=\"1\"] { background: var(--portal-surface-hover,#f3f3f3); }\n\n/* The dim behind the search dialog, once the script has had a frame to turn it on --\n\ta transition does not run on the frame an element stops being display:none. The\n\tcolour is the desk's own: $modal-backdrop-bg is --gray-800, which Espresso sets to\n\tthe 56 named here, and .modal-backdrop.show carries it at the 0.8. Named as an\n\trgba rather than a token because it is a scrim over the page and not a colour of\n\tthe portal, which is how the shadows above it are written too. */\n[data-search-overlay][data-shown=\"1\"] { background: rgba(56, 56, 56, 0.8); }\n\n/* Whoever asked for less movement gets the dim without the fade, not without the dim. */\n@media (prefers-reduced-motion: reduce) {\n\t[data-search-overlay] { transition: none; }\n}\n</style>\n",
+ "head_html": "\n<!-- Builder Token records are served as :root custom properties by these routes, and the\n\tBuilder canvas serves the same records itself, so var(--brand-*) resolves in the\n\teditor and on the published page alike. -->\n<link rel=\"stylesheet\" href=\"/builder_assets/tokens.css\">\n<style>\n/* Website pages do not load the desk bundle, so the font ships with the page. */\n@font-face {\n\tfont-family: InterVariable;\n\tfont-style: normal;\n\tfont-weight: 100 900;\n\tfont-display: swap;\n\tsrc: url(\"/assets/frappe/css/fonts/inter/InterVariable.woff2\") format(\"woff2\");\n}\n\n:root { color-scheme: light; }\nhtml { background: var(--portal-surface-page, #ffffff); }\n\n/* Every block carries its display inline, which outranks the browser's own\n\t[hidden] { display: none } rule. Without this, hiding a panel does nothing. */\n[hidden] { display: none !important; }\n\n/* State and interaction, which a block's inline styles cannot express. A block can\n\tcarry its own :hover through a \"hover:property\" style key, but the chosen tile and\n\tthe filled code box are states the script sets on an attribute, so the appearance\n\tof a choice lives here rather than in the script. */\ninput:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible {\n\toutline: 2px solid var(--brand-primary, #0f0f0f); outline-offset: 2px;\n}\ninput:focus, select:focus { border-color: var(--brand-primary, #0f0f0f); }\n[data-code] input:not(:placeholder-shown) { border-color: var(--brand-primary, #0f0f0f); }\n\n/* The tiles are this page's radio buttons, at the size the question deserves. The\n\tdot is the smallest part of the control, so choosing one restyles the whole tile. */\n[data-tile][data-chosen=\"1\"] {\n\tborder-color: var(--brand-primary, #0f0f0f);\n\tbox-shadow: inset 0 0 0 1px var(--brand-primary, #0f0f0f);\n}\n[data-tile][data-chosen=\"1\"] [data-tile-icon] {\n\tbackground: var(--brand-primary, #0f0f0f); color: var(--brand-primary-ink, #ffffff);\n}\n[data-tile][data-chosen=\"1\"] [data-tile-radio] {\n\tbackground: var(--brand-primary, #0f0f0f); border-color: var(--brand-primary, #0f0f0f);\n}\n[data-tile-icon] svg { width: 19px; height: 19px; }\n[data-tile-radio] svg { width: 13px; height: 13px; }\n[data-echo-note] svg { width: 13px; height: 13px; }\n\n/* The tick is always in the dot, so the dot never changes size when it is chosen. */\n[data-tile-radio] svg { opacity: 0; }\n[data-tile][data-chosen=\"1\"] [data-tile-radio] svg { opacity: 1; }\n\n/* A step whose question is unanswered offers a button that cannot be pressed, which\n\tis quieter than letting it through and then refusing the form. */\nbutton[disabled], button[disabled]:hover { opacity: 0.45; cursor: default; filter: none; }\n\n/* The sidebar's collapse toggle. Out of the way until the pointer is over the\n\tsidebar, and always in reach while the sidebar is shut, because a control that\n\thides the menu has to be the control that brings it back. */\n[data-sidebar-toggle] { opacity: 0; transition: opacity 120ms ease, transform 160ms ease; }\n[data-sidebar]:hover [data-sidebar-toggle],\n[data-sidebar-toggle]:focus-visible { opacity: 1; }\n\n[data-sidebar][data-collapsed=\"1\"] {\n\twidth: 0; min-width: 0; padding-left: 0; padding-right: 0; border-right-color: transparent;\n}\n/* Every row carries its display inline, so hiding the list needs to outrank that.\n\tThe toggle is the one child that stays. */\n[data-sidebar][data-collapsed=\"1\"] > *:not([data-sidebar-toggle]) { display: none; }\n[data-sidebar][data-collapsed=\"1\"] [data-sidebar-toggle] { opacity: 1; transform: rotate(180deg); }\n\n/* The offer grid is three columns of figures. Two of them on a phone would wrap\n\tmid-number, so it drops to one. */\n@media (max-width: 600px) {\n\t[data-offer-grid] { grid-template-columns: minmax(0, 1fr); }\n}\n</style>\n\n<style>\n/* The sidebar row for the page being served. The rows are one block repeated over the\n\tmenu, so the current one cannot carry different styles: it says which page it is on\n\twith aria-current, and this is what that looks like. */\n[data-portal-nav] a[aria-current=\"page\"] {\n\tbackground: var(--portal-surface-card,#ffffff);\n\tbox-shadow: 0 0 1px 0 rgba(0, 0, 0, 0.14), 0 1px 3px 0 rgba(0, 0, 0, 0.14);\n}\n\n/* The notifications panel stands beside the sidebar, and follows it when it is shut.\n\tUnder the mobile breakpoint neither rail nor sidebar is there to stand beside. */\n[data-alerts-panel] { left: 270px; }\n[data-sidebar][data-collapsed=\"1\"] ~ [data-alerts-panel] { left: 50px; }\n@media (max-width: 576px) {\n\t[data-alerts-panel] { left: 0; width: 100vw; }\n}\n\n/* The bell while its panel is out. The same square its own hover draws, held rather\n\tthan passing, which is what tells you the panel came from here. The glyph does not\n\tchange either way. */\n[data-alerts-open][aria-expanded=\"true\"] { background: var(--portal-surface-hover-strong,#ededed); }\n\n/* The tab in front of the other one. */\n[data-alerts-tab][aria-selected=\"true\"] {\n\tcolor: var(--portal-ink,#171717);\n\tborder-bottom-color: var(--brand-primary,#171717);\n}\n\n/* The result the arrow keys are on. It is also what the pointer hovers, so the two\n\tcannot both be styles on the block: one of them has to win, and it is this one. */\n[data-search-row][data-active=\"1\"] { background: var(--portal-surface-hover,#f3f3f3); }\n\n/* The dim behind the search dialog, once the script has had a frame to turn it on --\n\ta transition does not run on the frame an element stops being display:none. The\n\tcolour is the desk's own: $modal-backdrop-bg is --gray-800, which Espresso sets to\n\tthe 56 named here, and .modal-backdrop.show carries it at the 0.8. Named as an\n\trgba rather than a token because it is a scrim over the page and not a colour of\n\tthe portal, which is how the shadows above it are written too. */\n[data-search-overlay][data-shown=\"1\"] { background: rgba(56, 56, 56, 0.8); }\n\n/* Whoever asked for less movement gets the dim without the fade, not without the dim. */\n@media (prefers-reduced-motion: reduce) {\n\t[data-search-overlay] { transition: none; }\n}\n\n/* The rules between the footer's links. The links are one block repeated over the\n\tlender's list, so no one of them can carry a divider of its own: the rule belongs\n\tto whichever link happens to follow another, which only a selector knows. The ends\n\tlose their padding so the row sits flush with the page head above it. */\n[data-footer-links] > a + a { border-left: 1px solid var(--portal-border,#ededed); }\n[data-footer-links] > a:first-child { padding-left: 0; }\n[data-footer-links] > a:last-child { padding-right: 0; }\n\n/* A badge saying something went right, and one asking for something. Both override the\n\tneutral pair on the block, which is why they are here and not on it. */\n[data-tone=\"ok\"] { background: var(--portal-ok-soft,#e4faeb); color: var(--portal-ok-deep,#14804d); }\n[data-tone=\"warn\"] { background: var(--portal-warn-soft,#fdf8ed); color: var(--portal-warn-deep,#bb6f0c); }\n\n</style>\n",
  "idx": 0,
  "is_standard": 1,
  "is_template": 0,
- "modified": "2026-09-20 02:39:32.206421",
+ "modified": "2026-09-21 15:31:39.458651",
  "modified_by": "Administrator",
  "name": "page-41255a91",
  "owner": "Administrator",

@@ -59,10 +59,9 @@ from lending.portal.build.theme import (
 	DIALOG_ROW_STYLES,
 	DIALOG_ROW_TITLE_STYLES,
 	DIALOG_STYLES,
-	FOOTER_BRAND_STYLES,
 	FOOTER_LINK_STYLES,
-	FOOTER_LOGO_STYLES,
-	FOOTER_MAIL_STYLES,
+	FOOTER_LINKS_STYLES,
+	FOOTER_NOTE_STYLES,
 	FOOTER_STYLES,
 	HEAD_END_STYLES,
 	HEAD_HTML,
@@ -95,8 +94,7 @@ from lending.portal.build.theme import (
 	SIDE_LOGO_STYLES,
 	SIDEBAR_STYLES,
 	SPACER_STYLES,
-	STATUS_DOT_STYLES,
-	STATUS_STYLES,
+	badge,
 	bind,
 	block,
 	block_id,
@@ -121,8 +119,6 @@ COMPONENT_NAME = "Borrower Portal Shell"
 # same thing the panel says, so pressing the bell left a borrower with two places to
 # read one list, and the page is gone: the panel is the whole of the notifications.
 SEARCH_ROUTE = "borrower/search"
-
-FOOTER_LINKS = ("Fair practice code", "Grievance redressal", "Interest rate policy")
 
 # Paths a page overrides through its mirror. Named here so a page never types a path.
 CONTENT_PATH = "shell/main/content"
@@ -515,6 +511,20 @@ def alerts_panel():
 	)
 
 
+def crest():
+	"""How the borrower's accounts stand, when that is worth a line of its own.
+
+	It hides on an empty account_status rather than rendering an empty pill. That is
+	how core.account_status declines to repeat a single account's own badge back at
+	it: the head reports standing the page's rows cannot, and says nothing when they
+	already have.
+	"""
+	node = badge("account_status", tone_key="account_tone", path="shell/main/head/end/status")
+	node["visibilityCondition"] = "account_status"
+
+	return node
+
+
 def page_head():
 	"""The crumb, the note and the button label all arrive from the page's data script.
 
@@ -533,15 +543,7 @@ def page_head():
 				path="shell/main/head/end",
 				styles=HEAD_END_STYLES,
 				children=[
-					block(
-						"span",
-						path="shell/main/head/end/status",
-						styles=STATUS_STYLES,
-						children=[
-							block("span", path="shell/main/head/end/status/dot", styles=STATUS_DOT_STYLES),
-							bound("span", "account_status", path="shell/main/head/end/status/text"),
-						],
-					),
+					crest(),
 					bound(
 						"a",
 						"action_label",
@@ -556,48 +558,46 @@ def page_head():
 
 
 def footer():
-	"""Whose portal this is, how to complain about it, and the policies.
+	"""Whose portal this is, the policies, and how to complain about it.
 
-	Nothing here names Frappe. The brand is the lender's logo or the lender's name,
-	and the address beside it is the lender's own, so the foot of the page says what
-	a regulator expects it to say and nothing a borrower has no use for.
+	Nothing here names Frappe, and nothing here is written by us. The notice on the
+	left and the links on the right are both Lending Settings, so the foot of the page
+	says what a regulator expects this lender to say.
+
+	The links are a repeater over portal.core.footer_links rather than a block each,
+	which is what makes them a setting at all: a lender adding a policy changes a row
+	in a child table and the next page served has it. Written as blocks, the count
+	would be frozen at build time and every change would mean rebuilding ten pages --
+	the same reason the sidebar stopped being blocks. See nav() above.
 	"""
-	links = [
-		block(
-			"a",
-			path=f"shell/main/footer/link/{index}",
-			styles=FOOTER_LINK_STYLES,
-			html=label,
-			attributes={"href": "#"},
-		)
-		for index, label in enumerate(FOOTER_LINKS)
-	]
-
-	support = bound(
+	link = block(
 		"a",
-		"support_email",
-		path="shell/main/footer/support",
-		styles=FOOTER_MAIL_STYLES,
+		path="shell/main/footer/links/row",
+		styles=FOOTER_LINK_STYLES,
 		attributes={"href": "#"},
 	)
-	bind(support, "support_href", property="href", type="attribute")
-	support["visibilityCondition"] = "support_email"
+	bind(link, "footer_label")
+	bind(link, "footer_href", property="href", type="attribute")
 
 	return block(
 		"footer",
 		path="shell/main/footer",
 		styles=FOOTER_STYLES,
 		children=[
-			block(
-				"div",
-				path="shell/main/footer/brand",
-				styles=FOOTER_BRAND_STYLES,
-				children=brand_lockup(
-					{}, logo_styles=FOOTER_LOGO_STYLES, path="shell/main/footer/brand"
-				),
+			bound(
+				"span",
+				"copyright_note",
+				path="shell/main/footer/note",
+				styles=FOOTER_NOTE_STYLES,
 			),
-			support,
-			block("span", path="shell/main/footer/links", children=links),
+			repeater(
+				"footer_links",
+				link,
+				element="nav",
+				path="shell/main/footer/links",
+				styles=FOOTER_LINKS_STYLES,
+				attributes={"data-footer-links": "1", "aria-label": "Policies"},
+			),
 		],
 	)
 
@@ -752,11 +752,20 @@ def build_page(
 	action_href="#",
 	data_script=None,
 	authenticated=True,
+	extra_css="",
 ):
 	"""Create or replace one portal page: the shared shell, wrapped around `content`.
 
 	Every page is assembled the same way, so the only per-page arguments are its route,
 	where its header button goes -- None for no button -- and its data script.
+
+	`extra_css` is for a rule one page needs and the others do not, typically because
+	that page repeats a block and so cannot style each copy. It goes in the page's own
+	head rather than in SHELL_STATE_CSS, which every page carries a copy of: a rule
+	added there is only served after all eleven have been rebuilt.
+
+	It is appended to the head as it stands, so it carries its own `<style>` tags. Bare
+	rules land after the shell's closing tag and the browser prints them on the page.
 	"""
 	upsert_tokens()
 	component, component_action = upsert_component()
@@ -776,7 +785,7 @@ def build_page(
 		"disable_indexing": 1,
 		"is_standard": 1,
 		"app": "lending",
-		"head_html": HEAD_HTML + SHELL_STATE_CSS,
+		"head_html": HEAD_HTML + SHELL_STATE_CSS + extra_css,
 		"page_data_script": data_script or "",
 		"blocks": frappe.as_json([body]),
 		# A leftover draft outranks what this script just wrote: the canvas loads

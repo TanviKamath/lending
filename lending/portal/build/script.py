@@ -26,6 +26,12 @@ And three pair a button with a section that stays out of the way until pressed:
 	data-reveals   on the button, naming the panel it opens
 	data-revealed  on the panel, carrying that name
 	data-hides     on a button inside the panel that closes it again
+
+And three turn one card into several sections with one showing:
+
+	data-tabs      on the block holding both the tabs and the panels
+	data-tab       on each button, naming the section it selects
+	data-panel     on each section, carrying that name
 """
 
 SCRIPT_NAME = "lending-portal-forms"
@@ -262,6 +268,55 @@ CLIENT_SCRIPT = """
 				close.addEventListener("click", function (event) {
 					event.preventDefault();
 					show(false);
+				});
+			});
+		});
+	}
+
+	// --- the sections a card shows one at a time -----------------------------------
+	//
+	// Every panel is rendered by the server and none of them is fetched, so switching
+	// is a matter of which one is hidden. The markup already opens on its first tab,
+	// so a page whose script never arrives still shows that section rather than all
+	// four at once or none of them.
+
+	function wireTabs() {
+		document.querySelectorAll("[data-tabs]").forEach(function (group) {
+			var tabs = Array.prototype.slice.call(group.querySelectorAll("[data-tab]"));
+			var panels = group.querySelectorAll("[data-panel]");
+			if (!tabs.length) return;
+
+			function show(name) {
+				tabs.forEach(function (tab) {
+					var on = tab.dataset.tab === name;
+					tab.setAttribute("aria-selected", on ? "true" : "false");
+					// Only the selected tab is in the tab order. Inside a tablist the
+					// arrow keys move between them, which is what the listener below
+					// is for; Tab is how you leave for the panel.
+					tab.tabIndex = on ? 0 : -1;
+				});
+				panels.forEach(function (panel) {
+					panel.hidden = panel.dataset.panel !== name;
+				});
+			}
+
+			tabs.forEach(function (tab, index) {
+				tab.tabIndex = tab.getAttribute("aria-selected") === "true" ? 0 : -1;
+
+				tab.addEventListener("click", function () {
+					show(tab.dataset.tab);
+				});
+
+				tab.addEventListener("keydown", function (event) {
+					var step = { ArrowRight: 1, ArrowLeft: -1, Home: -index, End: tabs.length - 1 - index }[
+						event.key
+					];
+					if (step === undefined) return;
+
+					event.preventDefault();
+					var next = tabs[(index + step + tabs.length) % tabs.length];
+					show(next.dataset.tab);
+					next.focus();
 				});
 			});
 		});
@@ -922,6 +977,7 @@ CLIENT_SCRIPT = """
 		wireSidebar();
 		wireSearch();
 		wireAlerts();
+		wireTabs();
 		wireReveals();
 		wireForms();
 		wireApply();

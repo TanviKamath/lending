@@ -32,12 +32,18 @@ class LendingSettings(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
+		from lending.loan_management.doctype.portal_footer_link.portal_footer_link import (
+			PortalFooterLink,
+		)
+
 		auto_create_customer: DF.Check
 		enable_borrower_portal: DF.Check
 		enable_public_apply: DF.Check
 		portal_accent_color: DF.Color | None
 		portal_brand_color: DF.Color | None
 		portal_brand_name: DF.Data | None
+		portal_copyright: DF.Data | None
+		portal_footer_links: DF.Table[PortalFooterLink]
 		portal_logo: DF.AttachImage | None
 		portal_support_email: DF.Data | None
 	# end: auto-generated types

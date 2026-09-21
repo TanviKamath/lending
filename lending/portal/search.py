@@ -19,10 +19,12 @@ import frappe
 from frappe import _
 
 from lending.portal.core import (
+	application_url,
 	clean,
 	get_applications,
 	get_loans,
 	get_portal_customers,
+	loan_url,
 	money,
 	nav_items,
 	outstanding_of,
@@ -123,7 +125,7 @@ def loan_row(loan: dict) -> dict:
 			loan.name, money(outstanding_of(loan)), status_label(loan)
 		),
 		"kind": _("Loan account"),
-		"url": "/borrower/loan/{0}".format(loan.name),
+		"url": loan_url(loan.name),
 	}
 
 
@@ -132,7 +134,7 @@ def application_row(application: dict) -> dict:
 		"title": application["product"],
 		"note": "{0} · {1}".format(application["reference"], application["stage"]),
 		"kind": _("Application"),
-		"url": "/borrower/application/{0}".format(application["name"]),
+		"url": application["url"],
 	}
 
 
@@ -157,7 +159,7 @@ def document_rows(applications: list[dict]) -> list[dict]:
 			"title": row.document_type or _("Document"),
 			"note": _("Attached to {0}").format(row.parent),
 			"kind": _("Document"),
-			"url": "/borrower/application/{0}".format(row.parent),
+			"url": application_url(row.parent),
 		}
 		for row in frappe.get_all(
 			"Loan Application Document",

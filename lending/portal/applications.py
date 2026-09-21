@@ -70,10 +70,6 @@ def get_applications_page() -> dict:
 	"""Every application in progress, each linking to its own tracker."""
 	customers = get_portal_customers()
 	applications = get_applications(customers) if customers else []
-
-	for row in applications:
-		row["url"] = f"/borrower/application/{row['name']}"
-
 	enquiries = get_enquiries()
 	waiting = sum(1 for row in applications if row["needs_borrower"])
 	payload = shell_payload(_("Applications"), _("Apply for a loan"), customers, [])
@@ -135,12 +131,18 @@ def get_application_detail() -> dict:
 	)
 
 	documents = document_rows(name)
+	headline, headline_note = stage_headline(application, booked_loan(name))
 	payload.update(
 		{
+			"product": application.loan_product,
+			"reference": _("Application {0}").format(application.name),
+			"headline": headline,
+			"headline_note": headline_note,
 			"steps": get_application_steps(application),
 			"steps_note": stage_note(application),
+			"preview_note": _("As you sent it on {0}").format(long_date(application.posting_date)),
 			"terms": term_rows(application),
-			"terms_note": _("As requested on {0}").format(long_date(application.posting_date)),
+			"terms_note": _("The loan you asked for"),
 			"applicant": applicant_rows(application),
 			"applicant_note": _("From your customer record"),
 			"co_applicants": co_applicant_rows(name),
@@ -156,7 +158,45 @@ def get_application_detail() -> dict:
 def stage_label(application: dict) -> str:
 	from lending.portal.core import application_stage
 
-	return application_stage(application, application.docstatus == 0, booked_loan(application.name))
+	stage, _tone = application_stage(
+		application, application.docstatus == 0, booked_loan(application.name)
+	)
+
+	return stage
+
+
+def stage_headline(application: dict, loan: dict) -> tuple[str, str]:
+	"""What the tracker adds up to, said once in words: a sentence and its follow-up.
+
+	The steps above it say where the file is. This says what that means for the person
+	reading, which is the part they came for. `loan` is passed in rather than read
+	again: the caller already has it, and every branch here needs it.
+
+	A refusal is told plainly and without a reason. The reason is a credit decision,
+	and PORTAL_PLAN.md section 8 keeps those off the portal -- a borrower asking why
+	is a conversation with the team, not a line on a page.
+	"""
+	if application.docstatus == 0:
+		return _("Your application is not sent yet"), _(
+			"Finish the details and submit it, and we will start the review."
+		)
+
+	if loan:
+		return _("Your loan is open"), _("{0} is live. Your schedule and payments are under Loans.").format(
+			loan.name
+		)
+
+	if application.status == "Approved":
+		return _("Congratulations!"), _(
+			"Your loan has been approved. We will get in touch with you about the disbursal."
+		)
+
+	if application.status == "Rejected":
+		return _("Not approved this time"), _(
+			"We could not approve this application. Contact us and we will talk it through."
+		)
+
+	return _("With our team"), _("We are assessing your application and will come back to you.")
 
 
 def booked_loan(application: str) -> dict:
@@ -171,7 +211,7 @@ def booked_loan(application: str) -> dict:
 	)
 
 
-def step(title: str, detail: str, state: tuple) -> dict:
+def step(title: str, detail: str, state: tuple, short: str = "") -> dict:
 	code, marker = state
 
 	return {
@@ -179,6 +219,10 @@ def step(title: str, detail: str, state: tuple) -> dict:
 		"detail": detail,
 		"marker": marker,
 		"state": _(STATE_LABELS[code]),
+		# What the stage is called where the tracker runs across the page rather than
+		# down it: five titles side by side break into two lines each, and the title is
+		# a phrase where the space allows only a word.
+		"short": short or title,
 		# The label above is translated for reading. The code is what a reader compares
 		# against, so finding the step in progress does not depend on the language.
 		"code": code,
@@ -203,11 +247,13 @@ def get_application_steps(application: dict) -> list[dict]:
 			_("Application started"),
 			_("Initiated {0}").format(long_date(application.posting_date)),
 			DONE,
+			_("Started"),
 		),
 		step(
 			_("Your details"),
 			_("Received") if submitted else _("Finish and submit your application"),
 			DONE if submitted else CURRENT,
+			_("Details"),
 		),
 		step(
 			_("Under review"),
@@ -215,11 +261,13 @@ def get_application_steps(application: dict) -> list[dict]:
 			if submitted and not decided
 			else (_("Assessed") if decided else _("Starts once you submit")),
 			DONE if decided else (CURRENT if submitted else PENDING),
+			_("Review"),
 		),
 		step(
 			_("Decision"),
 			_("Approved") if approved else (_("Not approved this time") if decided else _("Awaited")),
 			DONE if decided else PENDING,
+			_("Decision"),
 		),
 	]
 
@@ -229,6 +277,7 @@ def get_application_steps(application: dict) -> list[dict]:
 				_("Loan account"),
 				"{0} · {1}".format(loan.name, STATUS_LABELS.get(loan.status, loan.status)),
 				DONE,
+				_("Loan"),
 			)
 		)
 
@@ -410,7 +459,6 @@ def get_documents_page() -> dict:
 		listed.append(
 			{
 				**application,
-				"url": "/borrower/application/{0}".format(application["name"]),
 				"progress": progress.get(application["name"], ""),
 				# This page is about files, so the column that carries money elsewhere
 				# counts what the application already holds.

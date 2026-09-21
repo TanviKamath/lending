@@ -31,7 +31,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 import frappe
-from frappe.utils import add_years, nowdate
+from frappe.utils import add_days, add_years, getdate, nowdate
 
 from lending.loan_management.doctype.lending_settings.lending_settings import (
 	PORTAL_SCRIPT_MARKER,
@@ -55,17 +55,19 @@ from lending.portal.apply import (
 	track_application,
 )
 from lending.portal.build import overview_page, theme
-from lending.portal.build.overview_page import ACTION_HREF, content, money_block
+from lending.portal.build.overview_page import content, summary_block
 from lending.portal.build.script import CLIENT_SCRIPT
-from lending.portal.build.shell import ACTION_PATH, SEARCH_ROUTE, reference, tree
+from lending.portal.build.shell import SEARCH_ROUTE, tree
 from lending.portal.build.theme import (
+	ACTION_TONE_CSS,
+	ACTIVITY_CSS,
 	NEUTRALS,
 	PORTAL_TOKENS,
 	SCALE_TOKENS,
 	SHIPPED,
 	STATES,
+	activity_list,
 	apca,
-	block_id,
 	brand_overrides,
 	channels,
 	from_hsl,
@@ -81,16 +83,26 @@ from lending.portal.build.theme import (
 from lending.portal.core import (
 	DEFAULT_BRAND_NAME,
 	PORTAL_ROUTE_PREFIX,
+	REPAYMENTS_ROUTE,
+	account_status,
+	application_lead,
 	assert_owns,
 	brand_name,
 	brand_payload,
 	build_summary,
+	copyright_note,
+	days_ago,
 	empty_dashboard,
+	footer_links,
 	get_portal_customers,
 	leads_for_login,
 	money,
+	name_once,
 	nav_items,
+	next_action,
 	shell_payload,
+	standing_line,
+	waiting_on_borrower,
 )
 from lending.portal.loans import get_loan_detail, get_loans_page
 from lending.portal.notifications import (
@@ -188,6 +200,22 @@ def set_branding(**values):
 	"""
 	settings = frappe.get_doc("Lending Settings")
 	settings.update({field: values.get(field) for field in BRAND_FIELDS})
+	settings.save()
+
+
+def set_footer(notice=None, links=(), support=None):
+	"""Fill in the Portal Footer section, links and all.
+
+	Separate from set_branding because the links are a child table: update() would
+	take a list of dicts, but appending row by row is what the desk grid does, and the
+	idx these come out in is half of what the footer tests are about.
+	"""
+	settings = frappe.get_doc("Lending Settings")
+	settings.portal_copyright = notice
+	settings.portal_support_email = support
+	settings.portal_footer_links = []
+	for label, url in links:
+		settings.append("portal_footer_links", {"link_label": label, "url": url})
 	settings.save()
 
 
@@ -1307,6 +1335,168 @@ class TestPortalBranding(LendingTestSuite):
 		self.assertEqual(token_value("brand-primary"), "#8b1d3f")
 
 
+class TestPortalFooter(LendingTestSuite):
+	"""The line at the foot of every page, which is the lender's and not ours.
+
+	A borrower reading the bottom of a bank's site expects the copyright notice on one
+	side and the policies on the other, and a regulator expects the grievance address
+	among them. None of it can be written into the blocks: the notice names a company
+	we do not know and the policies are a list whose length we do not know, so both
+	are settings read per request. These hold that open -- that the frame repeats one
+	link rather than holding a fixed few, because that is what lets a lender add a
+	policy without a rebuild of ten pages.
+	"""
+
+	def tearDown(self):
+		set_footer()
+		set_branding()
+
+	def test_an_unwritten_notice_names_the_lender_and_the_year(self):
+		set_branding(portal_brand_name="Ganges Finance")
+		set_footer()
+
+		self.assertEqual(
+			copyright_note(), f"Copyright © {getdate(nowdate()).year} Ganges Finance. All rights reserved."
+		)
+
+	def test_an_unnamed_portal_puts_our_name_in_its_own_notice(self):
+		set_footer()
+
+		self.assertIn(DEFAULT_BRAND_NAME, copyright_note())
+
+	def test_a_company_that_ends_in_a_stop_does_not_get_two(self):
+		"""Most of them do, being an Ltd. The sentence supplies the stop, not the name."""
+		set_branding(portal_brand_name="Ganges Finance Ltd.")
+		set_footer()
+
+		self.assertIn("Ganges Finance Ltd. All rights reserved.", copyright_note())
+
+	def test_a_lender_writes_its_own_notice(self):
+		set_footer(notice="© Ganges Finance. A Ganges Group company.")
+
+		self.assertEqual(copyright_note(), "© Ganges Finance. A Ganges Group company.")
+
+	def test_a_written_notice_still_gets_this_year(self):
+		"""A notice with the year typed into it is wrong every January, and nobody edits
+		settings to fix that."""
+		set_footer(notice="© {year} Ganges Finance.")
+
+		self.assertEqual(copyright_note(), f"© {getdate(nowdate()).year} Ganges Finance.")
+
+	def test_a_notice_carrying_a_stray_brace_is_text_and_not_an_error(self):
+		"""The substitution is a replace and not a format, so this renders rather than
+		raising on every page of the portal."""
+		set_footer(notice="© Ganges Finance {a division of Ganges Group}")
+
+		self.assertEqual(copyright_note(), "© Ganges Finance {a division of Ganges Group}")
+
+	def test_the_links_are_the_lenders_own_in_the_lenders_order(self):
+		set_footer(
+			links=(
+				("User Agreement", "/borrower/user-agreement"),
+				("Privacy Policy", "/borrower/privacy-policy"),
+				("Disclaimer", "https://ganges.example.com/disclaimer"),
+			)
+		)
+
+		self.assertEqual(
+			footer_links(),
+			[
+				{"footer_label": "User Agreement", "footer_href": "/borrower/user-agreement"},
+				{"footer_label": "Privacy Policy", "footer_href": "/borrower/privacy-policy"},
+				{"footer_label": "Disclaimer", "footer_href": "https://ganges.example.com/disclaimer"},
+			],
+		)
+
+	def test_contact_us_follows_them_without_being_typed(self):
+		"""A lender is required to publish a grievance address. Leaving it to a row
+		someone remembers to add would mean the sites that need it most are the ones
+		without it.
+
+		The link reads Contact us and carries the address underneath, because the
+		address is what it does and not what it is for.
+		"""
+		set_footer(links=(("Privacy Policy", "/borrower/privacy-policy"),), support="care@ganges.example.com")
+
+		self.assertEqual(
+			footer_links()[-1],
+			{"footer_label": "Contact us", "footer_href": "mailto:care@ganges.example.com"},
+		)
+
+	def test_no_address_means_no_contact_us(self):
+		"""Rather than a Contact us that opens an empty mail window."""
+		set_footer(links=(("Privacy Policy", "/borrower/privacy-policy"),))
+
+		self.assertEqual([link["footer_label"] for link in footer_links()], ["Privacy Policy"])
+
+	def test_no_links_and_no_address_leaves_the_row_empty_rather_than_broken(self):
+		"""What a site that upgrades into this and sets nothing gets: a bare notice."""
+		set_footer()
+
+		self.assertEqual(footer_links(), [])
+		self.assertEqual(shell_payload("Loans", "Apply", [], [])["footer_links"], [])
+
+	def test_a_row_missing_its_destination_is_not_a_link(self):
+		"""Both columns are required on the grid, so this is the row saved before the
+		field was, and a link to nowhere is worse than no link."""
+		set_footer(links=(("Privacy Policy", "/borrower/privacy-policy"),))
+		frappe.db.set_value(
+			"Portal Footer Link",
+			frappe.get_all("Portal Footer Link", pluck="name")[0],
+			"url",
+			"",
+			update_modified=False,
+		)
+
+		self.assertEqual(footer_links(), [])
+
+	def test_the_footer_reaches_the_frame_every_page_wears(self):
+		set_branding(portal_brand_name="Ganges Finance")
+		set_footer(links=(("Privacy Policy", "/borrower/privacy-policy"),))
+		payload = shell_payload("Loans", "Apply", [], [])
+
+		self.assertIn("Ganges Finance", payload["copyright_note"])
+		self.assertEqual(payload["footer_links"][0]["footer_label"], "Privacy Policy")
+
+	def test_the_frame_repeats_one_link_rather_than_holding_a_fixed_few(self):
+		"""The whole reason the links are a setting at all.
+
+		Written as a block each, the count would be frozen at build time: a lender
+		adding a policy would need every page rebuilt, and Builder discards the canvas
+		layout when a page is rebuilt. Same trap the sidebar was pulled out of.
+		"""
+		found = []
+
+		def walk(node):
+			if node.get("path") == "shell/main/footer/links":
+				found.append(node)
+			for child in node.get("children") or []:
+				walk(child)
+
+		walk(tree())
+
+		self.assertEqual(len(found), 1)
+		links = found[0]
+		self.assertTrue(links.get("isRepeaterBlock"))
+		self.assertEqual(links["dataKey"]["key"], "footer_links")
+		self.assertEqual(len(links["children"]), 1)
+
+	def test_no_policy_is_named_in_the_blocks(self):
+		"""The old footer spelt three of them out, which made them ours and not the
+		lender's, and wrong for any lender that publishes a different set."""
+		labels = []
+
+		def walk(node):
+			if (node.get("path") or "").startswith("shell/main/footer"):
+				labels.append(node.get("innerHTML") or "")
+			for child in node.get("children") or []:
+				walk(child)
+
+		walk(tree())
+
+		self.assertEqual([label for label in labels if label], [])
+
+
 class TestPortalMenu(LendingTestSuite):
 	"""The sidebar, which is a list read per request rather than seven blocks per page.
 
@@ -1402,8 +1592,11 @@ class TestPortalMenu(LendingTestSuite):
 		# the frame; they are not menu rows. What must not appear is a menu route.
 		menu_routes = {item["route"] for item in self.declared()}
 		self.assertEqual([href for href in hrefs if href in menu_routes], [])
-		self.assertEqual([node["dataKey"]["key"] for node in repeaters], ["nav_items"])
-		row = repeaters[0]["children"][0]
+		# The footer's policy links are a repeater too, and for the same reason -- see
+		# TestPortalFooter. The menu's is the one this test is about.
+		nav = [node for node in repeaters if node["dataKey"]["key"] == "nav_items"]
+		self.assertEqual(len(nav), 1)
+		row = nav[0]["children"][0]
 		self.assertEqual(
 			{value["key"] for value in row["dynamicValues"]},
 			{"nav_title", "nav_route", "nav_current"},
@@ -1605,10 +1798,11 @@ class TestPortalRail(LendingTestSuite):
 		"""A draft is the borrower's to submit, so it belongs on the list that asks."""
 		rows = attention_rows(
 			[
-				{"name": "APP-1", "product": PRODUCT, "note": "Submit to start the review",
-					"stage": "Action required", "needs_borrower": True},
-				{"name": "APP-2", "product": PRODUCT, "note": "", "stage": "Under review",
-					"needs_borrower": False},
+				{"name": "APP-1", "url": "/borrower/application/APP-1", "product": PRODUCT,
+					"note": "Submit to start the review", "stage": "Action required",
+					"needs_borrower": True},
+				{"name": "APP-2", "url": "/borrower/application/APP-2", "product": PRODUCT,
+					"note": "", "stage": "Under review", "needs_borrower": False},
 			],
 			[],
 		)
@@ -1616,11 +1810,21 @@ class TestPortalRail(LendingTestSuite):
 		self.assertEqual([row["url"] for row in rows], ["/borrower/application/APP-1"])
 
 	def test_an_instalment_coming_due_is_on_the_list_too(self):
-		rows = attention_rows(
-			[], [{"product": PRODUCT, "detail": "Principal 900 · interest 100", "date": "12 Oct 2026", "amount": "1,000"}]
-		)
+		instalment = {
+			"product": PRODUCT,
+			"detail": "Principal 900 · interest 100",
+			"date": "12 Oct 2026",
+			"amount": "1,000",
+		}
+		rows = attention_rows([], [dict(instalment, url="/borrower/loan/LOAN-0001")])
 
 		self.assertEqual(rows[0]["when"], "Due 12 Oct 2026 · 1,000")
+		self.assertEqual(rows[0]["url"], "/borrower/loan/LOAN-0001")
+
+	def test_an_instalment_whose_loan_is_unknown_still_leads_somewhere(self):
+		"""A row that looks like a link has to act like one, even with no loan to name."""
+		rows = attention_rows([], [{"product": PRODUCT, "detail": "", "date": "z", "amount": "1"}])
+
 		self.assertEqual(rows[0]["url"], "/borrower/loans")
 
 	def test_the_borrowers_own_list_is_capped_and_says_how_long_it_really_is(self):
@@ -1750,34 +1954,44 @@ class TestPortalScale(LendingTestSuite):
 
 		self.assertEqual(steps, sorted(set(steps)))
 
-	def test_body_text_is_never_smaller_than_fifteen_pixels(self):
-		"""The whole reason for the stage.
+	def test_body_and_sub_headings_are_set_where_the_desk_sets_them(self):
+		"""The whole reason for the scale being the desk's rather than its own.
 
-		The portal shipped at 13px, which is a desk tool. A borrower opens this page a
-		few times a year to read one number, so the scale has to stay readable to
-		somebody who is not a daily user.
+		A borrower who has also seen the desk reads the two at one size, so the portal
+		sets body in --text-sm and a sub-heading in --text-base, which is where the
+		desk sets a row and a section heading. Asserted on the two steps that carry
+		text a page is actually read in; the rest of the scale is free to move.
 		"""
-		body = int(SCALE_TOKENS[2]["value"].removesuffix("px"))
+		body = SCALE_TOKENS[2]["value"]
+		sub_heading = SCALE_TOKENS[3]["value"]
 
-		self.assertGreaterEqual(body, 15)
+		self.assertEqual((body, sub_heading), ("13px", "14px"))
 
 	def test_no_style_carries_a_text_size_as_a_number(self):
 		"""The guard on the next person who adds a style.
 
 		A literal size is invisible: the page still renders, and the one block that
-		ignores the scale is the one nobody looks at. Five are allowed. Three are a
+		ignores the scale is the one nobody looks at. Six are allowed. Three are a
 		glyph centred in a circle of a fixed width, which cannot grow with the text.
-		The other two are the notifications panel, which is a copy of the desk's own
-		dropdown down to its type, and the desk sets that at 14px over a 12px
-		timestamp where the portal scale would put 15px over 11px.
+		Two are the notifications panel, which is a copy of the desk's own dropdown
+		down to its type: the desk sets that at 14px over a 12px timestamp. Those are
+		the scale's own values now that the scale is the desk's, but they stay written
+		out because a row of the panel is body text and the name the portal gives 14px
+		is the one it gives a sub-heading.
+
+		The sixth is the badge, and it is the same argument: .es-badge is a 20px pill
+		with 12px type on one line, and a badge whose text grew with the page's scale
+		while its height did not would burst the shape the desk made recognisable. It
+		is pinned to the desk for the same reason the panel is.
 
 		Both spellings count: a size written into a style, and a size held in a name
 		that styles then point at. A constant is the honest way to say the panel is
-		off-scale on purpose, but it must not also be the way around this test.
+		measured against the desk rather than against the page, but it must not also
+		be the way around this test.
 		"""
 		literals = re.findall(r'(?:"fontSize": "|^[A-Z][A-Z_]* = ")(\d+px)"', theme_source(), re.M)
 
-		self.assertEqual(sorted(literals), ["10px", "10px", "11px", "12px", "14px"])
+		self.assertEqual(sorted(literals), ["10px", "10px", "11px", "12px", "12px", "14px"])
 
 	def test_no_style_is_named_twice_in_the_file(self):
 		"""The guard on a file long enough to forget what is already in it.
@@ -1932,14 +2146,14 @@ class TestPortalPalette(LendingTestSuite):
 		self.assertEqual(re.findall(r"#[0-9a-fA-F]{6}\b", source), [])
 
 
-class TestPortalMoneyBlock(LendingTestSuite):
-	"""Stage 5 of PORTAL_DESIGN_PLAN.md: the two figures the overview is opened for.
+class TestPortalSummaryStrip(LendingTestSuite):
+	"""The three cards the overview opens with, and which of them leads.
 
-	A borrower opens the portal to learn two things -- how much is owed, and when the
-	next payment falls due. Those two sat in cards, at the same weight as a third card
-	nobody comes for. What is held open here is that they no longer do: two figures at
-	the top of the scale, one button under them, and the sanctioned amount demoted to
-	a line.
+	A borrower opens the portal to learn three things: where their application has got
+	to, what they pay next, and what they still owe. The application leads because it
+	is the only one of the three with an answer on the first day -- the two figures
+	read "Nothing due" and "No live accounts" until a loan is booked, and a borrower
+	who is still applying was meeting a page of blanks.
 	"""
 
 	def blocks(self, node) -> list[dict]:
@@ -1950,61 +2164,71 @@ class TestPortalMoneyBlock(LendingTestSuite):
 
 		return found
 
-	def money_blocks(self) -> list[dict]:
-		return self.blocks(money_block())
+	def summary_blocks(self) -> list[dict]:
+		return self.blocks(summary_block())
 
-	def test_the_two_figures_are_the_largest_thing_on_the_page(self):
-		"""The point of the stage.
+	def test_the_strip_leads_with_the_application_then_the_two_figures(self):
+		"""The order is the point, so it is read off the cards rather than counted.
 
-		Two figures at the top of the scale, and the third card gone. Asserted on the
-		size rather than on the count of children, because a figure is only the answer
-		to the page if nothing beside it is set as loud.
+		Each card's title is the first bound thing in its head, and the three titles in
+		order are the strip's whole argument: the application, the payment, the debt.
 		"""
-		figures = [
-			node["baseStyles"]["fontSize"]
-			for node in self.money_blocks()
-			if node["baseStyles"].get("fontSize")
-		]
-		largest = f"var(--{SCALE_TOKENS[5]['token_name']},{SCALE_TOKENS[5]['value']})"
+		cards = summary_block()["children"]
+		titles = [card["children"][0]["children"][0]["dynamicValues"][0]["key"] for card in cards]
 
-		self.assertEqual([size for size in figures if size == largest], [largest] * 2)
+		self.assertEqual(titles, ["label_application", "label_next", "label_outstanding"])
 
-	def test_neither_figure_stands_in_a_card(self):
-		"""A card is a container for a list, so a figure in one reads as one of several.
+	def test_the_application_card_takes_its_pill_tone_from_the_payload(self):
+		"""The pill beside the title does not always mean the same thing.
 
-		Asserted of everything here that holds something else: the two cards this
-		replaced were a painted box around a number, and a background or a border put
-		back on any of these wrappers rebuilds one while every other test still passes.
-		The two painted things left are the button and the "due in five days" pill, and
-		neither contains anything.
+		"Action required" is a warning and "Under review" is not, and a stage pill
+		painted warn on the block would tell a borrower waiting on the lender that
+		something is wrong. The due-in-five-days pill beside it is the opposite case
+		and keeps its fixed tone.
 		"""
-		for node in self.money_blocks():
-			if not node["children"]:
-				continue
+		head = summary_block()["children"][0]["children"][0]
+		pill = head["children"][1]
+		bound_keys = [value["key"] for value in pill["dynamicValues"]]
 
-			self.assertNotIn("background", node["baseStyles"])
-			self.assertNotIn("border", node["baseStyles"])
+		self.assertEqual(bound_keys, ["application_stage", "application_stage_tone"])
+		# And it goes when there is no application, rather than leaving an empty pill.
+		self.assertEqual(pill["visibilityCondition"], "application_stage")
 
-	def test_the_button_stands_under_the_figures_and_not_in_the_frame(self):
-		"""Both halves, because either alone leaves the page with a button it should not
-		have: the page's own must point at the repayments route, and the frame's stub
-		must be hidden rather than left to sit above the figures saying the same thing.
+	def test_a_borrower_with_nothing_in_progress_is_not_shown_an_empty_card(self):
+		"""The card stands either way, so the empty payload has to fill it.
+
+		A blank headline would read as a page that failed to load. The em dash and the
+		line under it say there is nothing, which is a different thing from saying
+		nothing.
 		"""
-		buttons = [node for node in self.money_blocks() if node["element"] == "a"]
+		empty = application_lead([])
 
-		self.assertEqual(len(buttons), 1)
-		self.assertEqual(buttons[0]["attributes"]["href"], ACTION_HREF)
-		self.assertEqual([value["key"] for value in buttons[0]["dynamicValues"]], ["action_label"])
+		self.assertEqual(empty["application_stage"], "")
+		self.assertNotEqual(empty["application_headline"], "")
+		self.assertNotEqual(empty["application_note"], "")
 
-		# Two steps, because the page asking for no header button and that request
-		# reaching the frame are separate mechanisms, and either one alone would leave
-		# the borrower with the same words on two buttons. The stub mirroring a
-		# component node is keyed on "ref/" plus that node's path.
-		self.assertIn("action_href=None", inspect.getsource(overview_page.build))
+	def test_the_card_names_the_newest_application_and_says_how_many_more(self):
+		"""One card, several applications: it must not look like the whole story.
 
-		mirrored = {node["blockId"]: node for node in self.blocks(reference(content(), None))}
+		get_applications orders newest first, so the card takes the first row. The
+		count under it is what sends a borrower to the table below, and it stays away
+		when there is only the one they are already reading.
+		"""
+		newest = dict(self.application("Home Loan"), note="")
+		older = self.application("Personal Loan")
 
-		self.assertEqual(mirrored[block_id(f"ref/{ACTION_PATH}")]["baseStyles"], {"display": "none"})
+		self.assertEqual(application_lead([newest, older])["application_headline"], "Home Loan")
+		self.assertIn("2", application_lead([newest, older])["application_more"])
+		self.assertEqual(application_lead([newest])["application_more"], "")
+
+	def application(self, product: str) -> dict:
+		return {
+			"product": product,
+			"stage": "Under review",
+			"stage_tone": "info",
+			"reference": "APP-1 · initiated 1 January 2026",
+			"note": "",
+		}
 
 	def test_the_sanctioned_amount_is_one_line_under_the_outstanding_figure(self):
 		"""It was a card of its own, at the weight of the two figures beside it.
@@ -2035,7 +2259,229 @@ class TestPortalMoneyBlock(LendingTestSuite):
 		self.assertEqual(build_summary([], [])["sanctioned_line"], "")
 
 		conditioned = [
-			node for node in self.money_blocks() if node.get("visibilityCondition") == "sanctioned_line"
+			node for node in self.summary_blocks() if node.get("visibilityCondition") == "sanctioned_line"
 		]
 
 		self.assertEqual(len(conditioned), 1)
+
+
+class TestPortalRanking(LendingTestSuite):
+	"""What the overview puts first, and what it stops saying twice.
+
+	The page used to lead with a filled black button offering a payment eighteen days
+	away, while the two applications actually waiting on the borrower were grey text
+	in the middle of a table. What is held open here is the order it reads in now:
+	the work first, the button following the work, and every fact said once.
+	"""
+
+	def draft(self, name="APP-1", product="Personal Loan"):
+		return {
+			"name": name,
+			"url": f"/borrower/application/{name}",
+			"product": product,
+			"reference": f"{name} · initiated 24 August 2026",
+			"note": "Submit to start the review",
+			"stage": "Action required",
+			"stage_tone": "warn",
+			"needs_borrower": True,
+			"amount": money(100000),
+		}
+
+	def instalment(self, product="Personal Loan"):
+		return {
+			"date": "09 Oct 2026",
+			"product": product,
+			"detail": "Principal 900 · interest 100",
+			"amount": money(1000),
+			"url": "/borrower/loan/LOAN-0001",
+		}
+
+	# --- what counts as waiting ------------------------------------------------------
+
+	def test_an_application_under_review_is_not_waiting_on_the_borrower(self):
+		"""The strip is work they can do. An application with the lender is not that."""
+		reviewing = dict(self.draft(), needs_borrower=False, stage="Under review")
+
+		self.assertEqual(waiting_on_borrower([reviewing]), [])
+
+	def test_a_draft_opens_where_it_is_cleared(self):
+		rows = waiting_on_borrower([self.draft(), dict(self.draft(), needs_borrower=False)])
+
+		self.assertEqual([row["url"] for row in rows], ["/borrower/application/APP-1"])
+		self.assertEqual(rows[0]["note"], "Submit to start the review")
+
+	def test_the_strip_leaves_the_payment_to_the_button(self):
+		"""The two halves of the page's one request must not both make it.
+
+		A strip that also carried the instalment would put the payment on the page
+		twice -- once as a row and once as the button right above it -- which is the
+		habit the strip was added to break, reintroduced by the fix for it.
+		"""
+		source = inspect.getsource(waiting_on_borrower)
+
+		self.assertNotIn("schedule", source)
+		self.assertNotIn(REPAYMENTS_ROUTE, source)
+
+	# --- the button ------------------------------------------------------------------
+
+	def test_the_button_is_the_payment_page_either_way(self):
+		"""The destination was never wrong. Only the insistence was."""
+		quiet = next_action(due_soon=False)
+		loud = next_action(due_soon=True)
+
+		self.assertEqual(quiet["action_href"], REPAYMENTS_ROUTE)
+		self.assertEqual(loud["action_href"], REPAYMENTS_ROUTE)
+		self.assertEqual(quiet["action_label"], loud["action_label"])
+
+	def test_the_button_only_insists_when_a_payment_is_near(self):
+		"""The whole complaint in one assertion: eighteen days out, this was "1"."""
+		self.assertEqual(next_action(due_soon=False)["action_urgent"], "0")
+		self.assertEqual(next_action(due_soon=True)["action_urgent"], "1")
+
+	def test_the_quiet_button_has_a_rule_to_be_quiet_by(self):
+		"""The payload can say "0" all it likes; something has to paint it.
+
+		The rule rides in this page's own head rather than SHELL_STATE_CSS, which
+		every page carries a copy of and which no page serves until all of them have
+		been rebuilt.
+		"""
+		self.assertIn('[data-urgent="0"]', ACTION_TONE_CSS)
+		self.assertIn("extra_css=ACTION_TONE_CSS", inspect.getsource(overview_page.build))
+
+	def test_the_strip_hides_itself_when_there_is_nothing_in_it(self):
+		"""A borrower in good standing gets no empty shelf announcing they are idle."""
+		strips = [
+			node
+			for node in self.walk(content())
+			if node.get("visibilityCondition") == "tasks"
+		]
+
+		self.assertEqual(len(strips), 1)
+
+	# --- what is no longer said twice -------------------------------------------------
+
+	def test_one_live_account_reads_its_standing_in_its_own_row(self):
+		"""The head said "All accounts regular" over a single row saying "Regular"."""
+		one = [frappe._dict(name="L-1", status="Disbursed")]
+		two = [frappe._dict(name="L-1", status="Disbursed"), frappe._dict(name="L-2", status="Active")]
+
+		self.assertEqual(account_status(one)["account_status"], "")
+		self.assertEqual(account_status(two)["account_status"], "All accounts regular")
+
+	def test_a_fully_drawn_loan_gets_progress_where_it_got_its_own_figure_back(self):
+		"""Sanctioned equals disbursed once a loan is fully drawn, so the line was
+		repeating the figure above it. How far through they are is the fact that is
+		nowhere else on the page."""
+		drawn = standing_line(sanctioned=300000, undrawn=0, drawn=300000, repaid=50000)
+		partly = standing_line(sanctioned=300000, undrawn=100000, drawn=200000, repaid=0)
+
+		self.assertIn(money(50000), drawn)
+		self.assertNotIn("sanctioned", drawn.lower())
+		self.assertIn("undrawn", partly.lower())
+
+	def test_nothing_sanctioned_still_says_nothing(self):
+		self.assertEqual(standing_line(sanctioned=0, undrawn=0, drawn=0, repaid=0), "")
+
+	def test_one_loans_instalments_stop_repeating_its_name(self):
+		"""Four rows of one fixed instalment differ only in date. The name goes up to
+		the card's subtitle and the row leads with what actually moves."""
+		rows = name_once([self.instalment(), self.instalment()])
+
+		self.assertEqual([row["sub"] for row in rows], ["", ""])
+		self.assertEqual([row["title"] for row in rows], [row["detail"] for row in rows])
+
+	def test_two_loans_keep_their_names_on_every_row(self):
+		"""With more than one loan the name is what tells the rows apart."""
+		rows = name_once([self.instalment("Personal Loan"), self.instalment("Demand Loan")])
+
+		self.assertEqual([row["title"] for row in rows], ["Personal Loan", "Demand Loan"])
+		self.assertEqual([row["sub"] for row in rows], [row["detail"] for row in rows])
+
+	def walk(self, nodes) -> list[dict]:
+		found = []
+		for node in nodes:
+			found.append(node)
+			found.extend(self.walk(node.get("children") or []))
+
+		return found
+
+
+class TestPortalActivityList(LendingTestSuite):
+	"""The overview's activity list: a line of dots, and one sentence per event.
+
+	It reads the way the desk's own timeline reads, because it answers the same
+	question -- has the thing I did landed yet -- and a borrower checking whether their
+	payment went through should not have to subtract a date from today to find out.
+	"""
+
+	def walk(self, node) -> list[dict]:
+		found = [node]
+		for child in node.get("children") or []:
+			found.extend(self.walk(child))
+
+		return found
+
+	def list_block(self) -> dict:
+		return activity_list("activity", "title", "note", url_key="url", date_key="date")
+
+	def test_an_event_from_today_is_not_told_in_hours(self):
+		"""The reason days_ago exists rather than frappe.utils.pretty_date.
+
+		These events carry a posting date, which pretty_date reads as midnight: a
+		repayment entered this morning came back as "14 hours ago", and one entered
+		late last night as "yesterday", though both happened on the same day.
+		"""
+		self.assertEqual(days_ago(nowdate()), "Today")
+		self.assertEqual(days_ago(add_days(nowdate(), -1)), "Yesterday")
+
+	def test_how_long_ago_is_told_in_the_unit_that_fits(self):
+		"""Days for a week, then weeks, then months. "56 days ago" is arithmetic."""
+		said = [days_ago(add_days(nowdate(), -days)) for days in (3, 8, 40, 400)]
+
+		self.assertEqual(said, ["3 days ago", "1 week ago", "1 month ago", "1 year ago"])
+
+	def test_the_sentence_is_the_event_in_ink_and_the_rest_in_grey(self):
+		"""Two spans, not five. The weight changes once, and everything after it --
+		how much, which loan, how long ago -- is one grey clause joined in the data
+		layer, where the empty parts can drop out without leaving a separator."""
+		bodies = [
+			node
+			for node in self.walk(self.list_block())
+			if len(node["children"]) > 1 and all(child.get("dynamicValues") for child in node["children"])
+		]
+		spans = [child["dynamicValues"][0]["key"] for child in bodies[0]["children"]]
+
+		self.assertEqual(spans, ["title", "note"])
+
+	def test_the_day_it_happened_is_kept_in_the_tooltip(self):
+		""""2 days ago" is the faster read; the date is what a borrower needs the
+		moment they go looking for the entry on a statement."""
+		notes = [
+			node
+			for node in self.walk(self.list_block())
+			if any(value["property"] == "title" for value in node.get("dynamicValues") or [])
+		]
+
+		self.assertEqual(len(notes), 1)
+		self.assertEqual(notes[0]["dynamicValues"][-1]["key"], "date")
+
+	def test_the_last_dot_does_not_trail_a_line(self):
+		"""A stem running on under the final dot is a list that looks truncated.
+
+		The rows are one repeated block, so only a stylesheet can tell the last of them
+		apart. Asserted against the markers the blocks actually carry, because renaming
+		one of the two and not the other leaves a rule that matches nothing.
+		"""
+		marked = {
+			name
+			for node in self.walk(self.list_block())
+			for name in (node.get("attributes") or {})
+			if name.startswith("data-activity")
+		}
+
+		self.assertEqual(marked, {"data-activity-list", "data-activity-stem"})
+		for marker in marked:
+			self.assertIn(marker, ACTIVITY_CSS)
+
+		self.assertIn(":last-child", ACTIVITY_CSS)
+		self.assertIn("extra_css=ACTIVITY_CSS", inspect.getsource(overview_page.build))

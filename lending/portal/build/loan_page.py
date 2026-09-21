@@ -24,33 +24,23 @@ from lending.portal.build.shell import build_page
 from lending.portal.build.theme import (
 	AMOUNT_STYLES,
 	BTN_STYLES,
-	CARD_HEAD_STYLES,
-	CARD_STYLES,
-	CARD_SUB_STYLES,
-	CARD_TITLE_STYLES,
-	CARDS_STYLES,
 	COL_AMT_STYLES,
 	COL_MAIN_STYLES,
 	COL_STATUS_STYLES,
 	GRID_STYLES,
 	GRID_TABLET_STYLES,
-	LI_AMT_STYLES,
-	LI_BODY_STYLES,
-	LI_DATE_STYLES,
-	LI_STYLES,
-	NCARD_BODY_STYLES,
-	NCARD_HEAD_STYLES,
-	NCARD_STYLES,
-	NCARD_TITLE_STYLES,
-	NUMBER_STYLES,
 	PRIMARY_TEXT_STYLES,
 	ROW_STYLES,
 	SECONDARY_TEXT_STYLES,
 	STACK_STYLES,
-	STATE_STYLES,
+	badge,
 	block,
 	bound,
+	card,
+	pair_grid,
+	pair_rows,
 	repeater,
+	timeline_rows,
 )
 
 PAGE_NAME = "Borrower Loan Detail"
@@ -64,64 +54,21 @@ data.update(frappe.call("lending.portal.loans.get_loan_detail"))  # noqa: F821
 '''
 
 
-def card(title, subtitle_key, body):
-	return block(
-		"section",
-		styles=CARD_STYLES,
-		children=[
-			block(
-				"div",
-				styles=CARD_HEAD_STYLES,
-				children=[
-					block("h2", styles=CARD_TITLE_STYLES, html=title),
-					bound("div", subtitle_key, styles=CARD_SUB_STYLES),
-				],
-			),
-			body,
-		],
-	)
+def summary_card():
+	"""The terms, laid across one card the way a form lays out a record.
 
+	These eight figures used to get a number card each. Two things went wrong with
+	that. The grid was styled on the repeater's parent, so the repeater itself was the
+	only cell and every card came out full width, one under the next -- the rate and
+	the first due date ended up a screen apart. And a number card is for a figure that
+	stands alone, which none of these do: they are eight readings of one loan, and a
+	borrower checking the rate against the instalment wants them within one glance of
+	each other rather than stacked down the page.
 
-def pair_rows(key):
-	"""A repeater over label and value pairs: the terms, the charges, the payoff."""
-	row = block(
-		"div",
-		styles=ROW_STYLES,
-		children=[
-			block(
-				"div",
-				styles=COL_MAIN_STYLES,
-				children=[
-					bound("div", "label", styles=SECONDARY_TEXT_STYLES),
-					bound("div", "value", styles=PRIMARY_TEXT_STYLES),
-				],
-			)
-		],
-	)
-
-	return repeater(key, row)
-
-
-def summary_body():
-	"""The terms, laid out as cards so eight figures stay scannable."""
-	row = block(
-		"div",
-		styles=NCARD_STYLES,
-		children=[
-			block(
-				"div",
-				styles=NCARD_HEAD_STYLES,
-				children=[bound("span", "label", styles=NCARD_TITLE_STYLES)],
-			),
-			block(
-				"div",
-				styles=NCARD_BODY_STYLES,
-				children=[bound("div", "value", styles=NUMBER_STYLES)],
-			),
-		],
-	)
-
-	return block("section", styles=CARDS_STYLES, children=[repeater("summary", row)])
+	pair_grid is the shape the application detail page already gives the same
+	question, three to a row, folding to two and then to one.
+	"""
+	return card("Loan details", "summary_note", pair_grid("summary"))
 
 
 def schedule_body():
@@ -140,7 +87,7 @@ def schedule_body():
 			block(
 				"div",
 				styles=COL_STATUS_STYLES,
-				children=[bound("span", "state", styles=STATE_STYLES)],
+				children=[badge("state", tone_key="state_tone")],
 			),
 			block(
 				"div",
@@ -154,27 +101,6 @@ def schedule_body():
 	)
 
 	return repeater("schedule", row)
-
-
-def timeline_body(key):
-	row = block(
-		"div",
-		styles=LI_STYLES,
-		children=[
-			bound("span", "date", styles=LI_DATE_STYLES),
-			block(
-				"div",
-				styles=LI_BODY_STYLES,
-				children=[
-					bound("div", "detail", styles=PRIMARY_TEXT_STYLES),
-					bound("div", "running", styles=SECONDARY_TEXT_STYLES),
-				],
-			),
-			bound("span", "amount", styles=LI_AMT_STYLES),
-		],
-	)
-
-	return repeater(key, row)
 
 
 def payoff_body():
@@ -201,7 +127,7 @@ def payoff_body():
 
 def content():
 	return [
-		summary_body(),
+		summary_card(),
 		block(
 			"div",
 			styles=GRID_STYLES,
@@ -212,7 +138,12 @@ def content():
 					styles=STACK_STYLES,
 					children=[
 						card("Repayment schedule", "schedule_note", schedule_body()),
-						card("Disbursements", "disbursements_note", timeline_body("disbursements")),
+						# No link on these rows: this is already the loan they would open.
+						card(
+							"Disbursements",
+							"disbursements_note",
+							timeline_rows("disbursements", "detail", "running"),
+						),
 					],
 				),
 				block(

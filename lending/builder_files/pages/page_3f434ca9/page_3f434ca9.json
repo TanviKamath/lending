@@ -3,604 +3,292 @@
  "authenticated_access": 1,
  "blocks": [
   {
-   "attributes": {},
    "baseStyles": {
     "WebkitFontSmoothing": "antialiased",
-    "background": "var(--portal-surface-page,#ffffff)",
     "color": "var(--portal-ink,#171717)",
     "fontFamily": "var(--brand-font,InterVariable),Inter,-apple-system,BlinkMacSystemFont,\"Segoe UI\",Roboto,Oxygen,Ubuntu,Cantarell,\"Fira Sans\",\"Droid Sans\",\"Helvetica Neue\",sans-serif",
-    "fontSize": "var(--portal-text-md,15px)",
+    "fontSize": "var(--portal-text-md,13px)",
     "fontVariationSettings": "\"opsz\" 24",
     "fontWeight": "400",
     "lineHeight": "1.5",
     "margin": "0"
    },
-   "blockId": "b5a2b6bf4",
+   "blockId": "root",
    "children": [
     {
-     "attributes": {},
-     "baseStyles": {},
      "blockId": "0f478d51d",
      "children": [
       {
-       "attributes": {},
-       "baseStyles": {},
        "blockId": "b303e540d",
        "children": [
         {
-         "attributes": {},
-         "baseStyles": {},
          "blockId": "248dc746d",
-         "children": [],
-         "classes": [],
-         "customAttributes": {},
          "isChildOfComponent": "lending-borrower-shell",
-         "mobileStyles": {},
-         "referenceBlockId": "c3695df2c",
-         "tabletStyles": {}
+         "referenceBlockId": "c3695df2c"
         },
         {
-         "attributes": {},
-         "baseStyles": {},
          "blockId": "e5fe1f4d8",
-         "children": [],
-         "classes": [],
-         "customAttributes": {},
          "isChildOfComponent": "lending-borrower-shell",
-         "mobileStyles": {},
-         "referenceBlockId": "5f25802ba",
-         "tabletStyles": {}
+         "referenceBlockId": "5f25802ba"
         },
         {
-         "attributes": {},
-         "baseStyles": {},
          "blockId": "35d14c8e1",
-         "children": [],
-         "classes": [],
-         "customAttributes": {},
          "isChildOfComponent": "lending-borrower-shell",
-         "mobileStyles": {},
-         "referenceBlockId": "1e0ef2e6e",
-         "tabletStyles": {}
+         "referenceBlockId": "1e0ef2e6e"
         },
         {
-         "attributes": {},
-         "baseStyles": {},
          "blockId": "453241156",
-         "children": [],
-         "classes": [],
-         "customAttributes": {},
          "isChildOfComponent": "lending-borrower-shell",
-         "mobileStyles": {},
-         "referenceBlockId": "f7f995e1b",
-         "tabletStyles": {}
+         "referenceBlockId": "f7f995e1b"
         },
         {
-         "attributes": {},
-         "baseStyles": {},
          "blockId": "38e6f4b7a",
-         "children": [],
-         "classes": [],
-         "customAttributes": {},
          "isChildOfComponent": "lending-borrower-shell",
-         "mobileStyles": {},
-         "referenceBlockId": "5c973d052",
-         "tabletStyles": {}
+         "referenceBlockId": "5c973d052"
         },
         {
-         "attributes": {},
-         "baseStyles": {},
          "blockId": "4c93ed923",
-         "children": [],
-         "classes": [],
-         "customAttributes": {},
          "isChildOfComponent": "lending-borrower-shell",
-         "mobileStyles": {},
-         "referenceBlockId": "61bbb004b",
-         "tabletStyles": {}
+         "referenceBlockId": "61bbb004b"
         }
        ],
-       "classes": [],
-       "customAttributes": {},
        "isChildOfComponent": "lending-borrower-shell",
-       "mobileStyles": {},
-       "referenceBlockId": "82f55a233",
-       "tabletStyles": {}
+       "referenceBlockId": "82f55a233"
       },
       {
-       "attributes": {},
-       "baseStyles": {},
        "blockId": "9dd376da0",
        "children": [
         {
-         "attributes": {},
-         "baseStyles": {},
          "blockId": "b0c2778be",
          "children": [
           {
-           "attributes": {},
-           "baseStyles": {},
            "blockId": "28b713fed",
-           "children": [],
-           "classes": [],
-           "customAttributes": {},
            "isChildOfComponent": "lending-borrower-shell",
-           "mobileStyles": {},
-           "referenceBlockId": "2022e18d9",
-           "tabletStyles": {}
+           "referenceBlockId": "2022e18d9"
           },
           {
-           "attributes": {},
-           "baseStyles": {},
            "blockId": "d551ee55a",
            "children": [
             {
-             "attributes": {},
-             "baseStyles": {},
              "blockId": "7fae8d9e3",
-             "children": [],
-             "classes": [],
-             "customAttributes": {},
              "isChildOfComponent": "lending-borrower-shell",
-             "mobileStyles": {},
-             "referenceBlockId": "27f41dbfc",
-             "tabletStyles": {}
+             "referenceBlockId": "27f41dbfc"
             }
            ],
-           "classes": [],
-           "customAttributes": {},
            "isChildOfComponent": "lending-borrower-shell",
-           "mobileStyles": {},
-           "referenceBlockId": "550eba79c",
-           "tabletStyles": {}
+           "referenceBlockId": "550eba79c"
           }
          ],
-         "classes": [],
-         "customAttributes": {},
          "isChildOfComponent": "lending-borrower-shell",
-         "mobileStyles": {},
-         "referenceBlockId": "384a086c3",
-         "tabletStyles": {}
+         "referenceBlockId": "384a086c3"
         },
         {
-         "attributes": {},
-         "baseStyles": {},
          "blockId": "81257ce1c",
-         "children": [],
-         "classes": [],
-         "customAttributes": {},
          "isChildOfComponent": "lending-borrower-shell",
-         "mobileStyles": {},
-         "referenceBlockId": "bb9c13776",
-         "tabletStyles": {}
+         "referenceBlockId": "bb9c13776"
         },
         {
-         "attributes": {},
-         "baseStyles": {},
          "blockId": "106dc2254",
          "children": [
           {
-           "attributes": {},
-           "baseStyles": {},
            "blockId": "52bb93349",
-           "children": [],
-           "classes": [],
-           "customAttributes": {},
            "isChildOfComponent": "lending-borrower-shell",
-           "mobileStyles": {},
-           "referenceBlockId": "663072a0d",
-           "tabletStyles": {}
+           "referenceBlockId": "663072a0d"
           }
          ],
-         "classes": [],
-         "customAttributes": {},
          "isChildOfComponent": "lending-borrower-shell",
-         "mobileStyles": {},
-         "referenceBlockId": "9de89b2f1",
-         "tabletStyles": {}
+         "referenceBlockId": "9de89b2f1"
         },
         {
-         "attributes": {},
-         "baseStyles": {},
          "blockId": "ba8b992fb",
          "children": [
           {
-           "attributes": {},
-           "baseStyles": {},
            "blockId": "b680cd30f",
-           "children": [],
-           "classes": [],
-           "customAttributes": {},
            "isChildOfComponent": "lending-borrower-shell",
-           "mobileStyles": {},
-           "referenceBlockId": "f993affae",
-           "tabletStyles": {}
+           "referenceBlockId": "f993affae"
           },
           {
-           "attributes": {},
-           "baseStyles": {},
            "blockId": "1463fef27",
-           "children": [],
-           "classes": [],
-           "customAttributes": {},
            "isChildOfComponent": "lending-borrower-shell",
-           "mobileStyles": {},
-           "referenceBlockId": "3e01753ad",
-           "tabletStyles": {}
+           "referenceBlockId": "3e01753ad"
           }
          ],
-         "classes": [],
-         "customAttributes": {},
          "isChildOfComponent": "lending-borrower-shell",
-         "mobileStyles": {},
-         "referenceBlockId": "0a48a037a",
-         "tabletStyles": {}
+         "referenceBlockId": "0a48a037a"
         }
        ],
-       "classes": [],
-       "customAttributes": {},
        "isChildOfComponent": "lending-borrower-shell",
-       "mobileStyles": {},
-       "referenceBlockId": "3a6a0ee29",
-       "tabletStyles": {}
+       "referenceBlockId": "3a6a0ee29"
       },
       {
-       "attributes": {},
-       "baseStyles": {},
        "blockId": "234877ddc",
        "children": [
         {
-         "attributes": {},
-         "baseStyles": {},
          "blockId": "fcbefda82",
          "children": [
           {
-           "attributes": {},
-           "baseStyles": {},
            "blockId": "a2cffb9e3",
-           "children": [],
-           "classes": [],
-           "customAttributes": {},
            "isChildOfComponent": "lending-borrower-shell",
-           "mobileStyles": {},
-           "referenceBlockId": "a4b8a9129",
-           "tabletStyles": {}
+           "referenceBlockId": "a4b8a9129"
           },
           {
-           "attributes": {},
-           "baseStyles": {},
            "blockId": "925e6188c",
-           "children": [],
-           "classes": [],
-           "customAttributes": {},
            "isChildOfComponent": "lending-borrower-shell",
-           "mobileStyles": {},
-           "referenceBlockId": "0e491e99f",
-           "tabletStyles": {}
+           "referenceBlockId": "0e491e99f"
           },
           {
-           "attributes": {},
-           "baseStyles": {},
            "blockId": "dfca54e8e",
-           "children": [],
-           "classes": [],
-           "customAttributes": {},
            "isChildOfComponent": "lending-borrower-shell",
-           "mobileStyles": {},
-           "referenceBlockId": "146841743",
-           "tabletStyles": {}
+           "referenceBlockId": "146841743"
           },
           {
-           "attributes": {},
-           "baseStyles": {},
            "blockId": "70584286c",
-           "children": [],
-           "classes": [],
-           "customAttributes": {},
            "isChildOfComponent": "lending-borrower-shell",
-           "mobileStyles": {},
-           "referenceBlockId": "8acfb956d",
-           "tabletStyles": {}
+           "referenceBlockId": "8acfb956d"
           },
           {
-           "attributes": {},
-           "baseStyles": {},
            "blockId": "2a6b1af9a",
-           "children": [],
-           "classes": [],
-           "customAttributes": {},
            "isChildOfComponent": "lending-borrower-shell",
-           "mobileStyles": {},
-           "referenceBlockId": "462306ba7",
-           "tabletStyles": {}
+           "referenceBlockId": "462306ba7"
           }
          ],
-         "classes": [],
-         "customAttributes": {},
          "isChildOfComponent": "lending-borrower-shell",
-         "mobileStyles": {},
-         "referenceBlockId": "f381a2c0f",
-         "tabletStyles": {}
+         "referenceBlockId": "f381a2c0f"
         },
         {
-         "attributes": {},
-         "baseStyles": {},
          "blockId": "4bab75831",
          "children": [
           {
-           "attributes": {},
-           "baseStyles": {},
            "blockId": "27556f30c",
            "children": [
             {
-             "attributes": {},
-             "baseStyles": {},
              "blockId": "372ea29af",
-             "children": [],
-             "classes": [],
-             "customAttributes": {},
              "isChildOfComponent": "lending-borrower-shell",
-             "mobileStyles": {},
-             "referenceBlockId": "6b3bb6978",
-             "tabletStyles": {}
+             "referenceBlockId": "6b3bb6978"
             },
             {
-             "attributes": {},
-             "baseStyles": {},
              "blockId": "9db947c68",
-             "children": [],
-             "classes": [],
-             "customAttributes": {},
              "isChildOfComponent": "lending-borrower-shell",
-             "mobileStyles": {},
-             "referenceBlockId": "8411ef753",
-             "tabletStyles": {}
+             "referenceBlockId": "8411ef753"
             },
             {
-             "attributes": {},
-             "baseStyles": {},
              "blockId": "b7bfe5992",
              "children": [
               {
-               "attributes": {},
-               "baseStyles": {},
                "blockId": "afd3058be",
-               "children": [],
-               "classes": [],
-               "customAttributes": {},
                "isChildOfComponent": "lending-borrower-shell",
-               "mobileStyles": {},
-               "referenceBlockId": "c0a77fe1d",
-               "tabletStyles": {}
+               "referenceBlockId": "c0a77fe1d"
               },
               {
-               "attributes": {},
-               "baseStyles": {},
                "blockId": "67acc0e97",
-               "children": [],
-               "classes": [],
-               "customAttributes": {},
                "isChildOfComponent": "lending-borrower-shell",
-               "mobileStyles": {},
-               "referenceBlockId": "7a0742f3d",
-               "tabletStyles": {}
+               "referenceBlockId": "7a0742f3d"
               },
               {
-               "attributes": {},
-               "baseStyles": {},
                "blockId": "f28e9c8b8",
-               "children": [],
-               "classes": [],
-               "customAttributes": {},
                "isChildOfComponent": "lending-borrower-shell",
-               "mobileStyles": {},
-               "referenceBlockId": "69ba1bd5e",
-               "tabletStyles": {}
+               "referenceBlockId": "69ba1bd5e"
               }
              ],
-             "classes": [],
-             "customAttributes": {},
              "isChildOfComponent": "lending-borrower-shell",
-             "mobileStyles": {},
-             "referenceBlockId": "4cd7a76ff",
-             "tabletStyles": {}
+             "referenceBlockId": "4cd7a76ff"
             }
            ],
-           "classes": [],
-           "customAttributes": {},
            "isChildOfComponent": "lending-borrower-shell",
-           "mobileStyles": {},
-           "referenceBlockId": "6f3dcbe6c",
-           "tabletStyles": {}
+           "referenceBlockId": "6f3dcbe6c"
           }
          ],
-         "classes": [],
-         "customAttributes": {},
          "isChildOfComponent": "lending-borrower-shell",
-         "mobileStyles": {},
-         "referenceBlockId": "724a8701d",
-         "tabletStyles": {}
+         "referenceBlockId": "724a8701d"
         },
         {
-         "attributes": {},
-         "baseStyles": {},
          "blockId": "7918023fe",
-         "children": [],
-         "classes": [],
-         "customAttributes": {},
          "isChildOfComponent": "lending-borrower-shell",
-         "mobileStyles": {},
-         "referenceBlockId": "5a36e6c8b",
-         "tabletStyles": {}
+         "referenceBlockId": "5a36e6c8b"
         }
        ],
-       "classes": [],
-       "customAttributes": {},
        "isChildOfComponent": "lending-borrower-shell",
-       "mobileStyles": {},
-       "referenceBlockId": "d411390f0",
-       "tabletStyles": {}
+       "referenceBlockId": "d411390f0"
       },
       {
-       "attributes": {},
-       "baseStyles": {},
        "blockId": "2522ef2dd",
        "children": [
         {
-         "attributes": {},
-         "baseStyles": {},
          "blockId": "0d0567e99",
          "children": [
           {
-           "attributes": {},
-           "baseStyles": {},
            "blockId": "24b5f25b4",
-           "children": [],
-           "classes": [],
-           "customAttributes": {},
            "isChildOfComponent": "lending-borrower-shell",
-           "mobileStyles": {},
-           "referenceBlockId": "c0259725e",
-           "tabletStyles": {}
+           "referenceBlockId": "c0259725e"
           },
           {
-           "attributes": {},
-           "baseStyles": {},
            "blockId": "320b81b5f",
-           "children": [],
-           "classes": [],
-           "customAttributes": {},
            "isChildOfComponent": "lending-borrower-shell",
-           "mobileStyles": {},
-           "referenceBlockId": "d6dfe80cc",
-           "tabletStyles": {}
+           "referenceBlockId": "d6dfe80cc"
           },
           {
-           "attributes": {},
-           "baseStyles": {},
            "blockId": "31c8c76bf",
            "children": [
             {
-             "attributes": {},
-             "baseStyles": {},
              "blockId": "bd70617c8",
-             "children": [
-              {
-               "attributes": {},
-               "baseStyles": {},
-               "blockId": "493dd7db7",
-               "children": [],
-               "classes": [],
-               "customAttributes": {},
-               "isChildOfComponent": "lending-borrower-shell",
-               "mobileStyles": {},
-               "referenceBlockId": "ec3aee1a4",
-               "tabletStyles": {}
-              },
-              {
-               "attributes": {},
-               "baseStyles": {},
-               "blockId": "8a9fa0fb8",
-               "children": [],
-               "classes": [],
-               "customAttributes": {},
-               "isChildOfComponent": "lending-borrower-shell",
-               "mobileStyles": {},
-               "referenceBlockId": "119671b49",
-               "tabletStyles": {}
-              }
-             ],
-             "classes": [],
-             "customAttributes": {},
              "isChildOfComponent": "lending-borrower-shell",
-             "mobileStyles": {},
-             "referenceBlockId": "4e6762ee0",
-             "tabletStyles": {}
+             "referenceBlockId": "4e6762ee0"
             },
             {
              "attributes": {
               "href": "/borrower/overview"
              },
-             "baseStyles": {},
              "blockId": "7c9b896dc",
-             "children": [],
-             "classes": [],
-             "customAttributes": {},
              "isChildOfComponent": "lending-borrower-shell",
-             "mobileStyles": {},
-             "referenceBlockId": "361362433",
-             "tabletStyles": {}
+             "referenceBlockId": "361362433"
             }
            ],
-           "classes": [],
-           "customAttributes": {},
            "isChildOfComponent": "lending-borrower-shell",
-           "mobileStyles": {},
-           "referenceBlockId": "63785555c",
-           "tabletStyles": {}
+           "referenceBlockId": "63785555c"
           }
          ],
-         "classes": [],
-         "customAttributes": {},
          "isChildOfComponent": "lending-borrower-shell",
-         "mobileStyles": {},
-         "referenceBlockId": "4c2b4ba43",
-         "tabletStyles": {}
+         "referenceBlockId": "4c2b4ba43"
         },
         {
-         "attributes": {},
-         "baseStyles": {},
          "blockId": "88b1a256c",
          "children": [
           {
-           "attributes": {},
            "baseStyles": {
-            "background": "var(--portal-surface-card,#ffffff)",
             "border": "1px solid var(--portal-border,#ededed)",
             "borderRadius": "12px",
             "display": "flex",
             "flexDirection": "column",
             "minWidth": "0"
            },
-           "blockId": "9c6e56fbc",
+           "blockId": "76681e782",
            "children": [
             {
-             "attributes": {},
              "baseStyles": {
               "padding": "var(--portal-card-pad,12px)"
              },
-             "blockId": "516007936",
+             "blockId": "3c34235e8",
              "children": [
               {
-               "attributes": {},
                "baseStyles": {
                 "color": "var(--portal-ink,#171717)",
-                "fontSize": "var(--portal-text-lg,18px)",
+                "fontSize": "var(--portal-text-lg,14px)",
                 "fontWeight": "600",
                 "lineHeight": "1.3em",
                 "margin": "0"
                },
-               "blockId": "b34d5eeb2",
-               "children": [],
-               "classes": [],
-               "customAttributes": {},
+               "blockId": "e9ded4386",
                "element": "h2",
-               "innerHTML": "Search",
-               "mobileStyles": {},
-               "tabletStyles": {}
+               "innerHTML": "Search"
               },
               {
-               "attributes": {},
                "baseStyles": {
                 "color": "var(--portal-ink-muted,#525252)",
-                "fontSize": "var(--portal-text-sm,13px)",
+                "fontSize": "var(--portal-text-sm,12px)",
                 "fontVariantNumeric": "tabular-nums",
                 "marginTop": "5px"
                },
-               "blockId": "b35efbae7",
-               "children": [],
-               "classes": [],
-               "customAttributes": {},
+               "blockId": "1bfa1ba4d",
                "dynamicValues": [
                 {
                  "comesFrom": "dataScript",
@@ -609,21 +297,13 @@
                  "type": "key"
                 }
                ],
-               "element": "div",
-               "mobileStyles": {},
-               "tabletStyles": {}
+               "element": "div"
               }
              ],
-             "classes": [],
-             "customAttributes": {},
-             "element": "div",
-             "mobileStyles": {},
-             "tabletStyles": {}
+             "element": "div"
             },
             {
-             "attributes": {},
-             "baseStyles": {},
-             "blockId": "6f6ba9bc4",
+             "blockId": "46d093e6b",
              "children": [
               {
                "attributes": {
@@ -637,7 +317,7 @@
                 "gap": "10px",
                 "padding": "12px"
                },
-               "blockId": "2e2b9cb70",
+               "blockId": "d031f260f",
                "children": [
                 {
                  "attributes": {
@@ -649,22 +329,18 @@
                   "value": ""
                  },
                  "baseStyles": {
-                  "background": "var(--portal-surface-card,#ffffff)",
                   "border": "1px solid var(--portal-border,#ededed)",
                   "borderRadius": "var(--brand-radius,10px)",
                   "boxSizing": "border-box",
                   "color": "var(--portal-ink,#171717)",
                   "flex": "1 1 auto",
                   "fontFamily": "inherit",
-                  "fontSize": "var(--portal-text-md,15px)",
+                  "fontSize": "var(--portal-text-md,13px)",
                   "hover:borderColor": "var(--portal-border-strong,#999999)",
                   "padding": "10px 12px",
                   "width": "100%"
                  },
-                 "blockId": "ef977b498",
-                 "children": [],
-                 "classes": [],
-                 "customAttributes": {},
+                 "blockId": "fa5dc057f",
                  "dynamicValues": [
                   {
                    "comesFrom": "dataScript",
@@ -673,51 +349,36 @@
                    "type": "attribute"
                   }
                  ],
-                 "element": "input",
-                 "mobileStyles": {},
-                 "tabletStyles": {}
+                 "element": "input"
                 },
                 {
                  "attributes": {
                   "type": "submit"
                  },
                  "baseStyles": {
-                  "background": "var(--brand-primary,#171717)",
                   "border": "1px solid transparent",
                   "borderRadius": "var(--brand-radius,8px)",
                   "color": "var(--brand-primary-ink,#ffffff)",
                   "cursor": "pointer",
                   "fontFamily": "inherit",
-                  "fontSize": "var(--portal-text-md,15px)",
+                  "fontSize": "var(--portal-text-md,13px)",
                   "fontWeight": "500",
                   "hover:filter": "brightness(1.4)",
                   "padding": "6px 12px",
                   "textDecoration": "none",
                   "whiteSpace": "nowrap"
                  },
-                 "blockId": "f657b5ddf",
-                 "children": [],
-                 "classes": [],
-                 "customAttributes": {},
+                 "blockId": "58b169328",
                  "element": "button",
-                 "innerHTML": "Search",
-                 "mobileStyles": {},
-                 "tabletStyles": {}
+                 "innerHTML": "Search"
                 }
                ],
-               "classes": [],
-               "customAttributes": {},
-               "element": "form",
-               "mobileStyles": {},
-               "tabletStyles": {}
+               "element": "form"
               },
               {
-               "attributes": {},
-               "baseStyles": {},
-               "blockId": "a955ff418",
+               "blockId": "640451fc5",
                "children": [
                 {
-                 "attributes": {},
                  "baseStyles": {
                   "alignItems": "center",
                   "borderBottom": "1px solid var(--portal-border,#ededed)",
@@ -725,10 +386,9 @@
                   "gap": "12px",
                   "padding": "0 var(--portal-card-pad,12px) 8px"
                  },
-                 "blockId": "3e234ae65",
+                 "blockId": "de86147e3",
                  "children": [
                   {
-                   "attributes": {},
                    "baseStyles": {
                     "color": "var(--portal-ink-subtle,#7c7c7c)",
                     "display": "flex",
@@ -738,44 +398,30 @@
                     "gap": "2px",
                     "minWidth": "0"
                    },
-                   "blockId": "e529d876b",
-                   "children": [],
-                   "classes": [],
-                   "customAttributes": {},
+                   "blockId": "3e5c5fda8",
                    "element": "span",
-                   "innerHTML": "Result",
-                   "mobileStyles": {},
-                   "tabletStyles": {}
+                   "innerHTML": "Result"
                   },
                   {
-                   "attributes": {},
                    "baseStyles": {
                     "color": "var(--portal-ink-subtle,#7c7c7c)",
                     "flexShrink": "0",
                     "fontSize": "var(--portal-text-xs,11px)",
                     "width": "150px"
                    },
-                   "blockId": "5fd5aba85",
-                   "children": [],
-                   "classes": [],
-                   "customAttributes": {},
+                   "blockId": "f8b896b63",
                    "element": "span",
-                   "innerHTML": "Kind",
-                   "mobileStyles": {},
-                   "tabletStyles": {}
+                   "innerHTML": "Kind"
                   }
                  ],
-                 "classes": [],
-                 "customAttributes": {},
                  "element": "div",
-                 "mobileStyles": {},
-                 "tabletStyles": {},
-                 "visibilityCondition": "results"
+                 "visibilityCondition": {
+                  "comesFrom": "dataScript",
+                  "key": "results"
+                 }
                 },
                 {
-                 "attributes": {},
-                 "baseStyles": {},
-                 "blockId": "c42af8647",
+                 "blockId": "fcf38baf2",
                  "children": [
                   {
                    "attributes": {
@@ -788,12 +434,12 @@
                     "display": "flex",
                     "gap": "12px",
                     "hover:background": "var(--portal-surface-sunken,#f8f8f8)",
-                    "padding": "var(--portal-row-pad,10px) var(--portal-card-pad,12px)"
+                    "padding": "var(--portal-row-pad,10px) var(--portal-card-pad,12px)",
+                    "textDecoration": "none"
                    },
-                   "blockId": "ee7a43566",
+                   "blockId": "b0c0cc921",
                    "children": [
                     {
-                     "attributes": {},
                      "baseStyles": {
                       "display": "flex",
                       "flex": "1 1 auto",
@@ -801,18 +447,14 @@
                       "gap": "2px",
                       "minWidth": "0"
                      },
-                     "blockId": "b15e4dacb",
+                     "blockId": "0281334cb",
                      "children": [
                       {
-                       "attributes": {},
                        "baseStyles": {
-                        "fontSize": "var(--portal-text-md,15px)",
+                        "fontSize": "var(--portal-text-md,13px)",
                         "fontWeight": "500"
                        },
-                       "blockId": "cdde79ca5",
-                       "children": [],
-                       "classes": [],
-                       "customAttributes": {},
+                       "blockId": "0802d8851",
                        "dynamicValues": [
                         {
                          "comesFrom": "dataScript",
@@ -821,21 +463,15 @@
                          "type": "key"
                         }
                        ],
-                       "element": "div",
-                       "mobileStyles": {},
-                       "tabletStyles": {}
+                       "element": "div"
                       },
                       {
-                       "attributes": {},
                        "baseStyles": {
                         "color": "var(--portal-ink-subtle,#7c7c7c)",
-                        "fontSize": "var(--portal-text-sm,13px)",
+                        "fontSize": "var(--portal-text-sm,12px)",
                         "fontVariantNumeric": "tabular-nums"
                        },
-                       "blockId": "c18278463",
-                       "children": [],
-                       "classes": [],
-                       "customAttributes": {},
+                       "blockId": "197b9735d",
                        "dynamicValues": [
                         {
                          "comesFrom": "dataScript",
@@ -844,36 +480,25 @@
                          "type": "key"
                         }
                        ],
-                       "element": "div",
-                       "mobileStyles": {},
-                       "tabletStyles": {}
+                       "element": "div"
                       }
                      ],
-                     "classes": [],
-                     "customAttributes": {},
-                     "element": "div",
-                     "mobileStyles": {},
-                     "tabletStyles": {}
+                     "element": "div"
                     },
                     {
-                     "attributes": {},
                      "baseStyles": {
                       "flexShrink": "0",
                       "width": "150px"
                      },
-                     "blockId": "320d0159d",
+                     "blockId": "0dfa2f488",
                      "children": [
                       {
-                       "attributes": {},
                        "baseStyles": {
                         "color": "var(--portal-ink-subtle,#7c7c7c)",
-                        "fontSize": "var(--portal-text-sm,13px)",
+                        "fontSize": "var(--portal-text-sm,12px)",
                         "fontVariantNumeric": "tabular-nums"
                        },
-                       "blockId": "c74da4bc9",
-                       "children": [],
-                       "classes": [],
-                       "customAttributes": {},
+                       "blockId": "49adcbaf2",
                        "dynamicValues": [
                         {
                          "comesFrom": "dataScript",
@@ -882,20 +507,12 @@
                          "type": "key"
                         }
                        ],
-                       "element": "div",
-                       "mobileStyles": {},
-                       "tabletStyles": {}
+                       "element": "div"
                       }
                      ],
-                     "classes": [],
-                     "customAttributes": {},
-                     "element": "div",
-                     "mobileStyles": {},
-                     "tabletStyles": {}
+                     "element": "div"
                     }
                    ],
-                   "classes": [],
-                   "customAttributes": {},
                    "dynamicValues": [
                     {
                      "comesFrom": "dataScript",
@@ -904,13 +521,9 @@
                      "type": "attribute"
                     }
                    ],
-                   "element": "a",
-                   "mobileStyles": {},
-                   "tabletStyles": {}
+                   "element": "a"
                   }
                  ],
-                 "classes": [],
-                 "customAttributes": {},
                  "dataKey": {
                   "comesFrom": "dataScript",
                   "key": "results",
@@ -918,448 +531,185 @@
                   "type": "key"
                  },
                  "element": "div",
-                 "isRepeaterBlock": true,
-                 "mobileStyles": {},
-                 "tabletStyles": {}
+                 "isRepeaterBlock": true
                 }
                ],
-               "classes": [],
-               "customAttributes": {},
-               "element": "div",
-               "mobileStyles": {},
-               "tabletStyles": {}
+               "element": "div"
               }
              ],
-             "classes": [],
-             "customAttributes": {},
-             "element": "div",
-             "mobileStyles": {},
-             "tabletStyles": {}
+             "element": "div"
             }
            ],
-           "classes": [],
-           "customAttributes": {},
-           "element": "section",
-           "mobileStyles": {},
-           "tabletStyles": {}
+           "element": "section"
           }
          ],
-         "classes": [],
-         "customAttributes": {},
          "isChildOfComponent": "lending-borrower-shell",
-         "mobileStyles": {},
-         "referenceBlockId": "1a9187037",
-         "tabletStyles": {}
+         "referenceBlockId": "1a9187037"
         },
         {
-         "attributes": {},
-         "baseStyles": {},
          "blockId": "0e57d52e4",
          "children": [
           {
-           "attributes": {},
-           "baseStyles": {},
-           "blockId": "e170960b2",
-           "children": [
-            {
-             "attributes": {},
-             "baseStyles": {},
-             "blockId": "3b67b3822",
-             "children": [],
-             "classes": [],
-             "customAttributes": {},
-             "isChildOfComponent": "lending-borrower-shell",
-             "mobileStyles": {},
-             "referenceBlockId": "7546d49c1",
-             "tabletStyles": {}
-            },
-            {
-             "attributes": {},
-             "baseStyles": {},
-             "blockId": "126a91f44",
-             "children": [
-              {
-               "attributes": {},
-               "baseStyles": {},
-               "blockId": "e5ab1a0dc",
-               "children": [],
-               "classes": [],
-               "customAttributes": {},
-               "isChildOfComponent": "lending-borrower-shell",
-               "mobileStyles": {},
-               "referenceBlockId": "83808a589",
-               "tabletStyles": {}
-              }
-             ],
-             "classes": [],
-             "customAttributes": {},
-             "isChildOfComponent": "lending-borrower-shell",
-             "mobileStyles": {},
-             "referenceBlockId": "1ffb79728",
-             "tabletStyles": {}
-            }
-           ],
-           "classes": [],
-           "customAttributes": {},
+           "blockId": "8a4539d6e",
            "isChildOfComponent": "lending-borrower-shell",
-           "mobileStyles": {},
-           "referenceBlockId": "d0c7f620c",
-           "tabletStyles": {}
+           "referenceBlockId": "c02b7f725"
           },
           {
-           "attributes": {},
-           "baseStyles": {},
-           "blockId": "7cdb46a97",
-           "children": [],
-           "classes": [],
-           "customAttributes": {},
-           "isChildOfComponent": "lending-borrower-shell",
-           "mobileStyles": {},
-           "referenceBlockId": "67205fd02",
-           "tabletStyles": {}
-          },
-          {
-           "attributes": {},
-           "baseStyles": {},
            "blockId": "97fe86e6f",
            "children": [
             {
-             "attributes": {},
-             "baseStyles": {},
-             "blockId": "687d24982",
-             "children": [],
-             "classes": [],
-             "customAttributes": {},
+             "blockId": "28ec6f8c2",
              "isChildOfComponent": "lending-borrower-shell",
-             "mobileStyles": {},
-             "referenceBlockId": "f47af7800",
-             "tabletStyles": {}
-            },
-            {
-             "attributes": {},
-             "baseStyles": {},
-             "blockId": "41ecb65ee",
-             "children": [],
-             "classes": [],
-             "customAttributes": {},
-             "isChildOfComponent": "lending-borrower-shell",
-             "mobileStyles": {},
-             "referenceBlockId": "256918724",
-             "tabletStyles": {}
-            },
-            {
-             "attributes": {},
-             "baseStyles": {},
-             "blockId": "ae2e4bab9",
-             "children": [],
-             "classes": [],
-             "customAttributes": {},
-             "isChildOfComponent": "lending-borrower-shell",
-             "mobileStyles": {},
-             "referenceBlockId": "079ed88b3",
-             "tabletStyles": {}
+             "referenceBlockId": "1dc3317e8"
             }
            ],
-           "classes": [],
-           "customAttributes": {},
            "isChildOfComponent": "lending-borrower-shell",
-           "mobileStyles": {},
-           "referenceBlockId": "d60c70b28",
-           "tabletStyles": {}
+           "referenceBlockId": "d60c70b28"
           }
          ],
-         "classes": [],
-         "customAttributes": {},
          "isChildOfComponent": "lending-borrower-shell",
-         "mobileStyles": {},
-         "referenceBlockId": "110eb8ed9",
-         "tabletStyles": {}
+         "referenceBlockId": "110eb8ed9"
         }
        ],
-       "classes": [],
-       "customAttributes": {},
        "isChildOfComponent": "lending-borrower-shell",
-       "mobileStyles": {},
-       "referenceBlockId": "c034e23df",
-       "tabletStyles": {}
+       "referenceBlockId": "c034e23df"
       },
       {
-       "attributes": {},
-       "baseStyles": {},
+       "baseStyles": {
+        "__last_display": "flex",
+        "display": "none"
+       },
        "blockId": "9ae1fe4ff",
        "children": [
         {
-         "attributes": {},
-         "baseStyles": {},
          "blockId": "9879fad92",
          "children": [
           {
-           "attributes": {},
-           "baseStyles": {},
            "blockId": "1302a7fe5",
            "children": [
             {
-             "attributes": {},
-             "baseStyles": {},
              "blockId": "509f2edf2",
-             "children": [],
-             "classes": [],
-             "customAttributes": {},
              "isChildOfComponent": "lending-borrower-shell",
-             "mobileStyles": {},
-             "referenceBlockId": "f638ec4c2",
-             "tabletStyles": {}
+             "referenceBlockId": "f638ec4c2"
             },
             {
-             "attributes": {},
-             "baseStyles": {},
              "blockId": "58d900ec2",
-             "children": [],
-             "classes": [],
-             "customAttributes": {},
              "isChildOfComponent": "lending-borrower-shell",
-             "mobileStyles": {},
-             "referenceBlockId": "613f5935c",
-             "tabletStyles": {}
+             "referenceBlockId": "613f5935c"
             }
            ],
-           "classes": [],
-           "customAttributes": {},
            "isChildOfComponent": "lending-borrower-shell",
-           "mobileStyles": {},
-           "referenceBlockId": "326c40693",
-           "tabletStyles": {}
+           "referenceBlockId": "326c40693"
           },
           {
-           "attributes": {},
-           "baseStyles": {},
            "blockId": "1524c26a2",
            "children": [
             {
-             "attributes": {},
-             "baseStyles": {},
              "blockId": "2a243fb10",
              "children": [
               {
-               "attributes": {},
-               "baseStyles": {},
                "blockId": "e327da927",
-               "children": [],
-               "classes": [],
-               "customAttributes": {},
                "isChildOfComponent": "lending-borrower-shell",
-               "mobileStyles": {},
-               "referenceBlockId": "17c3f418b",
-               "tabletStyles": {}
+               "referenceBlockId": "17c3f418b"
               },
               {
-               "attributes": {},
-               "baseStyles": {},
                "blockId": "0acf0b5bf",
-               "children": [],
-               "classes": [],
-               "customAttributes": {},
                "isChildOfComponent": "lending-borrower-shell",
-               "mobileStyles": {},
-               "referenceBlockId": "4d4e6042d",
-               "tabletStyles": {}
+               "referenceBlockId": "4d4e6042d"
               }
              ],
-             "classes": [],
-             "customAttributes": {},
              "isChildOfComponent": "lending-borrower-shell",
-             "mobileStyles": {},
-             "referenceBlockId": "6db8061a4",
-             "tabletStyles": {}
+             "referenceBlockId": "6db8061a4"
             }
            ],
-           "classes": [],
-           "customAttributes": {},
            "isChildOfComponent": "lending-borrower-shell",
-           "mobileStyles": {},
-           "referenceBlockId": "96c32e1be",
-           "tabletStyles": {}
+           "referenceBlockId": "96c32e1be"
           },
           {
-           "attributes": {},
-           "baseStyles": {},
            "blockId": "ad4718fec",
-           "children": [],
-           "classes": [],
-           "customAttributes": {},
            "isChildOfComponent": "lending-borrower-shell",
-           "mobileStyles": {},
-           "referenceBlockId": "24b2831a8",
-           "tabletStyles": {}
+           "referenceBlockId": "24b2831a8"
           },
           {
-           "attributes": {},
-           "baseStyles": {},
            "blockId": "0139604a5",
            "children": [
             {
-             "attributes": {},
-             "baseStyles": {},
              "blockId": "b0769b551",
              "children": [
               {
-               "attributes": {},
-               "baseStyles": {},
                "blockId": "fd358de70",
-               "children": [],
-               "classes": [],
-               "customAttributes": {},
                "isChildOfComponent": "lending-borrower-shell",
-               "mobileStyles": {},
-               "referenceBlockId": "c91038a03",
-               "tabletStyles": {}
+               "referenceBlockId": "c91038a03"
               },
               {
-               "attributes": {},
-               "baseStyles": {},
                "blockId": "c755feda0",
-               "children": [],
-               "classes": [],
-               "customAttributes": {},
                "isChildOfComponent": "lending-borrower-shell",
-               "mobileStyles": {},
-               "referenceBlockId": "c0ab60d89",
-               "tabletStyles": {}
+               "referenceBlockId": "c0ab60d89"
               },
               {
-               "attributes": {},
-               "baseStyles": {},
                "blockId": "5cb593149",
-               "children": [],
-               "classes": [],
-               "customAttributes": {},
                "isChildOfComponent": "lending-borrower-shell",
-               "mobileStyles": {},
-               "referenceBlockId": "b13091dac",
-               "tabletStyles": {}
+               "referenceBlockId": "b13091dac"
               }
              ],
-             "classes": [],
-             "customAttributes": {},
              "isChildOfComponent": "lending-borrower-shell",
-             "mobileStyles": {},
-             "referenceBlockId": "b40ba0061",
-             "tabletStyles": {}
+             "referenceBlockId": "b40ba0061"
             },
             {
-             "attributes": {},
-             "baseStyles": {},
              "blockId": "79d7f000b",
              "children": [
               {
-               "attributes": {},
-               "baseStyles": {},
                "blockId": "4807a35ac",
-               "children": [],
-               "classes": [],
-               "customAttributes": {},
                "isChildOfComponent": "lending-borrower-shell",
-               "mobileStyles": {},
-               "referenceBlockId": "565f9287c",
-               "tabletStyles": {}
+               "referenceBlockId": "565f9287c"
               },
               {
-               "attributes": {},
-               "baseStyles": {},
                "blockId": "f28f62cab",
-               "children": [],
-               "classes": [],
-               "customAttributes": {},
                "isChildOfComponent": "lending-borrower-shell",
-               "mobileStyles": {},
-               "referenceBlockId": "dc4118399",
-               "tabletStyles": {}
+               "referenceBlockId": "dc4118399"
               }
              ],
-             "classes": [],
-             "customAttributes": {},
              "isChildOfComponent": "lending-borrower-shell",
-             "mobileStyles": {},
-             "referenceBlockId": "946bc967d",
-             "tabletStyles": {}
+             "referenceBlockId": "946bc967d"
             },
             {
-             "attributes": {},
-             "baseStyles": {},
              "blockId": "508bf691c",
              "children": [
               {
-               "attributes": {},
-               "baseStyles": {},
                "blockId": "4d96c5e1c",
-               "children": [],
-               "classes": [],
-               "customAttributes": {},
                "isChildOfComponent": "lending-borrower-shell",
-               "mobileStyles": {},
-               "referenceBlockId": "7ccc2f680",
-               "tabletStyles": {}
+               "referenceBlockId": "7ccc2f680"
               },
               {
-               "attributes": {},
-               "baseStyles": {},
                "blockId": "5497b26e6",
-               "children": [],
-               "classes": [],
-               "customAttributes": {},
                "isChildOfComponent": "lending-borrower-shell",
-               "mobileStyles": {},
-               "referenceBlockId": "d615aeb1c",
-               "tabletStyles": {}
+               "referenceBlockId": "d615aeb1c"
               }
              ],
-             "classes": [],
-             "customAttributes": {},
              "isChildOfComponent": "lending-borrower-shell",
-             "mobileStyles": {},
-             "referenceBlockId": "c0c669679",
-             "tabletStyles": {}
+             "referenceBlockId": "c0c669679"
             }
            ],
-           "classes": [],
-           "customAttributes": {},
            "isChildOfComponent": "lending-borrower-shell",
-           "mobileStyles": {},
-           "referenceBlockId": "a034a36ba",
-           "tabletStyles": {}
+           "referenceBlockId": "a034a36ba"
           }
          ],
-         "classes": [],
-         "customAttributes": {},
          "isChildOfComponent": "lending-borrower-shell",
-         "mobileStyles": {},
-         "referenceBlockId": "b361b3f05",
-         "tabletStyles": {}
+         "referenceBlockId": "b361b3f05"
         }
        ],
-       "classes": [],
-       "customAttributes": {},
        "isChildOfComponent": "lending-borrower-shell",
-       "mobileStyles": {},
-       "referenceBlockId": "14b16d7bd",
-       "tabletStyles": {}
+       "referenceBlockId": "14b16d7bd"
       }
      ],
-     "classes": [],
-     "customAttributes": {},
      "extendedFromComponent": "lending-borrower-shell",
      "isChildOfComponent": "lending-borrower-shell",
-     "mobileStyles": {},
-     "referenceBlockId": "2bbebb222",
-     "tabletStyles": {}
+     "referenceBlockId": "2bbebb222"
     }
    ],
-   "classes": [],
-   "customAttributes": {},
+   "draggable": false,
    "element": "div",
-   "mobileStyles": {},
-   "originalElement": "body",
-   "tabletStyles": {}
+   "originalElement": "body"
   }
  ],
  "client_scripts": [
@@ -1373,11 +723,11 @@
  "doctype": "Builder Page",
  "draft_blocks": null,
  "dynamic_route": 0,
- "head_html": "\n<!-- Builder Token records are served as :root custom properties by these routes, and the\n\tBuilder canvas serves the same records itself, so var(--brand-*) resolves in the\n\teditor and on the published page alike. -->\n<link rel=\"stylesheet\" href=\"/builder_assets/tokens.css\">\n<style>\n/* Website pages do not load the desk bundle, so the font ships with the page. */\n@font-face {\n\tfont-family: InterVariable;\n\tfont-style: normal;\n\tfont-weight: 100 900;\n\tfont-display: swap;\n\tsrc: url(\"/assets/frappe/css/fonts/inter/InterVariable.woff2\") format(\"woff2\");\n}\n\n:root { color-scheme: light; }\nhtml { background: var(--portal-surface-page, #ffffff); }\n\n/* Every block carries its display inline, which outranks the browser's own\n\t[hidden] { display: none } rule. Without this, hiding a panel does nothing. */\n[hidden] { display: none !important; }\n\n/* State and interaction, which a block's inline styles cannot express. A block can\n\tcarry its own :hover through a \"hover:property\" style key, but the chosen tile and\n\tthe filled code box are states the script sets on an attribute, so the appearance\n\tof a choice lives here rather than in the script. */\ninput:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible {\n\toutline: 2px solid var(--brand-primary, #0f0f0f); outline-offset: 2px;\n}\ninput:focus, select:focus { border-color: var(--brand-primary, #0f0f0f); }\n[data-code] input:not(:placeholder-shown) { border-color: var(--brand-primary, #0f0f0f); }\n\n/* The tiles are this page's radio buttons, at the size the question deserves. The\n\tdot is the smallest part of the control, so choosing one restyles the whole tile. */\n[data-tile][data-chosen=\"1\"] {\n\tborder-color: var(--brand-primary, #0f0f0f);\n\tbox-shadow: inset 0 0 0 1px var(--brand-primary, #0f0f0f);\n}\n[data-tile][data-chosen=\"1\"] [data-tile-icon] {\n\tbackground: var(--brand-primary, #0f0f0f); color: var(--brand-primary-ink, #ffffff);\n}\n[data-tile][data-chosen=\"1\"] [data-tile-radio] {\n\tbackground: var(--brand-primary, #0f0f0f); border-color: var(--brand-primary, #0f0f0f);\n}\n[data-tile-icon] svg { width: 19px; height: 19px; }\n[data-tile-radio] svg { width: 13px; height: 13px; }\n[data-echo-note] svg { width: 13px; height: 13px; }\n\n/* The tick is always in the dot, so the dot never changes size when it is chosen. */\n[data-tile-radio] svg { opacity: 0; }\n[data-tile][data-chosen=\"1\"] [data-tile-radio] svg { opacity: 1; }\n\n/* A step whose question is unanswered offers a button that cannot be pressed, which\n\tis quieter than letting it through and then refusing the form. */\nbutton[disabled], button[disabled]:hover { opacity: 0.45; cursor: default; filter: none; }\n\n/* The sidebar's collapse toggle. Out of the way until the pointer is over the\n\tsidebar, and always in reach while the sidebar is shut, because a control that\n\thides the menu has to be the control that brings it back. */\n[data-sidebar-toggle] { opacity: 0; transition: opacity 120ms ease, transform 160ms ease; }\n[data-sidebar]:hover [data-sidebar-toggle],\n[data-sidebar-toggle]:focus-visible { opacity: 1; }\n\n[data-sidebar][data-collapsed=\"1\"] {\n\twidth: 0; min-width: 0; padding-left: 0; padding-right: 0; border-right-color: transparent;\n}\n/* Every row carries its display inline, so hiding the list needs to outrank that.\n\tThe toggle is the one child that stays. */\n[data-sidebar][data-collapsed=\"1\"] > *:not([data-sidebar-toggle]) { display: none; }\n[data-sidebar][data-collapsed=\"1\"] [data-sidebar-toggle] { opacity: 1; transform: rotate(180deg); }\n\n/* The offer grid is three columns of figures. Two of them on a phone would wrap\n\tmid-number, so it drops to one. */\n@media (max-width: 600px) {\n\t[data-offer-grid] { grid-template-columns: minmax(0, 1fr); }\n}\n</style>\n\n<style>\n/* The sidebar row for the page being served. The rows are one block repeated over the\n\tmenu, so the current one cannot carry different styles: it says which page it is on\n\twith aria-current, and this is what that looks like. */\n[data-portal-nav] a[aria-current=\"page\"] {\n\tbackground: var(--portal-surface-card,#ffffff);\n\tbox-shadow: 0 0 1px 0 rgba(0, 0, 0, 0.14), 0 1px 3px 0 rgba(0, 0, 0, 0.14);\n}\n\n/* The notifications panel stands beside the sidebar, and follows it when it is shut.\n\tUnder the mobile breakpoint neither rail nor sidebar is there to stand beside. */\n[data-alerts-panel] { left: 270px; }\n[data-sidebar][data-collapsed=\"1\"] ~ [data-alerts-panel] { left: 50px; }\n@media (max-width: 576px) {\n\t[data-alerts-panel] { left: 0; width: 100vw; }\n}\n\n/* The bell while its panel is out. The same square its own hover draws, held rather\n\tthan passing, which is what tells you the panel came from here. The glyph does not\n\tchange either way. */\n[data-alerts-open][aria-expanded=\"true\"] { background: var(--portal-surface-hover-strong,#ededed); }\n\n/* The tab in front of the other one. */\n[data-alerts-tab][aria-selected=\"true\"] {\n\tcolor: var(--portal-ink,#171717);\n\tborder-bottom-color: var(--brand-primary,#171717);\n}\n\n/* The result the arrow keys are on. It is also what the pointer hovers, so the two\n\tcannot both be styles on the block: one of them has to win, and it is this one. */\n[data-search-row][data-active=\"1\"] { background: var(--portal-surface-hover,#f3f3f3); }\n\n/* The dim behind the search dialog, once the script has had a frame to turn it on --\n\ta transition does not run on the frame an element stops being display:none. The\n\tcolour is the desk's own: $modal-backdrop-bg is --gray-800, which Espresso sets to\n\tthe 56 named here, and .modal-backdrop.show carries it at the 0.8. Named as an\n\trgba rather than a token because it is a scrim over the page and not a colour of\n\tthe portal, which is how the shadows above it are written too. */\n[data-search-overlay][data-shown=\"1\"] { background: rgba(56, 56, 56, 0.8); }\n\n/* Whoever asked for less movement gets the dim without the fade, not without the dim. */\n@media (prefers-reduced-motion: reduce) {\n\t[data-search-overlay] { transition: none; }\n}\n</style>\n",
+ "head_html": "\n<!-- Builder Token records are served as :root custom properties by these routes, and the\n\tBuilder canvas serves the same records itself, so var(--brand-*) resolves in the\n\teditor and on the published page alike. -->\n<link rel=\"stylesheet\" href=\"/builder_assets/tokens.css\">\n<style>\n/* Website pages do not load the desk bundle, so the font ships with the page. */\n@font-face {\n\tfont-family: InterVariable;\n\tfont-style: normal;\n\tfont-weight: 100 900;\n\tfont-display: swap;\n\tsrc: url(\"/assets/frappe/css/fonts/inter/InterVariable.woff2\") format(\"woff2\");\n}\n\n:root { color-scheme: light; }\nhtml { background: var(--portal-surface-page, #ffffff); }\n\n/* Every block carries its display inline, which outranks the browser's own\n\t[hidden] { display: none } rule. Without this, hiding a panel does nothing. */\n[hidden] { display: none !important; }\n\n/* State and interaction, which a block's inline styles cannot express. A block can\n\tcarry its own :hover through a \"hover:property\" style key, but the chosen tile and\n\tthe filled code box are states the script sets on an attribute, so the appearance\n\tof a choice lives here rather than in the script. */\ninput:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible {\n\toutline: 2px solid var(--brand-primary, #0f0f0f); outline-offset: 2px;\n}\ninput:focus, select:focus { border-color: var(--brand-primary, #0f0f0f); }\n[data-code] input:not(:placeholder-shown) { border-color: var(--brand-primary, #0f0f0f); }\n\n/* The tiles are this page's radio buttons, at the size the question deserves. The\n\tdot is the smallest part of the control, so choosing one restyles the whole tile. */\n[data-tile][data-chosen=\"1\"] {\n\tborder-color: var(--brand-primary, #0f0f0f);\n\tbox-shadow: inset 0 0 0 1px var(--brand-primary, #0f0f0f);\n}\n[data-tile][data-chosen=\"1\"] [data-tile-icon] {\n\tbackground: var(--brand-primary, #0f0f0f); color: var(--brand-primary-ink, #ffffff);\n}\n[data-tile][data-chosen=\"1\"] [data-tile-radio] {\n\tbackground: var(--brand-primary, #0f0f0f); border-color: var(--brand-primary, #0f0f0f);\n}\n[data-tile-icon] svg { width: 19px; height: 19px; }\n[data-tile-radio] svg { width: 13px; height: 13px; }\n[data-echo-note] svg { width: 13px; height: 13px; }\n\n/* The tick is always in the dot, so the dot never changes size when it is chosen. */\n[data-tile-radio] svg { opacity: 0; }\n[data-tile][data-chosen=\"1\"] [data-tile-radio] svg { opacity: 1; }\n\n/* A step whose question is unanswered offers a button that cannot be pressed, which\n\tis quieter than letting it through and then refusing the form. */\nbutton[disabled], button[disabled]:hover { opacity: 0.45; cursor: default; filter: none; }\n\n/* The sidebar's collapse toggle. Out of the way until the pointer is over the\n\tsidebar, and always in reach while the sidebar is shut, because a control that\n\thides the menu has to be the control that brings it back. */\n[data-sidebar-toggle] { opacity: 0; transition: opacity 120ms ease, transform 160ms ease; }\n[data-sidebar]:hover [data-sidebar-toggle],\n[data-sidebar-toggle]:focus-visible { opacity: 1; }\n\n[data-sidebar][data-collapsed=\"1\"] {\n\twidth: 0; min-width: 0; padding-left: 0; padding-right: 0; border-right-color: transparent;\n}\n/* Every row carries its display inline, so hiding the list needs to outrank that.\n\tThe toggle is the one child that stays. */\n[data-sidebar][data-collapsed=\"1\"] > *:not([data-sidebar-toggle]) { display: none; }\n[data-sidebar][data-collapsed=\"1\"] [data-sidebar-toggle] { opacity: 1; transform: rotate(180deg); }\n\n/* The offer grid is three columns of figures. Two of them on a phone would wrap\n\tmid-number, so it drops to one. */\n@media (max-width: 600px) {\n\t[data-offer-grid] { grid-template-columns: minmax(0, 1fr); }\n}\n</style>\n\n<style>\n/* The sidebar row for the page being served. The rows are one block repeated over the\n\tmenu, so the current one cannot carry different styles: it says which page it is on\n\twith aria-current, and this is what that looks like. */\n[data-portal-nav] a[aria-current=\"page\"] {\n\tbackground: var(--portal-surface-card,#ffffff);\n\tbox-shadow: 0 0 1px 0 rgba(0, 0, 0, 0.14), 0 1px 3px 0 rgba(0, 0, 0, 0.14);\n}\n\n/* The notifications panel stands beside the sidebar, and follows it when it is shut.\n\tUnder the mobile breakpoint neither rail nor sidebar is there to stand beside. */\n[data-alerts-panel] { left: 270px; }\n[data-sidebar][data-collapsed=\"1\"] ~ [data-alerts-panel] { left: 50px; }\n@media (max-width: 576px) {\n\t[data-alerts-panel] { left: 0; width: 100vw; }\n}\n\n/* The bell while its panel is out. The same square its own hover draws, held rather\n\tthan passing, which is what tells you the panel came from here. The glyph does not\n\tchange either way. */\n[data-alerts-open][aria-expanded=\"true\"] { background: var(--portal-surface-hover-strong,#ededed); }\n\n/* The tab in front of the other one. */\n[data-alerts-tab][aria-selected=\"true\"] {\n\tcolor: var(--portal-ink,#171717);\n\tborder-bottom-color: var(--brand-primary,#171717);\n}\n\n/* The result the arrow keys are on. It is also what the pointer hovers, so the two\n\tcannot both be styles on the block: one of them has to win, and it is this one. */\n[data-search-row][data-active=\"1\"] { background: var(--portal-surface-hover,#f3f3f3); }\n\n/* The dim behind the search dialog, once the script has had a frame to turn it on --\n\ta transition does not run on the frame an element stops being display:none. The\n\tcolour is the desk's own: $modal-backdrop-bg is --gray-800, which Espresso sets to\n\tthe 56 named here, and .modal-backdrop.show carries it at the 0.8. Named as an\n\trgba rather than a token because it is a scrim over the page and not a colour of\n\tthe portal, which is how the shadows above it are written too. */\n[data-search-overlay][data-shown=\"1\"] { background: rgba(56, 56, 56, 0.8); }\n\n/* Whoever asked for less movement gets the dim without the fade, not without the dim. */\n@media (prefers-reduced-motion: reduce) {\n\t[data-search-overlay] { transition: none; }\n}\n\n/* The rules between the footer's links. The links are one block repeated over the\n\tlender's list, so no one of them can carry a divider of its own: the rule belongs\n\tto whichever link happens to follow another, which only a selector knows. The ends\n\tlose their padding so the row sits flush with the page head above it. */\n[data-footer-links] > a + a { border-left: 1px solid var(--portal-border,#ededed); }\n[data-footer-links] > a:first-child { padding-left: 0; }\n[data-footer-links] > a:last-child { padding-right: 0; }\n\n/* A badge saying something went right, and one asking for something. Both override the\n\tneutral pair on the block, which is why they are here and not on it. */\n[data-tone=\"ok\"] { background: var(--portal-ok-soft,#e4faeb); color: var(--portal-ok-deep,#14804d); }\n[data-tone=\"warn\"] { background: var(--portal-warn-soft,#fdf8ed); color: var(--portal-warn-deep,#bb6f0c); }\n\n</style>\n",
  "idx": 0,
  "is_standard": 1,
  "is_template": 0,
- "modified": "2026-09-20 02:39:33.095730",
+ "modified": "2026-09-21 16:35:40.785441",
  "modified_by": "Administrator",
  "name": "page-3f434ca9",
  "owner": "Administrator",

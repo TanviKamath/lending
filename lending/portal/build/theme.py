@@ -56,17 +56,26 @@ BRAND_TOKENS = [
 # named rather than written into the blocks so that the scale moves as one: a page whose
 # sizes were nine separate numbers would read as nine unrelated pages.
 #
-# The portal used to sit below even this: 13px was its commonest size, and 13px is a
-# desk tool, not a bank. A borrower opens this page a few times a year to read one
-# number, so the body size holds at 15px however tight the rest is drawn. See
-# PORTAL_DESIGN_PLAN.md, stage 1.
+# Every size is a step of the desk's own scale, read off the Espresso typography tokens
+# in frappe/public/css/espresso/typography.css, so that a borrower who has also seen the
+# desk reads the two at one size. The portal sets sub-headings in --text-base and body
+# in --text-sm, which is where the desk itself sets a section heading and a row. The
+# names below stay portal-* because the canvas cannot reach the desk's variables, but
+# the values are the desk's, not a scale of our own:
+#
+#     xs 11px  --text-2xs    labels, column heads, badges
+#     sm 12px  --text-xs     text held quiet, the size of a desk timestamp
+#     md 13px  --text-sm     body text
+#     lg 14px  --text-base   sub-headings: card, panel and section titles
+#     xl 17px  --text-xl     page and head titles, the desk's .head-title
+#     2xl 20px --text-3xl    the hero title and the one figure a page is opened for
 SCALE_TOKENS = [
 	{"token_name": "portal-text-xs", "type": "Dimension", "value": "11px"},
-	{"token_name": "portal-text-sm", "type": "Dimension", "value": "13px"},
-	{"token_name": "portal-text-md", "type": "Dimension", "value": "15px"},
-	{"token_name": "portal-text-lg", "type": "Dimension", "value": "18px"},
-	{"token_name": "portal-text-xl", "type": "Dimension", "value": "24px"},
-	{"token_name": "portal-text-2xl", "type": "Dimension", "value": "32px"},
+	{"token_name": "portal-text-sm", "type": "Dimension", "value": "12px"},
+	{"token_name": "portal-text-md", "type": "Dimension", "value": "13px"},
+	{"token_name": "portal-text-lg", "type": "Dimension", "value": "14px"},
+	{"token_name": "portal-text-xl", "type": "Dimension", "value": "17px"},
+	{"token_name": "portal-text-2xl", "type": "Dimension", "value": "20px"},
 	# How tall one row of a table stands.
 	{"token_name": "portal-row-pad", "type": "Dimension", "value": "10px"},
 	# The room inside a card, which a row is also padded by down its sides so that the
@@ -257,6 +266,10 @@ ACTIVE_SHADOW = "0 0 1px 0 rgba(0, 0, 0, 0.14), 0 1px 3px 0 rgba(0, 0, 0, 0.14)"
 # Fragments spread into the style dicts below.
 COLUMN = {"display": "flex", "flexDirection": "column"}
 ROW_FLEX = {"display": "flex", "alignItems": "center"}
+# What a row gives up to become a link. The colour, because a row of blue text reads as
+# a row of separate links rather than one destination, and the underline, because the
+# whole row is the target and there is no phrase in it to underline.
+LINK_ROW_STYLES = {"color": "inherit", "textDecoration": "none"}
 TABULAR = {"fontVariantNumeric": "tabular-nums"}
 
 # Stroked line icons, sized for the 28px rail slot. Inline so the portal pulls in no
@@ -321,7 +334,7 @@ BODY_STYLES = {
 	"color": INK,
 	"fontFamily": FONT_STACK,
 	"fontVariationSettings": '"opsz" 24',
-	"fontSize": "var(--portal-text-md,15px)",
+	"fontSize": "var(--portal-text-md,13px)",
 	"fontWeight": "400",
 	"lineHeight": "1.5",
 	"WebkitFontSmoothing": "antialiased",
@@ -450,12 +463,12 @@ SIDE_COLLAPSE_STYLES = {
 # you are on, the one under the pointer -- do it with a card and a colour, not with a
 # size or a weight of their own. The two names are <b> elements, so the weight has to
 # be said out loud to beat the browser's bold.
-SIDE_TEXT_STYLES = {"fontSize": "var(--portal-text-sm,13px)", "fontWeight": "400", "color": INK_MUTED}
+SIDE_TEXT_STYLES = {"fontSize": "var(--portal-text-md,13px)", "fontWeight": "420", "color": INK_MUTED}
 
 # The one line that is not a row in the list: it says whose portal this is.
 SIDE_HEAD_STYLES = {
 	**SIDE_TEXT_STYLES,
-	"fontSize": "var(--portal-text-md,15px)",
+	"fontSize": "var(--portal-text-lg,14px)",
 	"fontWeight": "500",
 	"color": INK,
 }
@@ -528,12 +541,14 @@ DIALOG_STYLES = {
 	"boxShadow": "0 12px 40px rgba(0, 0, 0, 0.22)",
 	"overflow": "hidden",
 }
-# 9px over and under a 15px line at the body's 1.5 leading is a 41px bar, which is the
+# 11px over and under a 13px line at the body's 1.5 leading is a 41px bar, which is the
 # height the desk's own command box comes to -- 8px of padding around a 28px control.
+# The padding carries the height now that the body sets at the desk's 13px rather than
+# at 15px; the bar is measured against the desk, not against the text inside it.
 DIALOG_HEAD_STYLES = {
 	**ROW_FLEX,
 	"gap": "12px",
-	"padding": "9px var(--portal-gap,16px)",
+	"padding": "11px var(--portal-gap,16px)",
 	"color": INK_MUTED,
 	"borderBottom": BORDER,
 }
@@ -544,7 +559,7 @@ DIALOG_INPUT_STYLES = {
 	"flex": "1 1 auto",
 	"minWidth": "0",
 	"fontFamily": "inherit",
-	"fontSize": "var(--portal-text-md,15px)",
+	"fontSize": "var(--portal-text-md,13px)",
 	"color": INK,
 	"border": "none",
 	"outline": "none",
@@ -558,23 +573,23 @@ DIALOG_BODY_STYLES = {**COLUMN, "gap": "5px", "padding": "12px", "overflowY": "a
 # A space between the name and what it is, not a gap: the pair reads as one phrase --
 # "Personal Loan Loan account" -- the way the desk reads "Loan Lead List".
 #
-# 6px over and under a 15px line at the body's 1.5 leading is a 34px result, which is
+# 7px over and under a 13px line at the body's 1.5 leading is a 34px result, which is
 # the height the desk's own results come to. The 8px at the sides puts the name 20px
 # in from the edge of the dialog, where the desk puts it.
 DIALOG_ROW_STYLES = {
 	**ROW_FLEX,
 	"gap": "5px",
-	"padding": "6px 8px",
+	"padding": "7px 8px",
 	"borderRadius": "var(--brand-radius,8px)",
 	"color": INK,
 	"textDecoration": "none",
 	"cursor": "pointer",
 }
-DIALOG_ROW_TITLE_STYLES = {"fontSize": "var(--portal-text-md,15px)", "fontWeight": "600"}
-DIALOG_ROW_KIND_STYLES = {"fontSize": "var(--portal-text-md,15px)", "color": INK_MUTED}
+DIALOG_ROW_TITLE_STYLES = {"fontSize": "var(--portal-text-md,13px)", "fontWeight": "600"}
+DIALOG_ROW_KIND_STYLES = {"fontSize": "var(--portal-text-md,13px)", "color": INK_MUTED}
 DIALOG_NOTE_STYLES = {
 	"padding": "6px 20px 18px",
-	"fontSize": "var(--portal-text-md,15px)",
+	"fontSize": "var(--portal-text-md,13px)",
 	"color": INK_MUTED,
 }
 DIALOG_FOOT_STYLES = {
@@ -584,7 +599,7 @@ DIALOG_FOOT_STYLES = {
 	"padding": "12px var(--portal-gap,16px)",
 	"borderTop": BORDER,
 	"background": SURFACE_SUNKEN,
-	"fontSize": "var(--portal-text-sm,13px)",
+	"fontSize": "var(--portal-text-sm,12px)",
 	"color": INK_MUTED,
 }
 HINT_STYLES = {**ROW_FLEX, "gap": "5px"}
@@ -610,12 +625,11 @@ KEY_STYLES = {
 # where those values are written down -- so the panel names the portal's palette and
 # still matches the desk shade for shade.
 #
-# The type is the one place this leaves the portal's scale. The desk sets rows in
-# --text-base/--font-weight-regular and timestamps in --text-xs -- 14px/420 and 12px --
-# and portal-text-md is 15px, portal-text-xs 11px. Copying the desk means copying its
-# sizes, so they are written out rather than taken from the scale; a panel at 15px is a
-# panel that only nearly matches. See SCALE_TOKENS for why the rest of the portal holds
-# at 15px.
+# The type no longer leaves the portal's scale, because the scale is now the desk's own:
+# the desk sets rows in --text-base/--font-weight-regular and timestamps in --text-xs --
+# 14px/420 and 12px -- which are portal-text-lg and portal-text-sm. They are still
+# written out rather than named, because a row of a panel is body text and would read as
+# a sub-heading under the name the portal gives 14px. See SCALE_TOKENS.
 ALERTS_TEXT = "14px"
 ALERTS_TEXT_SMALL = "12px"
 # InterVariable's regular is 420 on the desk, not 400, and the letter-spacing comes off
@@ -760,6 +774,69 @@ ALERTS_NOTE_STYLES = {
 	"color": INK_MUTED,
 }
 
+# The desk's badge, to the pixel: .es-badge at its md size and subtle variant, which is
+# what a status looks like everywhere else in Frappe and so what a borrower who also
+# sees the desk already reads. The numbers are the desk's own -- a 20px pill, 12px type
+# on one line, 6px either side -- rather than the portal's scale, because a badge that
+# grows with the page's type stops being the shape the desk made recognisable.
+#
+# The 1px transparent border is the desk's too: it holds the width a bordered variant
+# would take, so one badge beside another never sits half a pixel off it.
+#
+# Tone is not here. The badge is one block repeated over the rows of a table, so a row
+# cannot carry styles of its own: it names its tone in an attribute and BADGE_TONE_CSS
+# paints it. What is here is the neutral it falls back to, which is what a status that
+# is neither good news nor a nudge should look like.
+BADGE_STYLES = {
+	"display": "inline-flex",
+	"alignItems": "center",
+	"justifyContent": "center",
+	"gap": "4px",
+	"width": "fit-content",
+	"flexShrink": "0",
+	"height": "20px",
+	"padding": "0 6px",
+	"border": "1px solid transparent",
+	"borderRadius": "999px",
+	"fontSize": "12px",
+	"fontWeight": "420",
+	"lineHeight": "1",
+	"letterSpacing": "0.28px",
+	"whiteSpace": "nowrap",
+	"overflow": "clip",
+	"userSelect": "none",
+	"background": SURFACE_SUNKEN,
+	"color": INK_MUTED,
+}
+
+# The two tones the palette has a pair for. The desk offers six; the portal's states are
+# ok, warn and danger, and danger has no soft shade to lay text on, so a rejection or a
+# write-off takes the warn pair rather than a red the palette cannot make readable.
+BADGE_TONE_CSS = f"""
+/* A badge saying something went right, and one asking for something. Both override the
+	neutral pair on the block, which is why they are here and not on it. */
+[data-tone="ok"] {{ background: {OK_SOFT}; color: {OK_DEEP}; }}
+[data-tone="warn"] {{ background: {WARN_SOFT}; color: {WARN_DEEP}; }}
+"""
+
+# The overview's button when nothing is waiting. It is the same anchor either way --
+# one block cannot carry two sets of styles -- so the quiet variant is a rule keyed on
+# what core.next_action put in the payload.
+#
+# A filled black button is a page saying "do this". On a day when there is nothing to
+# do, the most likely next thing is still the payment page, so the button stays and
+# stops shouting: the offer survives, the instruction does not.
+ACTION_TONE_CSS = f"""
+<style>
+[data-action][data-urgent="0"] {{
+	background: transparent;
+	color: {INK};
+	border-color: {BORDER_COLOR};
+}}
+[data-action][data-urgent="0"]:hover {{ background: {SURFACE_SUNKEN}; filter: none; }}
+</style>
+"""
+
 # Every rule the blocks cannot carry themselves: a state the script sets, or a position
 # that depends on another element. Appended to the head after HEAD_HTML, which is where
 # the rest of the portal's stylesheet lives.
@@ -812,6 +889,15 @@ SHELL_STATE_CSS = f"""
 @media (prefers-reduced-motion: reduce) {{
 	[data-search-overlay] {{ transition: none; }}
 }}
+
+/* The rules between the footer's links. The links are one block repeated over the
+	lender's list, so no one of them can carry a divider of its own: the rule belongs
+	to whichever link happens to follow another, which only a selector knows. The ends
+	lose their padding so the row sits flush with the page head above it. */
+[data-footer-links] > a + a {{ border-left: 1px solid {BORDER_COLOR}; }}
+[data-footer-links] > a:first-child {{ padding-left: 0; }}
+[data-footer-links] > a:last-child {{ padding-right: 0; }}
+{BADGE_TONE_CSS}
 </style>
 """
 
@@ -834,22 +920,15 @@ PAGE_HEAD_STYLES = {
 	"borderBottom": BORDER,
 }
 CRUMB_STYLES = {
-	"fontSize": "var(--portal-text-lg,18px)",
+	"fontSize": "var(--portal-text-lg,14px)",
 	"fontWeight": "500",
 	"color": INK,
 }
-HEAD_NOTE_STYLES = {"fontSize": "var(--portal-text-sm,13px)", "color": INK_MUTED}
+HEAD_NOTE_STYLES = {"fontSize": "var(--portal-text-sm,12px)", "color": INK_MUTED}
 HEAD_END_STYLES = {**ROW_FLEX, "marginLeft": "auto", "gap": "10px"}
-STATUS_STYLES = {**ROW_FLEX, "gap": "6px", "fontSize": "var(--portal-text-sm,13px)", "color": INK_MUTED}
-STATUS_DOT_STYLES = {
-	"width": "6px",
-	"height": "6px",
-	"borderRadius": "999px",
-	"background": OK_DEEP,
-}
 BTN_STYLES = {
 	"fontFamily": "inherit",
-	"fontSize": "var(--portal-text-md,15px)",
+	"fontSize": "var(--portal-text-md,13px)",
 	"fontWeight": "500",
 	"cursor": "pointer",
 	"padding": "6px 12px",
@@ -875,6 +954,19 @@ CARDS_STYLES = {
 	"gridTemplateColumns": "repeat(auto-fit, minmax(240px, 1fr))",
 	"gap": "var(--portal-gap,16px)",
 }
+# The overview's top strip, where the three cards are not peers. The first one carries
+# the application the borrower is waiting on -- a product name and a stage, which are
+# words -- and the two beside it carry figures. Given equal columns the words wrapped
+# to three lines while the figures sat in half their card, so the strip is a fixed
+# three, widest first, rather than the auto-fit CARDS_STYLES uses where every card
+# holds a number. It folds to one column on a tablet, like every other grid here.
+TOP_CARDS_STYLES = {
+	"display": "grid",
+	"gridTemplateColumns": "minmax(0, 1.8fr) minmax(0, 1fr) minmax(0, 1fr)",
+	"gap": "var(--portal-gap,16px)",
+	"alignItems": "stretch",
+}
+TOP_CARDS_TABLET_STYLES = {"gridTemplateColumns": "minmax(0, 1fr)"}
 NCARD_STYLES = {
 	**COLUMN,
 	"minHeight": "110px",
@@ -889,15 +981,15 @@ NCARD_HEAD_STYLES = {
 	"alignItems": "flex-start",
 	"gap": "8px",
 }
-NCARD_TITLE_STYLES = {"fontSize": "var(--portal-text-sm,13px)", "fontWeight": "500"}
+NCARD_TITLE_STYLES = {"fontSize": "var(--portal-text-sm,12px)", "fontWeight": "500"}
 NCARD_BODY_STYLES = {**COLUMN, "paddingTop": "var(--portal-card-pad,12px)"}
 NUMBER_STYLES = {
 	**TABULAR,
-	"fontSize": "var(--portal-text-xl,24px)",
+	"fontSize": "var(--portal-text-xl,17px)",
 	"fontWeight": "600",
 	"lineHeight": "115%",
 }
-NCARD_STAT_STYLES = {**TABULAR, "marginTop": "10px", "fontSize": "var(--portal-text-sm,13px)", "color": INK_MUTED}
+NCARD_STAT_STYLES = {**TABULAR, "marginTop": "10px", "fontSize": "var(--portal-text-sm,12px)", "color": INK_MUTED}
 
 # The two figures a borrower opened the portal to read: how much is owed, and when the
 # next payment is due. See PORTAL_DESIGN_PLAN.md, stage 5.
@@ -925,25 +1017,25 @@ MONEY_ITEM_STYLES = {**COLUMN, "gap": "2px", "minWidth": "0"}
 MONEY_LABEL_STYLES = {
 	**ROW_FLEX,
 	"gap": "8px",
-	"fontSize": "var(--portal-text-sm,13px)",
+	"fontSize": "var(--portal-text-sm,12px)",
 	"color": INK_MUTED,
 }
 MONEY_FIGURE_STYLES = {
 	**TABULAR,
-	"fontSize": "var(--portal-text-2xl,32px)",
+	"fontSize": "var(--portal-text-2xl,20px)",
 	"fontWeight": "600",
 	"lineHeight": "115%",
 	"color": INK,
 }
 # The date the figure is due, which is half of what the borrower came for, so it is set
 # at body size rather than at the size of a footnote.
-MONEY_NOTE_STYLES = {**TABULAR, "fontSize": "var(--portal-text-md,15px)", "color": INK_MUTED}
+MONEY_NOTE_STYLES = {**TABULAR, "fontSize": "var(--portal-text-md,13px)", "color": INK_MUTED}
 # What the third card held. A borrower checks the sanctioned amount once a year, so it
 # is a line under the outstanding figure rather than a figure of its own.
 MONEY_SUB_STYLES = {
 	**TABULAR,
 	"marginTop": "4px",
-	"fontSize": "var(--portal-text-sm,13px)",
+	"fontSize": "var(--portal-text-sm,12px)",
 	"color": INK_SUBTLE,
 }
 # The button the page exists for. The one in the page head is 6px of padding wide and
@@ -954,6 +1046,41 @@ MONEY_ACTION_STYLES = {
 	"fontWeight": "600",
 	"padding": "10px 20px",
 }
+
+# What is waiting on the borrower, between the figures and the four cards below.
+#
+# Not a card itself. The cards below are things to read and this is the one thing to
+# do, so putting it in the same box would file it with them. It sits on the page's own
+# surface between two rules, the way the figures above it do: the top of the page is
+# the part that asks something of you, and it should read as one zone.
+#
+# The whole strip hides when there is nothing in it. A borrower in good standing gets
+# the figures and the cards, with no empty shelf in between announcing that they have
+# nothing to do.
+TASKS_STYLES = {
+	**COLUMN,
+	"gap": "8px",
+	"paddingBottom": "var(--portal-gap,16px)",
+	"borderBottom": BORDER,
+}
+TASKS_NOTE_STYLES = {"fontSize": "var(--portal-text-sm,12px)", "color": INK_MUTED}
+# The repeater is the list, so the spacing between rows is set here: the rows come out
+# as its children rather than the section's, and a gap on the section never reaches them.
+TASKS_LIST_STYLES = {**COLUMN, "gap": "8px"}
+# A row here is a bordered tile rather than a ruled line, which is the visible
+# difference between a task and a record. The tables below separate rows with a rule;
+# these stand apart from each other because each one is a separate piece of work.
+TASK_ROW_STYLES = {
+	**ROW_FLEX,
+	"gap": "12px",
+	"padding": "10px var(--portal-card-pad,12px)",
+	"border": BORDER,
+	"borderRadius": "var(--brand-radius,8px)",
+	"background": SURFACE_CARD,
+	"hover:background": SURFACE_SUNKEN,
+	**LINK_ROW_STYLES,
+}
+TASK_BODY_STYLES = {**COLUMN, "flex": "1 1 auto", "minWidth": "0", "gap": "2px"}
 
 # The two-column split folds to one column on Builder's tablet breakpoint (<=1023px).
 GRID_STYLES = {
@@ -975,12 +1102,12 @@ CARD_STYLES = {
 CARD_HEAD_STYLES = {"padding": "var(--portal-card-pad,12px)"}
 CARD_TITLE_STYLES = {
 	"margin": "0",
-	"fontSize": "var(--portal-text-lg,18px)",
+	"fontSize": "var(--portal-text-lg,14px)",
 	"fontWeight": "600",
 	"color": INK,
 	"lineHeight": "1.3em",
 }
-CARD_SUB_STYLES = {**TABULAR, "marginTop": "5px", "fontSize": "var(--portal-text-sm,13px)", "color": INK_MUTED}
+CARD_SUB_STYLES = {**TABULAR, "marginTop": "5px", "fontSize": "var(--portal-text-sm,12px)", "color": INK_MUTED}
 # A head that carries a control: the titles take the room they need and the control
 # sits against the right edge, dropping under them when there is no room for both.
 CARD_HEAD_ROW_STYLES = {
@@ -1012,33 +1139,10 @@ COL_AMT_STYLES = {
 	"gap": "2px",
 }
 
-PRIMARY_TEXT_STYLES = {"fontSize": "var(--portal-text-md,15px)", "fontWeight": "500"}
-SECONDARY_TEXT_STYLES = {**TABULAR, "fontSize": "var(--portal-text-sm,13px)", "color": INK_SUBTLE}
-AMOUNT_STYLES = {**TABULAR, "fontSize": "var(--portal-text-md,15px)", "fontWeight": "500"}
+PRIMARY_TEXT_STYLES = {"fontSize": "var(--portal-text-md,13px)", "fontWeight": "500"}
+SECONDARY_TEXT_STYLES = {**TABULAR, "fontSize": "var(--portal-text-sm,12px)", "color": INK_SUBTLE}
+AMOUNT_STYLES = {**TABULAR, "fontSize": "var(--portal-text-md,13px)", "fontWeight": "500"}
 
-STATE_STYLES = {
-	"display": "inline-flex",
-	"alignItems": "center",
-	"gap": "6px",
-	"fontSize": "var(--portal-text-sm,13px)",
-	"color": INK_MUTED,
-}
-DOT_STYLES = {
-	"width": "6px",
-	"height": "6px",
-	"borderRadius": "999px",
-	"background": BORDER_STRONG,
-	"flexShrink": "0",
-}
-FLAG_STYLES = {
-	"display": "inline-block",
-	"fontSize": "var(--portal-text-xs,11px)",
-	"fontWeight": "500",
-	"color": WARN_DEEP,
-	"background": WARN_SOFT,
-	"padding": "2px 8px",
-	"borderRadius": "4px",
-}
 WHY_STYLES = {"fontSize": "var(--portal-text-xs,11px)", "color": WARN_DEEP}
 
 LI_STYLES = {
@@ -1052,32 +1156,81 @@ LI_DATE_STYLES = {
 	**TABULAR,
 	"width": "80px",
 	"flexShrink": "0",
-	"fontSize": "var(--portal-text-sm,13px)",
+	"fontSize": "var(--portal-text-sm,12px)",
 	"color": INK_MUTED,
 }
 LI_BODY_STYLES = {**COLUMN, "flex": "1 1 auto", "minWidth": "0", "gap": "2px"}
-LI_AMT_STYLES = {**TABULAR, "flexShrink": "0", "fontSize": "var(--portal-text-md,15px)", "fontWeight": "500"}
+LI_AMT_STYLES = {**TABULAR, "flexShrink": "0", "fontSize": "var(--portal-text-md,13px)", "fontWeight": "500"}
 
+# The activity list: the desk's own timeline, in the portal's colours. A dot per event
+# on a line running down the list, and one sentence beside it.
+#
+# Not the dated row LI_STYLES gives the schedule, and the difference is what the two
+# lists are for. A schedule is a table read down a column of dates. Activity is a record
+# of things that have happened, read as sentences, and a borrower checking whether their
+# payment went through wants "2 days ago" rather than a date to subtract from today.
+ACTIVITY_LIST_STYLES = {**COLUMN, "gap": "0", "padding": "2px var(--portal-card-pad,12px) 10px"}
+# Stretch, so the mark column is as tall as the sentence beside it however far that
+# wraps. Left to itself it would be as tall as the dot, and the line would break between
+# every pair of rows.
+ACTIVITY_ROW_STYLES = {"display": "flex", "gap": "12px", "alignItems": "stretch"}
+ACTIVITY_MARK_STYLES = {**COLUMN, "alignItems": "center", "gap": "0", "flexShrink": "0", "width": "6px"}
+# The top margin is what puts the dot on the first line of the sentence rather than at
+# the top of the row: the body's own padding plus half a line of it.
+ACTIVITY_DOT_STYLES = {
+	"width": "6px",
+	"height": "6px",
+	"marginTop": "15px",
+	"borderRadius": "999px",
+	"flexShrink": "0",
+	"background": INK_SUBTLE,
+}
+# ACTIVITY_CSS cuts the last row's stem. A line carrying on under the final dot is a
+# list that looks like it was cut off before it finished.
+ACTIVITY_STEM_STYLES = {"width": "1px", "flex": "1 1 auto", "minHeight": "10px", "background": BORDER_COLOR}
+ACTIVITY_BODY_STYLES = {"flex": "1 1 auto", "minWidth": "0", "padding": "8px 0", "lineHeight": "1.55"}
+ACTIVITY_TITLE_STYLES = {
+	"fontSize": "var(--portal-text-md,13px)",
+	"fontWeight": "500",
+	"color": INK,
+	# Two inline spans with nothing between them render as one word. A margin says the
+	# gap in a way that survives the sentence wrapping between them.
+	"marginRight": "4px",
+}
+ACTIVITY_NOTE_STYLES = {**TABULAR, "fontSize": "var(--portal-text-md,13px)", "color": INK_MUTED}
+ACTIVITY_CSS = """
+<style>
+[data-activity-list] > *:last-child [data-activity-stem] { display: none; }
+</style>
+"""
+
+# The notice on one side and the policies on the other, which is the shape a borrower
+# has read at the foot of every bank's site. Both ends wrap onto their own line under
+# the mobile breakpoint rather than being cut, so nothing a regulator asks for is lost
+# on a phone.
 FOOTER_STYLES = {
 	**ROW_FLEX,
-	"gap": "20px",
+	"justifyContent": "space-between",
+	"gap": "12px 20px",
 	"flexWrap": "wrap",
 	"padding": "14px var(--portal-gap,16px)",
 	"borderTop": BORDER,
 	"fontSize": "var(--portal-text-xs,11px)",
 	"color": INK_SUBTLE,
 }
+FOOTER_NOTE_STYLES = {"minWidth": "0"}
+# No gap: the rules between the links are drawn by SHELL_STATE_CSS on each link's own
+# left edge, so the space either side of one is the link's padding and stays with it
+# when a row of them wraps.
+FOOTER_LINKS_STYLES = {**ROW_FLEX, "flexWrap": "wrap", "minWidth": "0"}
+# The last of these is the grievance contact. A lender is required to publish one, and
+# a borrower reading the foot of the page is the one looking for it.
 FOOTER_LINK_STYLES = {
 	"color": INK_MUTED,
 	"textDecoration": "none",
-	"marginRight": "18px",
+	"padding": "0 14px",
 	"hover:color": INK,
 }
-FOOTER_BRAND_STYLES = {**ROW_FLEX, "gap": "8px", "minWidth": "0"}
-FOOTER_LOGO_STYLES = {**LOGO_STYLES, "height": "18px", "maxWidth": "120px"}
-# The grievance contact. A lender is required to publish one, and a borrower reading
-# the foot of the page is the one looking for it.
-FOOTER_MAIL_STYLES = {**FOOTER_LINK_STYLES, "marginRight": "0"}
 
 # The rail and the sidebar leave the page on Builder's mobile breakpoint (<=576px).
 HIDDEN = {"display": "none"}
@@ -1146,6 +1299,21 @@ def bind(node, key, property="innerHTML", type="key"):
 def bound(element, key, styles=None, path=None, **kwargs):
 	"""A block whose text comes from the page data script."""
 	return bind(block(element, styles=styles, path=path, **kwargs), key)
+
+
+def badge(key, tone_key=None, tone="", path=None):
+	"""A status, in the shape the desk gives one.
+
+	`tone_key` is a second key from the page data, bound to the attribute BADGE_TONE_CSS
+	reads. A row in a repeated table needs it, because the block is shared and only the
+	payload can tell one row from another. `tone` is for the badge that stands alone and
+	always means the same thing, which can say so on the block and bind nothing.
+	"""
+	node = bound("span", key, styles=BADGE_STYLES, path=path, attributes={"data-tone": tone})
+	if tone_key:
+		bind(node, tone_key, property="data-tone", type="attribute")
+
+	return node
 
 
 def linked(key, styles=None, children=None, **kwargs):
@@ -1476,11 +1644,17 @@ def upsert_tokens():
 		clear_builder_token_cache()
 
 
-def card(title, subtitle_key, body, action=None):
+def card(title, subtitle_key, body, action=None, visible_key=None):
 	"""A titled panel with a subtitle from data. Every portal page is built of these.
 
 	`action` is the one thing the card offers to press, sat at the end of its title
 	row. Without one the head is the title and its subtitle, as it always was.
+
+	`visible_key` drops the whole card when that key is empty. A card whose subtitle
+	says "Nothing to show" is still a box, a heading and a rule spent on saying that
+	there is nothing, and four of them side by side is a page reporting its own
+	emptiness four times. A card only takes this where some other card is certain to
+	remain, so the page never empties out completely.
 	"""
 	titles = [
 		block("h2", styles=CARD_TITLE_STYLES, html=title),
@@ -1496,7 +1670,11 @@ def card(title, subtitle_key, body, action=None):
 		)
 	)
 
-	return block("section", styles=CARD_STYLES, children=[head, body])
+	node = block("section", styles=CARD_STYLES, children=[head, body])
+	if visible_key:
+		node["visibilityCondition"] = visible_key
+
+	return node
 
 
 def reveal_button(label, name, styles=None):
@@ -1538,7 +1716,7 @@ def record_table(labels, columns, key, url_key="url"):
 
 	row = linked(
 		url_key,
-		styles={**ROW_STYLES, "color": "inherit"},
+		styles={**ROW_STYLES, **LINK_ROW_STYLES},
 		children=[
 			block("div", styles=RECORD_COLUMNS[index], children=children)
 			for index, children in enumerate(columns)
@@ -1546,6 +1724,83 @@ def record_table(labels, columns, key, url_key="url"):
 	)
 
 	return block("div", children=[head, repeater(key, row)])
+
+
+def timeline_rows(key, title_key, sub_key, url_key=None):
+	"""A dated event per row: when it happened, what it was, how much it was for.
+
+	`url_key` makes the whole row the way into the record the event belongs to. A page
+	already showing that record passes none, and the row stays a plain one: a link back
+	to the page you are on is a dead end wearing a pointer.
+
+	The second line hides on an empty value. A list of one loan's instalments has
+	nothing to put there -- the card's own subtitle has already named the loan, and
+	repeating it down every row is the list telling you four times what it told you
+	once -- and an empty div would still take its gap and leave the rows uneven.
+	"""
+	sub = bound("div", sub_key, styles=SECONDARY_TEXT_STYLES)
+	sub["visibilityCondition"] = sub_key
+
+	children = [
+		bound("span", "date", styles=LI_DATE_STYLES),
+		block(
+			"div",
+			styles=LI_BODY_STYLES,
+			children=[bound("div", title_key, styles=PRIMARY_TEXT_STYLES), sub],
+		),
+		bound("span", "amount", styles=LI_AMT_STYLES),
+	]
+	row = (
+		linked(url_key, styles={**LI_STYLES, **LINK_ROW_STYLES, "hover:background": SURFACE_SUNKEN}, children=children)
+		if url_key
+		else block("div", styles=LI_STYLES, children=children)
+	)
+
+	return repeater(key, row)
+
+
+def activity_list(key, title_key, note_key, url_key=None, date_key=None):
+	"""One event per row: a dot on the line, then a sentence saying what happened.
+
+	The sentence is two spans and not five, because the weight changes once and the
+	rest of it is one grey clause: what happened, in ink, and then how much, which loan
+	and how long ago, joined in the data layer. Builder binds one key into one element,
+	so a block that wanted the parts separately would need a span each and a separator
+	between them that had to know which of its neighbours were empty.
+
+	`date_key` puts the day it happened in the sentence's tooltip. "2 days ago" is the
+	faster read and the one the list is for, but the date is what a borrower needs the
+	moment they go looking for the entry on a statement, and it costs no room here.
+	"""
+	note = bound("span", note_key, styles=ACTIVITY_NOTE_STYLES, attributes={"title": ""})
+	if date_key:
+		bind(note, date_key, property="title", type="attribute")
+
+	children = [
+		block(
+			"div",
+			styles=ACTIVITY_MARK_STYLES,
+			children=[
+				block("span", styles=ACTIVITY_DOT_STYLES),
+				block("span", styles=ACTIVITY_STEM_STYLES, attributes={"data-activity-stem": "1"}),
+			],
+		),
+		block(
+			"div",
+			styles=ACTIVITY_BODY_STYLES,
+			children=[bound("span", title_key, styles=ACTIVITY_TITLE_STYLES), note],
+		),
+	]
+	row = (
+		linked(url_key, styles={**ACTIVITY_ROW_STYLES, **LINK_ROW_STYLES}, children=children)
+		if url_key
+		else block("div", styles=ACTIVITY_ROW_STYLES, children=children)
+	)
+
+	# The marker ACTIVITY_CSS hangs the last row's cut stem off. On the list rather than
+	# on the row, because the rows are one repeated block and every copy carries the
+	# same attributes -- only their position tells them apart.
+	return repeater(key, row, styles=ACTIVITY_LIST_STYLES, attributes={"data-activity-list": "1"})
 
 
 def pair_rows(key, with_detail=False, marker=False):
@@ -1597,6 +1852,356 @@ def note_panel(key):
 	return node
 
 
+# --- the lead card: the one a borrower opens the page for --------------------------
+#
+# The application detail page leads with the product, the reference and how far the
+# file has got, because "where has it reached" is the question that brings a borrower
+# here. Everything below it answers "and what did I ask for".
+#
+# LEAD_ rather than HERO_: the public pages already own that prefix, and a second
+# HERO_TITLE_STYLES would silently replace theirs -- this file is read top to bottom
+# and the later name wins.
+
+LEAD_STYLES = {
+	**CARD_STYLES,
+	"flexDirection": "row",
+	"alignItems": "stretch",
+	"gap": "0",
+	"overflow": "hidden",
+}
+LEAD_TABLET_STYLES = {"flexDirection": "column"}
+# A decorative panel, not a picture of anything: the portal ships no product artwork
+# and a lender's own would have to be uploaded per product.
+LEAD_ART_STYLES = {
+	"display": "grid",
+	"placeItems": "center",
+	"width": "180px",
+	"flexShrink": "0",
+	"background": SURFACE_SUNKEN,
+	"color": "var(--brand-primary,#171717)",
+	"borderRight": BORDER,
+}
+LEAD_ART_TABLET_STYLES = {
+	"width": "auto",
+	"padding": "20px 0",
+	"borderRight": "none",
+	"borderBottom": BORDER,
+}
+LEAD_BODY_STYLES = {
+	**COLUMN,
+	"flex": "1 1 auto",
+	"minWidth": "0",
+	"gap": "18px",
+	"padding": "20px var(--portal-gap,16px)",
+}
+LEAD_TITLE_STYLES = {
+	"margin": "0",
+	"fontSize": "var(--portal-text-xl,17px)",
+	"fontWeight": "600",
+	"color": INK,
+	"lineHeight": "1.3em",
+}
+LEAD_REF_STYLES = {**TABULAR, "marginTop": "4px", "fontSize": "var(--portal-text-sm,12px)", "color": INK_SUBTLE}
+LEAD_HEADLINE_STYLES = {
+	"margin": "0",
+	"fontSize": "var(--portal-text-lg,14px)",
+	"fontWeight": "600",
+	"color": INK,
+}
+LEAD_NOTE_STYLES = {"marginTop": "4px", "fontSize": "var(--portal-text-md,13px)", "color": INK_MUTED}
+
+# The tracker laid across rather than down. Everything that distinguishes one step
+# from another -- the filled tick, the joining line, the underline under the step in
+# progress -- is a state the data names and APPLICATION_CSS draws, because the steps
+# are one block repeated and so cannot carry a style each.
+TRACK_STYLES = {"display": "flex", "alignItems": "flex-start", "gap": "0"}
+TRACK_STEP_STYLES = {
+	**COLUMN,
+	"alignItems": "center",
+	"gap": "8px",
+	"flex": "1 1 0",
+	"minWidth": "0",
+	"position": "relative",
+	"textAlign": "center",
+}
+TRACK_MARK_STYLES = {
+	"display": "grid",
+	"placeItems": "center",
+	"width": "26px",
+	"height": "26px",
+	"borderRadius": "999px",
+	"flexShrink": "0",
+	"position": "relative",
+	"zIndex": "1",
+	"background": SURFACE_CARD,
+	"border": f"2px solid {BORDER_STRONG}",
+	"color": INK_FAINT,
+	"fontSize": "var(--portal-text-sm,12px)",
+	"lineHeight": "1",
+}
+TRACK_LABEL_STYLES = {
+	"fontSize": "var(--portal-text-sm,12px)",
+	"color": INK_MUTED,
+	"paddingBottom": "6px",
+	"borderBottom": "2px solid transparent",
+}
+
+# --- the preview: four sections, one card, one at a time ---------------------------
+
+TABLIST_STYLES = {
+	**ROW_FLEX,
+	"gap": "20px",
+	"flexWrap": "wrap",
+	"padding": "0 var(--portal-card-pad,12px)",
+	"borderBottom": BORDER,
+}
+TAB_STYLES = {
+	"padding": "0 0 10px",
+	"marginBottom": "-1px",
+	"border": "none",
+	"borderBottom": "2px solid transparent",
+	"background": "transparent",
+	"fontFamily": "inherit",
+	"fontSize": "var(--portal-text-md,13px)",
+	"fontWeight": "500",
+	"color": INK_SUBTLE,
+	"cursor": "pointer",
+	"hover:color": INK,
+}
+# Three across, because that is what the pairs on this page are: a short label over a
+# short value. Two on a tablet, one on a phone -- Builder's own breakpoints.
+PAIR_GRID_STYLES = {
+	"display": "grid",
+	"gridTemplateColumns": "repeat(3, minmax(0, 1fr))",
+	"gap": "18px var(--portal-gap,16px)",
+	"padding": "var(--portal-card-pad,12px)",
+}
+PAIR_GRID_TABLET_STYLES = {"gridTemplateColumns": "repeat(2, minmax(0, 1fr))"}
+PAIR_GRID_MOBILE_STYLES = {"gridTemplateColumns": "minmax(0, 1fr)"}
+PAIR_CELL_STYLES = {**COLUMN, "gap": "4px", "minWidth": "0"}
+
+# The row over the page: where the borrower came from, and the day they are reading.
+CREST_STYLES = {**ROW_FLEX, "justifyContent": "space-between", "gap": "12px", "flexWrap": "wrap"}
+BACK_STYLES = {
+	**ROW_FLEX,
+	"gap": "8px",
+	"fontSize": "var(--portal-text-md,13px)",
+	"color": INK_MUTED,
+	"textDecoration": "none",
+	"hover:color": INK,
+}
+AS_ON_STYLES = {**TABULAR, "fontSize": "var(--portal-text-sm,12px)", "color": INK_SUBTLE}
+
+
+def step_track(key):
+	"""The stage tracker as one row across, one step per stage.
+
+	`code` rides in as an attribute rather than as text: it is what APPLICATION_CSS
+	matches on to fill the tick, colour the line into it and underline the step being
+	worked on. The tick character itself still comes from `marker`, so a page that
+	renders before the stylesheet does still says which stages are behind.
+	"""
+	mark = bound("span", "marker", styles=TRACK_MARK_STYLES, attributes={"data-step-mark": "1"})
+	step = block(
+		"div",
+		styles=TRACK_STEP_STYLES,
+		attributes={"data-track-step": "1"},
+		children=[mark, bound("div", "short", styles=TRACK_LABEL_STYLES, attributes={"data-step-label": "1"})],
+	)
+
+	return repeater(key, bind(step, "code", property="data-step-state", type="attribute"), styles=TRACK_STYLES, attributes={"data-track": "1"})
+
+
+def lead_card(title_key, ref_key, steps_key, headline_key, note_key, art):
+	"""The card the page opens with: what this is, how far it has got, what that means."""
+	return block(
+		"section",
+		styles=LEAD_STYLES,
+		tabletStyles=LEAD_TABLET_STYLES,
+		children=[
+			block(
+				"div",
+				styles=LEAD_ART_STYLES,
+				tabletStyles=LEAD_ART_TABLET_STYLES,
+				html=art,
+				attributes={"data-lead-art": "1", "aria-hidden": "true"},
+			),
+			block(
+				"div",
+				styles=LEAD_BODY_STYLES,
+				children=[
+					block(
+						"div",
+						children=[
+							bound("h1", title_key, styles=LEAD_TITLE_STYLES),
+							bound("div", ref_key, styles=LEAD_REF_STYLES),
+						],
+					),
+					step_track(steps_key),
+					block(
+						"div",
+						children=[
+							bound("h2", headline_key, styles=LEAD_HEADLINE_STYLES),
+							bound("div", note_key, styles=LEAD_NOTE_STYLES),
+						],
+					),
+				],
+			),
+		],
+	)
+
+
+def pair_grid(key, with_detail=False, marker=False):
+	"""The pair rows again, laid out across the card instead of down it."""
+	label = bound("div", "label", styles=SECONDARY_TEXT_STYLES)
+	if marker:
+		# The tick belongs beside what it is about, not on a line of its own: a cell
+		# that opened with a bare mark would read as a column of ticks.
+		label = block(
+			"div",
+			styles={**ROW_FLEX, "gap": "6px", "minWidth": "0"},
+			children=[
+				bound("span", "marker", styles={"color": OK_DEEP, "flexShrink": "0"}),
+				bound("span", "label", styles=SECONDARY_TEXT_STYLES),
+			],
+		)
+
+	lines = [label, bound("div", "value", styles=PRIMARY_TEXT_STYLES)]
+	if with_detail:
+		detail = bound("div", "detail", styles=SECONDARY_TEXT_STYLES)
+		detail["visibilityCondition"] = "detail"
+		lines.append(detail)
+
+	return repeater(
+		key,
+		block("div", styles=PAIR_CELL_STYLES, children=lines),
+		styles=PAIR_GRID_STYLES,
+		tabletStyles=PAIR_GRID_TABLET_STYLES,
+		mobileStyles=PAIR_GRID_MOBILE_STYLES,
+	)
+
+
+def preview(title, subtitle_key, sections):
+	"""One card holding several sections, of which one shows at a time.
+
+	`sections` is (name, label, note_key, body). The first is the one that opens, and
+	it is marked open here rather than left to the script, so the card is not blank in
+	the moment before the script runs -- or at all, if it never does.
+	"""
+	tabs = []
+	panels = []
+	for index, (name, label, note_key, body) in enumerate(sections):
+		first = index == 0
+		tabs.append(
+			block(
+				"button",
+				styles=TAB_STYLES,
+				html=label,
+				attributes={
+					"type": "button",
+					"role": "tab",
+					"data-tab": name,
+					"aria-selected": "true" if first else "false",
+				},
+			)
+		)
+		panel = block(
+			"div",
+			children=[note_panel(note_key), body],
+			attributes={"role": "tabpanel", "data-panel": name},
+		)
+		if not first:
+			panel["attributes"]["hidden"] = "hidden"
+		panels.append(panel)
+
+	group = block(
+		"div",
+		attributes={"data-tabs": "1"},
+		children=[block("div", styles=TABLIST_STYLES, attributes={"role": "tablist"}, children=tabs), *panels],
+	)
+
+	return card(title, subtitle_key, group)
+
+
+# Rules the blocks on the application page cannot carry themselves, because the step
+# they style is one block repeated over the stages. Passed to build_page as that
+# page's own head CSS, so adding it costs one page rebuild rather than eleven.
+APPLICATION_CSS = f"""
+<style>
+[data-lead-art] svg {{ width: 56px; height: 56px; stroke-width: 1.4; }}
+
+/* The line joining one step to the one before it. It starts behind the tick -- the
+	tick sits on its own stacking level and carries the card's background -- and runs
+	back to the middle of the step before. */
+[data-track-step]::before {{
+	content: "";
+	position: absolute;
+	top: 12px;
+	right: 50%;
+	width: 100%;
+	height: 2px;
+	background: {BORDER_COLOR};
+}}
+[data-track-step]:first-child::before {{ display: none; }}
+
+/* A stage that is behind you, and the line you crossed to get there. The line into
+	the stage in progress is crossed too, which is why it is coloured the same. */
+[data-step-state="done"]::before,
+[data-step-state="current"]::before {{ background: {OK_DEEP}; }}
+/* The tick is the card showing through the fill, which is why it is the card's own
+	colour rather than a white of its own: a lender with an off-white card gets a tick
+	that matches everything else punched out of a fill. */
+[data-step-state="done"] [data-step-mark] {{
+	background: {OK_DEEP};
+	border-color: {OK_DEEP};
+	color: {SURFACE_CARD};
+}}
+
+/* The stage being worked on: the lender's colour, and the underline that says this
+	is the one the page is about. */
+[data-step-state="current"] [data-step-mark] {{
+	background: var(--brand-primary,#171717);
+	border-color: var(--brand-primary,#171717);
+	color: var(--brand-primary-ink,#ffffff);
+}}
+[data-step-state="current"] [data-step-label] {{
+	color: {INK};
+	font-weight: 600;
+	border-bottom-color: var(--brand-primary,#171717);
+}}
+
+/* Across is only worth it while the steps have room. Under Builder's mobile
+	breakpoint five of them would be five stacks of broken words, so the tracker
+	turns back into the list it used to be and the joining line turns with it. */
+@media (max-width: 576px) {{
+	[data-track] {{ flex-direction: column; align-items: stretch; }}
+	[data-track-step] {{
+		flex-direction: row;
+		align-items: center;
+		gap: 12px;
+		text-align: left;
+		padding: 6px 0;
+	}}
+	[data-track-step]::before {{
+		top: auto;
+		bottom: 50%;
+		right: auto;
+		left: 12px;
+		width: 2px;
+		height: 100%;
+	}}
+	[data-step-label] {{ border-bottom: none; padding-bottom: 0; }}
+}}
+
+/* The section of the preview being read. */
+[data-tab][aria-selected="true"] {{
+	color: {INK};
+	border-bottom-color: var(--brand-primary,#171717);
+}}
+</style>
+"""
+
+
 # --- the public pages: no sidebar, one centred column -----------------------------
 
 PUBLIC_PAGE_STYLES = {
@@ -1610,10 +2215,10 @@ PUBLIC_PAGE_STYLES = {
 PUBLIC_COLUMN_STYLES = {**COLUMN, "width": "100%", "maxWidth": "720px", "gap": "var(--portal-gap,16px)"}
 
 FIELD_STYLES = {**COLUMN, "gap": "6px", "padding": "8px 12px"}
-LABEL_STYLES = {"fontSize": "var(--portal-text-sm,13px)", "fontWeight": "500", "color": INK_MUTED}
+LABEL_STYLES = {"fontSize": "var(--portal-text-sm,12px)", "fontWeight": "500", "color": INK_MUTED}
 INPUT_STYLES = {
 	"fontFamily": "inherit",
-	"fontSize": "var(--portal-text-md,15px)",
+	"fontSize": "var(--portal-text-md,13px)",
 	"padding": "10px 12px",
 	"borderRadius": "var(--brand-radius,10px)",
 	"border": BORDER,
@@ -1644,7 +2249,7 @@ ERROR_STYLES = {
 	"padding": "12px 16px",
 	"background": WARN_SOFT,
 	"borderRadius": "8px",
-	"fontSize": "var(--portal-text-sm,13px)",
+	"fontSize": "var(--portal-text-sm,12px)",
 	"color": WARN_DEEP,
 }
 
@@ -1754,7 +2359,7 @@ BAND_COLUMN_STYLES = {**COLUMN, "width": "100%", "maxWidth": "720px", "gap": "14
 TOPBAR_STYLES = {**ROW_FLEX, "gap": "10px", "padding": "13px 0", "width": "100%"}
 TOPBAR_LINKS_STYLES = {**ROW_FLEX, "marginLeft": "auto", "gap": "14px"}
 TOPBAR_LINK_STYLES = {
-	"fontSize": "var(--portal-text-md,15px)",
+	"fontSize": "var(--portal-text-md,13px)",
 	"fontWeight": "500",
 	"color": INK_MUTED,
 	"textDecoration": "none",
@@ -1769,7 +2374,7 @@ PILL_LINK_STYLES = {
 	"borderRadius": "999px",
 	"border": BORDER,
 	"background": SURFACE_CARD,
-	"fontSize": "var(--portal-text-md,15px)",
+	"fontSize": "var(--portal-text-md,13px)",
 	"fontWeight": "500",
 	"color": INK,
 	"textDecoration": "none",
@@ -1779,17 +2384,17 @@ PILL_LINK_STYLES = {
 
 HERO_TITLE_STYLES = {
 	"margin": "0",
-	"fontSize": "var(--portal-text-2xl,32px)",
+	"fontSize": "var(--portal-text-2xl,20px)",
 	"lineHeight": "1.15",
 	"fontWeight": "600",
 	"color": INK,
 	"letterSpacing": "-0.02em",
 	"maxWidth": "20ch",
 }
-HERO_TITLE_MOBILE_STYLES = {"fontSize": "var(--portal-text-xl,24px)"}
+HERO_TITLE_MOBILE_STYLES = {"fontSize": "var(--portal-text-xl,17px)"}
 HERO_INTRO_STYLES = {
 	"margin": "0",
-	"fontSize": "var(--portal-text-md,15px)",
+	"fontSize": "var(--portal-text-md,13px)",
 	"lineHeight": "1.55",
 	"color": INK_MUTED,
 	"maxWidth": "56ch",
@@ -1812,7 +2417,7 @@ TRUST_TICK_STYLES = {
 	"fontSize": "10px",
 	"fontWeight": "600",
 }
-TRUST_TEXT_STYLES = {"fontSize": "var(--portal-text-sm,13px)", "color": INK_MUTED}
+TRUST_TEXT_STYLES = {"fontSize": "var(--portal-text-sm,12px)", "color": INK_MUTED}
 
 
 def trust_row(key):
@@ -1852,12 +2457,12 @@ START_CARD_MOBILE_STYLES = {"padding": "24px 20px"}
 START_COPY_STYLES = {**COLUMN, "gap": "6px", "minWidth": "0"}
 START_TITLE_STYLES = {
 	"margin": "0",
-	"fontSize": "var(--portal-text-xl,24px)",
+	"fontSize": "var(--portal-text-xl,17px)",
 	"fontWeight": "600",
 	"letterSpacing": "-0.01em",
 	"color": INK,
 }
-START_NOTE_STYLES = {"margin": "0", "fontSize": "var(--portal-text-sm,13px)", "color": INK_MUTED}
+START_NOTE_STYLES = {"margin": "0", "fontSize": "var(--portal-text-sm,12px)", "color": INK_MUTED}
 
 BENEFIT_ROW_STYLES = {
 	"display": "grid",
@@ -1881,8 +2486,8 @@ BENEFIT_NUMBER_STYLES = {
 	"fontSize": "11px",
 	"fontWeight": "600",
 }
-BENEFIT_TITLE_STYLES = {"fontSize": "var(--portal-text-md,15px)", "fontWeight": "600", "color": INK}
-BENEFIT_NOTE_STYLES = {"margin": "0", "fontSize": "var(--portal-text-sm,13px)", "color": INK_SUBTLE, "lineHeight": "1.5"}
+BENEFIT_TITLE_STYLES = {"fontSize": "var(--portal-text-md,13px)", "fontWeight": "600", "color": INK}
+BENEFIT_NOTE_STYLES = {"margin": "0", "fontSize": "var(--portal-text-sm,12px)", "color": INK_SUBTLE, "lineHeight": "1.5"}
 
 
 def benefits(key):
@@ -1914,7 +2519,7 @@ def benefits(key):
 
 PROGRESS_STYLES = {**COLUMN, "gap": "8px", "width": "100%", "padding": "0 2px"}
 PROGRESS_HEAD_STYLES = {**ROW_FLEX, "justifyContent": "space-between", "gap": "10px"}
-PROGRESS_NAME_STYLES = {"fontSize": "var(--portal-text-sm,13px)", "fontWeight": "600", "color": INK}
+PROGRESS_NAME_STYLES = {"fontSize": "var(--portal-text-sm,12px)", "fontWeight": "600", "color": INK}
 PROGRESS_COUNT_STYLES = {**TABULAR, "fontSize": "var(--portal-text-xs,11px)", "fontWeight": "500", "color": INK_SUBTLE}
 PROGRESS_TRACK_STYLES = {
 	"width": "100%",
@@ -1986,20 +2591,20 @@ PANEL_STEP_STYLES = {
 	"textTransform": "uppercase",
 	"color": INK_FAINT,
 }
-PANEL_TITLE_STYLES = {"margin": "0", "fontSize": "var(--portal-text-lg,18px)", "fontWeight": "600", "color": INK}
-PANEL_SUB_STYLES = {"margin": "0", "fontSize": "var(--portal-text-sm,13px)", "color": INK_MUTED, "lineHeight": "1.5"}
+PANEL_TITLE_STYLES = {"margin": "0", "fontSize": "var(--portal-text-lg,14px)", "fontWeight": "600", "color": INK}
+PANEL_SUB_STYLES = {"margin": "0", "fontSize": "var(--portal-text-sm,12px)", "color": INK_MUTED, "lineHeight": "1.5"}
 
 # One question per screen, asked at the size of the only thing being asked.
 QUESTION_TITLE_STYLES = {
 	"margin": "0",
-	"fontSize": "var(--portal-text-xl,24px)",
+	"fontSize": "var(--portal-text-xl,17px)",
 	"lineHeight": "1.2",
 	"fontWeight": "600",
 	"letterSpacing": "-0.02em",
 	"color": INK,
 }
-QUESTION_TITLE_MOBILE_STYLES = {"fontSize": "var(--portal-text-lg,18px)"}
-QUESTION_SUB_STYLES = {"margin": "0", "fontSize": "var(--portal-text-sm,13px)", "color": INK_SUBTLE, "lineHeight": "1.5"}
+QUESTION_TITLE_MOBILE_STYLES = {"fontSize": "var(--portal-text-lg,14px)"}
+QUESTION_SUB_STYLES = {"margin": "0", "fontSize": "var(--portal-text-sm,12px)", "color": INK_SUBTLE, "lineHeight": "1.5"}
 
 # What was answered two screens ago, on the screen that posts it, so a visitor does
 # not have to walk back to remind themselves what they picked.
@@ -2058,7 +2663,7 @@ WIZARD_BTN_STYLES = {
 	"background": "var(--brand-primary,#171717)",
 	"color": "var(--brand-primary-ink,#ffffff)",
 	"fontFamily": "inherit",
-	"fontSize": "var(--portal-text-md,15px)",
+	"fontSize": "var(--portal-text-md,13px)",
 	"fontWeight": "600",
 	"cursor": "pointer",
 	"whiteSpace": "nowrap",
@@ -2084,7 +2689,7 @@ GHOST_BTN_STYLES = {
 	"background": SURFACE_CARD,
 	"color": INK,
 	"fontFamily": "inherit",
-	"fontSize": "var(--portal-text-md,15px)",
+	"fontSize": "var(--portal-text-md,13px)",
 	"fontWeight": "500",
 	"cursor": "pointer",
 }
@@ -2095,7 +2700,7 @@ LINK_BTN_STYLES = {
 	"background": "transparent",
 	"color": INK_MUTED,
 	"fontFamily": "inherit",
-	"fontSize": "var(--portal-text-md,15px)",
+	"fontSize": "var(--portal-text-md,13px)",
 	"fontWeight": "500",
 	"textDecoration": "underline",
 	"cursor": "pointer",
@@ -2194,8 +2799,8 @@ TILE_BODY_STYLES = {
 	"minWidth": "0",
 	"alignItems": "flex-start",
 }
-TILE_LABEL_STYLES = {"fontSize": "var(--portal-text-md,15px)", "fontWeight": "600", "color": INK}
-TILE_NOTE_STYLES = {"fontSize": "var(--portal-text-sm,13px)", "color": INK_SUBTLE, "lineHeight": "1.45"}
+TILE_LABEL_STYLES = {"fontSize": "var(--portal-text-md,13px)", "fontWeight": "600", "color": INK}
+TILE_NOTE_STYLES = {"fontSize": "var(--portal-text-sm,12px)", "color": INK_SUBTLE, "lineHeight": "1.45"}
 TILE_META_STYLES = {**ROW_FLEX, "gap": "6px", "flexWrap": "wrap", "fontSize": "var(--portal-text-xs,11px)", "color": INK_SUBTLE}
 TILE_RADIO_STYLES = {
 	**ROW_FLEX,
@@ -2267,7 +2872,7 @@ def product_tiles(key, name):
 			bound(
 				"span",
 				"rate",
-				styles={**TABULAR, "fontSize": "var(--portal-text-md,15px)", "fontWeight": "600", "color": INK},
+				styles={**TABULAR, "fontSize": "var(--portal-text-md,13px)", "fontWeight": "600", "color": INK},
 			),
 			bound("span", "rate_note"),
 		],
@@ -2314,7 +2919,7 @@ CODE_BOX_STYLES = {
 	"height": "50px",
 	"textAlign": "center",
 	"fontFamily": "inherit",
-	"fontSize": "var(--portal-text-lg,18px)",
+	"fontSize": "var(--portal-text-lg,14px)",
 	"fontWeight": "600",
 	"borderRadius": "var(--brand-radius,8px)",
 	"border": BORDER,
@@ -2364,8 +2969,8 @@ OFFER_STYLES = {
 	"background": SURFACE_CARD,
 }
 OFFER_HEAD_STYLES = {**COLUMN, "gap": "3px", "padding": "18px 20px", "background": OK_SOFT}
-OFFER_HEADLINE_STYLES = {"fontSize": "var(--portal-text-lg,18px)", "fontWeight": "600", "color": OK_DEEP}
-OFFER_MESSAGE_STYLES = {"fontSize": "var(--portal-text-sm,13px)", "color": INK_MUTED, "lineHeight": "1.5"}
+OFFER_HEADLINE_STYLES = {"fontSize": "var(--portal-text-lg,14px)", "fontWeight": "600", "color": OK_DEEP}
+OFFER_MESSAGE_STYLES = {"fontSize": "var(--portal-text-sm,12px)", "color": INK_MUTED, "lineHeight": "1.5"}
 OFFER_GRID_STYLES = {
 	"display": "grid",
 	"gridTemplateColumns": "repeat(3, minmax(0, 1fr))",
@@ -2373,7 +2978,7 @@ OFFER_GRID_STYLES = {
 }
 OFFER_CELL_STYLES = {**COLUMN, "gap": "4px", "padding": "16px 20px"}
 OFFER_LABEL_STYLES = {"fontSize": "var(--portal-text-xs,11px)", "color": INK_SUBTLE}
-OFFER_VALUE_STYLES = {**TABULAR, "fontSize": "var(--portal-text-xl,24px)", "fontWeight": "600", "color": INK}
+OFFER_VALUE_STYLES = {**TABULAR, "fontSize": "var(--portal-text-xl,17px)", "fontWeight": "600", "color": INK}
 OFFER_FOOT_STYLES = {
 	**ROW_FLEX,
 	"gap": "12px",
@@ -2382,7 +2987,7 @@ OFFER_FOOT_STYLES = {
 	"borderTop": BORDER,
 	"background": SURFACE_SUNKEN,
 }
-REFERENCE_STYLES = {**TABULAR, "fontSize": "var(--portal-text-sm,13px)", "color": INK_MUTED}
+REFERENCE_STYLES = {**TABULAR, "fontSize": "var(--portal-text-sm,12px)", "color": INK_MUTED}
 
 
 # --- the tracker timeline -----------------------------------------------------------
@@ -2403,8 +3008,8 @@ TIMELINE_DOT_STYLES = {
 }
 TIMELINE_STEM_STYLES = {"width": "1px", "flex": "1 1 auto", "minHeight": "18px", "background": BORDER_COLOR}
 TIMELINE_BODY_STYLES = {**COLUMN, "gap": "2px", "padding": "8px 0 14px"}
-TIMELINE_TITLE_STYLES = {"fontSize": "var(--portal-text-md,15px)", "fontWeight": "500", "color": INK}
-TIMELINE_NOTE_STYLES = {"fontSize": "var(--portal-text-sm,13px)", "color": INK_SUBTLE, "lineHeight": "1.5"}
+TIMELINE_TITLE_STYLES = {"fontSize": "var(--portal-text-md,13px)", "fontWeight": "500", "color": INK}
+TIMELINE_NOTE_STYLES = {"fontSize": "var(--portal-text-sm,12px)", "color": INK_SUBTLE, "lineHeight": "1.5"}
 
 
 def timeline_shell():
@@ -2638,7 +3243,7 @@ def topbar(links):
 	bar looking for, so it is a pill rather than the third of three identical links.
 	"""
 	children = brand_lockup(
-		{"fontSize": "var(--portal-text-md,15px)", "fontWeight": "500", "color": INK}, mark_styles=MARK_STYLES
+		{"fontSize": "var(--portal-text-md,13px)", "fontWeight": "500", "color": INK}, mark_styles=MARK_STYLES
 	)
 
 	if links:

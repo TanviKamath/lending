@@ -6,11 +6,11 @@
  "group": null,
  "idx": 0,
  "is_standard": 0,
- "modified": "2026-09-18 15:32:59.587775",
+ "modified": "2026-09-20 13:12:20.973710",
  "modified_by": "Administrator",
  "name": "portal-text-2xl",
  "owner": "Administrator",
  "token_name": "portal-text-2xl",
  "type": "Dimension",
- "value": "32px"
+ "value": "20px"
 }

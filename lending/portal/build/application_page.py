@@ -16,29 +16,26 @@ frappe.form_dict, and the data script runs after that -- so the endpoint reads t
 name from form_dict and checks ownership before touching the record.
 
 The tracker leads, because "where has my application got to" is the question that
-brings a borrower here. Everything below it answers "and what did I ask for".
+brings a borrower here. It runs across the hero rather than down a card, so the whole
+journey is one glance, and under it a sentence says what the stage it has reached
+means. Everything below answers "and what did I ask for", in one card whose sections
+are tabs: four sets of label-and-value pairs stacked down the page is a scroll, and
+only one of them is being read at a time.
 """
 
 from lending.portal.build.shell import build_page
 from lending.portal.build.theme import (
-	AVATAR_STYLES,
-	CARD_HEAD_STYLES,
-	CARD_STYLES,
-	CARD_SUB_STYLES,
-	CARD_TITLE_STYLES,
-	COL_MAIN_STYLES,
-	GRID_STYLES,
-	GRID_TABLET_STYLES,
-	LI_BODY_STYLES,
-	LI_STYLES,
-	PRIMARY_TEXT_STYLES,
-	ROW_STYLES,
-	SECONDARY_TEXT_STYLES,
-	STACK_STYLES,
-	STATE_STYLES,
+	APPLICATION_CSS,
+	AS_ON_STYLES,
+	BACK_STYLES,
+	CHEVRON_LEFT,
+	CREST_STYLES,
+	ICON_MONEY,
 	block,
 	bound,
-	repeater,
+	lead_card,
+	pair_grid,
+	preview,
 )
 
 PAGE_NAME = "Borrower Application Detail"
@@ -51,116 +48,48 @@ DATA_SCRIPT = '''
 data.update(frappe.call("lending.portal.applications.get_application_detail"))  # noqa: F821
 '''
 
+def crest():
+	"""The way back, and the day this is being read.
 
-def card(title, subtitle_key, body):
+	Both sit above the hero rather than in the shell's own header: the header is one
+	component shared by eleven pages, and a node added there is only served after all
+	eleven have been rebuilt.
+	"""
 	return block(
-		"section",
-		styles=CARD_STYLES,
-		children=[
-			block(
-				"div",
-				styles=CARD_HEAD_STYLES,
-				children=[
-					block("h2", styles=CARD_TITLE_STYLES, html=title),
-					bound("div", subtitle_key, styles=CARD_SUB_STYLES),
-				],
-			),
-			body,
-		],
-	)
-
-
-def steps_body():
-	"""One row per stage. The marker is a character from the data layer, so a stage
-	reads as done, current or waiting without a style per row."""
-	row = block(
 		"div",
-		styles=LI_STYLES,
+		styles=CREST_STYLES,
 		children=[
-			bound("span", "marker", styles={**AVATAR_STYLES, "background": "transparent"}),
 			block(
-				"div",
-				styles=LI_BODY_STYLES,
+				"a",
+				styles=BACK_STYLES,
+				attributes={"href": "/borrower/applications"},
 				children=[
-					bound("div", "title", styles=PRIMARY_TEXT_STYLES),
-					bound("div", "detail", styles=SECONDARY_TEXT_STYLES),
+					block("span", html=CHEVRON_LEFT, attributes={"aria-hidden": "true"}),
+					block("span", html="Back"),
 				],
 			),
-			bound("span", "state", styles=STATE_STYLES),
+			bound("span", "as_on", styles=AS_ON_STYLES),
 		],
 	)
 
-	return repeater("steps", row)
 
-
-def pair_rows(key, with_detail=False):
-	"""A repeater over label and value pairs: terms, applicant, charges, documents."""
-	main = [
-		bound("div", "label", styles=SECONDARY_TEXT_STYLES),
-		bound("div", "value", styles=PRIMARY_TEXT_STYLES),
+def sections():
+	"""What the preview holds, in the order a borrower checks it: the loan first,
+	because that is what the application is, then who it is for, then what went with
+	it. Built per call, so no two pages share a block dict."""
+	return [
+		("terms", "Loan Details", "terms_note", pair_grid("terms")),
+		("applicant", "Your Details", "applicant_note", pair_grid("applicant")),
+		("co_applicants", "Co-applicants", "co_applicants_note", pair_grid("co_applicants", with_detail=True)),
+		("documents", "Documents", "documents_note", pair_grid("documents", marker=True)),
 	]
-	if with_detail:
-		detail = bound("div", "detail", styles=SECONDARY_TEXT_STYLES)
-		detail["visibilityCondition"] = "detail"
-		main.append(detail)
-
-	row = block(
-		"div",
-		styles=ROW_STYLES,
-		children=[block("div", styles=COL_MAIN_STYLES, children=main)],
-	)
-
-	return repeater(key, row)
-
-
-def documents_body():
-	row = block(
-		"div",
-		styles=ROW_STYLES,
-		children=[
-			bound("span", "marker", styles={**AVATAR_STYLES, "background": "transparent"}),
-			block(
-				"div",
-				styles=COL_MAIN_STYLES,
-				children=[bound("div", "label", styles=PRIMARY_TEXT_STYLES)],
-			),
-			bound("span", "value", styles=STATE_STYLES),
-		],
-	)
-
-	return repeater("documents", row)
 
 
 def content():
 	return [
-		card("Where your application stands", "steps_note", steps_body()),
-		block(
-			"div",
-			styles=GRID_STYLES,
-			tabletStyles=GRID_TABLET_STYLES,
-			children=[
-				block(
-					"div",
-					styles=STACK_STYLES,
-					children=[
-						card("What you asked for", "terms_note", pair_rows("terms")),
-						card("Documents", "documents_note", documents_body()),
-					],
-				),
-				block(
-					"div",
-					styles=STACK_STYLES,
-					children=[
-						card("Your details", "applicant_note", pair_rows("applicant")),
-						card(
-							"Co-applicants",
-							"co_applicants_note",
-							pair_rows("co_applicants", with_detail=True),
-						),
-					],
-				),
-			],
-		),
+		crest(),
+		lead_card("product", "reference", "steps", "headline", "headline_note", ICON_MONEY),
+		preview("Application preview", "preview_note", sections()),
 	]
 
 
@@ -171,4 +100,5 @@ def build():
 		"Application",
 		content(),
 		data_script=DATA_SCRIPT,
+		extra_css=APPLICATION_CSS,
 	)

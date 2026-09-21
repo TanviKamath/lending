@@ -21,48 +21,40 @@ rule sits on its own block rather than in a stylesheet.
 
 from lending.portal.build.shell import build_page
 from lending.portal.build.theme import (
+	ACTIVITY_CSS,
 	AMOUNT_STYLES,
-	CARD_HEAD_STYLES,
-	CARD_STYLES,
-	CARD_SUB_STYLES,
-	CARD_TITLE_STYLES,
-	COL_AMT_STYLES,
-	COL_MAIN_STYLES,
-	COL_NEXT_STYLES,
-	COL_STATUS_STYLES,
-	DOT_STYLES,
-	FLAG_STYLES,
 	GRID_STYLES,
 	GRID_TABLET_STYLES,
-	LI_AMT_STYLES,
-	LI_BODY_STYLES,
-	LI_DATE_STYLES,
-	LI_STYLES,
-	MONEY_ACTION_STYLES,
-	MONEY_FIGURE_STYLES,
-	MONEY_FIGURES_STYLES,
-	MONEY_ITEM_STYLES,
-	MONEY_LABEL_STYLES,
-	MONEY_NOTE_STYLES,
-	MONEY_STYLES,
-	MONEY_SUB_STYLES,
+	NCARD_BODY_STYLES,
+	NCARD_HEAD_STYLES,
+	NCARD_STAT_STYLES,
+	NCARD_STYLES,
+	NCARD_TITLE_STYLES,
+	NUMBER_STYLES,
 	PRIMARY_TEXT_STYLES,
-	ROW_STYLES,
 	SECONDARY_TEXT_STYLES,
 	STACK_STYLES,
-	STATE_STYLES,
-	TABULAR,
-	THEAD_LABEL_STYLES,
-	THEAD_STYLES,
+	TASK_BODY_STYLES,
+	TASK_ROW_STYLES,
+	TASKS_LIST_STYLES,
+	TASKS_NOTE_STYLES,
+	TASKS_STYLES,
+	TOP_CARDS_STYLES,
+	TOP_CARDS_TABLET_STYLES,
 	WHY_STYLES,
+	activity_list,
+	badge,
 	block,
 	bound,
+	card,
+	linked,
+	record_table,
 	repeater,
+	timeline_rows,
 )
 
 PAGE_NAME = "Borrower Account Overview"
 ROUTE = "borrower/overview"
-ACTION_HREF = "/borrower/repayments"
 
 # One call, so the page makes a single trip to the data layer.
 DATA_SCRIPT = '''
@@ -73,216 +65,156 @@ data.update(frappe.call("lending.portal.core.get_dashboard"))  # noqa: F821
 '''
 
 
-def figure(label_key, value_key, note_key, flag_key=None, sub_key=None):
-	"""One of the two figures: what it is, how much it is, and when it falls.
+def number_card(title_key, value_key, stat_key, flag_key=None, flag_tone_key=None, sub_key=None):
+	"""A single number card: title at the top, large number below, and a stat line.
 
-	`flag_key` is the "due in five days" pill that sits beside the label, and `sub_key`
-	is the quieter line under the note. Both hide themselves when the payload has
-	nothing to put in them, so a borrower with nothing due is not shown an empty pill.
+	Modelled on the number cards the loans page already uses (NCARD_STYLES), so the
+	two pages share the same visual language. `flag_key` is the "due in five days"
+	pill beside the title, and `sub_key` is the quieter line under the stat.
+
+	`flag_tone_key` is for a pill that does not always mean the same thing. The due
+	pill is always a warning and says so on the block; an application stage is a
+	warning when it is waiting on the borrower and neutral when it is with the
+	lender, so it takes its tone from the payload like a table badge does.
 	"""
-	label_children = [bound("span", label_key)]
+	head_children = [bound("span", title_key, styles=NCARD_TITLE_STYLES)]
 	if flag_key:
-		flag = bound("span", flag_key, styles=FLAG_STYLES)
+		flag = badge(flag_key, tone_key=flag_tone_key) if flag_tone_key else badge(flag_key, tone="warn")
 		flag["visibilityCondition"] = flag_key
-		label_children.append(flag)
+		head_children.append(flag)
 
-	children = [
-		block("div", styles=MONEY_LABEL_STYLES, children=label_children),
-		bound("div", value_key, styles=MONEY_FIGURE_STYLES),
-		bound("div", note_key, styles=MONEY_NOTE_STYLES),
+	body_children = [
+		bound("div", value_key, styles=NUMBER_STYLES),
+		bound("div", stat_key, styles=NCARD_STAT_STYLES),
 	]
 	if sub_key:
-		sub = bound("div", sub_key, styles=MONEY_SUB_STYLES)
+		sub = bound("div", sub_key, styles=NCARD_STAT_STYLES)
 		sub["visibilityCondition"] = sub_key
-		children.append(sub)
+		body_children.append(sub)
 
-	return block("div", styles=MONEY_ITEM_STYLES, children=children)
+	return block(
+		"div",
+		styles=NCARD_STYLES,
+		children=[
+			block("div", styles=NCARD_HEAD_STYLES, children=head_children),
+			block("div", styles=NCARD_BODY_STYLES, children=body_children),
+		],
+	)
 
 
-def money_block():
-	"""The two questions a borrower opens the portal with, and the button that answers.
+def summary_block():
+	"""The three questions a borrower opens the portal with, in one strip.
 
-	The button is the page's own rather than the frame's -- build() passes action_href
-	as None, which is how the shell is told to hide its header stub -- because a
-	borrower who has just read what is due should not have to look back up to the
-	navigation to pay it.
+	Where has my application got to, what do I pay next, and how much do I still owe.
+	The application leads because it is the one that has an answer from the first day:
+	the two figures beside it read "Nothing due" and "No live accounts" until a loan is
+	booked, and a borrower who is still applying was meeting an empty page.
+
+	Each sits in its own number card -- rounded, bordered, white background -- so the
+	overview reads the same way the loans page does. The application card is the wide
+	one, because a product name and a stage are words where the other two are figures.
 	"""
 	return block(
 		"section",
-		styles=MONEY_STYLES,
+		styles=TOP_CARDS_STYLES,
+		tabletStyles=TOP_CARDS_TABLET_STYLES,
 		children=[
-			block(
-				"div",
-				styles=MONEY_FIGURES_STYLES,
-				children=[
-					figure("label_next", "next_amount", "next_note", flag_key="next_flag"),
-					figure(
-						"label_outstanding",
-						"outstanding",
-						"outstanding_note",
-						sub_key="sanctioned_line",
-					),
-				],
+			number_card(
+				"label_application",
+				"application_headline",
+				"application_note",
+				flag_key="application_stage",
+				flag_tone_key="application_stage_tone",
+				sub_key="application_more",
 			),
-			bound(
-				"a",
-				"action_label",
-				styles=MONEY_ACTION_STYLES,
-				attributes={"href": ACTION_HREF},
+			number_card("label_next", "next_amount", "next_note", flag_key="next_flag"),
+			number_card(
+				"label_outstanding",
+				"outstanding",
+				"outstanding_note",
+				sub_key="sanctioned_line",
 			),
 		],
 	)
 
 
-def card(title, subtitle_key, body):
-	return block(
-		"section",
-		styles=CARD_STYLES,
+def tasks_block():
+	"""What is waiting on the borrower, directly under the figures.
+
+	This is the page's answer to its own worst habit: the only rows that asked
+	anything of the borrower were two lines of grey text in the middle of a table,
+	under a black button offering a payment that was eighteen days away. The work
+	comes first now, and the button follows it.
+
+	The strip hides itself when the payload has no tasks, so it costs a borrower with
+	nothing to do exactly nothing.
+	"""
+	row = linked(
+		"url",
+		styles=TASK_ROW_STYLES,
 		children=[
 			block(
 				"div",
-				styles=CARD_HEAD_STYLES,
-				children=[
-					block("h2", styles=CARD_TITLE_STYLES, html=title),
-					bound("div", subtitle_key, styles=CARD_SUB_STYLES),
-				],
-			),
-			body,
-		],
-	)
-
-
-def thead(labels):
-	columns = [COL_MAIN_STYLES, COL_STATUS_STYLES, COL_NEXT_STYLES, COL_AMT_STYLES]
-	return block(
-		"div",
-		styles=THEAD_STYLES,
-		children=[
-			block("span", styles={**columns[index], **THEAD_LABEL_STYLES}, html=label)
-			for index, label in enumerate(labels)
-		],
-	)
-
-
-def accounts_body():
-	row = block(
-		"div",
-		styles=ROW_STYLES,
-		children=[
-			block(
-				"div",
-				styles=COL_MAIN_STYLES,
+				styles=TASK_BODY_STYLES,
 				children=[
 					bound("div", "product", styles=PRIMARY_TEXT_STYLES),
-					bound("div", "terms", styles=SECONDARY_TEXT_STYLES),
+					bound("div", "note", styles=SECONDARY_TEXT_STYLES),
 				],
 			),
-			block(
-				"div",
-				styles=COL_STATUS_STYLES,
-				children=[
-					block(
-						"span",
-						styles=STATE_STYLES,
-						children=[
-							block("span", styles=DOT_STYLES),
-							bound("span", "status_label"),
-						],
-					)
-				],
-			),
-			block(
-				"div",
-				styles=COL_NEXT_STYLES,
-				children=[
-					bound("div", "next_date", styles=TABULAR),
-					bound("div", "next_amount", styles=SECONDARY_TEXT_STYLES),
-				],
-			),
-			block(
-				"div",
-				styles=COL_AMT_STYLES,
-				children=[
-					bound("div", "outstanding", styles=AMOUNT_STYLES),
-					bound("div", "against", styles=SECONDARY_TEXT_STYLES),
-				],
-			),
+			badge("stage", tone_key="stage_tone"),
 		],
 	)
 
-	return block(
-		"div",
+	strip = block(
+		"section",
+		styles=TASKS_STYLES,
 		children=[
-			thead(["Account", "Status", "Next repayment", "Outstanding"]),
-			repeater("accounts", row),
+			bound("div", "tasks_note", styles=TASKS_NOTE_STYLES),
+			repeater("tasks", row, styles=TASKS_LIST_STYLES),
 		],
 	)
+	strip["visibilityCondition"] = "tasks"
+
+	return strip
 
 
 def applications_body():
+	"""The same table the Applications page draws, so a row means the same thing twice.
+
+	It matters most for the row that says Action required: that is the only thing on
+	this page waiting on the borrower, and until now it was the one row they could
+	read but not open.
+	"""
 	why = bound("div", "note", styles=WHY_STYLES)
 	why["visibilityCondition"] = "note"
 
-	row = block(
-		"div",
-		styles=ROW_STYLES,
-		children=[
-			block(
-				"div",
-				styles=COL_MAIN_STYLES,
-				children=[
-					bound("div", "product", styles=PRIMARY_TEXT_STYLES),
-					bound("div", "reference", styles=SECONDARY_TEXT_STYLES),
-					why,
-				],
-			),
-			block(
-				"div",
-				styles=COL_STATUS_STYLES,
-				children=[bound("span", "stage", styles=STATE_STYLES)],
-			),
-			block(
-				"div",
-				styles=COL_AMT_STYLES,
-				children=[bound("div", "amount", styles=AMOUNT_STYLES)],
-			),
+	return record_table(
+		["Application", "Stage", "Amount sought"],
+		[
+			[
+				bound("div", "product", styles=PRIMARY_TEXT_STYLES),
+				bound("div", "reference", styles=SECONDARY_TEXT_STYLES),
+				why,
+			],
+			[badge("stage", tone_key="stage_tone")],
+			[bound("div", "amount", styles=AMOUNT_STYLES)],
 		],
+		"applications",
 	)
-
-	return block(
-		"div",
-		children=[
-			thead(["Application", "Stage", "Amount sought"]),
-			repeater("applications", row),
-		],
-	)
-
-
-def timeline_body(key, title_key):
-	row = block(
-		"div",
-		styles=LI_STYLES,
-		children=[
-			bound("span", "date", styles=LI_DATE_STYLES),
-			block(
-				"div",
-				styles=LI_BODY_STYLES,
-				children=[
-					bound("div", title_key, styles=PRIMARY_TEXT_STYLES),
-					bound("div", "detail" if title_key == "product" else "sub", styles=SECONDARY_TEXT_STYLES),
-				],
-			),
-			bound("span", "amount", styles=LI_AMT_STYLES),
-		],
-	)
-
-	return repeater(key, row)
 
 
 def content():
-	"""The page's own blocks, dropped into the shell's content well."""
+	"""The page's own blocks, dropped into the shell's content well.
+
+	Three figure cards, then whatever is waiting on the borrower, then two columns:
+	the record of the account down the wide side, the four instalments coming down the
+	narrow one. The story reads top to bottom on the left -- where the application has
+	got to, what it has become, what has happened to it -- and the one thing that is
+	about the future sits beside it rather than under it.
+	"""
 	return [
-		money_block(),
+		summary_block(),
+		tasks_block(),
 		block(
 			"div",
 			styles=GRID_STYLES,
@@ -292,16 +224,32 @@ def content():
 					"div",
 					styles=STACK_STYLES,
 					children=[
-						card("Loan accounts", "accounts_note", accounts_body()),
-						card("Applications", "applications_note", applications_body()),
+						# The one card that never hides. A borrower with no loans and
+						# no applications still gets this, saying none are in
+						# progress, so the page is never only its figures.
+						card("Application status", "applications_note", applications_body()),
+						card(
+							"Activity timeline",
+							"activity_note",
+							# A line of dots and a sentence each, rather than the dated
+							# rows the schedule beside it keeps. What has already
+							# happened is read as a record -- "Repayment received,
+							# 2 days ago" -- and what has not is read as a diary.
+							activity_list("activity", "title", "note", url_key="url", date_key="date"),
+							visible_key="activity",
+						),
 					],
 				),
 				block(
 					"div",
 					styles=STACK_STYLES,
 					children=[
-						card("Scheduled repayments", "schedule_note", timeline_body("schedule", "product")),
-						card("Recent activity", "activity_note", timeline_body("activity", "title")),
+						card(
+							"Scheduled repayments",
+							"schedule_note",
+							timeline_rows("schedule", "title", "sub", url_key="url"),
+							visible_key="schedule",
+						),
 					],
 				),
 			],
@@ -315,7 +263,10 @@ def build():
 		ROUTE,
 		"Account overview",
 		content(),
-		# No header button: this page carries its own, under the figure it pays off.
 		action_href=None,
 		data_script=DATA_SCRIPT,
+		# The one rule the activity list cannot put on a block: its rows are one
+		# repeated block, so only a stylesheet can tell the last of them apart and cut
+		# the stem that would otherwise run on under the final dot.
+		extra_css=ACTIVITY_CSS,
 	)
