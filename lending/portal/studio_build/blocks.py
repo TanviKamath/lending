@@ -167,6 +167,31 @@ def button(label, script=None, variant="subtle", **kwargs):
 def alert(message, theme="blue", **kwargs):
 	"""A quiet panel of guidance, shown only when the data supplies one."""
 	return block("Alert", props={"title": message, "theme": theme}, **kwargs)
+def breadcrumb_trail(items, **kwargs):
+	children = []
+	for i, item in enumerate(items):
+		if item.get("route"):
+			children.append(
+				button(
+					item["label"],
+					variant="ghost",
+					script=f"open('{item['route']}')",
+					props={"size": "sm"},
+					styles={"padding": "4px 8px"}
+				)
+			)
+		else:
+			children.append(
+				text(
+					item["label"],
+					size="text-sm",
+					styles={"fontWeight": "500", "padding": "4px 8px"}
+				)
+			)
+		if i < len(items) - 1:
+			children.append(text("/", size="text-sm", styles={"color": "var(--ink-gray-4)"}))
+
+	return row(children, gap="4px", styles={"alignItems": "center"}, **kwargs)
 
 
 def divider(**kwargs):

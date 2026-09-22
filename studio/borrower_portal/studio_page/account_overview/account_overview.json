@@ -11,129 +11,157 @@
    "blockName": "body",
    "children": [
     {
-     "children": [],
-     "classes": [],
-     "componentId": "Sidebar-xj1yvv2ky",
-     "componentName": "Sidebar",
-     "componentProps": {
-      "header": {
-       "title": "{{ overview.data.brand_name }}"
-      },
-      "sections": [
-       {
-        "items": [
-         {
-          "icon": "{{ getIcon('layout-dashboard') }}",
-          "label": "Account overview",
-          "to": "/overview"
-         },
-         {
-          "icon": "{{ getIcon('wallet') }}",
-          "label": "Loan accounts",
-          "to": "/loans"
-         },
-         {
-          "icon": "{{ getIcon('file-text') }}",
-          "label": "Applications",
-          "to": "/applications"
-         },
-         {
-          "icon": "{{ getIcon('paperclip') }}",
-          "label": "Documents",
-          "to": "/documents"
-         },
-         {
-          "icon": "{{ getIcon('receipt') }}",
-          "label": "Statement of account",
-          "to": "/statement"
-         },
-         {
-          "icon": "{{ getIcon('award') }}",
-          "label": "Interest certificate",
-          "to": "/certificate"
-         },
-         {
-          "icon": "{{ getIcon('user') }}",
-          "label": "Personal details",
-          "to": "/profile"
-         },
-         {
-          "icon": "{{ getIcon('search') }}",
-          "label": "Search",
-          "to": "/search"
-         }
-        ],
-        "label": ""
-       }
-      ]
-     },
-     "componentSlots": {
-      "footer-items": {
-       "parentBlockId": "Sidebar-xj1yvv2ky",
-       "slotContent": [
+     "children": [
+      {
+       "baseStyles": {
+        "display": "flex",
+        "flexDirection": "column",
+        "height": "100%",
+        "padding": "0.5rem"
+       },
+       "children": [
         {
-         "attributes": {},
+         "children": [],
+         "componentName": "SidebarHeader",
+         "componentProps": {
+          "title": "{{ overview.data.brand_name }}"
+         }
+        },
+        {
          "baseStyles": {
-          "display": "flex",
-          "flexDirection": "column",
-          "gap": "2px",
-          "padding": "12px"
+          "flex": "1 1 0%",
+          "overflowX": "hidden",
+          "overflowY": "auto"
          },
          "children": [
           {
-           "attributes": {},
-           "baseStyles": {
-            "fontWeight": "600"
-           },
            "children": [],
-           "classes": [],
-           "componentEvents": {},
-           "componentId": "TextBlock-l7est0hd3",
-           "componentName": "TextBlock",
+           "componentName": "SidebarItem",
            "componentProps": {
-            "fontSize": "text-sm",
-            "tag": "p",
-            "text": "{{ overview.data.holder_name }}"
-           },
-           "componentSlots": {},
-           "mobileStyles": {},
-           "tabletStyles": {}
+            "icon": "lucide-layout-dashboard",
+            "label": "Account overview",
+            "to": "/overview"
+           }
           },
           {
-           "attributes": {},
-           "baseStyles": {
-            "color": "var(--ink-gray-6)"
-           },
            "children": [],
-           "classes": [],
-           "componentEvents": {},
-           "componentId": "TextBlock-uuu59ug07",
-           "componentName": "TextBlock",
+           "componentName": "SidebarItem",
            "componentProps": {
-            "fontSize": "text-p-xs",
-            "tag": "p",
-            "text": "{{ overview.data.customer_note }}"
-           },
-           "componentSlots": {},
-           "mobileStyles": {},
-           "tabletStyles": {}
+            "icon": "lucide-wallet",
+            "label": "Loan accounts",
+            "to": "/loans"
+           }
+          },
+          {
+           "children": [],
+           "componentName": "SidebarItem",
+           "componentProps": {
+            "icon": "lucide-file-text",
+            "label": "Applications",
+            "to": "/applications"
+           }
+          },
+          {
+           "children": [],
+           "componentName": "SidebarItem",
+           "componentProps": {
+            "icon": "lucide-paperclip",
+            "label": "Documents",
+            "to": "/documents"
+           }
+          },
+          {
+           "children": [],
+           "componentName": "SidebarItem",
+           "componentProps": {
+            "icon": "lucide-receipt",
+            "label": "Statement of account",
+            "to": "/statement"
+           }
+          },
+          {
+           "children": [],
+           "componentName": "SidebarItem",
+           "componentProps": {
+            "icon": "lucide-award",
+            "label": "Interest certificate",
+            "to": "/certificate"
+           }
+          },
+          {
+           "children": [],
+           "componentName": "SidebarItem",
+           "componentProps": {
+            "icon": "lucide-user",
+            "label": "Personal details",
+            "to": "/profile"
+           }
+          },
+          {
+           "children": [],
+           "componentName": "SidebarItem",
+           "componentProps": {
+            "icon": "lucide-search",
+            "label": "Search",
+            "to": "/search"
+           }
           }
          ],
-         "classes": [],
-         "componentEvents": {},
-         "componentId": "container-0xqc2498m",
-         "componentName": "container",
-         "componentProps": {},
-         "componentSlots": {},
-         "mobileStyles": {},
-         "originalElement": "div",
-         "tabletStyles": {}
+         "componentName": "div"
+        },
+        {
+         "baseStyles": {
+          "marginTop": "auto"
+         },
+         "children": [
+          {
+           "baseStyles": {
+            "display": "flex",
+            "flexDirection": "column",
+            "gap": "2px",
+            "padding": "12px"
+           },
+           "children": [
+            {
+             "baseStyles": {
+              "fontWeight": "600"
+             },
+             "children": [],
+             "componentName": "TextBlock",
+             "componentProps": {
+              "fontSize": "text-sm",
+              "tag": "p",
+              "text": "{{ overview.data.holder_name }}"
+             }
+            },
+            {
+             "baseStyles": {
+              "color": "var(--ink-gray-6)"
+             },
+             "children": [],
+             "componentName": "TextBlock",
+             "componentProps": {
+              "fontSize": "text-p-xs",
+              "tag": "p",
+              "text": "{{ overview.data.customer_note }}"
+             }
+            }
+           ],
+           "componentName": "container",
+           "originalElement": "div"
+          },
+          {
+           "children": [],
+           "componentName": "SidebarCollapseToggle"
+          }
+         ],
+         "componentName": "div"
         }
        ],
-       "slotId": "Sidebar-xj1yvv2ky:footer-items",
-       "slotName": "footer-items"
+       "componentName": "div"
       }
-     },
+     ],
+     "componentName": "Sidebar",
      "mobileStyles": {
       "display": "none"
      }
@@ -150,12 +178,10 @@
      "children": [
       {
        "children": [],
-       "classes": [],
-       "componentId": "borrower_header-ubr3lvccn",
        "componentName": "borrower_header",
        "componentProps": {
         "action_label": "View payment details",
-        "action_route": "/borrower/loans",
+        "action_route": "/borrower-portal/loans",
         "crumb": "{{ overview.data.crumb }}",
         "note": "{{ overview.data.head_note }}",
         "status": "{{ overview.data.account_status }}",
@@ -205,8 +231,6 @@
              "children": [
               {
                "children": [],
-               "classes": [],
-               "componentId": "TextBlock-co1xmes37",
                "componentName": "TextBlock",
                "componentProps": {
                 "fontSize": "text-xs",
@@ -216,8 +240,6 @@
               },
               {
                "children": [],
-               "classes": [],
-               "componentId": "Badge-8b2y9j1uu",
                "componentName": "Badge",
                "componentProps": {
                 "label": "{{ overview.data.application_stage }}",
@@ -228,8 +250,6 @@
                "visibilityCondition": "{{ overview.data.application_stage }}"
               }
              ],
-             "classes": [],
-             "componentId": "container-kmemoit7e",
              "componentName": "container",
              "originalElement": "div"
             },
@@ -245,8 +265,6 @@
                 "fontWeight": "600"
                },
                "children": [],
-               "classes": [],
-               "componentId": "TextBlock-gc0jzc709",
                "componentName": "TextBlock",
                "componentProps": {
                 "fontSize": "text-4xl",
@@ -259,8 +277,6 @@
                 "color": "var(--ink-gray-6)"
                },
                "children": [],
-               "classes": [],
-               "componentId": "TextBlock-j009uurzl",
                "componentName": "TextBlock",
                "componentProps": {
                 "fontSize": "text-p-xs",
@@ -273,8 +289,6 @@
                 "color": "var(--ink-gray-6)"
                },
                "children": [],
-               "classes": [],
-               "componentId": "TextBlock-vwgyvcltl",
                "componentName": "TextBlock",
                "componentProps": {
                 "fontSize": "text-p-xs",
@@ -284,14 +298,10 @@
                "visibilityCondition": "{{ overview.data.application_more }}"
               }
              ],
-             "classes": [],
-             "componentId": "container-vk80v5qtv",
              "componentName": "container",
              "originalElement": "div"
             }
            ],
-           "classes": [],
-           "componentId": "container-yswr9izfm",
            "componentName": "container",
            "originalElement": "div"
           },
@@ -319,8 +329,6 @@
              "children": [
               {
                "children": [],
-               "classes": [],
-               "componentId": "TextBlock-5waz15v9j",
                "componentName": "TextBlock",
                "componentProps": {
                 "fontSize": "text-xs",
@@ -330,8 +338,6 @@
               },
               {
                "children": [],
-               "classes": [],
-               "componentId": "Badge-ygk2hfxt4",
                "componentName": "Badge",
                "componentProps": {
                 "label": "{{ overview.data.next_flag }}",
@@ -342,8 +348,6 @@
                "visibilityCondition": "{{ overview.data.next_flag }}"
               }
              ],
-             "classes": [],
-             "componentId": "container-6vqpc1c3h",
              "componentName": "container",
              "originalElement": "div"
             },
@@ -359,8 +363,6 @@
                 "fontWeight": "600"
                },
                "children": [],
-               "classes": [],
-               "componentId": "TextBlock-z4tyr79p0",
                "componentName": "TextBlock",
                "componentProps": {
                 "fontSize": "text-4xl",
@@ -373,8 +375,6 @@
                 "color": "var(--ink-gray-6)"
                },
                "children": [],
-               "classes": [],
-               "componentId": "TextBlock-lekqza4f6",
                "componentName": "TextBlock",
                "componentProps": {
                 "fontSize": "text-p-xs",
@@ -383,14 +383,10 @@
                }
               }
              ],
-             "classes": [],
-             "componentId": "container-astcbz4yk",
              "componentName": "container",
              "originalElement": "div"
             }
            ],
-           "classes": [],
-           "componentId": "container-gm2i04hhs",
            "componentName": "container",
            "originalElement": "div"
           },
@@ -418,8 +414,6 @@
              "children": [
               {
                "children": [],
-               "classes": [],
-               "componentId": "TextBlock-ezv2iojdo",
                "componentName": "TextBlock",
                "componentProps": {
                 "fontSize": "text-xs",
@@ -428,8 +422,6 @@
                }
               }
              ],
-             "classes": [],
-             "componentId": "container-f6gad29q7",
              "componentName": "container",
              "originalElement": "div"
             },
@@ -445,8 +437,6 @@
                 "fontWeight": "600"
                },
                "children": [],
-               "classes": [],
-               "componentId": "TextBlock-lvzhqex5h",
                "componentName": "TextBlock",
                "componentProps": {
                 "fontSize": "text-4xl",
@@ -459,8 +449,6 @@
                 "color": "var(--ink-gray-6)"
                },
                "children": [],
-               "classes": [],
-               "componentId": "TextBlock-4i8it0qh6",
                "componentName": "TextBlock",
                "componentProps": {
                 "fontSize": "text-p-xs",
@@ -473,8 +461,6 @@
                 "color": "var(--ink-gray-6)"
                },
                "children": [],
-               "classes": [],
-               "componentId": "TextBlock-7e4wbb7im",
                "componentName": "TextBlock",
                "componentProps": {
                 "fontSize": "text-p-xs",
@@ -484,20 +470,14 @@
                "visibilityCondition": "{{ overview.data.sanctioned_line }}"
               }
              ],
-             "classes": [],
-             "componentId": "container-zfkrg3f4q",
              "componentName": "container",
              "originalElement": "div"
             }
            ],
-           "classes": [],
-           "componentId": "container-oa8aisgvl",
            "componentName": "container",
            "originalElement": "div"
           }
          ],
-         "classes": [],
-         "componentId": "container-8f3gourr4",
          "componentName": "container",
          "mobileStyles": {
           "flexDirection": "column"
@@ -532,8 +512,6 @@
               "fontWeight": "600"
              },
              "children": [],
-             "classes": [],
-             "componentId": "TextBlock-dbup3i4bu",
              "componentName": "TextBlock",
              "componentProps": {
               "fontSize": "text-lg",
@@ -546,8 +524,6 @@
               "color": "var(--ink-gray-6)"
              },
              "children": [],
-             "classes": [],
-             "componentId": "TextBlock-0fn40s0i7",
              "componentName": "TextBlock",
              "componentProps": {
               "fontSize": "text-p-xs",
@@ -556,8 +532,6 @@
              }
             }
            ],
-           "classes": [],
-           "componentId": "container-7tb3h9hzb",
            "componentName": "container",
            "originalElement": "div"
           },
@@ -582,8 +556,6 @@
                "children": [
                 {
                  "children": [],
-                 "classes": [],
-                 "componentId": "TextBlock-7vr86vxc3",
                  "componentName": "TextBlock",
                  "componentProps": {
                   "fontSize": "text-base",
@@ -596,8 +568,6 @@
                   "color": "var(--ink-gray-6)"
                  },
                  "children": [],
-                 "classes": [],
-                 "componentId": "TextBlock-c606d8o47",
                  "componentName": "TextBlock",
                  "componentProps": {
                   "fontSize": "text-p-xs",
@@ -606,8 +576,6 @@
                  }
                 }
                ],
-               "classes": [],
-               "componentId": "container-dzszxazws",
                "componentName": "container",
                "originalElement": "div"
               },
@@ -616,15 +584,11 @@
                 "flex": "1 1 auto"
                },
                "children": [],
-               "classes": [],
-               "componentId": "container-67l6rv8kk",
                "componentName": "container",
                "originalElement": "div"
               },
               {
                "children": [],
-               "classes": [],
-               "componentId": "Badge-8yicjnh46",
                "componentName": "Badge",
                "componentProps": {
                 "label": "{{ dataItem.stage }}",
@@ -634,7 +598,6 @@
                }
               }
              ],
-             "classes": [],
              "componentEvents": {
               "click": {
                "action": "Run Script",
@@ -642,13 +605,10 @@
                "script": "open(dataItem.url)"
               }
              },
-             "componentId": "container-0te8qu6se",
              "componentName": "container",
              "originalElement": "div"
             }
            ],
-           "classes": [],
-           "componentId": "Repeater-8qa2vge9p",
            "componentName": "Repeater",
            "componentProps": {
             "data": "{{ overview.data.tasks }}",
@@ -657,8 +617,6 @@
            }
           }
          ],
-         "classes": [],
-         "componentId": "container-vultu2anb",
          "componentName": "container",
          "originalElement": "div",
          "visibilityCondition": "{{ overview.data.tasks }}"
@@ -703,8 +661,6 @@
                   "fontWeight": "600"
                  },
                  "children": [],
-                 "classes": [],
-                 "componentId": "TextBlock-opre818ng",
                  "componentName": "TextBlock",
                  "componentProps": {
                   "fontSize": "text-lg",
@@ -717,8 +673,6 @@
                   "color": "var(--ink-gray-6)"
                  },
                  "children": [],
-                 "classes": [],
-                 "componentId": "TextBlock-spczsaytj",
                  "componentName": "TextBlock",
                  "componentProps": {
                   "fontSize": "text-p-xs",
@@ -727,8 +681,6 @@
                  }
                 }
                ],
-               "classes": [],
-               "componentId": "container-ii0yoc0uv",
                "componentName": "container",
                "originalElement": "div"
               },
@@ -740,8 +692,6 @@
                    "children": [
                     {
                      "children": [],
-                     "classes": [],
-                     "componentId": "TextBlock-loescefgl",
                      "componentName": "TextBlock",
                      "componentProps": {
                       "fontSize": "text-xs",
@@ -750,16 +700,12 @@
                      }
                     }
                    ],
-                   "classes": [],
-                   "componentId": "ListHeaderCell-8gu0gkcbw",
                    "componentName": "ListHeaderCell"
                   },
                   {
                    "children": [
                     {
                      "children": [],
-                     "classes": [],
-                     "componentId": "TextBlock-bilhe03z8",
                      "componentName": "TextBlock",
                      "componentProps": {
                       "fontSize": "text-xs",
@@ -768,16 +714,12 @@
                      }
                     }
                    ],
-                   "classes": [],
-                   "componentId": "ListHeaderCell-yrz4mxe5p",
                    "componentName": "ListHeaderCell"
                   },
                   {
                    "children": [
                     {
                      "children": [],
-                     "classes": [],
-                     "componentId": "TextBlock-irphiimyh",
                      "componentName": "TextBlock",
                      "componentProps": {
                       "fontSize": "text-xs",
@@ -786,19 +728,13 @@
                      }
                     }
                    ],
-                   "classes": [],
-                   "componentId": "ListHeaderCell-jwxq9wzxw",
                    "componentName": "ListHeaderCell"
                   }
                  ],
-                 "classes": [],
-                 "componentId": "ListHeader-p82fbzxnp",
                  "componentName": "ListHeader"
                 },
                 {
                  "children": [],
-                 "classes": [],
-                 "componentId": "ListRows-hq6qqrgoh",
                  "componentName": "ListRows",
                  "componentProps": {
                   "items": "{{ overview.data.applications }}",
@@ -806,23 +742,17 @@
                  },
                  "componentSlots": {
                   "default": {
-                   "parentBlockId": "ListRows-hq6qqrgoh",
                    "slotContent": [
                     {
-                     "attributes": {},
                      "baseStyles": {},
                      "children": [
                       {
-                       "attributes": {},
                        "baseStyles": {},
                        "children": [
                         {
-                         "attributes": {},
                          "baseStyles": {},
                          "children": [],
-                         "classes": [],
                          "componentEvents": {},
-                         "componentId": "TextBlock-j38r3j1k6",
                          "componentName": "TextBlock",
                          "componentProps": {
                           "fontSize": "text-base",
@@ -834,14 +764,11 @@
                          "tabletStyles": {}
                         },
                         {
-                         "attributes": {},
                          "baseStyles": {
                           "color": "var(--ink-gray-6)"
                          },
                          "children": [],
-                         "classes": [],
                          "componentEvents": {},
-                         "componentId": "TextBlock-syape3gwq",
                          "componentName": "TextBlock",
                          "componentProps": {
                           "fontSize": "text-p-xs",
@@ -853,14 +780,11 @@
                          "tabletStyles": {}
                         },
                         {
-                         "attributes": {},
                          "baseStyles": {
                           "color": "var(--ink-gray-6)"
                          },
                          "children": [],
-                         "classes": [],
                          "componentEvents": {},
-                         "componentId": "TextBlock-yhshmxsoy",
                          "componentName": "TextBlock",
                          "componentProps": {
                           "fontSize": "text-p-xs",
@@ -873,9 +797,7 @@
                          "visibilityCondition": "{{ item.note }}"
                         }
                        ],
-                       "classes": [],
                        "componentEvents": {},
-                       "componentId": "ListCell-z76su312a",
                        "componentName": "ListCell",
                        "componentProps": {},
                        "componentSlots": {},
@@ -883,16 +805,12 @@
                        "tabletStyles": {}
                       },
                       {
-                       "attributes": {},
                        "baseStyles": {},
                        "children": [
                         {
-                         "attributes": {},
                          "baseStyles": {},
                          "children": [],
-                         "classes": [],
                          "componentEvents": {},
-                         "componentId": "Badge-nb6p8lbqu",
                          "componentName": "Badge",
                          "componentProps": {
                           "label": "{{ item.stage }}",
@@ -905,9 +823,7 @@
                          "tabletStyles": {}
                         }
                        ],
-                       "classes": [],
                        "componentEvents": {},
-                       "componentId": "ListCell-z2bjh7mm1",
                        "componentName": "ListCell",
                        "componentProps": {},
                        "componentSlots": {},
@@ -915,16 +831,12 @@
                        "tabletStyles": {}
                       },
                       {
-                       "attributes": {},
                        "baseStyles": {},
                        "children": [
                         {
-                         "attributes": {},
                          "baseStyles": {},
                          "children": [],
-                         "classes": [],
                          "componentEvents": {},
-                         "componentId": "TextBlock-dgmsucmku",
                          "componentName": "TextBlock",
                          "componentProps": {
                           "fontSize": "text-base",
@@ -936,9 +848,7 @@
                          "tabletStyles": {}
                         }
                        ],
-                       "classes": [],
                        "componentEvents": {},
-                       "componentId": "ListCell-4z2e7dxwz",
                        "componentName": "ListCell",
                        "componentProps": {},
                        "componentSlots": {},
@@ -946,7 +856,6 @@
                        "tabletStyles": {}
                       }
                      ],
-                     "classes": [],
                      "componentEvents": {
                       "click": {
                        "action": "Run Script",
@@ -954,7 +863,6 @@
                        "script": "open(item.url)"
                       }
                      },
-                     "componentId": "ListRow-ws56qsvy7",
                      "componentName": "ListRow",
                      "componentProps": {
                       "value": "{{ value }}"
@@ -964,14 +872,11 @@
                      "tabletStyles": {}
                     }
                    ],
-                   "slotId": "ListRows-hq6qqrgoh:default",
                    "slotName": "default"
                   }
                  }
                 }
                ],
-               "classes": [],
-               "componentId": "List-181c97rgj",
                "componentName": "List",
                "componentProps": {
                 "columns": [
@@ -983,24 +888,19 @@
                }
               }
              ],
-             "classes": [],
-             "componentId": "container-uq8mejjcf",
              "componentName": "container",
              "originalElement": "div"
             },
             {
              "baseStyles": {
-              "alignItems": "flex-start",
               "backgroundColor": "var(--surface-base)",
               "borderColor": "var(--outline-gray-2)",
               "borderRadius": "0.5rem",
               "borderStyle": "solid",
               "borderWidth": "1px",
-              "display": "grid",
+              "display": "flex",
               "flexDirection": "column",
               "gap": "12px",
-              "gridTemplateColumns": "repeat(2, minmax(200px, 1fr))",
-              "justifyContent": "flex-start",
               "padding": "16px"
              },
              "children": [
@@ -1016,8 +916,6 @@
                   "fontWeight": "600"
                  },
                  "children": [],
-                 "classes": [],
-                 "componentId": "TextBlock-nve0p9aq3",
                  "componentName": "TextBlock",
                  "componentProps": {
                   "fontSize": "text-lg",
@@ -1030,8 +928,6 @@
                   "color": "var(--ink-gray-6)"
                  },
                  "children": [],
-                 "classes": [],
-                 "componentId": "TextBlock-j0kmck2iw",
                  "componentName": "TextBlock",
                  "componentProps": {
                   "fontSize": "text-p-xs",
@@ -1040,15 +936,11 @@
                  }
                 }
                ],
-               "classes": [],
-               "componentId": "container-horeacl62",
                "componentName": "container",
                "originalElement": "div"
               },
               {
                "children": [],
-               "classes": [],
-               "componentId": "ActivityTimeline-g6s4giwgd",
                "componentName": "ActivityTimeline",
                "componentProps": {
                 "activities": "{{ (overview.data.activity || []).map((entry, index) => ({ type: 'portal', key: 'portal:' + index, icon: 'info', timestamp: entry.date, data: entry })) }}",
@@ -1056,10 +948,8 @@
                },
                "componentSlots": {
                 "default": {
-                 "parentBlockId": "ActivityTimeline-g6s4giwgd",
                  "slotContent": [
                   {
-                   "attributes": {},
                    "baseStyles": {
                     "alignItems": "center",
                     "cursor": "pointer",
@@ -1070,7 +960,6 @@
                    },
                    "children": [
                     {
-                     "attributes": {},
                      "baseStyles": {
                       "display": "flex",
                       "flexDirection": "column",
@@ -1078,12 +967,9 @@
                      },
                      "children": [
                       {
-                       "attributes": {},
                        "baseStyles": {},
                        "children": [],
-                       "classes": [],
                        "componentEvents": {},
-                       "componentId": "TextBlock-7kn0bleq8",
                        "componentName": "TextBlock",
                        "componentProps": {
                         "fontSize": "text-base",
@@ -1095,14 +981,11 @@
                        "tabletStyles": {}
                       },
                       {
-                       "attributes": {},
                        "baseStyles": {
                         "color": "var(--ink-gray-6)"
                        },
                        "children": [],
-                       "classes": [],
                        "componentEvents": {},
-                       "componentId": "TextBlock-33ewyfw4m",
                        "componentName": "TextBlock",
                        "componentProps": {
                         "fontSize": "text-p-xs",
@@ -1114,9 +997,7 @@
                        "tabletStyles": {}
                       }
                      ],
-                     "classes": [],
                      "componentEvents": {},
-                     "componentId": "container-rsg1j8zhw",
                      "componentName": "container",
                      "componentProps": {},
                      "componentSlots": {},
@@ -1125,14 +1006,11 @@
                      "tabletStyles": {}
                     },
                     {
-                     "attributes": {},
                      "baseStyles": {
                       "flex": "1 1 auto"
                      },
                      "children": [],
-                     "classes": [],
                      "componentEvents": {},
-                     "componentId": "container-vxn9ss7ar",
                      "componentName": "container",
                      "componentProps": {},
                      "componentSlots": {},
@@ -1141,14 +1019,11 @@
                      "tabletStyles": {}
                     },
                     {
-                     "attributes": {},
                      "baseStyles": {
                       "color": "var(--ink-gray-6)"
                      },
                      "children": [],
-                     "classes": [],
                      "componentEvents": {},
-                     "componentId": "TextBlock-a3wtcgisf",
                      "componentName": "TextBlock",
                      "componentProps": {
                       "fontSize": "text-p-xs",
@@ -1160,7 +1035,6 @@
                      "tabletStyles": {}
                     }
                    ],
-                   "classes": [],
                    "componentEvents": {
                     "click": {
                      "action": "Run Script",
@@ -1168,7 +1042,6 @@
                      "script": "open(item.data.url)"
                     }
                    },
-                   "componentId": "container-b9bz8hu0n",
                    "componentName": "container",
                    "componentProps": {},
                    "componentSlots": {},
@@ -1177,21 +1050,16 @@
                    "tabletStyles": {}
                   }
                  ],
-                 "slotId": "ActivityTimeline-g6s4giwgd:default",
                  "slotName": "default"
                 }
                }
               }
              ],
-             "classes": [],
-             "componentId": "container-oy0e2kxv0",
              "componentName": "container",
              "originalElement": "div",
              "visibilityCondition": "{{ overview.data.activity }}"
             }
            ],
-           "classes": [],
-           "componentId": "container-f8jo7e2oa",
            "componentName": "container",
            "originalElement": "div"
           },
@@ -1212,9 +1080,7 @@
               "display": "flex",
               "flexDirection": "column",
               "gap": "12px",
-              "height": "402px",
-              "padding": "16px",
-              "width": "365px"
+              "padding": "16px"
              },
              "children": [
               {
@@ -1229,8 +1095,6 @@
                   "fontWeight": "600"
                  },
                  "children": [],
-                 "classes": [],
-                 "componentId": "TextBlock-a9l4csapj",
                  "componentName": "TextBlock",
                  "componentProps": {
                   "fontSize": "text-lg",
@@ -1243,8 +1107,6 @@
                   "color": "var(--ink-gray-6)"
                  },
                  "children": [],
-                 "classes": [],
-                 "componentId": "TextBlock-5p08hzlo0",
                  "componentName": "TextBlock",
                  "componentProps": {
                   "fontSize": "text-p-xs",
@@ -1253,8 +1115,6 @@
                  }
                 }
                ],
-               "classes": [],
-               "componentId": "container-5dcitprd2",
                "componentName": "container",
                "originalElement": "div"
               },
@@ -1275,8 +1135,6 @@
                     "color": "var(--ink-gray-6)"
                    },
                    "children": [],
-                   "classes": [],
-                   "componentId": "TextBlock-w17fimldr",
                    "componentName": "TextBlock",
                    "componentProps": {
                     "fontSize": "text-p-xs",
@@ -1293,8 +1151,6 @@
                    "children": [
                     {
                      "children": [],
-                     "classes": [],
-                     "componentId": "TextBlock-sh9zpsasn",
                      "componentName": "TextBlock",
                      "componentProps": {
                       "fontSize": "text-base",
@@ -1307,8 +1163,6 @@
                       "color": "var(--ink-gray-6)"
                      },
                      "children": [],
-                     "classes": [],
-                     "componentId": "TextBlock-ydann25wu",
                      "componentName": "TextBlock",
                      "componentProps": {
                       "fontSize": "text-p-xs",
@@ -1317,8 +1171,6 @@
                      }
                     }
                    ],
-                   "classes": [],
-                   "componentId": "container-luwlwbmlh",
                    "componentName": "container",
                    "originalElement": "div"
                   },
@@ -1327,15 +1179,11 @@
                     "flex": "1 1 auto"
                    },
                    "children": [],
-                   "classes": [],
-                   "componentId": "container-ueu2ylden",
                    "componentName": "container",
                    "originalElement": "div"
                   },
                   {
                    "children": [],
-                   "classes": [],
-                   "componentId": "TextBlock-4zwwcd8z5",
                    "componentName": "TextBlock",
                    "componentProps": {
                     "fontSize": "text-base",
@@ -1344,7 +1192,6 @@
                    }
                   }
                  ],
-                 "classes": [],
                  "componentEvents": {
                   "click": {
                    "action": "Run Script",
@@ -1352,13 +1199,10 @@
                    "script": "open(dataItem.url)"
                   }
                  },
-                 "componentId": "container-u5pa8o6sm",
                  "componentName": "container",
                  "originalElement": "div"
                 }
                ],
-               "classes": [],
-               "componentId": "Repeater-byrcbv920",
                "componentName": "Repeater",
                "componentProps": {
                 "data": "{{ overview.data.schedule }}",
@@ -1367,21 +1211,15 @@
                }
               }
              ],
-             "classes": [],
-             "componentId": "container-i1ez3bak7",
              "componentName": "container",
              "originalElement": "div",
              "visibilityCondition": "{{ overview.data.schedule }}"
             }
            ],
-           "classes": [],
-           "componentId": "container-or9kx6of8",
            "componentName": "container",
            "originalElement": "div"
           }
          ],
-         "classes": [],
-         "componentId": "container-ujg8cen89",
          "componentName": "container",
          "originalElement": "div",
          "tabletStyles": {
@@ -1389,15 +1227,11 @@
          }
         }
        ],
-       "classes": [],
-       "componentId": "container-591f8yc1l",
        "componentName": "container",
        "originalElement": "div"
       },
       {
        "children": [],
-       "classes": [],
-       "componentId": "borrower_footer-celud1gov",
        "componentName": "borrower_footer",
        "componentProps": {
         "links": "{{ overview.data.footer_links }}",
@@ -1407,20 +1241,14 @@
       },
       {
        "children": [],
-       "classes": [],
-       "componentId": "borrower_alerts-ysqk8s17p",
        "componentName": "borrower_alerts",
        "isStudioComponent": true
       }
      ],
-     "classes": [],
-     "componentId": "container-ss2a7kb6l",
      "componentName": "container",
      "originalElement": "div"
     }
    ],
-   "classes": [],
-   "componentId": "div-3ftgq29d2",
    "componentName": "div",
    "originalElement": "body"
   }
@@ -1429,7 +1257,7 @@
  "doctype": "Studio Page",
  "frappe_app": "lending",
  "is_standard": 1,
- "modified": "2026-09-21 23:57:17.587419",
+ "modified": "2026-09-22 13:05:55.389143",
  "modified_by": "Administrator",
  "name": "account_overview",
  "owner": "Administrator",
@@ -1438,6 +1266,7 @@
  "published": 1,
  "resources": [
   {
+   "__unsaved": 1,
    "auto": 1,
    "method": "GET",
    "resource_name": "overview",
@@ -1445,6 +1274,7 @@
    "url": "lending.portal.core.get_dashboard"
   },
   {
+   "__unsaved": 1,
    "method": "GET",
    "resource_name": "alerts",
    "resource_type": "API Resource",

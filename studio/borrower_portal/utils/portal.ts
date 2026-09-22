@@ -18,5 +18,5 @@ export function tone(value?: string): string {
 // character -- after which every tab in this tab-indented module reads as E117.
 export function appRoute(url?: string): string {
 	if (!url) return ""
-	return url.replace(/^\/borrower/, "") || "/overview"
+	return url.replace(/^\/borrower(-portal)?/, "") || "/overview"
 }

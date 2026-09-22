@@ -15,6 +15,7 @@ the borrower owns the loan before reading further.
 
 from lending.portal.studio_build.app import api_resource, upsert_page
 from lending.portal.studio_build.blocks import (
+	breadcrumb_trail,
 	button,
 	card,
 	column,
@@ -148,7 +149,12 @@ def payoff(read):
 
 
 def detail_content(read):
+	breadcrumbs = breadcrumb_trail([
+		{"label": "Loans", "route": "/borrower-portal/loans"},
+		{"label": read("crumb")},
+	])
 	return [
+		breadcrumbs,
 		card("Loan details", read("summary_note"), pair_grid(read("summary"))),
 		two_columns(
 			[
@@ -172,8 +178,6 @@ def build_detail():
 		frame(
 			DETAIL_SOURCE,
 			detail_content(read),
-			action_label="Download statement",
-			action_route="/borrower/statement",
 		),
 		[
 			api_resource(

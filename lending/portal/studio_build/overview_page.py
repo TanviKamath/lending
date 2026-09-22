@@ -225,7 +225,7 @@ def build():
 	return upsert_page(
 		TITLE,
 		ROUTE,
-		frame(SOURCE, content(), action_label="View payment details", action_route="/borrower/loans"),
+		frame(SOURCE, content(), action_label="View payment details", action_route="/borrower-portal/loans"),
 		resources=[
 			api_resource(SOURCE, "lending.portal.core.get_dashboard"),
 			api_resource("alerts", "lending.portal.notifications.get_notifications", auto=0),

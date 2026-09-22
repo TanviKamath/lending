@@ -634,7 +634,7 @@ def create_account() -> dict:
 		"message": _("You are signed in as {0}.").format(user.name),
 		"offer": [],
 		"reference_note": "",
-		"redirect": "/borrower/overview",
+		"redirect": "/borrower-portal/overview",
 	}
 
 

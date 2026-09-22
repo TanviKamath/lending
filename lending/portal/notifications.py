@@ -174,7 +174,7 @@ def attention_rows(applications: list[dict], schedule: list[dict]) -> list[dict]
 			# cannot be named, the accounts list is the nearest page that holds it --
 			# an empty href would leave the row looking like a link and acting like a
 			# dead end.
-			"url": instalment.get("url") or "/borrower/loans",
+			"url": instalment.get("url") or "/borrower-portal/loans",
 		}
 		for instalment in schedule
 	)
@@ -194,7 +194,7 @@ def activity_rows(events: list[dict]) -> list[dict]:
 			"title": event["title"],
 			"note": event["sub"],
 			"when": _("{0} · {1}").format(event["amount"], event["date"]),
-			"url": "/borrower/statement",
+			"url": "/borrower-portal/statement",
 		}
 		for event in events
 	]

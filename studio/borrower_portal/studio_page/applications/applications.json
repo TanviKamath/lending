@@ -11,116 +11,157 @@
    "blockName": "body",
    "children": [
     {
-     "children": [],
-     "componentName": "Sidebar",
-     "componentProps": {
-      "header": {
-       "title": "{{ applications.data.brand_name }}"
-      },
-      "sections": [
-       {
-        "items": [
-         {
-          "icon": "{{ getIcon('layout-dashboard') }}",
-          "label": "Account overview",
-          "to": "/overview"
-         },
-         {
-          "icon": "{{ getIcon('wallet') }}",
-          "label": "Loan accounts",
-          "to": "/loans"
-         },
-         {
-          "icon": "{{ getIcon('file-text') }}",
-          "label": "Applications",
-          "to": "/applications"
-         },
-         {
-          "icon": "{{ getIcon('paperclip') }}",
-          "label": "Documents",
-          "to": "/documents"
-         },
-         {
-          "icon": "{{ getIcon('receipt') }}",
-          "label": "Statement of account",
-          "to": "/statement"
-         },
-         {
-          "icon": "{{ getIcon('award') }}",
-          "label": "Interest certificate",
-          "to": "/certificate"
-         },
-         {
-          "icon": "{{ getIcon('user') }}",
-          "label": "Personal details",
-          "to": "/profile"
-         },
-         {
-          "icon": "{{ getIcon('search') }}",
-          "label": "Search",
-          "to": "/search"
+     "children": [
+      {
+       "baseStyles": {
+        "display": "flex",
+        "flexDirection": "column",
+        "height": "100%",
+        "padding": "0.5rem"
+       },
+       "children": [
+        {
+         "children": [],
+         "componentName": "SidebarHeader",
+         "componentProps": {
+          "title": "{{ applications.data.brand_name }}"
          }
-        ],
-        "label": ""
-       }
-      ]
-     },
-     "componentSlots": {
-      "footer-items": {
-       "slotContent": [
+        },
         {
          "baseStyles": {
-          "display": "flex",
-          "flexDirection": "column",
-          "gap": "2px",
-          "padding": "12px"
+          "flex": "1 1 0%",
+          "overflowX": "hidden",
+          "overflowY": "auto"
+         },
+         "children": [
+          {
+           "children": [],
+           "componentName": "SidebarItem",
+           "componentProps": {
+            "icon": "lucide-layout-dashboard",
+            "label": "Account overview",
+            "to": "/overview"
+           }
+          },
+          {
+           "children": [],
+           "componentName": "SidebarItem",
+           "componentProps": {
+            "icon": "lucide-wallet",
+            "label": "Loan accounts",
+            "to": "/loans"
+           }
+          },
+          {
+           "children": [],
+           "componentName": "SidebarItem",
+           "componentProps": {
+            "icon": "lucide-file-text",
+            "label": "Applications",
+            "to": "/applications"
+           }
+          },
+          {
+           "children": [],
+           "componentName": "SidebarItem",
+           "componentProps": {
+            "icon": "lucide-paperclip",
+            "label": "Documents",
+            "to": "/documents"
+           }
+          },
+          {
+           "children": [],
+           "componentName": "SidebarItem",
+           "componentProps": {
+            "icon": "lucide-receipt",
+            "label": "Statement of account",
+            "to": "/statement"
+           }
+          },
+          {
+           "children": [],
+           "componentName": "SidebarItem",
+           "componentProps": {
+            "icon": "lucide-award",
+            "label": "Interest certificate",
+            "to": "/certificate"
+           }
+          },
+          {
+           "children": [],
+           "componentName": "SidebarItem",
+           "componentProps": {
+            "icon": "lucide-user",
+            "label": "Personal details",
+            "to": "/profile"
+           }
+          },
+          {
+           "children": [],
+           "componentName": "SidebarItem",
+           "componentProps": {
+            "icon": "lucide-search",
+            "label": "Search",
+            "to": "/search"
+           }
+          }
+         ],
+         "componentName": "div"
+        },
+        {
+         "baseStyles": {
+          "marginTop": "auto"
          },
          "children": [
           {
            "baseStyles": {
-            "fontWeight": "600"
+            "display": "flex",
+            "flexDirection": "column",
+            "gap": "2px",
+            "padding": "12px"
            },
-           "children": [],
-           "componentEvents": {},
-           "componentName": "TextBlock",
-           "componentProps": {
-            "fontSize": "text-sm",
-            "tag": "p",
-            "text": "{{ applications.data.holder_name }}"
-           },
-           "componentSlots": {},
-           "mobileStyles": {},
-           "tabletStyles": {}
+           "children": [
+            {
+             "baseStyles": {
+              "fontWeight": "600"
+             },
+             "children": [],
+             "componentName": "TextBlock",
+             "componentProps": {
+              "fontSize": "text-sm",
+              "tag": "p",
+              "text": "{{ applications.data.holder_name }}"
+             }
+            },
+            {
+             "baseStyles": {
+              "color": "var(--ink-gray-6)"
+             },
+             "children": [],
+             "componentName": "TextBlock",
+             "componentProps": {
+              "fontSize": "text-p-xs",
+              "tag": "p",
+              "text": "{{ applications.data.customer_note }}"
+             }
+            }
+           ],
+           "componentName": "container",
+           "originalElement": "div"
           },
           {
-           "baseStyles": {
-            "color": "var(--ink-gray-6)"
-           },
            "children": [],
-           "componentEvents": {},
-           "componentName": "TextBlock",
-           "componentProps": {
-            "fontSize": "text-p-xs",
-            "tag": "p",
-            "text": "{{ applications.data.customer_note }}"
-           },
-           "componentSlots": {},
-           "mobileStyles": {},
-           "tabletStyles": {}
+           "componentName": "SidebarCollapseToggle"
           }
          ],
-         "componentEvents": {},
-         "componentName": "container",
-         "componentProps": {},
-         "componentSlots": {},
-         "mobileStyles": {},
-         "originalElement": "div",
-         "tabletStyles": {}
+         "componentName": "div"
         }
        ],
-       "slotName": "footer-items"
+       "componentName": "div"
       }
-     },
+     ],
+     "componentName": "Sidebar",
      "mobileStyles": {
       "display": "none"
      }
@@ -552,7 +593,7 @@
  "doctype": "Studio Page",
  "frappe_app": "lending",
  "is_standard": 1,
- "modified": "2026-09-21 23:14:51.242639",
+ "modified": "2026-09-22 13:05:55.551341",
  "modified_by": "Administrator",
  "name": "applications",
  "owner": "Administrator",

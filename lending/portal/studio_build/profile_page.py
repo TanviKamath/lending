@@ -149,7 +149,7 @@ def build():
 	return upsert_page(
 		"Personal details",
 		"/profile",
-		frame(SOURCE, content(), action_label="Contact us", action_route="/borrower/documents"),
+		frame(SOURCE, content(), action_label="Contact us", action_route="/borrower-portal/documents"),
 		[
 			api_resource(SOURCE, "lending.portal.profile.get_profile_page"),
 			api_resource("alerts", "lending.portal.notifications.get_notifications", auto=0),

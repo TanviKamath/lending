@@ -47,7 +47,7 @@ export function tone(value?: string): string {
 // character -- after which every tab in this tab-indented module reads as E117.
 export function appRoute(url?: string): string {
 \tif (!url) return ""
-\treturn url.replace(/^\\/borrower/, "") || "/overview"
+\treturn url.replace(/^\\/borrower(-portal)?/, "") || "/overview"
 }
 '''
 

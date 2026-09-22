@@ -67,7 +67,7 @@ DEFAULT_BRAND_NAME = "Frappe Lending"
 
 # Every borrower page lives under this prefix, and nothing else in the site's portal
 # menu does. It is how nav_items() tells this portal's rows from another's.
-PORTAL_ROUTE_PREFIX = "/borrower/"
+PORTAL_ROUTE_PREFIX = "/borrower-portal/"
 
 APPLICATION_STAGES = {
 	"Open": "Under review",
@@ -179,11 +179,11 @@ def loan_url(name: str) -> str:
 	open is a dead end, and four pages were spelling this path out for themselves --
 	or, on the overview, not at all.
 	"""
-	return f"/borrower/loan/{name}" if name else ""
+	return f"/borrower-portal/loan/{name}" if name else ""
 
 
 def application_url(name: str) -> str:
-	return f"/borrower/application/{name}" if name else ""
+	return f"/borrower-portal/application/{name}" if name else ""
 
 
 def current_route() -> str:
@@ -331,7 +331,7 @@ def empty_dashboard() -> dict:
 	return payload
 
 
-REPAYMENTS_ROUTE = "/borrower/repayments"
+REPAYMENTS_ROUTE = "/borrower-portal/repayments"
 
 
 def waiting_on_borrower(applications: list[dict]) -> list[dict]:

@@ -77,7 +77,7 @@ def build():
 	return upsert_page(
 		"Search",
 		"/search",
-		frame(SOURCE, content(), action_label="Account overview", action_route="/borrower/overview"),
+		frame(SOURCE, content(), action_label="Account overview", action_route="/borrower-portal/overview"),
 		[
 			api_resource(SOURCE, "lending.portal.search.get_search_page", params={"q": "{{ query }}"}),
 			api_resource("alerts", "lending.portal.notifications.get_notifications", auto=0),

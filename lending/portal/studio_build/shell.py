@@ -37,7 +37,6 @@ from lending.portal.studio_build.blocks import (
 	repeater,
 	root,
 	row,
-	slot,
 	spacer,
 	text,
 )
@@ -66,28 +65,7 @@ NAV_ITEMS = (
 
 
 def sidebar(data):
-	"""The list of pages, and whose portal it is.
-
-	frappe-ui's Sidebar itself, sat in the page rather than wrapped in a Studio
-	Component of ours. A component renders its own tree and the canvas will not open
-	it, so a Sidebar inside one is a black box: its rows, its header and its footer
-	slot are all out of reach of the properties panel. Placed directly, every one of
-	them is editable where it is drawn.
-
-	What that costs is the copy. The Sidebar is now in all ten authenticated pages
-	rather than in one document, so a row added by hand reaches one page -- the rest
-	come from a rebuild. The header, the notifications and the footer stay components,
-	because nothing in them is worth editing on a page-by-page basis.
-	"""
-	sections = [
-		{
-			"label": "",
-			"items": [
-				{"label": title, "icon": "{{ getIcon('%s') }}" % icon, "to": route}
-				for title, route, icon in NAV_ITEMS
-			],
-		}
-	]
+	"""The list of pages, and whose portal it is."""
 	foot = column(
 		[
 			text("{{ %s.holder_name }}" % data, size="text-sm", styles={"fontWeight": "600"}),
@@ -97,10 +75,30 @@ def sidebar(data):
 		styles={"padding": "12px"},
 	)
 
+	nav_items = [
+		block("SidebarItem", props={"label": title, "icon": "lucide-%s" % icon, "to": route})
+		for title, route, icon in NAV_ITEMS
+	]
+
+	sidebar_children = [
+		block(
+			"div",
+			styles={"display": "flex", "height": "100%", "flexDirection": "column", "padding": "0.5rem"},
+			children=[
+				block("SidebarHeader", props={"title": "{{ %s.brand_name }}" % data}),
+				block(
+					"div",
+					styles={"flex": "1 1 0%", "overflowY": "auto", "overflowX": "hidden"},
+					children=nav_items,
+				),
+				block("div", styles={"marginTop": "auto"}, children=[foot, block("SidebarCollapseToggle")]),
+			],
+		)
+	]
+
 	return block(
 		"Sidebar",
-		props={"header": {"title": "{{ %s.brand_name }}" % data}, "sections": sections},
-		slots=slot("footer-items", [foot]),
+		children=sidebar_children,
 		mobile={"display": "none"},
 	)
 
