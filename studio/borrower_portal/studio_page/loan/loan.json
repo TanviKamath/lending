@@ -24,7 +24,7 @@
          "children": [],
          "componentName": "SidebarHeader",
          "componentProps": {
-          "title": "{{ loan.data.brand_name }}"
+          "title": "{{ loan.data?.brand_name || '' }}"
          }
         },
         {
@@ -131,7 +131,7 @@
              "componentProps": {
               "fontSize": "text-sm",
               "tag": "p",
-              "text": "{{ loan.data.holder_name }}"
+              "text": "{{ loan.data?.holder_name }}"
              }
             },
             {
@@ -143,7 +143,7 @@
              "componentProps": {
               "fontSize": "text-p-xs",
               "tag": "p",
-              "text": "{{ loan.data.customer_note }}"
+              "text": "{{ loan.data?.customer_note }}"
              }
             }
            ],
@@ -182,10 +182,10 @@
        "componentProps": {
         "action_label": "",
         "action_route": "",
-        "crumb": "{{ loan.data.crumb }}",
-        "note": "{{ loan.data.head_note }}",
-        "status": "{{ loan.data.account_status }}",
-        "status_tone": "{{ loan.data.account_tone }}"
+        "crumb": "{{ loan.data?.crumb }}",
+        "note": "{{ loan.data?.head_note }}",
+        "status": "{{ loan.data?.account_status }}",
+        "status_tone": "{{ loan.data?.account_tone }}"
        },
        "isStudioComponent": true
       },
@@ -248,7 +248,7 @@
            "componentProps": {
             "fontSize": "text-sm",
             "tag": "p",
-            "text": "{{ loan.data.crumb }}"
+            "text": "{{ loan.data?.crumb }}"
            }
           }
          ],
@@ -296,7 +296,7 @@
              "componentProps": {
               "fontSize": "text-p-xs",
               "tag": "p",
-              "text": "{{ loan.data.summary_note }}"
+              "text": "{{ loan.data?.summary_note }}"
              }
             }
            ],
@@ -345,7 +345,7 @@
            ],
            "componentName": "Repeater",
            "componentProps": {
-            "data": "{{ loan.data.summary }}",
+            "data": "{{ loan.data?.summary || [] }}",
             "dataKey": "name",
             "emptyStateMessage": ""
            },
@@ -416,7 +416,7 @@
                  "componentProps": {
                   "fontSize": "text-p-xs",
                   "tag": "p",
-                  "text": "{{ loan.data.schedule_note }}"
+                  "text": "{{ loan.data?.schedule_note }}"
                  }
                 }
                ],
@@ -476,7 +476,7 @@
                  "children": [],
                  "componentName": "ListRows",
                  "componentProps": {
-                  "items": "{{ loan.data.schedule }}",
+                  "items": "{{ loan.data?.schedule || [] }}",
                   "rowKey": "name"
                  },
                  "componentSlots": {
@@ -664,7 +664,7 @@
                  "componentProps": {
                   "fontSize": "text-p-xs",
                   "tag": "p",
-                  "text": "{{ loan.data.disbursements_note }}"
+                  "text": "{{ loan.data?.disbursements_note }}"
                  }
                 }
                ],
@@ -738,7 +738,7 @@
                ],
                "componentName": "Repeater",
                "componentProps": {
-                "data": "{{ loan.data.disbursements }}",
+                "data": "{{ loan.data?.disbursements || [] }}",
                 "dataKey": "name",
                 "emptyStateMessage": "Nothing drawn yet"
                }
@@ -799,7 +799,7 @@
                  "componentProps": {
                   "fontSize": "text-p-xs",
                   "tag": "p",
-                  "text": "{{ loan.data.payoff_note }}"
+                  "text": "{{ loan.data?.payoff_note }}"
                  }
                 }
                ],
@@ -851,7 +851,7 @@
                  ],
                  "componentName": "Repeater",
                  "componentProps": {
-                  "data": "{{ loan.data.payoff }}",
+                  "data": "{{ loan.data?.payoff || [] }}",
                   "dataKey": "name",
                   "emptyStateMessage": "Nothing to show"
                  }
@@ -921,7 +921,7 @@
                  "componentProps": {
                   "fontSize": "text-p-xs",
                   "tag": "p",
-                  "text": "{{ loan.data.charges_note }}"
+                  "text": "{{ loan.data?.charges_note }}"
                  }
                 }
                ],
@@ -966,7 +966,7 @@
                ],
                "componentName": "Repeater",
                "componentProps": {
-                "data": "{{ loan.data.charges }}",
+                "data": "{{ loan.data?.charges || [] }}",
                 "dataKey": "name",
                 "emptyStateMessage": "Nothing to show"
                }
@@ -994,8 +994,8 @@
        "children": [],
        "componentName": "borrower_footer",
        "componentProps": {
-        "links": "{{ loan.data.footer_links }}",
-        "note": "{{ loan.data.copyright_note }}"
+        "links": "{{ loan.data?.footer_links }}",
+        "note": "{{ loan.data?.copyright_note }}"
        },
        "isStudioComponent": true
       },

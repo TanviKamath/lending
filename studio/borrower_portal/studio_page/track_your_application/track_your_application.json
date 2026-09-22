@@ -42,7 +42,7 @@
          "componentProps": {
           "fontSize": "text-lg",
           "tag": "span",
-          "text": "{{ track.data.brand_name }}"
+          "text": "{{ track.data?.brand_name }}"
          }
         },
         {
@@ -109,7 +109,7 @@
          "componentProps": {
           "fontSize": "text-5xl",
           "tag": "h1",
-          "text": "{{ track.data.heading }}"
+          "text": "{{ track.data?.heading }}"
          }
         },
         {
@@ -121,7 +121,7 @@
          "componentProps": {
           "fontSize": "text-p-xs",
           "tag": "p",
-          "text": "{{ track.data.intro }}"
+          "text": "{{ track.data?.intro }}"
          }
         },
         {
@@ -165,7 +165,7 @@
              "componentProps": {
               "fontSize": "text-p-xs",
               "tag": "p",
-              "text": "{{ track.data.track_note }}"
+              "text": "{{ track.data?.track_note }}"
              }
             }
            ],

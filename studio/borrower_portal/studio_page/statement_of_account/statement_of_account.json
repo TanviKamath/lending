@@ -24,7 +24,7 @@
          "children": [],
          "componentName": "SidebarHeader",
          "componentProps": {
-          "title": "{{ statement.data.brand_name }}"
+          "title": "{{ statement.data?.brand_name || '' }}"
          }
         },
         {
@@ -131,7 +131,7 @@
              "componentProps": {
               "fontSize": "text-sm",
               "tag": "p",
-              "text": "{{ statement.data.holder_name }}"
+              "text": "{{ statement.data?.holder_name }}"
              }
             },
             {
@@ -143,7 +143,7 @@
              "componentProps": {
               "fontSize": "text-p-xs",
               "tag": "p",
-              "text": "{{ statement.data.customer_note }}"
+              "text": "{{ statement.data?.customer_note }}"
              }
             }
            ],
@@ -182,10 +182,10 @@
        "componentProps": {
         "action_label": "",
         "action_route": "",
-        "crumb": "{{ statement.data.crumb }}",
-        "note": "{{ statement.data.head_note }}",
-        "status": "{{ statement.data.account_status }}",
-        "status_tone": "{{ statement.data.account_tone }}"
+        "crumb": "{{ statement.data?.crumb }}",
+        "note": "{{ statement.data?.head_note }}",
+        "status": "{{ statement.data?.account_status }}",
+        "status_tone": "{{ statement.data?.account_tone }}"
        },
        "isStudioComponent": true
       },
@@ -316,7 +316,7 @@
              "componentProps": {
               "fontSize": "text-p-xs",
               "tag": "p",
-              "text": "{{ statement.data.totals_note }}"
+              "text": "{{ statement.data?.totals_note }}"
              }
             }
            ],
@@ -368,7 +368,7 @@
              ],
              "componentName": "Repeater",
              "componentProps": {
-              "data": "{{ statement.data.totals }}",
+              "data": "{{ statement.data?.totals || [] }}",
               "dataKey": "name",
               "emptyStateMessage": "Nothing to show"
              }
@@ -379,12 +379,12 @@
               "click": {
                "action": "Run Script",
                "event": "click",
-               "script": "window.open(statement.data.download_url, '_blank')"
+               "script": "window.open(statement.data?.download_url, '_blank')"
               }
              },
              "componentName": "Button",
              "componentProps": {
-              "label": "{{ statement.data.download_label }}",
+              "label": "{{ statement.data?.download_label }}",
               "size": "sm",
               "variant": "solid"
              }
@@ -438,7 +438,7 @@
              "componentProps": {
               "fontSize": "text-p-xs",
               "tag": "p",
-              "text": "{{ statement.data.rows_note }}"
+              "text": "{{ statement.data?.rows_note }}"
              }
             }
            ],
@@ -496,7 +496,7 @@
            ],
            "componentName": "Repeater",
            "componentProps": {
-            "data": "{{ statement.data.rows }}",
+            "data": "{{ statement.data?.rows || [] }}",
             "dataKey": "name",
             "emptyStateMessage": "Nothing to show"
            }
@@ -513,8 +513,8 @@
        "children": [],
        "componentName": "borrower_footer",
        "componentProps": {
-        "links": "{{ statement.data.footer_links }}",
-        "note": "{{ statement.data.copyright_note }}"
+        "links": "{{ statement.data?.footer_links }}",
+        "note": "{{ statement.data?.copyright_note }}"
        },
        "isStudioComponent": true
       },

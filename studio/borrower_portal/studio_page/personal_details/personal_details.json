@@ -24,7 +24,7 @@
          "children": [],
          "componentName": "SidebarHeader",
          "componentProps": {
-          "title": "{{ profile.data.brand_name }}"
+          "title": "{{ profile.data?.brand_name || '' }}"
          }
         },
         {
@@ -131,7 +131,7 @@
              "componentProps": {
               "fontSize": "text-sm",
               "tag": "p",
-              "text": "{{ profile.data.holder_name }}"
+              "text": "{{ profile.data?.holder_name }}"
              }
             },
             {
@@ -143,7 +143,7 @@
              "componentProps": {
               "fontSize": "text-p-xs",
               "tag": "p",
-              "text": "{{ profile.data.customer_note }}"
+              "text": "{{ profile.data?.customer_note }}"
              }
             }
            ],
@@ -182,10 +182,10 @@
        "componentProps": {
         "action_label": "Contact us",
         "action_route": "/borrower-portal/documents",
-        "crumb": "{{ profile.data.crumb }}",
-        "note": "{{ profile.data.head_note }}",
-        "status": "{{ profile.data.account_status }}",
-        "status_tone": "{{ profile.data.account_tone }}"
+        "crumb": "{{ profile.data?.crumb }}",
+        "note": "{{ profile.data?.head_note }}",
+        "status": "{{ profile.data?.account_status }}",
+        "status_tone": "{{ profile.data?.account_tone }}"
        },
        "isStudioComponent": true
       },
@@ -248,7 +248,7 @@
                "componentProps": {
                 "fontSize": "text-p-xs",
                 "tag": "p",
-                "text": "{{ profile.data.records_note }}"
+                "text": "{{ profile.data?.records_note }}"
                }
               }
              ],
@@ -334,7 +334,7 @@
            ],
            "componentName": "Repeater",
            "componentProps": {
-            "data": "{{ profile.data.records }}",
+            "data": "{{ profile.data?.records || [] }}",
             "dataKey": "name",
             "emptyStateMessage": "Nothing to show"
            }
@@ -348,7 +348,7 @@
          "componentName": "Alert",
          "componentProps": {
           "theme": "blue",
-          "title": "{{ profile.data.edit_note }}"
+          "title": "{{ profile.data?.edit_note || '' }}"
          }
         },
         {
@@ -392,7 +392,7 @@
              "componentProps": {
               "fontSize": "text-p-xs",
               "tag": "p",
-              "text": "{{ profile.data.form_note }}"
+              "text": "{{ profile.data?.form_note }}"
              }
             }
            ],
@@ -415,10 +415,10 @@
                "$type": "variable",
                "name": "customer"
               },
-              "options": "{{ profile.data.customer_options }}",
+              "options": "{{ profile.data?.customer_options || [] }}",
               "type": "select"
              },
-             "visibilityCondition": "{{ profile.data.customer_options.length > 1 }}"
+             "visibilityCondition": "{{ profile.data?.customer_options.length > 1 }}"
             },
             {
              "baseStyles": {
@@ -562,7 +562,7 @@
                },
                "componentName": "Button",
                "componentProps": {
-                "label": "{{ profile.data.save_label }}",
+                "label": "{{ profile.data?.save_label }}",
                 "size": "sm",
                 "variant": "solid"
                }
@@ -604,8 +604,8 @@
        "children": [],
        "componentName": "borrower_footer",
        "componentProps": {
-        "links": "{{ profile.data.footer_links }}",
-        "note": "{{ profile.data.copyright_note }}"
+        "links": "{{ profile.data?.footer_links }}",
+        "note": "{{ profile.data?.copyright_note }}"
        },
        "isStudioComponent": true
       },

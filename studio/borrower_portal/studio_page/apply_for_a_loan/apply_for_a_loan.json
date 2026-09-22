@@ -42,7 +42,7 @@
          "componentProps": {
           "fontSize": "text-lg",
           "tag": "span",
-          "text": "{{ apply.data.brand_name }}"
+          "text": "{{ apply.data?.brand_name }}"
          }
         },
         {
@@ -148,7 +148,7 @@
            "componentProps": {
             "fontSize": "text-6xl",
             "tag": "h1",
-            "text": "{{ apply.data.heading }}"
+            "text": "{{ apply.data?.heading }}"
            }
           },
           {
@@ -160,7 +160,7 @@
            "componentProps": {
             "fontSize": "text-p-xs",
             "tag": "p",
-            "text": "{{ apply.data.intro }}"
+            "text": "{{ apply.data?.intro }}"
            }
           },
           {
@@ -186,7 +186,7 @@
            ],
            "componentName": "Repeater",
            "componentProps": {
-            "data": "{{ apply.data.trust_points }}",
+            "data": "{{ apply.data?.trust_points || [] }}",
             "dataKey": "label",
             "emptyStateMessage": ""
            }
@@ -220,7 +220,7 @@
                "componentProps": {
                 "fontSize": "text-lg",
                 "tag": "h2",
-                "text": "{{ apply.data.start_title }}"
+                "text": "{{ apply.data?.start_title }}"
                }
               },
               {
@@ -232,7 +232,7 @@
                "componentProps": {
                 "fontSize": "text-p-xs",
                 "tag": "p",
-                "text": "{{ apply.data.start_note }}"
+                "text": "{{ apply.data?.start_note }}"
                }
               }
              ],
@@ -311,7 +311,7 @@
            ],
            "componentName": "Repeater",
            "componentProps": {
-            "data": "{{ apply.data.benefits }}",
+            "data": "{{ apply.data?.benefits || [] }}",
             "dataKey": "step",
             "emptyStateMessage": ""
            },
@@ -365,7 +365,7 @@
              "componentProps": {
               "fontSize": "text-p-xs",
               "tag": "p",
-              "text": "{{ apply.data.type_note }}"
+              "text": "{{ apply.data?.type_note }}"
              }
             }
            ],
@@ -642,7 +642,7 @@
              "componentProps": {
               "fontSize": "text-p-xs",
               "tag": "p",
-              "text": "{{ apply.data.product_note }}"
+              "text": "{{ apply.data?.product_note }}"
              }
             }
            ],
@@ -745,7 +745,7 @@
            ],
            "componentName": "Repeater",
            "componentProps": {
-            "data": "{{ apply.data.products }}",
+            "data": "{{ apply.data?.products || [] }}",
             "dataKey": "value",
             "emptyStateMessage": ""
            }
@@ -862,7 +862,7 @@
              "componentProps": {
               "fontSize": "text-p-xs",
               "tag": "p",
-              "text": "{{ apply.data.verify_note }}"
+              "text": "{{ apply.data?.verify_note }}"
              }
             }
            ],
@@ -898,7 +898,7 @@
              "componentProps": {
               "fontSize": "text-p-xs",
               "tag": "p",
-              "text": "{{ apply.data.code_note }}"
+              "text": "{{ apply.data?.code_note }}"
              }
             },
             {
@@ -1050,7 +1050,7 @@
              "componentProps": {
               "fontSize": "text-p-xs",
               "tag": "p",
-              "text": "{{ apply.data.details_note }}"
+              "text": "{{ apply.data?.details_note }}"
              }
             }
            ],
@@ -1498,7 +1498,7 @@
              "componentProps": {
               "fontSize": "text-p-xs",
               "tag": "p",
-              "text": "{{ apply.data.account_note }}"
+              "text": "{{ apply.data?.account_note }}"
              }
             }
            ],
@@ -1594,5 +1594,41 @@
  ],
  "route": "/apply",
  "studio_app": "borrower-portal",
- "variables": []
+ "variables": [
+  {
+   "variable_name": "step",
+   "variable_type": "Number",
+   "initial_value": "1"
+  },
+  {
+   "variable_name": "applicantType",
+   "variable_type": "String",
+   "initial_value": "\"Individual\""
+  },
+  {
+   "variable_name": "loanProduct",
+   "variable_type": "String",
+   "initial_value": "\"\""
+  },
+  {
+   "variable_name": "mobileNumber",
+   "variable_type": "String",
+   "initial_value": "\"\""
+  },
+  {
+   "variable_name": "otp",
+   "variable_type": "String",
+   "initial_value": "\"\""
+  },
+  {
+   "variable_name": "busy",
+   "variable_type": "Boolean",
+   "initial_value": "false"
+  },
+  {
+   "variable_name": "codeSent",
+   "variable_type": "Boolean",
+   "initial_value": "false"
+  }
+ ]
 }

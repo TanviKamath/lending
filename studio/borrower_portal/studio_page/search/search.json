@@ -24,7 +24,7 @@
          "children": [],
          "componentName": "SidebarHeader",
          "componentProps": {
-          "title": "{{ search.data.brand_name }}"
+          "title": "{{ search.data?.brand_name || '' }}"
          }
         },
         {
@@ -131,7 +131,7 @@
              "componentProps": {
               "fontSize": "text-sm",
               "tag": "p",
-              "text": "{{ search.data.holder_name }}"
+              "text": "{{ search.data?.holder_name }}"
              }
             },
             {
@@ -143,7 +143,7 @@
              "componentProps": {
               "fontSize": "text-p-xs",
               "tag": "p",
-              "text": "{{ search.data.customer_note }}"
+              "text": "{{ search.data?.customer_note }}"
              }
             }
            ],
@@ -182,10 +182,10 @@
        "componentProps": {
         "action_label": "Account overview",
         "action_route": "/borrower-portal/overview",
-        "crumb": "{{ search.data.crumb }}",
-        "note": "{{ search.data.head_note }}",
-        "status": "{{ search.data.account_status }}",
-        "status_tone": "{{ search.data.account_tone }}"
+        "crumb": "{{ search.data?.crumb }}",
+        "note": "{{ search.data?.head_note }}",
+        "status": "{{ search.data?.account_status }}",
+        "status_tone": "{{ search.data?.account_tone }}"
        },
        "isStudioComponent": true
       },
@@ -240,7 +240,7 @@
              "componentProps": {
               "fontSize": "text-p-xs",
               "tag": "p",
-              "text": "{{ search.data.results_note }}"
+              "text": "{{ search.data?.results_note }}"
              }
             }
            ],
@@ -343,7 +343,7 @@
                "children": [],
                "componentName": "ListRows",
                "componentProps": {
-                "items": "{{ search.data.results }}",
+                "items": "{{ search.data?.results || [] }}",
                 "rowKey": "url"
                },
                "componentSlots": {
@@ -467,8 +467,8 @@
        "children": [],
        "componentName": "borrower_footer",
        "componentProps": {
-        "links": "{{ search.data.footer_links }}",
-        "note": "{{ search.data.copyright_note }}"
+        "links": "{{ search.data?.footer_links }}",
+        "note": "{{ search.data?.copyright_note }}"
        },
        "isStudioComponent": true
       },

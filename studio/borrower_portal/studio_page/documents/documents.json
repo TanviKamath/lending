@@ -24,7 +24,7 @@
          "children": [],
          "componentName": "SidebarHeader",
          "componentProps": {
-          "title": "{{ documents.data.brand_name }}"
+          "title": "{{ documents.data?.brand_name || '' }}"
          }
         },
         {
@@ -131,7 +131,7 @@
              "componentProps": {
               "fontSize": "text-sm",
               "tag": "p",
-              "text": "{{ documents.data.holder_name }}"
+              "text": "{{ documents.data?.holder_name }}"
              }
             },
             {
@@ -143,7 +143,7 @@
              "componentProps": {
               "fontSize": "text-p-xs",
               "tag": "p",
-              "text": "{{ documents.data.customer_note }}"
+              "text": "{{ documents.data?.customer_note }}"
              }
             }
            ],
@@ -182,10 +182,10 @@
        "componentProps": {
         "action_label": "Contact us",
         "action_route": "/borrower-portal/profile",
-        "crumb": "{{ documents.data.crumb }}",
-        "note": "{{ documents.data.head_note }}",
-        "status": "{{ documents.data.account_status }}",
-        "status_tone": "{{ documents.data.account_tone }}"
+        "crumb": "{{ documents.data?.crumb }}",
+        "note": "{{ documents.data?.head_note }}",
+        "status": "{{ documents.data?.account_status }}",
+        "status_tone": "{{ documents.data?.account_tone }}"
        },
        "isStudioComponent": true
       },
@@ -240,7 +240,7 @@
              "componentProps": {
               "fontSize": "text-p-xs",
               "tag": "p",
-              "text": "{{ documents.data.documents_note }}"
+              "text": "{{ documents.data?.documents_note }}"
              }
             }
            ],
@@ -298,7 +298,7 @@
            ],
            "componentName": "Repeater",
            "componentProps": {
-            "data": "{{ documents.data.documents }}",
+            "data": "{{ documents.data?.documents || [] }}",
             "dataKey": "name",
             "emptyStateMessage": "Nothing to show"
            }
@@ -348,7 +348,7 @@
              "componentProps": {
               "fontSize": "text-p-xs",
               "tag": "p",
-              "text": "{{ documents.data.upload_note }}"
+              "text": "{{ documents.data?.upload_note }}"
              }
             }
            ],
@@ -371,7 +371,7 @@
                "$type": "variable",
                "name": "application"
               },
-              "options": "{{ choices.data.application_options }}",
+              "options": "{{ choices.data?.application_options || [] }}",
               "type": "select"
              }
             },
@@ -384,7 +384,7 @@
                "$type": "variable",
                "name": "documentType"
               },
-              "options": "{{ choices.data.document_type_options }}",
+              "options": "{{ choices.data?.document_type_options || [] }}",
               "type": "select"
              }
             },
@@ -418,7 +418,7 @@
              },
              "componentName": "Button",
              "componentProps": {
-              "label": "{{ choices.data.upload_label }}",
+              "label": "{{ choices.data?.upload_label }}",
               "size": "sm",
               "variant": "solid"
              }
@@ -430,16 +430,16 @@
          ],
          "componentName": "container",
          "originalElement": "div",
-         "visibilityCondition": "{{ choices.data.can_upload }}"
+         "visibilityCondition": "{{ choices.data?.can_upload }}"
         },
         {
          "children": [],
          "componentName": "Alert",
          "componentProps": {
           "theme": "blue",
-          "title": "{{ documents.data.no_upload_note }}"
+          "title": "{{ documents.data?.no_upload_note || '' }}"
          },
-         "visibilityCondition": "{{ !choices.data.can_upload }}"
+         "visibilityCondition": "{{ !choices.data?.can_upload }}"
         },
         {
          "baseStyles": {
@@ -482,7 +482,7 @@
              "componentProps": {
               "fontSize": "text-p-xs",
               "tag": "p",
-              "text": "{{ documents.data.applications_note }}"
+              "text": "{{ documents.data?.applications_note }}"
              }
             }
            ],
@@ -542,7 +542,7 @@
              "children": [],
              "componentName": "ListRows",
              "componentProps": {
-              "items": "{{ documents.data.applications }}",
+              "items": "{{ documents.data?.applications || [] }}",
               "rowKey": "name"
              },
              "componentSlots": {
@@ -703,8 +703,8 @@
        "children": [],
        "componentName": "borrower_footer",
        "componentProps": {
-        "links": "{{ documents.data.footer_links }}",
-        "note": "{{ documents.data.copyright_note }}"
+        "links": "{{ documents.data?.footer_links }}",
+        "note": "{{ documents.data?.copyright_note }}"
        },
        "isStudioComponent": true
       },

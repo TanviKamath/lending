@@ -24,7 +24,7 @@
          "children": [],
          "componentName": "SidebarHeader",
          "componentProps": {
-          "title": "{{ applications.data.brand_name }}"
+          "title": "{{ applications.data?.brand_name || '' }}"
          }
         },
         {
@@ -131,7 +131,7 @@
              "componentProps": {
               "fontSize": "text-sm",
               "tag": "p",
-              "text": "{{ applications.data.holder_name }}"
+              "text": "{{ applications.data?.holder_name }}"
              }
             },
             {
@@ -143,7 +143,7 @@
              "componentProps": {
               "fontSize": "text-p-xs",
               "tag": "p",
-              "text": "{{ applications.data.customer_note }}"
+              "text": "{{ applications.data?.customer_note }}"
              }
             }
            ],
@@ -182,10 +182,10 @@
        "componentProps": {
         "action_label": "Apply for a loan",
         "action_route": "/apply",
-        "crumb": "{{ applications.data.crumb }}",
-        "note": "{{ applications.data.head_note }}",
-        "status": "{{ applications.data.account_status }}",
-        "status_tone": "{{ applications.data.account_tone }}"
+        "crumb": "{{ applications.data?.crumb }}",
+        "note": "{{ applications.data?.head_note }}",
+        "status": "{{ applications.data?.account_status }}",
+        "status_tone": "{{ applications.data?.account_tone }}"
        },
        "isStudioComponent": true
       },
@@ -240,7 +240,7 @@
              "componentProps": {
               "fontSize": "text-p-xs",
               "tag": "p",
-              "text": "{{ applications.data.applications_note }}"
+              "text": "{{ applications.data?.applications_note }}"
              }
             }
            ],
@@ -300,7 +300,7 @@
              "children": [],
              "componentName": "ListRows",
              "componentProps": {
-              "items": "{{ applications.data.applications }}",
+              "items": "{{ applications.data?.applications || [] }}",
               "rowKey": "name"
              },
              "componentSlots": {
@@ -495,7 +495,7 @@
              "componentProps": {
               "fontSize": "text-p-xs",
               "tag": "p",
-              "text": "{{ applications.data.enquiries_note }}"
+              "text": "{{ applications.data?.enquiries_note }}"
              }
             }
            ],
@@ -553,7 +553,7 @@
            ],
            "componentName": "Repeater",
            "componentProps": {
-            "data": "{{ applications.data.enquiries }}",
+            "data": "{{ applications.data?.enquiries || [] }}",
             "dataKey": "name",
             "emptyStateMessage": "Nothing to show"
            }
@@ -570,8 +570,8 @@
        "children": [],
        "componentName": "borrower_footer",
        "componentProps": {
-        "links": "{{ applications.data.footer_links }}",
-        "note": "{{ applications.data.copyright_note }}"
+        "links": "{{ applications.data?.footer_links }}",
+        "note": "{{ applications.data?.copyright_note }}"
        },
        "isStudioComponent": true
       },

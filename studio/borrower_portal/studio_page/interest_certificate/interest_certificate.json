@@ -24,7 +24,7 @@
          "children": [],
          "componentName": "SidebarHeader",
          "componentProps": {
-          "title": "{{ certificate.data.brand_name }}"
+          "title": "{{ certificate.data?.brand_name || '' }}"
          }
         },
         {
@@ -131,7 +131,7 @@
              "componentProps": {
               "fontSize": "text-sm",
               "tag": "p",
-              "text": "{{ certificate.data.holder_name }}"
+              "text": "{{ certificate.data?.holder_name }}"
              }
             },
             {
@@ -143,7 +143,7 @@
              "componentProps": {
               "fontSize": "text-p-xs",
               "tag": "p",
-              "text": "{{ certificate.data.customer_note }}"
+              "text": "{{ certificate.data?.customer_note }}"
              }
             }
            ],
@@ -182,10 +182,10 @@
        "componentProps": {
         "action_label": "",
         "action_route": "",
-        "crumb": "{{ certificate.data.crumb }}",
-        "note": "{{ certificate.data.head_note }}",
-        "status": "{{ certificate.data.account_status }}",
-        "status_tone": "{{ certificate.data.account_tone }}"
+        "crumb": "{{ certificate.data?.crumb }}",
+        "note": "{{ certificate.data?.head_note }}",
+        "status": "{{ certificate.data?.account_status }}",
+        "status_tone": "{{ certificate.data?.account_tone }}"
        },
        "isStudioComponent": true
       },
@@ -228,7 +228,7 @@
              "componentProps": {
               "fontSize": "text-lg",
               "tag": "h2",
-              "text": "{{ certificate.data.year_label }}"
+              "text": "{{ certificate.data?.year_label }}"
              }
             },
             {
@@ -240,7 +240,7 @@
              "componentProps": {
               "fontSize": "text-p-xs",
               "tag": "p",
-              "text": "{{ certificate.data.head_note }}"
+              "text": "{{ certificate.data?.head_note }}"
              }
             }
            ],
@@ -256,7 +256,7 @@
              "$type": "variable",
              "name": "year"
             },
-            "options": "{{ certificate.data.years }}",
+            "options": "{{ certificate.data?.years || [] }}",
             "type": "select"
            }
           }
@@ -305,7 +305,7 @@
              "componentProps": {
               "fontSize": "text-p-xs",
               "tag": "p",
-              "text": "{{ certificate.data.rows_note }}"
+              "text": "{{ certificate.data?.rows_note }}"
              }
             }
            ],
@@ -357,7 +357,7 @@
              ],
              "componentName": "Repeater",
              "componentProps": {
-              "data": "{{ certificate.data.rows }}",
+              "data": "{{ certificate.data?.rows || [] }}",
               "dataKey": "name",
               "emptyStateMessage": "Nothing to show"
              }
@@ -368,12 +368,12 @@
               "click": {
                "action": "Run Script",
                "event": "click",
-               "script": "window.open(certificate.data.download_url, '_blank')"
+               "script": "window.open(certificate.data?.download_url, '_blank')"
               }
              },
              "componentName": "Button",
              "componentProps": {
-              "label": "{{ certificate.data.download_label }}",
+              "label": "{{ certificate.data?.download_label }}",
               "size": "sm",
               "variant": "solid"
              }
@@ -391,7 +391,7 @@
          "componentName": "Alert",
          "componentProps": {
           "theme": "yellow",
-          "title": "{{ certificate.data.disclaimer }}"
+          "title": "{{ certificate.data?.disclaimer || '' }}"
          }
         },
         {
@@ -435,7 +435,7 @@
              "componentProps": {
               "fontSize": "text-p-xs",
               "tag": "p",
-              "text": "{{ certificate.data.accounts_note }}"
+              "text": "{{ certificate.data?.accounts_note }}"
              }
             }
            ],
@@ -493,7 +493,7 @@
            ],
            "componentName": "Repeater",
            "componentProps": {
-            "data": "{{ certificate.data.accounts }}",
+            "data": "{{ certificate.data?.accounts || [] }}",
             "dataKey": "name",
             "emptyStateMessage": "Nothing to show"
            }
@@ -510,8 +510,8 @@
        "children": [],
        "componentName": "borrower_footer",
        "componentProps": {
-        "links": "{{ certificate.data.footer_links }}",
-        "note": "{{ certificate.data.copyright_note }}"
+        "links": "{{ certificate.data?.footer_links }}",
+        "note": "{{ certificate.data?.copyright_note }}"
        },
        "isStudioComponent": true
       },
