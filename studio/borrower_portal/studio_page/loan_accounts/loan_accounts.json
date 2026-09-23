@@ -6,11 +6,16 @@
     "flexDirection": "row",
     "height": "100%",
     "overflowX": "hidden",
+    "scrollbarColor": "var(--outline-gray-3) transparent",
+    "scrollbarWidth": "thin",
     "width": "100%"
    },
    "blockName": "body",
    "children": [
     {
+     "baseStyles": {
+      "borderRight": "1px solid var(--outline-gray-1)"
+     },
      "children": [
       {
        "baseStyles": {
@@ -21,11 +26,79 @@
        },
        "children": [
         {
-         "children": [],
-         "componentName": "SidebarHeader",
-         "componentProps": {
-          "title": "{{ loans.data?.brand_name || '' }}"
-         }
+         "baseStyles": {
+          "alignItems": "center",
+          "display": "flex",
+          "flexDirection": "row",
+          "flexShrink": "0",
+          "gap": "8px",
+          "height": "48px",
+          "justifyContent": "center",
+          "padding": "0 6px"
+         },
+         "children": [
+          {
+           "baseStyles": {
+            "borderRadius": "6px",
+            "flexShrink": "0",
+            "height": "28px",
+            "overflow": "hidden",
+            "width": "28px"
+           },
+           "children": [],
+           "componentName": "ImageView",
+           "componentProps": {
+            "alt": "",
+            "image": "{{ loans.data.brand_logo }}",
+            "shape": "square",
+            "size": "lg"
+           },
+           "visibilityCondition": "{{ loans.data.brand_logo }}"
+          },
+          {
+           "baseStyles": {
+            "alignItems": "center",
+            "backgroundColor": "var(--surface-gray-4)",
+            "borderRadius": "6px",
+            "color": "var(--ink-gray-7)",
+            "display": "flex",
+            "flexShrink": "0",
+            "height": "28px",
+            "justifyContent": "center",
+            "textTransform": "uppercase",
+            "width": "28px"
+           },
+           "children": [],
+           "componentName": "TextBlock",
+           "componentProps": {
+            "fontSize": "text-base",
+            "tag": "p",
+            "text": "{{ (loans.data.brand_name || '').charAt(0) }}"
+           },
+           "visibilityCondition": "{{ loans.data.show_wordmark }}"
+          },
+          {
+           "baseStyles": {
+            "color": "var(--ink-gray-8)",
+            "flex": "1 1 0%",
+            "fontWeight": "500",
+            "minWidth": "0px",
+            "overflow": "hidden",
+            "textOverflow": "ellipsis",
+            "whiteSpace": "nowrap"
+           },
+           "children": [],
+           "componentName": "TextBlock",
+           "componentProps": {
+            "fontSize": "text-base",
+            "tag": "p",
+            "text": "{{ loans.data.brand_name || '' }}"
+           },
+           "visibilityCondition": "{{ !sidebarCollapsed }}"
+          }
+         ],
+         "componentName": "container",
+         "originalElement": "div"
         },
         {
          "baseStyles": {
@@ -131,7 +204,7 @@
              "componentProps": {
               "fontSize": "text-sm",
               "tag": "p",
-              "text": "{{ loans.data?.holder_name }}"
+              "text": "{{ loans.data.holder_name }}"
              }
             },
             {
@@ -143,12 +216,13 @@
              "componentProps": {
               "fontSize": "text-p-xs",
               "tag": "p",
-              "text": "{{ loans.data?.customer_note }}"
+              "text": "{{ loans.data.customer_note }}"
              }
             }
            ],
            "componentName": "container",
-           "originalElement": "div"
+           "originalElement": "div",
+           "visibilityCondition": "{{ !sidebarCollapsed }}"
           },
           {
            "children": [],
@@ -162,6 +236,12 @@
       }
      ],
      "componentName": "Sidebar",
+     "componentProps": {
+      "collapsed": {
+       "$type": "variable",
+       "name": "sidebarCollapsed"
+      }
+     },
      "mobileStyles": {
       "display": "none"
      }
@@ -182,10 +262,11 @@
        "componentProps": {
         "action_label": "Apply for a loan",
         "action_route": "/apply",
-        "crumb": "{{ loans.data?.crumb }}",
-        "note": "{{ loans.data?.head_note }}",
-        "status": "{{ loans.data?.account_status }}",
-        "status_tone": "{{ loans.data?.account_tone }}"
+        "breadcrumbs": "{{ loans.data.breadcrumbs }}",
+        "crumb": "{{ loans.data.crumb }}",
+        "note": "{{ loans.data.head_note }}",
+        "status": "{{ loans.data.account_status }}",
+        "status_tone": "{{ loans.data.account_tone }}"
        },
        "isStudioComponent": true
       },
@@ -235,19 +316,19 @@
                "componentProps": {
                 "fontSize": "text-xs",
                 "tag": "p",
-                "text": "{{ loans.data?.label_next }}"
+                "text": "{{ loans.data.label_next }}"
                }
               },
               {
                "children": [],
                "componentName": "Badge",
                "componentProps": {
-                "label": "{{ loans.data?.next_flag }}",
+                "label": "{{ loans.data.next_flag }}",
                 "size": "sm",
                 "theme": "orange",
                 "variant": "subtle"
                },
-               "visibilityCondition": "{{ loans.data?.next_flag }}"
+               "visibilityCondition": "{{ loans.data.next_flag }}"
               }
              ],
              "componentName": "container",
@@ -269,7 +350,7 @@
                "componentProps": {
                 "fontSize": "text-4xl",
                 "tag": "div",
-                "text": "{{ loans.data?.next_amount }}"
+                "text": "{{ loans.data.next_amount }}"
                }
               },
               {
@@ -281,7 +362,7 @@
                "componentProps": {
                 "fontSize": "text-p-xs",
                 "tag": "p",
-                "text": "{{ loans.data?.next_note }}"
+                "text": "{{ loans.data.next_note }}"
                }
               }
              ],
@@ -320,7 +401,7 @@
                "componentProps": {
                 "fontSize": "text-xs",
                 "tag": "p",
-                "text": "{{ loans.data?.label_outstanding }}"
+                "text": "{{ loans.data.label_outstanding }}"
                }
               }
              ],
@@ -343,7 +424,7 @@
                "componentProps": {
                 "fontSize": "text-4xl",
                 "tag": "div",
-                "text": "{{ loans.data?.outstanding }}"
+                "text": "{{ loans.data.outstanding }}"
                }
               },
               {
@@ -355,7 +436,7 @@
                "componentProps": {
                 "fontSize": "text-p-xs",
                 "tag": "p",
-                "text": "{{ loans.data?.outstanding_note }}"
+                "text": "{{ loans.data.outstanding_note }}"
                }
               }
              ],
@@ -394,7 +475,7 @@
                "componentProps": {
                 "fontSize": "text-xs",
                 "tag": "p",
-                "text": "{{ loans.data?.label_sanctioned }}"
+                "text": "{{ loans.data.label_sanctioned }}"
                }
               }
              ],
@@ -417,7 +498,7 @@
                "componentProps": {
                 "fontSize": "text-4xl",
                 "tag": "div",
-                "text": "{{ loans.data?.sanctioned }}"
+                "text": "{{ loans.data.sanctioned }}"
                }
               },
               {
@@ -429,7 +510,7 @@
                "componentProps": {
                 "fontSize": "text-p-xs",
                 "tag": "p",
-                "text": "{{ loans.data?.sanctioned_note }}"
+                "text": "{{ loans.data.sanctioned_note }}"
                }
               }
              ],
@@ -491,7 +572,7 @@
              "componentProps": {
               "fontSize": "text-p-xs",
               "tag": "p",
-              "text": "{{ loans.data?.accounts_note }}"
+              "text": "{{ loans.data.accounts_note }}"
              }
             }
            ],
@@ -565,7 +646,7 @@
              "children": [],
              "componentName": "ListRows",
              "componentProps": {
-              "items": "{{ loans.data?.accounts || [] }}",
+              "items": "{{ loans.data.accounts || [] }}",
               "rowKey": "name"
              },
              "componentSlots": {
@@ -768,8 +849,8 @@
        "children": [],
        "componentName": "borrower_footer",
        "componentProps": {
-        "links": "{{ loans.data?.footer_links }}",
-        "note": "{{ loans.data?.copyright_note }}"
+        "links": "{{ loans.data.footer_links }}",
+        "note": "{{ loans.data.copyright_note }}"
        },
        "isStudioComponent": true
       },
@@ -787,11 +868,11 @@
    "originalElement": "body"
   }
  ],
- "creation": "2026-09-21 17:39:41.030551",
+ "creation": "2026-09-23 12:26:28.519343",
  "doctype": "Studio Page",
  "frappe_app": "lending",
  "is_standard": 1,
- "modified": "2026-09-22 13:05:55.469000",
+ "modified": "2026-09-23 14:48:31.524344",
  "modified_by": "Administrator",
  "name": "loan_accounts",
  "owner": "Administrator",

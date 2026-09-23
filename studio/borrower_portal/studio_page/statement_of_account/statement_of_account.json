@@ -6,11 +6,16 @@
     "flexDirection": "row",
     "height": "100%",
     "overflowX": "hidden",
+    "scrollbarColor": "var(--outline-gray-3) transparent",
+    "scrollbarWidth": "thin",
     "width": "100%"
    },
    "blockName": "body",
    "children": [
     {
+     "baseStyles": {
+      "borderRight": "1px solid var(--outline-gray-1)"
+     },
      "children": [
       {
        "baseStyles": {
@@ -21,11 +26,79 @@
        },
        "children": [
         {
-         "children": [],
-         "componentName": "SidebarHeader",
-         "componentProps": {
-          "title": "{{ statement.data?.brand_name || '' }}"
-         }
+         "baseStyles": {
+          "alignItems": "center",
+          "display": "flex",
+          "flexDirection": "row",
+          "flexShrink": "0",
+          "gap": "8px",
+          "height": "48px",
+          "justifyContent": "center",
+          "padding": "0 6px"
+         },
+         "children": [
+          {
+           "baseStyles": {
+            "borderRadius": "6px",
+            "flexShrink": "0",
+            "height": "28px",
+            "overflow": "hidden",
+            "width": "28px"
+           },
+           "children": [],
+           "componentName": "ImageView",
+           "componentProps": {
+            "alt": "",
+            "image": "{{ statement.data.brand_logo }}",
+            "shape": "square",
+            "size": "lg"
+           },
+           "visibilityCondition": "{{ statement.data.brand_logo }}"
+          },
+          {
+           "baseStyles": {
+            "alignItems": "center",
+            "backgroundColor": "var(--surface-gray-4)",
+            "borderRadius": "6px",
+            "color": "var(--ink-gray-7)",
+            "display": "flex",
+            "flexShrink": "0",
+            "height": "28px",
+            "justifyContent": "center",
+            "textTransform": "uppercase",
+            "width": "28px"
+           },
+           "children": [],
+           "componentName": "TextBlock",
+           "componentProps": {
+            "fontSize": "text-base",
+            "tag": "p",
+            "text": "{{ (statement.data.brand_name || '').charAt(0) }}"
+           },
+           "visibilityCondition": "{{ statement.data.show_wordmark }}"
+          },
+          {
+           "baseStyles": {
+            "color": "var(--ink-gray-8)",
+            "flex": "1 1 0%",
+            "fontWeight": "500",
+            "minWidth": "0px",
+            "overflow": "hidden",
+            "textOverflow": "ellipsis",
+            "whiteSpace": "nowrap"
+           },
+           "children": [],
+           "componentName": "TextBlock",
+           "componentProps": {
+            "fontSize": "text-base",
+            "tag": "p",
+            "text": "{{ statement.data.brand_name || '' }}"
+           },
+           "visibilityCondition": "{{ !sidebarCollapsed }}"
+          }
+         ],
+         "componentName": "container",
+         "originalElement": "div"
         },
         {
          "baseStyles": {
@@ -131,7 +204,7 @@
              "componentProps": {
               "fontSize": "text-sm",
               "tag": "p",
-              "text": "{{ statement.data?.holder_name }}"
+              "text": "{{ statement.data.holder_name }}"
              }
             },
             {
@@ -143,12 +216,13 @@
              "componentProps": {
               "fontSize": "text-p-xs",
               "tag": "p",
-              "text": "{{ statement.data?.customer_note }}"
+              "text": "{{ statement.data.customer_note }}"
              }
             }
            ],
            "componentName": "container",
-           "originalElement": "div"
+           "originalElement": "div",
+           "visibilityCondition": "{{ !sidebarCollapsed }}"
           },
           {
            "children": [],
@@ -162,6 +236,12 @@
       }
      ],
      "componentName": "Sidebar",
+     "componentProps": {
+      "collapsed": {
+       "$type": "variable",
+       "name": "sidebarCollapsed"
+      }
+     },
      "mobileStyles": {
       "display": "none"
      }
@@ -182,10 +262,11 @@
        "componentProps": {
         "action_label": "",
         "action_route": "",
-        "crumb": "{{ statement.data?.crumb }}",
-        "note": "{{ statement.data?.head_note }}",
-        "status": "{{ statement.data?.account_status }}",
-        "status_tone": "{{ statement.data?.account_tone }}"
+        "breadcrumbs": "{{ statement.data.breadcrumbs }}",
+        "crumb": "{{ statement.data.crumb }}",
+        "note": "{{ statement.data.head_note }}",
+        "status": "{{ statement.data.account_status }}",
+        "status_tone": "{{ statement.data.account_tone }}"
        },
        "isStudioComponent": true
       },
@@ -316,7 +397,7 @@
              "componentProps": {
               "fontSize": "text-p-xs",
               "tag": "p",
-              "text": "{{ statement.data?.totals_note }}"
+              "text": "{{ statement.data.totals_note }}"
              }
             }
            ],
@@ -368,7 +449,7 @@
              ],
              "componentName": "Repeater",
              "componentProps": {
-              "data": "{{ statement.data?.totals || [] }}",
+              "data": "{{ statement.data.totals }}",
               "dataKey": "name",
               "emptyStateMessage": "Nothing to show"
              }
@@ -379,12 +460,12 @@
               "click": {
                "action": "Run Script",
                "event": "click",
-               "script": "window.open(statement.data?.download_url, '_blank')"
+               "script": "window.open(statement.data.download_url, '_blank')"
               }
              },
              "componentName": "Button",
              "componentProps": {
-              "label": "{{ statement.data?.download_label }}",
+              "label": "{{ statement.data.download_label }}",
               "size": "sm",
               "variant": "solid"
              }
@@ -438,7 +519,7 @@
              "componentProps": {
               "fontSize": "text-p-xs",
               "tag": "p",
-              "text": "{{ statement.data?.rows_note }}"
+              "text": "{{ statement.data.rows_note }}"
              }
             }
            ],
@@ -496,7 +577,7 @@
            ],
            "componentName": "Repeater",
            "componentProps": {
-            "data": "{{ statement.data?.rows || [] }}",
+            "data": "{{ statement.data.rows }}",
             "dataKey": "name",
             "emptyStateMessage": "Nothing to show"
            }
@@ -513,8 +594,8 @@
        "children": [],
        "componentName": "borrower_footer",
        "componentProps": {
-        "links": "{{ statement.data?.footer_links }}",
-        "note": "{{ statement.data?.copyright_note }}"
+        "links": "{{ statement.data.footer_links }}",
+        "note": "{{ statement.data.copyright_note }}"
        },
        "isStudioComponent": true
       },
@@ -532,11 +613,11 @@
    "originalElement": "body"
   }
  ],
- "creation": "2026-09-21 17:39:41.114845",
+ "creation": "2026-09-23 12:26:28.550989",
  "doctype": "Studio Page",
  "frappe_app": "lending",
  "is_standard": 1,
- "modified": "2026-09-22 13:05:55.677643",
+ "modified": "2026-09-23 14:48:31.709559",
  "modified_by": "Administrator",
  "name": "statement_of_account",
  "owner": "Administrator",

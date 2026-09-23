@@ -32,6 +32,7 @@ from lending.portal.studio_build.blocks import (
 	click,
 	column,
 	container,
+	fallback,
 	instance,
 	muted,
 	repeater,
@@ -44,6 +45,17 @@ from lending.portal.studio_build.blocks import (
 HEADER = "borrower_header"
 FOOTER = "borrower_footer"
 ALERTS = "borrower_alerts"
+
+# The crumb trail, as frappe-ui draws one. `Breadcrumbs.vue` gives every crumb
+# `px-0.5 py-1 text-lg-medium`, colours the trail `ink-gray-5` and the last one
+# `ink-gray-9`, and sets `/` between them in `text-base ink-gray-4` with `mx-0.5`.
+#
+# `text-lg-medium` is named rather than unpacked into numbers: the portal's own bundle
+# carries the class, so the header takes 16px/500/1.15/0.015em from the same rule the
+# desk reads it from, and follows it if the scale is ever retuned. Only what a Studio
+# block cannot say as a class -- the padding and the two colours -- is spelled out.
+CRUMB_TYPE = "text-lg-medium"
+CRUMB_BOX = {"display": "flex", "alignItems": "center", "padding": "4px 2px"}
 
 # The rows of the sidebar, and the routes this app serves them at.
 #
@@ -63,9 +75,101 @@ NAV_ITEMS = (
 	("Search", "/search", "search"),
 )
 
+# Whether the rail is open, as every block in it has to ask.
+#
+# frappe-ui's Sidebar provides its collapsed state down the tree and its own parts inject
+# it; blocks cannot inject anything, so the state is bound out to a page-script ref
+# instead -- `collapsed` is a v-model on Sidebar -- and read back through this. Anything
+# that is words rather than a glyph leaves the rail while it is shut, rather than being
+# clipped by the 48px of it that remain.
+#
+# The ref starts as null, which is Sidebar's own "collapse on mobile, otherwise not", so
+# `!sidebarCollapsed` reads as open until somebody presses the toggle.
+EXPANDED = "{{ !sidebarCollapsed }}"
+
+# The square the lender's mark is drawn in, whichever of the two marks it turns out to
+# be. The numbers are SidebarHeader's own -- `size-7` at `rounded-[6px]`.
+MARK = {"width": "28px", "height": "28px", "flexShrink": "0", "borderRadius": "6px"}
+
+
+def brand(data):
+	"""Whose portal this is: the lender's mark, and the lender's name beside it.
+
+	Not frappe-ui's SidebarHeader. That one is the trigger of a Dropdown and draws the
+	chevron that opens it whether or not the menu holds anything, and no prop takes the
+	chevron away. This portal has nothing to put in that menu -- one app, one borrower,
+	no workspace to switch to -- so the header is the two pieces the desk's own header is
+	made of, and none of it is pressable.
+
+	Both marks are written out, and one of them renders: `brand_payload` carries the logo
+	and the name together because the page is built once and Lending Settings is read per
+	request, so the page cannot know which it will have. `show_wordmark` is that payload's
+	own answer to which one this is.
+	"""
+	logo = block(
+		"ImageView",
+		props={"image": "{{ %s.brand_logo }}" % data, "alt": "", "shape": "square", "size": "lg"},
+		# ImageView's own sizes start at 128px, for a picture on a page rather than a mark
+		# in a rail. The styles win over the classes that set them, so `size` here is only
+		# choosing the 6px corner that goes with it.
+		styles=dict(MARK, overflow="hidden"),
+		visible="{{ %s.brand_logo }}" % data,
+	)
+	letter = text(
+		"{{ (%s.brand_name || '').charAt(0) }}" % data,
+		size="text-base",
+		styles=dict(
+			MARK,
+			display="flex",
+			alignItems="center",
+			justifyContent="center",
+			textTransform="uppercase",
+			backgroundColor="var(--surface-gray-4)",
+			color="var(--ink-gray-7)",
+		),
+		visible="{{ %s.show_wordmark }}" % data,
+	)
+
+	# `flex: 1` is what lets one row serve both states. Open, the name fills the row and
+	# the mark is pushed to the left edge regardless of the centring below; shut, the name
+	# is gone and the mark is the only thing left to centre.
+	name = text(
+		fallback("{{ %s.brand_name }}" % data, "''"),
+		size="text-base",
+		styles={
+			"flex": "1 1 0%",
+			"fontWeight": "500",
+			"color": "var(--ink-gray-8)",
+			"minWidth": "0px",
+			"overflow": "hidden",
+			"textOverflow": "ellipsis",
+			"whiteSpace": "nowrap",
+		},
+		visible=EXPANDED,
+	)
+
+	# 48px tall, so the mark sits in the same band as the page header beside it, and 6px
+	# in from a rail already padded 8, which is where SidebarHeader's own px-1 + px-1.5
+	# put it. Shut, those 6px leave less room than the mark needs and it overflows them
+	# evenly either side -- which is the rail's centre, 8 + 6 + 10 of 48.
+	return row(
+		[logo, letter, name],
+		gap="8px",
+		styles={"height": "48px", "flexShrink": "0", "justifyContent": "center", "padding": "0 6px"},
+	)
+
 
 def sidebar(data):
-	"""The list of pages, and whose portal it is."""
+	"""The list of pages, and whose portal it is.
+
+	Laid out as the desk's own sidebar is, which mostly meant leaving it alone: the two
+	already agree on the row, down to the number. `text-sm` is 13px at 420 over 1.15 in
+	both scales; SidebarItem's `h-7` is the desk's 28px anchor; the label is `ink-gray-6`
+	in both; `rounded` resolves to `--radius-4`, which is the desk's 8px; both hover at
+	gray-100 and draw the row you are on in white under a small shadow. What the desk has
+	and this did not is the hairline down the right of the rail, and a header with nothing
+	to press.
+	"""
 	foot = column(
 		[
 			text("{{ %s.holder_name }}" % data, size="text-sm", styles={"fontWeight": "600"}),
@@ -73,6 +177,7 @@ def sidebar(data):
 		],
 		gap="2px",
 		styles={"padding": "12px"},
+		visible=EXPANDED,
 	)
 
 	nav_items = [
@@ -85,7 +190,7 @@ def sidebar(data):
 			"div",
 			styles={"display": "flex", "height": "100%", "flexDirection": "column", "padding": "0.5rem"},
 			children=[
-				block("SidebarHeader", props={"title": "{{ %s.brand_name }}" % data}),
+				brand(data),
 				block(
 					"div",
 					styles={"flex": "1 1 0%", "overflowY": "auto", "overflowX": "hidden"},
@@ -96,9 +201,15 @@ def sidebar(data):
 		)
 	]
 
+	# The border is frappe-ui's own `border-r border-outline-gray-1`, which Sidebar draws
+	# only for the config-object API it is keeping around for one more release. Written
+	# out here because this sidebar is composed rather than configured, and because
+	# `--outline-gray-1` is #ededed, which is the desk's `--sidebar-border-color` exactly.
 	return block(
 		"Sidebar",
+		props={"collapsed": {"$type": "variable", "name": "sidebarCollapsed"}},
 		children=sidebar_children,
+		styles={"borderRight": "1px solid var(--outline-gray-1)"},
 		mobile={"display": "none"},
 	)
 
@@ -110,12 +221,75 @@ def header_tree():
 	itself where a page passes no label -- the statement and the certificate keep their
 	download inside the page, beside the dates it obeys.
 	"""
-	titles = column(
+	crumb_node = row(
 		[
-			text("{{ inputs.crumb }}", tag="h1", size="text-xl", styles={"fontWeight": "600"}),
-			muted("{{ inputs.note }}"),
+			text(
+				"{{ dataItem.label }}",
+				size=CRUMB_TYPE,
+				styles={**CRUMB_BOX, "color": "var(--ink-gray-5)", "cursor": "pointer"},
+				classes=["hover:text-ink-gray-7"],
+				events=click("open(dataItem.route)"),
+				visible="{{ dataItem.route }}"
+			),
+			text(
+				"{{ dataItem.label }}",
+				size=CRUMB_TYPE,
+				styles={
+					**CRUMB_BOX,
+					"color": "var(--ink-gray-9)",
+					"minWidth": "0px",
+					"overflow": "hidden",
+					"textOverflow": "ellipsis",
+					"whiteSpace": "nowrap",
+				},
+				visible="{{ !dataItem.route }}"
+			),
+			text(
+				"/",
+				size="text-base",
+				styles={"margin": "0px 2px", "color": "var(--ink-gray-4)"},
+				visible="{{ dataItem.route }}"
+			),
 		],
-		gap="2px",
+		gap="0px",
+		styles={"alignItems": "center", "minWidth": "0px"}
+	)
+
+	breadcrumbs = repeater(
+		"{{ inputs.breadcrumbs }}",
+		crumb_node,
+		# No gap: frappe-ui sets the crumbs flush against each other and lets the `/` hold
+		# them apart on its own -- `mx-0.5` on the separator against `px-0.5` on the crumb
+		# either side of it, so 4px of white each way. Zero has to be said out loud, since
+		# Studio's Repeater carries `gap-5` on its own wrapper and would stand them 20px
+		# apart on its own.
+		styles={
+			"display": "flex",
+			"flexDirection": "row",
+			"alignItems": "center",
+			"minWidth": "0px",
+			"gap": "0px",
+		},
+		visible="{{ inputs.breadcrumbs && inputs.breadcrumbs.length > 0 }}"
+	)
+
+	# A page with no trail says its own name, as frappe-ui's PageHeaderTitle does:
+	# `truncate text-lg font-semibold text-ink-gray-9`. `text-lg` rather than
+	# `text-lg-semibold` -- the weight is overridden on top of the regular style, so the
+	# tracking stays the regular 0.02em, and copying the semibold style would tighten it.
+	titles = text(
+		"{{ inputs.crumb }}",
+		tag="h1",
+		size="text-lg",
+		styles={
+			"fontWeight": "600",
+			"color": "var(--ink-gray-9)",
+			"minWidth": "0px",
+			"overflow": "hidden",
+			"textOverflow": "ellipsis",
+			"whiteSpace": "nowrap",
+		},
+		visible="{{ !inputs.breadcrumbs || inputs.breadcrumbs.length === 0 }}"
 	)
 	status = badge(
 		"{{ inputs.status }}",
@@ -135,15 +309,35 @@ def header_tree():
 		visible="{{ inputs.action_label }}",
 	)
 
+	# The badge sits beside the record it describes, not out at the right margin: it
+	# reads as part of the title. `gap-2` between them, as the desk header has it --
+	# 10px apart on the page, once the last crumb's own 2px of padding is counted.
 	return row(
-		[titles, spacer(), status, bell, action],
+		[
+			row(
+				[breadcrumbs, titles, status],
+				gap="8px",
+				styles={"alignItems": "center", "minWidth": "0px"},
+			),
+			spacer(),
+			bell,
+			action,
+		],
 		gap="10px",
 		styles={
-			"padding": "16px 20px",
+			"padding": "0px",
+			# Set on the canvas rather than here, and carried back so a rebuild keeps it.
+			# frappe-ui's own header pads `px-3 sm:px-5`, and the content below this one
+			# sits at 20px, so 20 is what would line the crumb up with the cards.
+			"paddingLeft": "15px",
 			"width": "100%",
-			"borderWidth": "0px 0px 1px 0px",
-			"borderStyle": "solid",
-			"borderColor": "var(--outline-gray-2)",
+			"minHeight": "48.8px",
+			"alignItems": "center",
+			# The rule under the header, as `PageHeader.vue` draws it: plain `border-b`,
+			# whose colour is the preset's own `borderColor.DEFAULT`. Spelled out rather
+			# than left to the class, because that default is set on Tailwind's preflight
+			# rule and a block styled here carries no class to inherit it from.
+			"borderBottom": "1px solid var(--outline-gray-1)",
 		},
 	)
 
@@ -246,6 +440,7 @@ def upsert_frame():
 		header_tree(),
 		inputs=(
 			("crumb", "What this page is"),
+			("breadcrumbs", "List of breadcrumbs"),
 			("note", "Who is reading it, and as on when"),
 			("status", "How the borrower's accounts stand, where that is worth saying"),
 			("status_tone", "'', 'ok', 'warn' or 'danger'"),
@@ -277,6 +472,7 @@ def frame(source, content, action_label="", action_route=""):
 		HEADER,
 		{
 			"crumb": "{{ %s.crumb }}" % data,
+			"breadcrumbs": "{{ %s.breadcrumbs }}" % data,
 			"note": "{{ %s.head_note }}" % data,
 			"status": "{{ %s.account_status }}" % data,
 			"status_tone": "{{ %s.account_tone }}" % data,

@@ -6,11 +6,16 @@
     "flexDirection": "row",
     "height": "100%",
     "overflowX": "hidden",
+    "scrollbarColor": "var(--outline-gray-3) transparent",
+    "scrollbarWidth": "thin",
     "width": "100%"
    },
    "blockName": "body",
    "children": [
     {
+     "baseStyles": {
+      "borderRight": "1px solid var(--outline-gray-1)"
+     },
      "children": [
       {
        "baseStyles": {
@@ -21,11 +26,79 @@
        },
        "children": [
         {
-         "children": [],
-         "componentName": "SidebarHeader",
-         "componentProps": {
-          "title": "{{ certificate.data?.brand_name || '' }}"
-         }
+         "baseStyles": {
+          "alignItems": "center",
+          "display": "flex",
+          "flexDirection": "row",
+          "flexShrink": "0",
+          "gap": "8px",
+          "height": "48px",
+          "justifyContent": "center",
+          "padding": "0 6px"
+         },
+         "children": [
+          {
+           "baseStyles": {
+            "borderRadius": "6px",
+            "flexShrink": "0",
+            "height": "28px",
+            "overflow": "hidden",
+            "width": "28px"
+           },
+           "children": [],
+           "componentName": "ImageView",
+           "componentProps": {
+            "alt": "",
+            "image": "{{ certificate.data.brand_logo }}",
+            "shape": "square",
+            "size": "lg"
+           },
+           "visibilityCondition": "{{ certificate.data.brand_logo }}"
+          },
+          {
+           "baseStyles": {
+            "alignItems": "center",
+            "backgroundColor": "var(--surface-gray-4)",
+            "borderRadius": "6px",
+            "color": "var(--ink-gray-7)",
+            "display": "flex",
+            "flexShrink": "0",
+            "height": "28px",
+            "justifyContent": "center",
+            "textTransform": "uppercase",
+            "width": "28px"
+           },
+           "children": [],
+           "componentName": "TextBlock",
+           "componentProps": {
+            "fontSize": "text-base",
+            "tag": "p",
+            "text": "{{ (certificate.data.brand_name || '').charAt(0) }}"
+           },
+           "visibilityCondition": "{{ certificate.data.show_wordmark }}"
+          },
+          {
+           "baseStyles": {
+            "color": "var(--ink-gray-8)",
+            "flex": "1 1 0%",
+            "fontWeight": "500",
+            "minWidth": "0px",
+            "overflow": "hidden",
+            "textOverflow": "ellipsis",
+            "whiteSpace": "nowrap"
+           },
+           "children": [],
+           "componentName": "TextBlock",
+           "componentProps": {
+            "fontSize": "text-base",
+            "tag": "p",
+            "text": "{{ certificate.data.brand_name || '' }}"
+           },
+           "visibilityCondition": "{{ !sidebarCollapsed }}"
+          }
+         ],
+         "componentName": "container",
+         "originalElement": "div"
         },
         {
          "baseStyles": {
@@ -131,7 +204,7 @@
              "componentProps": {
               "fontSize": "text-sm",
               "tag": "p",
-              "text": "{{ certificate.data?.holder_name }}"
+              "text": "{{ certificate.data.holder_name }}"
              }
             },
             {
@@ -143,12 +216,13 @@
              "componentProps": {
               "fontSize": "text-p-xs",
               "tag": "p",
-              "text": "{{ certificate.data?.customer_note }}"
+              "text": "{{ certificate.data.customer_note }}"
              }
             }
            ],
            "componentName": "container",
-           "originalElement": "div"
+           "originalElement": "div",
+           "visibilityCondition": "{{ !sidebarCollapsed }}"
           },
           {
            "children": [],
@@ -162,6 +236,12 @@
       }
      ],
      "componentName": "Sidebar",
+     "componentProps": {
+      "collapsed": {
+       "$type": "variable",
+       "name": "sidebarCollapsed"
+      }
+     },
      "mobileStyles": {
       "display": "none"
      }
@@ -182,10 +262,11 @@
        "componentProps": {
         "action_label": "",
         "action_route": "",
-        "crumb": "{{ certificate.data?.crumb }}",
-        "note": "{{ certificate.data?.head_note }}",
-        "status": "{{ certificate.data?.account_status }}",
-        "status_tone": "{{ certificate.data?.account_tone }}"
+        "breadcrumbs": "{{ certificate.data.breadcrumbs }}",
+        "crumb": "{{ certificate.data.crumb }}",
+        "note": "{{ certificate.data.head_note }}",
+        "status": "{{ certificate.data.account_status }}",
+        "status_tone": "{{ certificate.data.account_tone }}"
        },
        "isStudioComponent": true
       },
@@ -228,7 +309,7 @@
              "componentProps": {
               "fontSize": "text-lg",
               "tag": "h2",
-              "text": "{{ certificate.data?.year_label }}"
+              "text": "{{ certificate.data.year_label }}"
              }
             },
             {
@@ -240,7 +321,7 @@
              "componentProps": {
               "fontSize": "text-p-xs",
               "tag": "p",
-              "text": "{{ certificate.data?.head_note }}"
+              "text": "{{ certificate.data.head_note }}"
              }
             }
            ],
@@ -256,7 +337,7 @@
              "$type": "variable",
              "name": "year"
             },
-            "options": "{{ certificate.data?.years || [] }}",
+            "options": "{{ certificate.data.years }}",
             "type": "select"
            }
           }
@@ -305,7 +386,7 @@
              "componentProps": {
               "fontSize": "text-p-xs",
               "tag": "p",
-              "text": "{{ certificate.data?.rows_note }}"
+              "text": "{{ certificate.data.rows_note }}"
              }
             }
            ],
@@ -357,7 +438,7 @@
              ],
              "componentName": "Repeater",
              "componentProps": {
-              "data": "{{ certificate.data?.rows || [] }}",
+              "data": "{{ certificate.data.rows }}",
               "dataKey": "name",
               "emptyStateMessage": "Nothing to show"
              }
@@ -368,12 +449,12 @@
               "click": {
                "action": "Run Script",
                "event": "click",
-               "script": "window.open(certificate.data?.download_url, '_blank')"
+               "script": "window.open(certificate.data.download_url, '_blank')"
               }
              },
              "componentName": "Button",
              "componentProps": {
-              "label": "{{ certificate.data?.download_label }}",
+              "label": "{{ certificate.data.download_label }}",
               "size": "sm",
               "variant": "solid"
              }
@@ -391,7 +472,7 @@
          "componentName": "Alert",
          "componentProps": {
           "theme": "yellow",
-          "title": "{{ certificate.data?.disclaimer || '' }}"
+          "title": "{{ certificate.data.disclaimer }}"
          }
         },
         {
@@ -435,7 +516,7 @@
              "componentProps": {
               "fontSize": "text-p-xs",
               "tag": "p",
-              "text": "{{ certificate.data?.accounts_note }}"
+              "text": "{{ certificate.data.accounts_note }}"
              }
             }
            ],
@@ -493,7 +574,7 @@
            ],
            "componentName": "Repeater",
            "componentProps": {
-            "data": "{{ certificate.data?.accounts || [] }}",
+            "data": "{{ certificate.data.accounts }}",
             "dataKey": "name",
             "emptyStateMessage": "Nothing to show"
            }
@@ -510,8 +591,8 @@
        "children": [],
        "componentName": "borrower_footer",
        "componentProps": {
-        "links": "{{ certificate.data?.footer_links }}",
-        "note": "{{ certificate.data?.copyright_note }}"
+        "links": "{{ certificate.data.footer_links }}",
+        "note": "{{ certificate.data.copyright_note }}"
        },
        "isStudioComponent": true
       },
@@ -529,11 +610,11 @@
    "originalElement": "body"
   }
  ],
- "creation": "2026-09-21 17:39:41.132474",
+ "creation": "2026-09-23 12:26:28.500248",
  "doctype": "Studio Page",
  "frappe_app": "lending",
  "is_standard": 1,
- "modified": "2026-09-22 13:05:55.720399",
+ "modified": "2026-09-23 14:48:31.741560",
  "modified_by": "Administrator",
  "name": "interest_certificate",
  "owner": "Administrator",

@@ -6,6 +6,7 @@ export default function setup(context: any) {
 	const { router } = context
 	const showAlerts = ref(false)
 	const alertsTab = ref("attention")
+	const sidebarCollapsed = ref<boolean | null>(null)
 	const step = ref(1)
 	const applicantType = ref("Individual")
 	const loanProduct = ref("")
@@ -103,5 +104,5 @@ export default function setup(context: any) {
 			.finally(() => { busy.value = false })
 	}
 
-	return { tone, open, showAlerts, alertsTab, step, applicantType, loanProduct, mobileNumber, otp, employmentType, password, companyName, applicantName, dateOfBirth, pan, applicantCountry, email, loanAmount, proposedTenure, income, busy, codeSent, offer, go, choose, chooseProduct, sendCode, confirmCode, submit, createAccount }
+	return { tone, open, showAlerts, alertsTab, sidebarCollapsed, step, applicantType, loanProduct, mobileNumber, otp, employmentType, password, companyName, applicantName, dateOfBirth, pan, applicantCountry, email, loanAmount, proposedTenure, income, busy, codeSent, offer, go, choose, chooseProduct, sendCode, confirmCode, submit, createAccount }
 }

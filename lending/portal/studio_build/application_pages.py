@@ -15,7 +15,6 @@ buttons and a stylesheet, and this one hands to frappe-ui's TabButtons.
 from lending.portal.studio_build.app import api_resource, page_script, upsert_page
 from lending.portal.studio_build.blocks import (
 	block,
-	breadcrumb_trail,
 	card,
 	column,
 	muted,
@@ -175,11 +174,7 @@ def preview(read):
 
 
 def detail_content(read):
-	breadcrumbs = breadcrumb_trail([
-		{"label": "Applications", "route": "/borrower-portal/applications"},
-		{"label": read("reference")},
-	])
-	return [breadcrumbs, lead_card(read), card("Application preview", read("preview_note"), preview(read))]
+	return [lead_card(read), card("Application preview", read("preview_note"), preview(read))]
 
 
 def build_detail():

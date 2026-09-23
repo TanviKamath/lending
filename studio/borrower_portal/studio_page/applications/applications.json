@@ -6,11 +6,16 @@
     "flexDirection": "row",
     "height": "100%",
     "overflowX": "hidden",
+    "scrollbarColor": "var(--outline-gray-3) transparent",
+    "scrollbarWidth": "thin",
     "width": "100%"
    },
    "blockName": "body",
    "children": [
     {
+     "baseStyles": {
+      "borderRight": "1px solid var(--outline-gray-1)"
+     },
      "children": [
       {
        "baseStyles": {
@@ -21,11 +26,79 @@
        },
        "children": [
         {
-         "children": [],
-         "componentName": "SidebarHeader",
-         "componentProps": {
-          "title": "{{ applications.data?.brand_name || '' }}"
-         }
+         "baseStyles": {
+          "alignItems": "center",
+          "display": "flex",
+          "flexDirection": "row",
+          "flexShrink": "0",
+          "gap": "8px",
+          "height": "48px",
+          "justifyContent": "center",
+          "padding": "0 6px"
+         },
+         "children": [
+          {
+           "baseStyles": {
+            "borderRadius": "6px",
+            "flexShrink": "0",
+            "height": "28px",
+            "overflow": "hidden",
+            "width": "28px"
+           },
+           "children": [],
+           "componentName": "ImageView",
+           "componentProps": {
+            "alt": "",
+            "image": "{{ applications.data.brand_logo }}",
+            "shape": "square",
+            "size": "lg"
+           },
+           "visibilityCondition": "{{ applications.data.brand_logo }}"
+          },
+          {
+           "baseStyles": {
+            "alignItems": "center",
+            "backgroundColor": "var(--surface-gray-4)",
+            "borderRadius": "6px",
+            "color": "var(--ink-gray-7)",
+            "display": "flex",
+            "flexShrink": "0",
+            "height": "28px",
+            "justifyContent": "center",
+            "textTransform": "uppercase",
+            "width": "28px"
+           },
+           "children": [],
+           "componentName": "TextBlock",
+           "componentProps": {
+            "fontSize": "text-base",
+            "tag": "p",
+            "text": "{{ (applications.data.brand_name || '').charAt(0) }}"
+           },
+           "visibilityCondition": "{{ applications.data.show_wordmark }}"
+          },
+          {
+           "baseStyles": {
+            "color": "var(--ink-gray-8)",
+            "flex": "1 1 0%",
+            "fontWeight": "500",
+            "minWidth": "0px",
+            "overflow": "hidden",
+            "textOverflow": "ellipsis",
+            "whiteSpace": "nowrap"
+           },
+           "children": [],
+           "componentName": "TextBlock",
+           "componentProps": {
+            "fontSize": "text-base",
+            "tag": "p",
+            "text": "{{ applications.data.brand_name || '' }}"
+           },
+           "visibilityCondition": "{{ !sidebarCollapsed }}"
+          }
+         ],
+         "componentName": "container",
+         "originalElement": "div"
         },
         {
          "baseStyles": {
@@ -131,7 +204,7 @@
              "componentProps": {
               "fontSize": "text-sm",
               "tag": "p",
-              "text": "{{ applications.data?.holder_name }}"
+              "text": "{{ applications.data.holder_name }}"
              }
             },
             {
@@ -143,12 +216,13 @@
              "componentProps": {
               "fontSize": "text-p-xs",
               "tag": "p",
-              "text": "{{ applications.data?.customer_note }}"
+              "text": "{{ applications.data.customer_note }}"
              }
             }
            ],
            "componentName": "container",
-           "originalElement": "div"
+           "originalElement": "div",
+           "visibilityCondition": "{{ !sidebarCollapsed }}"
           },
           {
            "children": [],
@@ -162,6 +236,12 @@
       }
      ],
      "componentName": "Sidebar",
+     "componentProps": {
+      "collapsed": {
+       "$type": "variable",
+       "name": "sidebarCollapsed"
+      }
+     },
      "mobileStyles": {
       "display": "none"
      }
@@ -182,10 +262,11 @@
        "componentProps": {
         "action_label": "Apply for a loan",
         "action_route": "/apply",
-        "crumb": "{{ applications.data?.crumb }}",
-        "note": "{{ applications.data?.head_note }}",
-        "status": "{{ applications.data?.account_status }}",
-        "status_tone": "{{ applications.data?.account_tone }}"
+        "breadcrumbs": "{{ applications.data.breadcrumbs }}",
+        "crumb": "{{ applications.data.crumb }}",
+        "note": "{{ applications.data.head_note }}",
+        "status": "{{ applications.data.account_status }}",
+        "status_tone": "{{ applications.data.account_tone }}"
        },
        "isStudioComponent": true
       },
@@ -240,7 +321,7 @@
              "componentProps": {
               "fontSize": "text-p-xs",
               "tag": "p",
-              "text": "{{ applications.data?.applications_note }}"
+              "text": "{{ applications.data.applications_note }}"
              }
             }
            ],
@@ -300,7 +381,7 @@
              "children": [],
              "componentName": "ListRows",
              "componentProps": {
-              "items": "{{ applications.data?.applications || [] }}",
+              "items": "{{ applications.data.applications || [] }}",
               "rowKey": "name"
              },
              "componentSlots": {
@@ -495,7 +576,7 @@
              "componentProps": {
               "fontSize": "text-p-xs",
               "tag": "p",
-              "text": "{{ applications.data?.enquiries_note }}"
+              "text": "{{ applications.data.enquiries_note }}"
              }
             }
            ],
@@ -553,7 +634,7 @@
            ],
            "componentName": "Repeater",
            "componentProps": {
-            "data": "{{ applications.data?.enquiries || [] }}",
+            "data": "{{ applications.data.enquiries }}",
             "dataKey": "name",
             "emptyStateMessage": "Nothing to show"
            }
@@ -570,8 +651,8 @@
        "children": [],
        "componentName": "borrower_footer",
        "componentProps": {
-        "links": "{{ applications.data?.footer_links }}",
-        "note": "{{ applications.data?.copyright_note }}"
+        "links": "{{ applications.data.footer_links }}",
+        "note": "{{ applications.data.copyright_note }}"
        },
        "isStudioComponent": true
       },
@@ -589,11 +670,11 @@
    "originalElement": "body"
   }
  ],
- "creation": "2026-09-21 17:39:41.061180",
+ "creation": "2026-09-23 12:26:28.462226",
  "doctype": "Studio Page",
  "frappe_app": "lending",
  "is_standard": 1,
- "modified": "2026-09-22 13:05:55.551341",
+ "modified": "2026-09-23 14:48:31.596096",
  "modified_by": "Administrator",
  "name": "applications",
  "owner": "Administrator",

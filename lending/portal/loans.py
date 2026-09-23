@@ -81,6 +81,10 @@ def get_loan_detail() -> dict:
 
 	payload = shell_payload(loan.loan_product, _("Download statement"), [loan.applicant], [loan])
 	payload["crumb"] = loan.loan_product
+	payload["breadcrumbs"] = [
+		{"label": "Loans", "route": "/borrower-portal/loans"},
+		{"label": loan.loan_product}
+	]
 	payload["head_note"] = "{0} · {1}".format(loan.name, STATUS_LABELS.get(loan.status, loan.status))
 
 	payload.update(

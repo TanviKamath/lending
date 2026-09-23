@@ -41,6 +41,24 @@ def reader(source):
 	return read
 
 
+def fallback(expression, default):
+	"""The same expression, answering with `default` until its source arrives.
+
+	A page's resources hold nothing until they resolve, and on the Studio canvas they
+	never resolve at all. The evaluator rewrites `loan.data.schedule` as optional
+	chaining, so the expression itself is safe and hands back `undefined` -- but a
+	frappe-ui component that indexes what it is given, `items.map` or `title.charAt`,
+	throws on that while rendering, and Vue tears the subtree down with it. Anything
+	bound to a resource and read that way needs a value of the right shape instead.
+	"""
+	if not isinstance(expression, str):
+		return expression
+	if not (expression.startswith("{{") and expression.endswith("}}")):
+		return expression
+
+	return "{{ %s || %s }}" % (expression[2:-2].strip(), default)
+
+
 def block(name, props=None, styles=None, children=None, **kwargs):
 	"""One block. `name` is the component, everything else is optional."""
 	node = {
@@ -82,6 +100,14 @@ def root(children, direction="row"):
 	a page is one root with everything inside it, never two blocks side by side.
 
 	`originalElement: body` is what marks a block the root.
+
+	The scrollbar is set here and nowhere else. `scrollbar-width` and `scrollbar-color`
+	both inherit, so the root hands them to every scroller the page grows -- the sidebar,
+	the main column, a panel added next month -- without any of them having to ask. The
+	colour is frappe-ui's own thumb: its ScrollArea paints `bg-gray-400`, dark
+	`bg-gray-700`, and `--outline-gray-3` is that pair under one name that tracks the
+	theme. What a bare scrollbar cannot copy is the fade -- frappe-ui's is an overlay
+	that hides when idle, which no CSS scrollbar property can express.
 	"""
 	return [
 		block(
@@ -92,6 +118,8 @@ def root(children, direction="row"):
 				"width": "100%",
 				"height": "100%",
 				"overflowX": "hidden",
+				"scrollbarWidth": "thin",
+				"scrollbarColor": "var(--outline-gray-3) transparent",
 			},
 			children=children,
 			originalElement="body",
@@ -241,7 +269,7 @@ def record_list(columns, items, cells, row_key="name", script=None):
 	)
 	rows = block(
 		"ListRows",
-		props={"items": items, "rowKey": row_key},
+		props={"items": fallback(items, "[]"), "rowKey": row_key},
 		slots=slot("default", [record]),
 	)
 

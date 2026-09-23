@@ -6,6 +6,7 @@ export default function setup(context: any) {
 	const { router } = context
 	const showAlerts = ref(false)
 	const alertsTab = ref("attention")
+	const sidebarCollapsed = ref<boolean | null>(null)
 	const editing = ref(false)
 
 	const open = (url?: string) => {
@@ -40,5 +41,5 @@ export default function setup(context: any) {
 			.finally(() => { saving.value = false })
 	}
 
-	return { tone, open, showAlerts, alertsTab, editing, form, customer, edit, save, saving }
+	return { tone, open, showAlerts, alertsTab, sidebarCollapsed, editing, form, customer, edit, save, saving }
 }

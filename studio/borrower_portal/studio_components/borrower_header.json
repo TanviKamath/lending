@@ -2,54 +2,174 @@
  "block": {
   "baseStyles": {
    "alignItems": "center",
-   "borderColor": "var(--outline-gray-2)",
-   "borderStyle": "solid",
-   "borderWidth": "0px 0px 1px 0px",
+   "borderBottom": "1px solid var(--outline-gray-1)",
    "display": "flex",
    "flexDirection": "row",
    "gap": "10px",
-   "padding": "16px 20px",
+   "minHeight": "48.8px",
+   "padding": "0px",
+   "paddingLeft": "15px",
    "width": "100%"
   },
   "children": [
    {
     "baseStyles": {
+     "alignItems": "center",
      "display": "flex",
-     "flexDirection": "column",
-     "gap": "2px"
+     "flexDirection": "row",
+     "gap": "8px",
+     "minWidth": "0px"
     },
     "children": [
      {
       "baseStyles": {
-       "fontWeight": "600"
+       "alignItems": "center",
+       "display": "flex",
+       "flexDirection": "row",
+       "gap": "0px",
+       "minWidth": "0px"
+      },
+      "children": [
+       {
+        "baseStyles": {
+         "alignItems": "center",
+         "display": "flex",
+         "flexDirection": "row",
+         "gap": "0px",
+         "minWidth": "0px"
+        },
+        "children": [
+         {
+          "baseStyles": {
+           "alignItems": "center",
+           "color": "var(--ink-gray-5)",
+           "cursor": "pointer",
+           "display": "flex",
+           "padding": "4px 2px"
+          },
+          "children": [],
+          "classes": [
+           "hover:text-ink-gray-7"
+          ],
+          "componentEvents": {
+           "click": {
+            "action": "Run Script",
+            "event": "click",
+            "script": "open(dataItem.route)"
+           }
+          },
+          "componentName": "TextBlock",
+          "componentProps": {
+           "fontSize": "text-lg-medium",
+           "tag": "p",
+           "text": "{{ dataItem.label }}"
+          },
+          "componentSlots": {},
+          "mobileStyles": {},
+          "tabletStyles": {},
+          "visibilityCondition": "{{ dataItem.route }}"
+         },
+         {
+          "baseStyles": {
+           "alignItems": "center",
+           "color": "var(--ink-gray-9)",
+           "display": "flex",
+           "minWidth": "0px",
+           "overflow": "hidden",
+           "padding": "4px 2px",
+           "textOverflow": "ellipsis",
+           "whiteSpace": "nowrap"
+          },
+          "children": [],
+          "componentEvents": {},
+          "componentName": "TextBlock",
+          "componentProps": {
+           "fontSize": "text-lg-medium",
+           "tag": "p",
+           "text": "{{ dataItem.label }}"
+          },
+          "componentSlots": {},
+          "mobileStyles": {},
+          "tabletStyles": {},
+          "visibilityCondition": "{{ !dataItem.route }}"
+         },
+         {
+          "baseStyles": {
+           "color": "var(--ink-gray-4)",
+           "margin": "0px 2px"
+          },
+          "children": [],
+          "componentEvents": {},
+          "componentName": "TextBlock",
+          "componentProps": {
+           "fontSize": "text-base",
+           "tag": "p",
+           "text": "/"
+          },
+          "componentSlots": {},
+          "mobileStyles": {},
+          "tabletStyles": {},
+          "visibilityCondition": "{{ dataItem.route }}"
+         }
+        ],
+        "componentEvents": {},
+        "componentName": "container",
+        "componentProps": {},
+        "componentSlots": {},
+        "mobileStyles": {},
+        "originalElement": "div",
+        "tabletStyles": {}
+       }
+      ],
+      "componentEvents": {},
+      "componentName": "Repeater",
+      "componentProps": {
+       "data": "{{ inputs.breadcrumbs }}",
+       "dataKey": "name",
+       "emptyStateMessage": ""
+      },
+      "componentSlots": {},
+      "mobileStyles": {},
+      "tabletStyles": {},
+      "visibilityCondition": "{{ inputs.breadcrumbs && inputs.breadcrumbs.length > 0 }}"
+     },
+     {
+      "baseStyles": {
+       "color": "var(--ink-gray-9)",
+       "fontWeight": "600",
+       "minWidth": "0px",
+       "overflow": "hidden",
+       "textOverflow": "ellipsis",
+       "whiteSpace": "nowrap"
       },
       "children": [],
       "componentEvents": {},
       "componentName": "TextBlock",
       "componentProps": {
-       "fontSize": "text-xl",
+       "fontSize": "text-lg",
        "tag": "h1",
        "text": "{{ inputs.crumb }}"
       },
       "componentSlots": {},
       "mobileStyles": {},
-      "tabletStyles": {}
+      "tabletStyles": {},
+      "visibilityCondition": "{{ !inputs.breadcrumbs || inputs.breadcrumbs.length === 0 }}"
      },
      {
-      "baseStyles": {
-       "color": "var(--ink-gray-6)"
-      },
+      "baseStyles": {},
       "children": [],
       "componentEvents": {},
-      "componentName": "TextBlock",
+      "componentName": "Badge",
       "componentProps": {
-       "fontSize": "text-p-xs",
-       "tag": "p",
-       "text": "{{ inputs.note }}"
+       "label": "{{ inputs.status }}",
+       "size": "sm",
+       "theme": "{{ tone(inputs.status_tone) }}",
+       "variant": "subtle"
       },
       "componentSlots": {},
       "mobileStyles": {},
-      "tabletStyles": {}
+      "tabletStyles": {},
+      "visibilityCondition": "{{ inputs.status }}"
      }
     ],
     "componentEvents": {},
@@ -72,22 +192,6 @@
     "mobileStyles": {},
     "originalElement": "div",
     "tabletStyles": {}
-   },
-   {
-    "baseStyles": {},
-    "children": [],
-    "componentEvents": {},
-    "componentName": "Badge",
-    "componentProps": {
-     "label": "{{ inputs.status }}",
-     "size": "sm",
-     "theme": "{{ tone(inputs.status_tone) }}",
-     "variant": "subtle"
-    },
-    "componentSlots": {},
-    "mobileStyles": {},
-    "tabletStyles": {},
-    "visibilityCondition": "{{ inputs.status }}"
    },
    {
     "baseStyles": {},
@@ -142,7 +246,7 @@
  },
  "component_id": "borrower_header",
  "component_name": "Borrower Page Header",
- "creation": "2026-09-21 17:39:40.990050",
+ "creation": "2026-09-23 12:26:28.590854",
  "docstatus": 0,
  "doctype": "Studio Component",
  "idx": 0,
@@ -150,6 +254,12 @@
   {
    "description": "What this page is",
    "input_name": "crumb",
+   "required": 0,
+   "type": "string"
+  },
+  {
+   "description": "List of breadcrumbs",
+   "input_name": "breadcrumbs",
    "required": 0,
    "type": "string"
   },
@@ -185,7 +295,7 @@
   }
  ],
  "is_disabled": 0,
- "modified": "2026-09-21 17:39:40.990050",
+ "modified": "2026-09-23 13:33:39.220294",
  "modified_by": "Administrator",
  "name": "borrower_header",
  "owner": "Administrator"

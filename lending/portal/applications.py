@@ -126,6 +126,10 @@ def get_application_detail() -> dict:
 
 	payload = shell_payload(_("Application"), _("Contact us"), [application.applicant], [])
 	payload["crumb"] = application.loan_product
+	payload["breadcrumbs"] = [
+		{"label": "Applications", "route": "/borrower-portal/applications"},
+		{"label": _("Application {0}").format(application.name)}
+	]
 	payload["head_note"] = "{0} · {1}".format(
 		application.name, stage_label(application)
 	)

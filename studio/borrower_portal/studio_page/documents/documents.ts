@@ -6,6 +6,7 @@ export default function setup(context: any) {
 	const { router } = context
 	const showAlerts = ref(false)
 	const alertsTab = ref("attention")
+	const sidebarCollapsed = ref<boolean | null>(null)
 	const application = ref("")
 	const documentType = ref("")
 
@@ -44,5 +45,5 @@ export default function setup(context: any) {
 			.finally(() => { uploading.value = false })
 	}
 
-	return { tone, open, showAlerts, alertsTab, application, documentType, upload, uploading }
+	return { tone, open, showAlerts, alertsTab, sidebarCollapsed, application, documentType, upload, uploading }
 }

@@ -6,11 +6,12 @@ export default function setup(context: any) {
 	const { router } = context
 	const showAlerts = ref(false)
 	const alertsTab = ref("attention")
+	const sidebarCollapsed = ref<boolean | null>(null)
 
 	const open = (url?: string) => {
 		const to = appRoute(url)
 		if (to) router.push(to)
 	}
 
-	return { tone, open, showAlerts, alertsTab }
+	return { tone, open, showAlerts, alertsTab, sidebarCollapsed }
 }

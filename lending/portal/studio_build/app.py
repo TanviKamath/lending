@@ -55,10 +55,15 @@ export function appRoute(url?: string): string {
 # in Studio Page Variables, so this is where a page's refs and handlers live, and
 # whatever it returns is what the page's blocks can bind to and its events can write.
 #
-# Every page returns the four the frame itself reads: the tone helper its badges take
-# their colour from, the one way a row opens the record it stands for, and the two
-# pieces of state behind the bell. They are here rather than in the header component
-# because a Studio Component holds blocks and no state of its own.
+# Every page returns the five the frame itself reads: the tone helper its badges take
+# their colour from, the one way a row opens the record it stands for, the two pieces of
+# state behind the bell, and whether the sidebar is shut. They are here rather than in
+# the header component because a Studio Component holds blocks and no state of its own.
+#
+# `sidebarCollapsed` starts as null rather than false: that is Sidebar's own reading of
+# "nobody has said yet", under which it collapses on mobile and not otherwise. It is
+# bound out of the Sidebar as a v-model so the blocks in the rail can read it as well --
+# a block cannot inject what frappe-ui's own sidebar parts inject. See shell.EXPANDED.
 SCRIPT_TEMPLATE = '''import {{ computed, ref, watch }} from "vue"
 import {{ call, toast }} from "frappe-ui"
 import {{ tone, appRoute }} from "@app/utils/portal"
@@ -67,13 +72,14 @@ export default function setup(context: any) {{
 \tconst {{ router }} = context
 \tconst showAlerts = ref(false)
 \tconst alertsTab = ref("attention")
+\tconst sidebarCollapsed = ref<boolean | null>(null)
 {state}
 \tconst open = (url?: string) => {{
 \t\tconst to = appRoute(url)
 \t\tif (to) router.push(to)
 \t}}
 {body}
-\treturn {{ tone, open, showAlerts, alertsTab{returns} }}
+\treturn {{ tone, open, showAlerts, alertsTab, sidebarCollapsed{returns} }}
 }}
 '''
 

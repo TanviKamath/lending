@@ -6,6 +6,7 @@ export default function setup(context: any) {
 	const { router } = context
 	const showAlerts = ref(false)
 	const alertsTab = ref("attention")
+	const sidebarCollapsed = ref<boolean | null>(null)
 	const reference = ref("")
 	const mobileNumber = ref("")
 
@@ -30,5 +31,5 @@ export default function setup(context: any) {
 			.finally(() => { busy.value = false })
 	}
 
-	return { tone, open, showAlerts, alertsTab, reference, mobileNumber, busy, result, track }
+	return { tone, open, showAlerts, alertsTab, sidebarCollapsed, reference, mobileNumber, busy, result, track }
 }

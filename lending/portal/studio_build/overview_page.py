@@ -120,7 +120,7 @@ def tasks():
 		"Waiting on you",
 		read("tasks_note"),
 		repeater(read("tasks"), task),
-		visible=read("tasks"),
+		visible="{{ overview.data.tasks && overview.data.tasks.length > 0 }}",
 	)
 
 
@@ -206,7 +206,7 @@ def content():
 					"Activity timeline",
 					read("activity_note"),
 					activity(),
-					visible=read("activity"),
+					visible="{{ overview.data.activity && overview.data.activity.length > 0 }}",
 				),
 			],
 			[
@@ -214,7 +214,7 @@ def content():
 					"Scheduled repayments",
 					read("schedule_note"),
 					schedule(),
-					visible=read("schedule"),
+					visible="{{ overview.data.schedule && overview.data.schedule.length > 0 }}",
 				)
 			],
 		),

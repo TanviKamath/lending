@@ -6,6 +6,7 @@ export default function setup(context: any) {
 	const { router } = context
 	const showAlerts = ref(false)
 	const alertsTab = ref("attention")
+	const sidebarCollapsed = ref<boolean | null>(null)
 	const fromDate = ref("")
 	const toDate = ref("")
 
@@ -14,5 +15,5 @@ export default function setup(context: any) {
 		if (to) router.push(to)
 	}
 
-	return { tone, open, showAlerts, alertsTab, fromDate, toDate }
+	return { tone, open, showAlerts, alertsTab, sidebarCollapsed, fromDate, toDate }
 }

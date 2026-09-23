@@ -7,6 +7,8 @@
     "flexDirection": "column",
     "height": "100%",
     "overflowX": "hidden",
+    "scrollbarColor": "var(--outline-gray-3) transparent",
+    "scrollbarWidth": "thin",
     "width": "100%"
    },
    "blockName": "body",
@@ -42,7 +44,7 @@
          "componentProps": {
           "fontSize": "text-lg",
           "tag": "span",
-          "text": "{{ track.data?.brand_name }}"
+          "text": "{{ track.data.brand_name }}"
          }
         },
         {
@@ -109,7 +111,7 @@
          "componentProps": {
           "fontSize": "text-5xl",
           "tag": "h1",
-          "text": "{{ track.data?.heading }}"
+          "text": "{{ track.data.heading }}"
          }
         },
         {
@@ -121,7 +123,7 @@
          "componentProps": {
           "fontSize": "text-p-xs",
           "tag": "p",
-          "text": "{{ track.data?.intro }}"
+          "text": "{{ track.data.intro }}"
          }
         },
         {
@@ -165,7 +167,7 @@
              "componentProps": {
               "fontSize": "text-p-xs",
               "tag": "p",
-              "text": "{{ track.data?.track_note }}"
+              "text": "{{ track.data.track_note }}"
              }
             }
            ],
@@ -453,11 +455,11 @@
    "originalElement": "body"
   }
  ],
- "creation": "2026-09-21 17:39:41.195168",
+ "creation": "2026-09-23 12:26:28.560682",
  "doctype": "Studio Page",
  "frappe_app": "lending",
  "is_standard": 1,
- "modified": "2026-09-22 13:05:55.872033",
+ "modified": "2026-09-23 14:48:31.881824",
  "modified_by": "Administrator",
  "name": "track_your_application",
  "owner": "Administrator",
