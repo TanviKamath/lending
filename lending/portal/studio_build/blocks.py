@@ -59,6 +59,18 @@ def fallback(expression, default):
 	return "{{ %s || %s }}" % (expression[2:-2].strip(), default)
 
 
+def any_row(expression):
+	"""The condition that `expression` holds at least one row.
+
+	`|| []` for the same reason `fallback` has one: a resource holds nothing until it
+	resolves, and `.length` of `undefined` throws while rendering rather than reading
+	as zero.
+	"""
+	inner = expression[2:-2].strip() if expression.startswith("{{") else expression
+
+	return "{{ (%s || []).length > 0 }}" % inner
+
+
 def block(name, props=None, styles=None, children=None, **kwargs):
 	"""One block. `name` is the component, everything else is optional."""
 	node = {
@@ -170,12 +182,138 @@ def muted(value, **kwargs):
 	return text(value, size="text-p-xs", styles=styles, **kwargs)
 
 
+def subject(value, **kwargs):
+	"""What a record row is about, against the lines that only describe it.
+
+	The List family paints no cell -- unlike the ListView it replaces, it sets no ink on
+	the first column and none on the rest -- so every line of a row arrives at one
+	weight. `muted` quiets the describing lines; this lifts the two a borrower scans for,
+	what the row stands for and what it is worth.
+	"""
+	styles = {"fontWeight": "500"}
+	styles.update(kwargs.pop("styles", None) or {})
+
+	return text(value, size="text-base", styles=styles, **kwargs)
+
+
+# --- icons ------------------------------------------------------------------------------
+
+# lucide's own paths, copied from lucide-static. A `lucide-*` class is a Tailwind mask
+# emitted only where that exact class name sits in scanned source, so a class name
+# written here would arrive in the app with no CSS behind it. The markup is drawn by
+# Studio's HTML block, which sanitises what it is given -- DOMPurify keeps SVG.
+ICON_PATHS = {
+	"file-text": (
+		'<path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588'
+		'A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/>'
+		'<path d="M14 2v5a1 1 0 0 0 1 1h5"/>'
+		'<path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/>'
+	),
+	"calendar": (
+		'<path d="M8 2v3"/><path d="M16 2v3"/>'
+		'<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/>'
+	),
+	"database": (
+		'<ellipse cx="12" cy="5" rx="9" ry="3"/>'
+		'<path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/>'
+	),
+	"chevron-right": '<path d="m9 18 6-6-6-6"/>',
+}
+
+SVG = (
+	'<svg xmlns="http://www.w3.org/2000/svg" width="{size}" height="{size}" viewBox="0 0 24 24"'
+	' fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"'
+	' stroke-linejoin="round">{paths}</svg>'
+)
+
+# A payload tone -- "", "ok", "warn", "danger" -- as the frappe-ui colour a tile tints
+# itself in. The same map as the page script's `tone()`, kept here because a tile picks
+# its colour at build time and that one answers at render time. See toned_tile.
+TILE_THEMES = {"": "gray", "ok": "green", "warn": "orange", "danger": "red"}
+
+
+def icon(name, size=16, **kwargs):
+	"""One glyph, drawn at `size` and painted by whatever colour it inherits."""
+	styles = {"display": "flex", "alignItems": "center", "flex": "0 0 auto"}
+	styles.update(kwargs.pop("styles", None) or {})
+
+	props = {"html": SVG.format(size=size, paths=ICON_PATHS[name])}
+
+	return block("HTML", props=props, styles=styles, **kwargs)
+
+
+def chevron(**kwargs):
+	"""The mark at the end of a card's label saying the card opens something.
+
+	The affordance a row in the List family already has, at the size of a card. Not a
+	button: a card with a button in it is two things to press, and the card is the
+	larger target.
+	"""
+	return icon("chevron-right", styles={"color": "var(--ink-gray-4)"}, **kwargs)
+
+
+def icon_line(name, value, size=14, **kwargs):
+	"""A quiet line led by a glyph: a date, a place, whatever the glyph names.
+
+	The glyph takes its colour from the row, not from the text beside it -- an SVG
+	inherits `currentColor` from its parent, and the parent here is the row.
+	"""
+	return row(
+		[icon(name, size=size, styles={"color": "var(--ink-gray-5)"}), muted(value)],
+		gap="6px",
+		**kwargs,
+	)
+
+
+def icon_tile(name, theme="gray", **kwargs):
+	"""A glyph on a tinted square: what a card about a record or a figure leads with.
+
+	The one place besides PANEL that names a colour, and for the same reason -- a tile
+	that does not tint itself is not a tile. Both halves come from the theme, so the
+	tile reads as the quiet form of the badge beside it.
+
+	Rounded to `--radius-5` rather than to a circle. A disc reads as a person, which is
+	what an Avatar is for; these stand for a document and an amount, and the card they
+	lead has square corners of its own.
+	"""
+	styles = {
+		"width": "40px",
+		"height": "40px",
+		"justifyContent": "center",
+		"borderRadius": "var(--radius-5)",
+		"backgroundColor": f"var(--surface-{theme}-2)",
+		"color": f"var(--ink-{theme}-7)",
+	}
+	styles.update(kwargs.pop("styles", None) or {})
+
+	return icon(name, size=20, styles=styles, **kwargs)
+
+
+def toned_tile(name, tone_expression):
+	"""The same tile in every tone, with the payload choosing which one renders.
+
+	A tile cannot read its tone the way `toned_badge` does: only a block's props are
+	evaluated as expressions, and a tint is a style. So this is one block per tone,
+	each shown by the condition that names it -- four blocks in the tree, one on the
+	page. Returns a list, to be spread into the row that carries it.
+	"""
+	return [
+		icon_tile(name, theme, visible="{{ (%s || '') === '%s' }}" % (tone_expression, value))
+		for value, theme in TILE_THEMES.items()
+	]
+
+
 # --- components -----------------------------------------------------------------------
 
 
-def badge(label, theme="gray", **kwargs):
-	"""A status. `theme` is a frappe-ui theme, or an expression producing one."""
-	props = {"label": label, "theme": theme, "variant": "subtle", "size": "sm"}
+def badge(label, theme="gray", size="sm", **kwargs):
+	"""A status. `theme` is a frappe-ui theme, or an expression producing one.
+
+	`sm` is the badge that rides along a line of something else -- the flag on a figure
+	card. A badge that is a column of its own wants `lg`, which is the size the rest of
+	a record row is set at rather than the size of a label stuck to it.
+	"""
+	props = {"label": label, "theme": theme, "variant": "subtle", "size": size}
 
 	return block("Badge", props=props, **kwargs)
 
@@ -247,25 +385,71 @@ def repeater(data, template, data_key="name", empty="", **kwargs):
 	return block("Repeater", props=props, children=[template], **kwargs)
 
 
+# A row is as tall as what is in it, so the padding is what keeps two of them apart.
+# Rows here are two lines or four -- a draft application carries a line saying what it
+# is waiting for -- and the fixed `rowHeight` this replaces fitted only two. The inline
+# 12px is the inset the column names take from `list-row-px-3`, said here so that a row
+# without a hover surface to inset itself from still lines up with them; on a row that
+# has one it lands on exactly the 12px the family was already giving it.
+ROW_PADDING = {
+	"paddingTop": "10px",
+	"paddingBottom": "10px",
+	"paddingInlineStart": "12px",
+	"paddingInlineEnd": "12px",
+}
+
+# The band the column names sit on. frappe-ui's own header is a rule under the labels
+# and nothing else, which the portal's rows are too tall and too quiet to be told from;
+# this is the filled strip the Builder pages drew, kept. `height` is a style because the
+# component sets 32px as a class, and only a style outranks one.
+HEADER_BAND = {
+	"height": "40px",
+	"borderRadius": "var(--radius-4)",
+	"backgroundColor": "var(--surface-gray-2)",
+}
+
+# What a cell of more than one line needs. A ListCell is a flex box with `items-center`,
+# which is a row -- so its lines were laid side by side, and "Personal Loan" ran into the
+# two lines that belong under it. Turning the cell itself is what turns them, rather than
+# standing a column inside it: a block added under a cell renames every block below it,
+# and an id is what tells the next rebuild the same block from a new one.
+#
+# `stretch` rather than `flex-start`, which the turned cell would otherwise inherit from
+# `items-center`: a line sized to its own content has nothing to wrap against, so a long
+# product name would run out of the column and into the stage beside it.
+CELL_STACK = {"flexDirection": "column", "alignItems": "stretch", "gap": "2px"}
+
+
 def record_list(columns, items, cells, row_key="name", script=None):
 	"""The List family: a header of labels, then one row per record.
 
 	`columns` are CSS grid tracks paired with their heading, and `cells` builds the
-	blocks of one row from `item`, the slot's name for the current record. `script`
+	blocks of one row from `item`, the slot's name for the current record. A cell is a
+	list, and a cell of several blocks reads as lines stacked down the row. `script`
 	makes the whole row the way into the record it stands for.
+
+	An empty list is the whole block hidden rather than a header standing over nothing.
+	Every card that holds one of these already says in its subtitle how many rows it
+	has, so the column names are the only thing left to say it a second time and worse.
 	"""
+
+	def cell(content):
+		return block("ListCell", children=content, styles=CELL_STACK if len(content) > 1 else None)
+
 	header = block(
 		"ListHeader",
 		children=[
 			block("ListHeaderCell", children=[text(label, size="text-xs")])
 			for _track, label in columns
 		],
+		styles=HEADER_BAND,
 	)
 	record = block(
 		"ListRow",
 		props={"value": "{{ value }}"},
-		children=[block("ListCell", children=cell) for cell in cells],
+		children=[cell(content) for content in cells],
 		events=click(script) if script else None,
+		styles=ROW_PADDING,
 	)
 	rows = block(
 		"ListRows",
@@ -275,8 +459,14 @@ def record_list(columns, items, cells, row_key="name", script=None):
 
 	return block(
 		"List",
-		props={"columns": [track for track, _label in columns], "rowHeight": 56},
+		props={"columns": [track for track, _label in columns]},
 		children=[header, rows],
+		visible=any_row(items),
+		# The header's own inset, which it takes from this hook and nowhere else. The
+		# rows take the same 12px from ROW_PADDING rather than from the hook, because
+		# the family hands it only to a row with a hover surface to inset it from -- so
+		# a list of plain rows would otherwise sit 12px left of the names of its columns.
+		classes=["list-row-px-3"],
 	)
 
 
@@ -324,6 +514,24 @@ PANEL = {
 }
 
 
+def pressable(script):
+	"""What makes a whole card the way into the record or the page it stands for.
+
+	The styles and the block's own kwargs come back together because they are one
+	decision said twice: the cursor is a style, and the hover it promises cannot be --
+	an inline style has no hover. The border is what lights up, so the card answers
+	without moving anything on the page, and the app's bundle carries the class the
+	same way it carries the crumb's in shell.
+	"""
+	if not script:
+		return {}, {}
+
+	return {"cursor": "pointer"}, {
+		"events": click(script),
+		"classes": ["transition-colors", "hover:border-outline-gray-3"],
+	}
+
+
 def card(title, subtitle, body, action=None, **kwargs):
 	"""A titled panel with a subtitle from the data. Every portal page is built of these.
 
@@ -340,26 +548,89 @@ def card(title, subtitle, body, action=None, **kwargs):
 	return column(children, gap="12px", styles=styles, **kwargs)
 
 
-def stat(title, value, note, flag=None, flag_tone=None, sub=None):
+def stat(
+	title,
+	value,
+	note,
+	flag=None,
+	flag_tone=None,
+	sub=None,
+	icon_name=None,
+	note_icon=None,
+	script=None,
+):
 	"""One number card: a label, the figure, and a line saying what it is.
 
 	Not a NumberChart. Every figure on the portal arrives already formatted and
 	translated -- "₹3,17,450", "Nothing due" -- because the Builder pages could not
 	format one, and a chart that wants a number would print the string as NaN.
+
+	`icon_name` gives it the shape of the record card it stands beside: a tinted tile on
+	the left, the lines to its right. A strip then reads as one row of cards rather than
+	as a record card and two figures that happen to share a border.
+
+	It also settles the figure's size, which is why the two are one argument. A card with
+	a tile has a headline where the tile is, and 4xl beside a 40px tile over two lines of
+	note fills the card and still disagrees with the record card's own 2xl headline. A
+	card without one is all figure, and keeps the size it had.
+
+	`note_icon` leads the note with a glyph, the way the record card beside it leads the
+	day it was raised. For a note that says when, so the two cards date a line alike.
+
+	`script` makes the whole card the way into the page the figure comes from, and says
+	so with a chevron at the end of the label.
 	"""
-	head = [text(title, size="text-xs")]
+	head = [muted(title)]
 	if flag:
 		theme = "{{ %s }}" % TONE.format(flag_tone) if flag_tone else "orange"
 		head.append(badge(flag, theme=theme, visible=flag))
+	if script:
+		head += [spacer(), chevron()]
 
-	body = [text(value, tag="div", size="text-4xl", styles={"fontWeight": "600"}), muted(note)]
+	figure = "text-2xl" if icon_name else "text-4xl"
+	note_line = icon_line(note_icon, note) if note_icon else muted(note)
+	body = [text(value, tag="div", size=figure, styles={"fontWeight": "600"}), note_line]
 	if sub:
 		body.append(muted(sub, visible=sub))
 
-	return column(
+	lines = column(
 		[row(head, gap="6px"), column(body, gap="2px")],
-		gap="8px",
-		styles=dict(PANEL, flex="1"),
+		gap="6px",
+		styles={"flex": "1 1 auto", "minWidth": "0px"},
+	)
+	cursor, opens = pressable(script)
+	children = ([icon_tile(icon_name, "blue")] if icon_name else []) + [lines]
+
+	return row(children, gap="12px", align="start", styles=dict(PANEL, flex="1", **cursor), **opens)
+
+
+def record_stat(icon_name, tone_expression, lines, script=None):
+	"""A card the size of a stat, standing on a record instead of a figure.
+
+	What a borrower reads off an application is its name, its stage and the day it was
+	raised -- four short lines, none of which is a number. Drawn as a stat they are a
+	4xl product name pretending to be an amount, so this leads with a tile in the
+	stage's own colour and lets the lines stay the size they are.
+
+	`lines` is whatever the page stacks beside the tile, top to bottom. The tile sits at
+	the top of them rather than in the middle, as it does on the figure cards beside it:
+	centred against six lines it drifts down to where the third of them starts, and the
+	strip's three tiles stop sharing a line.
+
+	`script` opens the record, as it does on a stat. The chevron that says so goes in
+	`lines`, because only the page knows which of them is the label row it belongs on.
+	"""
+	cursor, opens = pressable(script)
+
+	return row(
+		[
+			*toned_tile(icon_name, tone_expression),
+			column(lines, gap="2px", styles={"flex": "1 1 auto", "minWidth": "0px"}),
+		],
+		gap="12px",
+		align="start",
+		styles=dict(PANEL, flex="1", **cursor),
+		**opens,
 	)
 
 

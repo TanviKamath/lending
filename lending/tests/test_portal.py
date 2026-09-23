@@ -1711,14 +1711,47 @@ class TestPortalSummaryStrip(LendingTestSuite):
 		self.assertIn("2", application_lead([newest, older])["application_more"])
 		self.assertEqual(application_lead([newest])["application_more"], "")
 
-	def application(self, product: str) -> dict:
+	def application(self, product: str, loan: str = "") -> dict:
 		return {
+			"name": "APP-1",
+			"url": "/borrower-portal/application/APP-1",
+			"loan_url": f"/borrower-portal/loan/{loan}" if loan else "",
 			"product": product,
-			"stage": "Under review",
-			"stage_tone": "info",
+			"stage": "Loan sanctioned" if loan else "Under review",
+			"stage_tone": "ok" if loan else "info",
 			"reference": "APP-1 · initiated 1 January 2026",
+			"initiated": "Initiated on 1 January 2026",
 			"note": "",
 		}
+
+	def test_the_card_opens_the_loan_once_the_application_has_become_one(self):
+		"""The card is pressable, and where it goes moves with the application.
+
+		An application under review is a record of the asking, and its own page is the
+		only place that shows where it has got to. Once the loan is booked that page is
+		history: the borrower pressing a card headed "Loan sanctioned" wants the account,
+		not the form they filled in weeks ago.
+		"""
+		under_review = application_lead([self.application("Home Loan")])
+		sanctioned = application_lead([self.application("Home Loan", loan="LOAN-1")])
+
+		self.assertEqual(under_review["application_url"], "/borrower-portal/application/APP-1")
+		self.assertEqual(sanctioned["application_url"], "/borrower-portal/loan/LOAN-1")
+
+	def test_a_card_with_nothing_in_progress_offers_nowhere_to_go(self):
+		"""The chevron is bound to this key, so an empty one is what hides it."""
+		self.assertEqual(application_lead([])["application_url"], "")
+
+	def test_the_card_names_the_application_and_the_day_it_was_raised(self):
+		"""Two lines, not the one the table reads.
+
+		The card sets the name above the date, so it needs them apart. A card handed
+		the table's joined reference could only print it whole.
+		"""
+		lead = application_lead([self.application("Home Loan")])
+
+		self.assertEqual(lead["application_name"], "APP-1")
+		self.assertEqual(lead["application_initiated"], "Initiated on 1 January 2026")
 
 	def test_the_sanctioned_amount_is_one_line_under_the_outstanding_figure(self):
 		"""It was a card of its own, at the weight of the two figures beside it.

@@ -370,16 +370,20 @@ def tasks_note(tasks: list[dict]) -> str:
 def application_lead(applications: list[dict]) -> dict:
 	"""The application the overview's first card stands on: the most recent one open.
 
-	It is the third figure card at the top of the page, next to the next repayment and
-	the total outstanding, because for a borrower who is still applying it is the only
-	one of the three that has any news in it -- the other two read "Nothing due" and
-	"No live accounts" until the loan is booked.
+	It stands at the top of the page beside the next repayment and the total
+	outstanding, because for a borrower who is still applying it is the only one of the
+	three that has any news in it -- the other two read "Nothing due" and "No live
+	accounts" until the loan is booked.
 
 	An application has no figure, so the card carries words: the product on the line
-	where a figure would go, the stage as the badge beside the title, and the
-	reference under it. The amount sought is deliberately not here. It is in the
-	Application status table below, and it is not the thing a borrower opens this page
-	to check -- they know what they asked for, they want to know where it has got to.
+	where a figure would go, the stage as the badge beside the title, and the name and
+	the date it was raised under it. The amount sought is deliberately not here. It is
+	in the Application status table below, and it is not the thing a borrower opens this
+	page to check -- they know what they asked for, they want to know where it has got
+	to.
+
+	The name and the date are two keys rather than the one line the table reads, because
+	the card sets them on two lines and a card cannot take a joined string apart.
 
 	Flat keys, one per element, so the card reads a value rather than picking the first
 	row out of the applications list in a binding. Which application leads is a decision
@@ -391,8 +395,11 @@ def application_lead(applications: list[dict]) -> dict:
 			"application_headline": "—",
 			"application_stage": "",
 			"application_stage_tone": "",
+			"application_name": "",
+			"application_initiated": "",
 			"application_note": _("Nothing in progress"),
 			"application_more": "",
+			"application_url": "",
 		}
 
 	# get_applications orders by posting_date desc, so the first row is the newest.
@@ -402,12 +409,20 @@ def application_lead(applications: list[dict]) -> dict:
 		"application_headline": first["product"],
 		"application_stage": first["stage"],
 		"application_stage_tone": first["stage_tone"],
-		"application_note": first["note"] or first["reference"],
+		"application_name": first["name"],
+		"application_initiated": first["initiated"],
+		# What is waiting on the borrower, when something is. It used to fall back to
+		# the reference, which the card now carries on a line of its own.
+		"application_note": first["note"],
 		# Only when the card is showing one of several, so the borrower knows the
 		# table below holds more than the row they are reading here.
 		"application_more": (
 			_("{0} in progress").format(len(applications)) if len(applications) > 1 else ""
 		),
+		# The loan once there is one, the application until then. A card that is about a
+		# sanctioned application and opens the form the borrower filled in weeks ago is
+		# answering a question they have stopped asking; the account is the answer.
+		"application_url": first["loan_url"] or first["url"],
 	}
 
 
@@ -763,9 +778,7 @@ def build_summary(loans: list[dict], schedule: list[dict]) -> dict:
 
 	return {
 		"next_amount": first.get("amount", "—"),
-		"next_note": (
-			_("{0} · due {1}").format(first.get("product"), first.get("date")) if first else _("Nothing due")
-		),
+		"next_note": (_("Due {0}").format(first.get("date")) if first else _("Nothing due")),
 		"next_flag": next_flag(loans),
 		"outstanding": money(outstanding),
 		"outstanding_note": (
@@ -936,13 +949,21 @@ def get_applications(customers: list[str]) -> list[dict]:
 	presented = []
 	for row in rows:
 		needs_borrower = row.docstatus == 0
-		stage, stage_tone = application_stage(row, needs_borrower, booked.get(row.name))
+		loan = booked.get(row.name)
+		stage, stage_tone = application_stage(row, needs_borrower, loan)
 		presented.append(
 			{
 				"name": row.name,
 				"url": application_url(row.name),
+				# Where a sanctioned application has got to. The application page is the
+				# record of the asking; once the loan exists, that account is what the
+				# borrower means by the application, and the card leads there instead.
+				"loan_url": loan_url(loan.name) if loan else "",
 				"product": row.loan_product,
 				"reference": "{0} · initiated {1}".format(row.name, long_date(row.posting_date)),
+				# The same date as a sentence, for the overview's lead card, which sets
+				# it on its own line under the name rather than joined to it.
+				"initiated": _("Initiated on {0}").format(long_date(row.posting_date)),
 				"stage": stage,
 				"stage_tone": stage_tone,
 				"needs_borrower": needs_borrower,

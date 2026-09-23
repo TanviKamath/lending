@@ -84,8 +84,22 @@ NAV_ITEMS = (
 # clipped by the 48px of it that remain.
 #
 # The ref starts as null, which is Sidebar's own "collapse on mobile, otherwise not", so
-# `!sidebarCollapsed` reads as open until somebody presses the toggle.
-EXPANDED = "{{ !sidebarCollapsed }}"
+# the second half reads as open until somebody presses the toggle.
+#
+# The `typeof` guard is what makes the rail survive the Studio canvas. An expression is
+# evaluated as `with (context) { return <expr> }`, and the canvas has no context to put
+# `sidebarCollapsed` in: a page's bindings come from importing its built setup() module,
+# which the editor cannot do for an exported app. A bare `!sidebarCollapsed` is then a
+# ReferenceError, the evaluator answers undefined, and `visibilityCondition` reads that
+# as false -- so every word in the rail vanished on the canvas while the running portal
+# was fine. `typeof` is the one operator that does not throw on a name that was never
+# declared, so it answers "undefined" there and the real value everywhere else.
+EXPANDED = "{{ typeof sidebarCollapsed === 'undefined' || !sidebarCollapsed }}"
+
+# The same question the other way about, for the blocks that want it that way. Written
+# out rather than negating the one above: `!` in front of that guard would make the
+# canvas, where the name does not exist, read as shut rather than open.
+COLLAPSED = "typeof sidebarCollapsed !== 'undefined' && sidebarCollapsed"
 
 # The square the lender's mark is drawn in, whichever of the two marks it turns out to
 # be. The numbers are SidebarHeader's own -- `size-7` at `rounded-[6px]`.
@@ -152,10 +166,62 @@ def brand(data):
 	# in from a rail already padded 8, which is where SidebarHeader's own px-1 + px-1.5
 	# put it. Shut, those 6px leave less room than the mark needs and it overflows them
 	# evenly either side -- which is the rail's centre, 8 + 6 + 10 of 48.
+	#
+	# So the centring is load-bearing only once the name has gone, and it reads as a bug
+	# the moment the name goes for any other reason: the mark drifts to the middle of an
+	# open rail. See EXPANDED for the one that did it.
 	return row(
 		[logo, letter, name],
 		gap="8px",
 		styles={"height": "48px", "flexShrink": "0", "justifyContent": "center", "padding": "0 6px"},
+	)
+
+
+def collapse_toggle():
+	"""The one control that shuts the rail, drawn where the desk draws it.
+
+	The desk hangs a 24px disc off the sidebar's right edge, half of it out over the
+	border, and keeps it invisible until the pointer is somewhere on the sidebar. That is
+	the whole affordance: no row in the list, nothing holding space in the column, and
+	nothing to read. `SidebarCollapseToggle`, which is a labelled row at the foot of the
+	list, is what this replaces.
+
+	Two things a style cannot say are said as classes instead -- appearing on hover of an
+	ancestor, and the hover of the disc itself. Tailwind generates both from the exported
+	page JSON, because studio's content glob reaches into every app's studio folder, so
+	neither has to exist in studio's own source first.
+	"""
+	return button(
+		"",
+		script="sidebarCollapsed.value = !sidebarCollapsed.value",
+		variant="ghost",
+		props={
+			"icon": "{{ %s ? 'lucide-chevron-right' : 'lucide-chevron-left' }}" % COLLAPSED,
+			"label": "Toggle sidebar",
+			"size": "xs",
+		},
+		classes=[
+			"opacity-0",
+			"group-hover:opacity-100",
+			"transition-opacity",
+			# `!` because the resting background below is an inline style, and an
+			# important declaration in a stylesheet is the only thing that outranks one.
+			"hover:!bg-surface-gray-2",
+		],
+		# `xs` is already the desk's 24px; everything here is the disc the desk cuts out
+		# of that square, and where it hangs. -12px is half of it, so it straddles the
+		# border rather than sitting inside the rail.
+		styles={
+			"position": "absolute",
+			"right": "-12px",
+			"bottom": "80px",
+			"borderRadius": "9999px",
+			"borderWidth": "1px",
+			"borderStyle": "solid",
+			"borderColor": "var(--outline-gray-1)",
+			"backgroundColor": "var(--surface-sidebar)",
+			"boxShadow": "0 1px 4px rgba(0, 0, 0, 0.1)",
+		},
 	)
 
 
@@ -167,8 +233,13 @@ def sidebar(data):
 	both scales; SidebarItem's `h-7` is the desk's 28px anchor; the label is `ink-gray-6`
 	in both; `rounded` resolves to `--radius-4`, which is the desk's 8px; both hover at
 	gray-100 and draw the row you are on in white under a small shadow. What the desk has
-	and this did not is the hairline down the right of the rail, and a header with nothing
-	to press.
+	and this did not is the hairline down the right of the rail, a header with nothing to
+	press, and the disc on the edge that shuts it -- see `collapse_toggle`.
+
+	One thing is deliberately not the desk's. There, collapsing takes the sidebar away
+	entirely and the workspace dock becomes the icon rail you reopen it from. This portal
+	has no dock, so a rail that left would leave nothing to press to bring it back; it
+	keeps frappe-ui's 48px of icons instead, and the disc rides along on that.
 	"""
 	foot = column(
 		[
@@ -196,20 +267,32 @@ def sidebar(data):
 					styles={"flex": "1 1 0%", "overflowY": "auto", "overflowX": "hidden"},
 					children=nav_items,
 				),
-				block("div", styles={"marginTop": "auto"}, children=[foot, block("SidebarCollapseToggle")]),
+				block("div", styles={"marginTop": "auto"}, children=[foot]),
 			],
-		)
+		),
+		collapse_toggle(),
 	]
 
 	# The border is frappe-ui's own `border-r border-outline-gray-1`, which Sidebar draws
 	# only for the config-object API it is keeping around for one more release. Written
 	# out here because this sidebar is composed rather than configured, and because
 	# `--outline-gray-1` is #ededed, which is the desk's `--sidebar-border-color` exactly.
+	#
+	# The other three all serve the disc on the edge. `relative` is what it is positioned
+	# against; `overflow-x` has to be given back, because Sidebar hides it and would cut
+	# the disc off at the border it is meant to straddle -- nothing else in the rail
+	# reaches the edge, since every label clips itself as it collapses; and `group` is the
+	# ancestor whose hover reveals it.
 	return block(
 		"Sidebar",
 		props={"collapsed": {"$type": "variable", "name": "sidebarCollapsed"}},
 		children=sidebar_children,
-		styles={"borderRight": "1px solid var(--outline-gray-1)"},
+		classes=["group"],
+		styles={
+			"position": "relative",
+			"overflowX": "visible",
+			"borderRight": "1px solid var(--outline-gray-1)",
+		},
 		mobile={"display": "none"},
 	)
 
@@ -420,7 +503,12 @@ def footer_tree():
 		],
 		gap="10px",
 		styles={
-			"padding": "12px 20px",
+			# A fixed 49px band, matching the 48.8px header at the other end of the page.
+			# The vertical padding goes with it: the links are `sm` buttons, 28px tall, and
+			# 12px either side of them would ask for 52px in a box that is only allowed 49.
+			"height": "49px",
+			"flexShrink": "0",
+			"padding": "0px 20px",
 			"width": "100%",
 			"borderWidth": "1px 0px 0px 0px",
 			"borderStyle": "solid",

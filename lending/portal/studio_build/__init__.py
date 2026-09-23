@@ -58,6 +58,7 @@ from lending.portal.studio_build import (
 	apply_page,
 	documents_page,
 	loan_pages,
+	merge,
 	overview_page,
 	profile_page,
 	search_page,
@@ -67,32 +68,42 @@ from lending.portal.studio_build import (
 )
 
 
-def build():
-	"""Create or replace the whole app: the frame first, then every page.
+def build(reset=False):
+	"""Create or update the whole app: the frame first, then every page.
 
 	Safe to re-run, and it has to be re-run as a whole: the pages share the frame's
 	components, so a change to one of those reaches a page only when its own blocks
 	are rebuilt around it.
 
-	It is not, however, meant to be run twice. Once a page has been opened in Studio and
-	saved, the canvas owns it: Studio exports every save to lending/studio/borrower_portal/,
-	so the exported JSON is the source of truth from that point and re-running this
-	would discard whatever was laid out there.
-	"""
-	app.upsert_app()
-	shell.upsert_frame()
+	Re-running does not cost anything laid out by hand. A page that already exists is
+	merged rather than replaced, and the canvas wins every disagreement -- see the merge
+	module for the rule and for what a rebuild is still allowed to change.
 
-	pages = [
-		overview_page.build(),
-		*loan_pages.build(),
-		*application_pages.build(),
-		documents_page.build(),
-		*statement_pages.build(),
-		profile_page.build(),
-		search_page.build(),
-		apply_page.build(),
-		track_page.build(),
-	]
+	The first run against a page built before the merge existed is the exception, and it
+	says so as it goes: that page has no baseline to merge against, so it is replaced
+	once and gains one. Read what the build prints.
+
+	`reset` says to do that for every page, whatever baselines are on disk: overwrite the
+	app with what the generator makes of it and record that as the new baseline. It
+	throws away every hand edit, which is the point of it. Reach for it when a rebuild
+	has left a page holding two of something -- a card's old shape beside its new one --
+	which is what a merge does when it cannot tell the two apart.
+	"""
+	with merge.reset(reset):
+		app.upsert_app()
+		shell.upsert_frame()
+
+		pages = [
+			overview_page.build(),
+			*loan_pages.build(),
+			*application_pages.build(),
+			documents_page.build(),
+			*statement_pages.build(),
+			profile_page.build(),
+			search_page.build(),
+			apply_page.build(),
+			track_page.build(),
+		]
 
 	print(f"built {len(pages)} Studio pages under /{app.APP_NAME}")
 

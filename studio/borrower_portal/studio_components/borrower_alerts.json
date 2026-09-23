@@ -13,6 +13,7 @@
       "baseStyles": {},
       "children": [],
       "componentEvents": {},
+      "componentId": "borrower_alerts-0-container1-tabbuttons1",
       "componentName": "TabButtons",
       "componentProps": {
        "modelValue": {
@@ -41,6 +42,7 @@
       },
       "children": [],
       "componentEvents": {},
+      "componentId": "borrower_alerts-0-container1-textblock1",
       "componentName": "TextBlock",
       "componentProps": {
        "fontSize": "text-p-xs",
@@ -75,6 +77,7 @@
             "baseStyles": {},
             "children": [],
             "componentEvents": {},
+            "componentId": "borrower_alerts-0-container1-repeater1-container1-container1-textblock1",
             "componentName": "TextBlock",
             "componentProps": {
              "fontSize": "text-base",
@@ -91,6 +94,7 @@
             },
             "children": [],
             "componentEvents": {},
+            "componentId": "borrower_alerts-0-container1-repeater1-container1-container1-textblock2",
             "componentName": "TextBlock",
             "componentProps": {
              "fontSize": "text-p-xs",
@@ -103,6 +107,7 @@
            }
           ],
           "componentEvents": {},
+          "componentId": "borrower_alerts-0-container1-repeater1-container1-container1",
           "componentName": "container",
           "componentProps": {},
           "componentSlots": {},
@@ -116,6 +121,7 @@
           },
           "children": [],
           "componentEvents": {},
+          "componentId": "borrower_alerts-0-container1-repeater1-container1-container2",
           "componentName": "container",
           "componentProps": {},
           "componentSlots": {},
@@ -129,6 +135,7 @@
           },
           "children": [],
           "componentEvents": {},
+          "componentId": "borrower_alerts-0-container1-repeater1-container1-textblock1",
           "componentName": "TextBlock",
           "componentProps": {
            "fontSize": "text-p-xs",
@@ -147,6 +154,7 @@
           "script": "open(dataItem.url); showAlerts.value = false"
          }
         },
+        "componentId": "borrower_alerts-0-container1-repeater1-container1",
         "componentName": "container",
         "componentProps": {},
         "componentSlots": {},
@@ -156,6 +164,7 @@
        }
       ],
       "componentEvents": {},
+      "componentId": "borrower_alerts-0-container1-repeater1",
       "componentName": "Repeater",
       "componentProps": {
        "data": "{{ alertsTab === 'attention' ? alerts.data.attention : alerts.data.activity }}",
@@ -176,6 +185,7 @@
         "script": "call('lending.portal.notifications.mark_all_as_read').then(() => alerts.reload())"
        }
       },
+      "componentId": "borrower_alerts-0-container1-button1",
       "componentName": "Button",
       "componentProps": {
        "label": "Mark all as read",
@@ -188,6 +198,7 @@
      }
     ],
     "componentEvents": {},
+    "componentId": "borrower_alerts-0-container1",
     "componentName": "container",
     "componentProps": {},
     "componentSlots": {},
@@ -197,6 +208,7 @@
    }
   ],
   "componentEvents": {},
+  "componentId": "borrower_alerts-0",
   "componentName": "Dialog",
   "componentProps": {
    "modelValue": {
@@ -218,7 +230,7 @@
  "idx": 0,
  "inputs": [],
  "is_disabled": 0,
- "modified": "2026-09-23 12:36:13.915551",
+ "modified": "2026-09-23 15:17:37.351174",
  "modified_by": "Administrator",
  "name": "borrower_alerts",
  "owner": "Administrator"

@@ -25,6 +25,7 @@ from lending.portal.studio_build.blocks import (
 	repeater,
 	row,
 	spacer,
+	subject,
 	text,
 	toned_badge,
 )
@@ -48,18 +49,31 @@ SECTIONS = (
 
 
 def applications(read):
-	"""Each row links to its own tracker, so the whole line is the way in."""
+	"""Each row links to its own tracker, so the whole line is the way in.
+
+	The Account overview draws this same table under "Application status", by calling
+	this -- the two are one function rather than two copies of one, so a row cannot come
+	to mean one thing on the list and another on the overview.
+
+	The tracks are proportional rather than the fixed 9rem they were: a stage and an
+	amount are both short, and two fixed columns pinned to the right of a wide one left
+	the three reading as a line of text and a pair of figures pushed away from it.
+	"""
 	return record_list(
-		[("minmax(0, 1fr)", "Application"), ("9rem", "Stage"), ("9rem", "Amount sought")],
+		[("minmax(0, 1.5fr)", "Application"), ("minmax(0, 1fr)", "Stage"), ("minmax(0, 1fr)", "Amount sought")],
 		read("applications"),
 		[
 			[
-				text("{{ item.product }}", size="text-base"),
-				muted("{{ item.reference }}"),
+				subject("{{ item.product }}"),
+				# The name and the day it was raised, one under the other. The payload
+				# joins them into `reference` for a row that has one line to say both
+				# in; this row has three, so it takes them apart again.
+				muted("{{ item.name }}"),
+				muted("{{ item.initiated }}"),
 				muted("{{ item.note }}", visible="{{ item.note }}"),
 			],
-			[toned_badge("{{ item.stage }}", "item.stage_tone")],
-			[text("{{ item.amount }}", size="text-base")],
+			[toned_badge("{{ item.stage }}", "item.stage_tone", size="lg")],
+			[subject("{{ item.amount }}")],
 		],
 		script="open(item.url)",
 	)

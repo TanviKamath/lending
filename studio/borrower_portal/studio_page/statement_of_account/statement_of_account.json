@@ -14,7 +14,9 @@
    "children": [
     {
      "baseStyles": {
-      "borderRight": "1px solid var(--outline-gray-1)"
+      "borderRight": "1px solid var(--outline-gray-1)",
+      "overflowX": "visible",
+      "position": "relative"
      },
      "children": [
       {
@@ -46,6 +48,7 @@
             "width": "28px"
            },
            "children": [],
+           "componentId": "statement-0-sidebar1-div1-container1-imageview1",
            "componentName": "ImageView",
            "componentProps": {
             "alt": "",
@@ -69,6 +72,7 @@
             "width": "28px"
            },
            "children": [],
+           "componentId": "statement-0-sidebar1-div1-container1-textblock1",
            "componentName": "TextBlock",
            "componentProps": {
             "fontSize": "text-base",
@@ -88,15 +92,17 @@
             "whiteSpace": "nowrap"
            },
            "children": [],
+           "componentId": "statement-0-sidebar1-div1-container1-textblock2",
            "componentName": "TextBlock",
            "componentProps": {
             "fontSize": "text-base",
             "tag": "p",
             "text": "{{ statement.data.brand_name || '' }}"
            },
-           "visibilityCondition": "{{ !sidebarCollapsed }}"
+           "visibilityCondition": "{{ typeof sidebarCollapsed === 'undefined' || !sidebarCollapsed }}"
           }
          ],
+         "componentId": "statement-0-sidebar1-div1-container1",
          "componentName": "container",
          "originalElement": "div"
         },
@@ -109,6 +115,7 @@
          "children": [
           {
            "children": [],
+           "componentId": "statement-0-sidebar1-div1-div1-sidebaritem1",
            "componentName": "SidebarItem",
            "componentProps": {
             "icon": "lucide-layout-dashboard",
@@ -118,6 +125,7 @@
           },
           {
            "children": [],
+           "componentId": "statement-0-sidebar1-div1-div1-sidebaritem2",
            "componentName": "SidebarItem",
            "componentProps": {
             "icon": "lucide-wallet",
@@ -127,6 +135,7 @@
           },
           {
            "children": [],
+           "componentId": "statement-0-sidebar1-div1-div1-sidebaritem3",
            "componentName": "SidebarItem",
            "componentProps": {
             "icon": "lucide-file-text",
@@ -136,6 +145,7 @@
           },
           {
            "children": [],
+           "componentId": "statement-0-sidebar1-div1-div1-sidebaritem4",
            "componentName": "SidebarItem",
            "componentProps": {
             "icon": "lucide-paperclip",
@@ -145,6 +155,7 @@
           },
           {
            "children": [],
+           "componentId": "statement-0-sidebar1-div1-div1-sidebaritem5",
            "componentName": "SidebarItem",
            "componentProps": {
             "icon": "lucide-receipt",
@@ -154,6 +165,7 @@
           },
           {
            "children": [],
+           "componentId": "statement-0-sidebar1-div1-div1-sidebaritem6",
            "componentName": "SidebarItem",
            "componentProps": {
             "icon": "lucide-award",
@@ -163,6 +175,7 @@
           },
           {
            "children": [],
+           "componentId": "statement-0-sidebar1-div1-div1-sidebaritem7",
            "componentName": "SidebarItem",
            "componentProps": {
             "icon": "lucide-user",
@@ -172,6 +185,7 @@
           },
           {
            "children": [],
+           "componentId": "statement-0-sidebar1-div1-div1-sidebaritem8",
            "componentName": "SidebarItem",
            "componentProps": {
             "icon": "lucide-search",
@@ -180,6 +194,7 @@
            }
           }
          ],
+         "componentId": "statement-0-sidebar1-div1-div1",
          "componentName": "div"
         },
         {
@@ -200,6 +215,7 @@
               "fontWeight": "600"
              },
              "children": [],
+             "componentId": "statement-0-sidebar1-div1-div2-container1-textblock1",
              "componentName": "TextBlock",
              "componentProps": {
               "fontSize": "text-sm",
@@ -212,6 +228,7 @@
               "color": "var(--ink-gray-6)"
              },
              "children": [],
+             "componentId": "statement-0-sidebar1-div1-div2-container1-textblock2",
              "componentName": "TextBlock",
              "componentProps": {
               "fontSize": "text-p-xs",
@@ -220,21 +237,59 @@
              }
             }
            ],
+           "componentId": "statement-0-sidebar1-div1-div2-container1",
            "componentName": "container",
            "originalElement": "div",
-           "visibilityCondition": "{{ !sidebarCollapsed }}"
-          },
-          {
-           "children": [],
-           "componentName": "SidebarCollapseToggle"
+           "visibilityCondition": "{{ typeof sidebarCollapsed === 'undefined' || !sidebarCollapsed }}"
           }
          ],
+         "componentId": "statement-0-sidebar1-div1-div2",
          "componentName": "div"
         }
        ],
+       "componentId": "statement-0-sidebar1-div1",
        "componentName": "div"
+      },
+      {
+       "baseStyles": {
+        "backgroundColor": "var(--surface-sidebar)",
+        "borderColor": "var(--outline-gray-1)",
+        "borderRadius": "9999px",
+        "borderStyle": "solid",
+        "borderWidth": "1px",
+        "bottom": "80px",
+        "boxShadow": "0 1px 4px rgba(0, 0, 0, 0.1)",
+        "position": "absolute",
+        "right": "-12px"
+       },
+       "children": [],
+       "classes": [
+        "opacity-0",
+        "group-hover:opacity-100",
+        "transition-opacity",
+        "hover:!bg-surface-gray-2"
+       ],
+       "componentEvents": {
+        "click": {
+         "action": "Run Script",
+         "event": "click",
+         "script": "sidebarCollapsed.value = !sidebarCollapsed.value"
+        }
+       },
+       "componentId": "statement-0-sidebar1-button1",
+       "componentName": "Button",
+       "componentProps": {
+        "icon": "{{ typeof sidebarCollapsed !== 'undefined' && sidebarCollapsed ? 'lucide-chevron-right' : 'lucide-chevron-left' }}",
+        "label": "Toggle sidebar",
+        "size": "xs",
+        "variant": "ghost"
+       }
       }
      ],
+     "classes": [
+      "group"
+     ],
+     "componentId": "statement-0-sidebar1",
      "componentName": "Sidebar",
      "componentProps": {
       "collapsed": {
@@ -258,6 +313,7 @@
      "children": [
       {
        "children": [],
+       "componentId": "statement-0-container1-borrower_header1",
        "componentName": "borrower_header",
        "componentProps": {
         "action_label": "",
@@ -305,6 +361,7 @@
               "fontWeight": "600"
              },
              "children": [],
+             "componentId": "statement-0-container1-container1-container1-container1-textblock1",
              "componentName": "TextBlock",
              "componentProps": {
               "fontSize": "text-lg",
@@ -313,6 +370,7 @@
              }
             }
            ],
+           "componentId": "statement-0-container1-container1-container1-container1",
            "componentName": "container",
            "originalElement": "div"
           },
@@ -326,6 +384,7 @@
            "children": [
             {
              "children": [],
+             "componentId": "statement-0-container1-container1-container1-container2-formcontrol1",
              "componentName": "FormControl",
              "componentProps": {
               "label": "From",
@@ -338,6 +397,7 @@
             },
             {
              "children": [],
+             "componentId": "statement-0-container1-container1-container1-container2-formcontrol2",
              "componentName": "FormControl",
              "componentProps": {
               "label": "To",
@@ -349,10 +409,12 @@
              }
             }
            ],
+           "componentId": "statement-0-container1-container1-container1-container2",
            "componentName": "container",
            "originalElement": "div"
           }
          ],
+         "componentId": "statement-0-container1-container1-container1",
          "componentName": "container",
          "originalElement": "div"
         },
@@ -381,6 +443,7 @@
               "fontWeight": "600"
              },
              "children": [],
+             "componentId": "statement-0-container1-container1-container2-container1-textblock1",
              "componentName": "TextBlock",
              "componentProps": {
               "fontSize": "text-lg",
@@ -393,6 +456,7 @@
               "color": "var(--ink-gray-6)"
              },
              "children": [],
+             "componentId": "statement-0-container1-container1-container2-container1-textblock2",
              "componentName": "TextBlock",
              "componentProps": {
               "fontSize": "text-p-xs",
@@ -401,6 +465,7 @@
              }
             }
            ],
+           "componentId": "statement-0-container1-container1-container2-container1",
            "componentName": "container",
            "originalElement": "div"
           },
@@ -426,6 +491,7 @@
                   "color": "var(--ink-gray-6)"
                  },
                  "children": [],
+                 "componentId": "statement-0-container1-container1-container2-container2-repeater1-container1-textblock1",
                  "componentName": "TextBlock",
                  "componentProps": {
                   "fontSize": "text-p-xs",
@@ -435,6 +501,7 @@
                 },
                 {
                  "children": [],
+                 "componentId": "statement-0-container1-container1-container2-container2-repeater1-container1-textblock2",
                  "componentName": "TextBlock",
                  "componentProps": {
                   "fontSize": "text-base",
@@ -443,10 +510,12 @@
                  }
                 }
                ],
+               "componentId": "statement-0-container1-container1-container2-container2-repeater1-container1",
                "componentName": "container",
                "originalElement": "div"
               }
              ],
+             "componentId": "statement-0-container1-container1-container2-container2-repeater1",
              "componentName": "Repeater",
              "componentProps": {
               "data": "{{ statement.data.totals }}",
@@ -463,6 +532,7 @@
                "script": "window.open(statement.data.download_url, '_blank')"
               }
              },
+             "componentId": "statement-0-container1-container1-container2-container2-button1",
              "componentName": "Button",
              "componentProps": {
               "label": "{{ statement.data.download_label }}",
@@ -471,10 +541,12 @@
              }
             }
            ],
+           "componentId": "statement-0-container1-container1-container2-container2",
            "componentName": "container",
            "originalElement": "div"
           }
          ],
+         "componentId": "statement-0-container1-container1-container2",
          "componentName": "container",
          "originalElement": "div"
         },
@@ -503,6 +575,7 @@
               "fontWeight": "600"
              },
              "children": [],
+             "componentId": "statement-0-container1-container1-container3-container1-textblock1",
              "componentName": "TextBlock",
              "componentProps": {
               "fontSize": "text-lg",
@@ -515,6 +588,7 @@
               "color": "var(--ink-gray-6)"
              },
              "children": [],
+             "componentId": "statement-0-container1-container1-container3-container1-textblock2",
              "componentName": "TextBlock",
              "componentProps": {
               "fontSize": "text-p-xs",
@@ -523,6 +597,7 @@
              }
             }
            ],
+           "componentId": "statement-0-container1-container1-container3-container1",
            "componentName": "container",
            "originalElement": "div"
           },
@@ -541,6 +616,7 @@
                 "color": "var(--ink-gray-6)"
                },
                "children": [],
+               "componentId": "statement-0-container1-container1-container3-repeater1-container1-textblock1",
                "componentName": "TextBlock",
                "componentProps": {
                 "fontSize": "text-p-xs",
@@ -550,6 +626,7 @@
               },
               {
                "children": [],
+               "componentId": "statement-0-container1-container1-container3-repeater1-container1-textblock2",
                "componentName": "TextBlock",
                "componentProps": {
                 "fontSize": "text-base",
@@ -562,6 +639,7 @@
                 "color": "var(--ink-gray-6)"
                },
                "children": [],
+               "componentId": "statement-0-container1-container1-container3-repeater1-container1-textblock3",
                "componentName": "TextBlock",
                "componentProps": {
                 "fontSize": "text-p-xs",
@@ -571,10 +649,12 @@
                "visibilityCondition": "{{ dataItem.detail }}"
               }
              ],
+             "componentId": "statement-0-container1-container1-container3-repeater1-container1",
              "componentName": "container",
              "originalElement": "div"
             }
            ],
+           "componentId": "statement-0-container1-container1-container3-repeater1",
            "componentName": "Repeater",
            "componentProps": {
             "data": "{{ statement.data.rows }}",
@@ -583,15 +663,18 @@
            }
           }
          ],
+         "componentId": "statement-0-container1-container1-container3",
          "componentName": "container",
          "originalElement": "div"
         }
        ],
+       "componentId": "statement-0-container1-container1",
        "componentName": "container",
        "originalElement": "div"
       },
       {
        "children": [],
+       "componentId": "statement-0-container1-borrower_footer1",
        "componentName": "borrower_footer",
        "componentProps": {
         "links": "{{ statement.data.footer_links }}",
@@ -601,14 +684,17 @@
       },
       {
        "children": [],
+       "componentId": "statement-0-container1-borrower_alerts1",
        "componentName": "borrower_alerts",
        "isStudioComponent": true
       }
      ],
+     "componentId": "statement-0-container1",
      "componentName": "container",
      "originalElement": "div"
     }
    ],
+   "componentId": "statement-0",
    "componentName": "div",
    "originalElement": "body"
   }
@@ -617,7 +703,7 @@
  "doctype": "Studio Page",
  "frappe_app": "lending",
  "is_standard": 1,
- "modified": "2026-09-23 14:48:31.709559",
+ "modified": "2026-09-23 17:50:00.142000",
  "modified_by": "Administrator",
  "name": "statement_of_account",
  "owner": "Administrator",
@@ -625,6 +711,22 @@
  "page_title": "Statement of account",
  "published": 1,
  "resources": [
+  {
+   "__unsaved": 1,
+   "auto": 1,
+   "method": "GET",
+   "params": "{\"from_date\": \"{{ fromDate }}\", \"to_date\": \"{{ toDate }}\"}",
+   "resource_name": "statement",
+   "resource_type": "API Resource",
+   "url": "lending.portal.statement.get_statement_page"
+  },
+  {
+   "__unsaved": 1,
+   "method": "GET",
+   "resource_name": "alerts",
+   "resource_type": "API Resource",
+   "url": "lending.portal.notifications.get_notifications"
+  },
   {
    "__unsaved": 1,
    "auto": 1,

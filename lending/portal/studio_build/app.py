@@ -20,9 +20,34 @@ import os
 
 import frappe
 
+from lending.portal.studio_build import merge
+
 APP_NAME = "borrower-portal"
 APP_TITLE = "Borrower Portal"
 FRAPPE_APP = "lending"
+
+# What a Studio Page Resource row carries. Read off an existing page so a data source
+# added on the canvas comes back intact after a merge.
+RESOURCE_FIELDS = (
+	"resource_type",
+	"resource_name",
+	"url",
+	"method",
+	"params",
+	"auto",
+	"document_type",
+	"document_name",
+	"fields",
+	"filters",
+	"limit",
+	"sort_field",
+	"sort_order",
+	"transform",
+	"whitelisted_methods",
+	"fetch_document_using_filters",
+	"on_success",
+	"on_error",
+)
 
 # The file every page's `setup()` module imports. Written here rather than through
 # Studio, which exports documents and knows nothing about the app's own source tree.
@@ -148,55 +173,98 @@ def upsert_app():
 
 
 def write_shared_utils():
-	"""Put utils/portal.ts in the exported app folder, creating the folder if Studio has not."""
+	"""Put utils/portal.ts in the exported app folder, creating the folder if Studio has not.
+
+	Left alone once it has been edited by hand. It is generated, but it is still source
+	somebody may have reached for, and a rebuild is not a reason to lose what they wrote
+	there. A text file has no ids to merge on, so this is the whole file or none of it.
+
+	Until it has a baseline, though, there is nothing to read an edit against, and the
+	run that gives it one writes it -- as _replace_page does, and for the same reason.
+	"""
 	folder = frappe.get_app_source_path(FRAPPE_APP, "studio", APP_NAME, SHARED_UTILS_PATH[0])
 	frappe.create_folder(folder)
 	path = os.path.join(folder, SHARED_UTILS_PATH[1])
+	key = f"file-{merge.baseline_key(SHARED_UTILS_PATH[1])}"
+
+	baseline = merge.read_baseline(key)
+	if baseline is not None and os.path.exists(path):
+		current = frappe.read_file(path)
+		if current not in (SHARED_UTILS, baseline.get("source")):
+			print(f"kept the hand-edited {SHARED_UTILS_PATH[1]}")
+			return
+
 	with open(path, "w") as source:
 		source.write(SHARED_UTILS)
 
+	merge.write_baseline(key, {"path": path, "source": SHARED_UTILS})
+
 
 def upsert_component(component_id, component_name, tree, inputs=()):
-	"""Create or replace one shared piece of the frame.
+	"""Create one shared piece of the frame, or merge this build into the one already there.
+
+	Merged the same way a page is, and for the same reason: the header and the sidebar
+	are as much a thing to restyle on the canvas as any page is.
 
 	An unchanged component is left alone: saving one publishes a document change to
 	every open editor, and eleven pages built in a row would do it eleven times over.
 	"""
+	tree = merge.identify([tree], component_id)[0]
+	key = f"component-{merge.baseline_key(component_id)}"
 	fields = {
 		"component_name": component_name,
 		"component_id": component_id,
-		"block": json.dumps(tree, indent=1),
 		"inputs": [{"input_name": name, "type": "string", "description": note} for name, note in inputs],
 	}
 
-	if frappe.db.exists("Studio Component", component_id):
-		doc = frappe.get_doc("Studio Component", component_id)
-		if doc.block == fields["block"]:
-			return doc.name
-		doc.update(fields)
-		doc.save()
-		action = "updated"
-	else:
-		doc = frappe.get_doc(dict(doctype="Studio Component", **fields)).insert()
-		action = "created"
+	if not frappe.db.exists("Studio Component", component_id):
+		doc = frappe.get_doc(dict(doctype="Studio Component", block=json.dumps(tree, indent=1), **fields))
+		doc.insert()
+		merge.write_baseline(key, {"component_id": component_id, "block": tree})
+		print(f"created Studio Component {doc.name}")
+		return doc.name
 
-	print(f"{action} Studio Component {doc.name}")
+	doc = frappe.get_doc("Studio Component", component_id)
+	live = frappe.parse_json(doc.block or "{}")
+	baseline = merge.read_baseline(key)
+
+	if baseline is None:
+		# No third tree to merge against, so this one run still replaces -- see _replace_page.
+		merged = [tree]
+	else:
+		merged = merge.merge_blocks([baseline["block"]], [live], [tree])
+
+	fields["block"] = json.dumps(merged[0] if merged else live, indent=1)
+	merge.write_baseline(key, {"component_id": component_id, "block": tree})
+
+	if doc.block == fields["block"]:
+		return doc.name
+
+	doc.update(fields)
+	doc.save()
+	print(f"{'replaced' if baseline is None else 'merged into'} Studio Component {doc.name}")
 
 	return doc.name
 
 
 def upsert_page(title, route, blocks, resources, script=PAGE_SCRIPT, allow_guest=False):
-	"""Create or replace one page of the app, found by the route it answers on.
+	"""Create one page of the app, or merge this build into the page already there.
 
-	Not by name. Studio names a page `page-<hash>` and frappe clears any name handed to
-	an insert before naming runs, so there is no name to look a page up by that this
-	module could choose. The route is the page's real identity anyway -- it is what a
-	borrower reaches it at, and what Studio itself refuses to let two pages share.
+	Found by the route it answers on. Not by name: Studio names a page `page-<hash>` and
+	frappe clears any name handed to an insert before naming runs, so there is no name to
+	look a page up by that this module could choose. The route is the page's real identity
+	anyway -- it is what a borrower reaches it at, and what Studio itself refuses to let
+	two pages share.
 
 	The exported folder is named after the title, so a retitle relocates it. Studio
 	handles that move; what it cannot handle is two pages built for one route, which is
 	why this looks the route up rather than trusting a name.
+
+	An existing page is never replaced. What this build produces is merged onto what is
+	on the canvas and the canvas wins every disagreement, so a rebuild carries a change
+	into a page without taking a hand edit out of it -- see the merge module.
 	"""
+	blocks = merge.identify(blocks, route)
 	fields = {
 		"page_title": title,
 		"route": route,
@@ -205,30 +273,126 @@ def upsert_page(title, route, blocks, resources, script=PAGE_SCRIPT, allow_guest
 		"allow_guest": 1 if allow_guest else 0,
 		"is_standard": 1,
 		"frappe_app": FRAPPE_APP,
-		"blocks": frappe.as_json(blocks),
 		"resources": resources,
-		"script": script,
-		# A leftover draft outranks what this script just wrote: the canvas loads
-		# draft_blocks when it has one, and so does the published page's preview.
-		"draft_blocks": None,
 	}
 
 	existing = frappe.db.get_value("Studio Page", {"studio_app": APP_NAME, "route": route}, "name")
-	if existing:
-		doc = frappe.get_doc("Studio Page", existing)
-		doc.resources = []
-		doc.update(fields)
-		doc.save()
-		action = "updated"
-	else:
-		doc = frappe.get_doc(dict(doctype="Studio Page", **fields)).insert()
-		action = "created"
+	if not existing:
+		return _create_page(route, blocks, script, fields)
+
+	doc = frappe.get_doc("Studio Page", existing)
+	baseline = merge.read_baseline(merge.baseline_key(route))
+	if baseline is None:
+		return _replace_page(doc, route, blocks, script, fields)
+
+	return _merge_page(doc, route, blocks, script, fields, baseline)
+
+
+def _create_page(route, blocks, script, fields):
+	"""A page nobody has opened yet: write it, and record it as the base of the next merge."""
+	doc = frappe.get_doc(
+		dict(doctype="Studio Page", blocks=frappe.as_json(blocks), script=script, **fields)
+	).insert()
 
 	# The script lives in the page's companion .ts once the page is exported, and the
 	# DB field is cleared. Writing it has to come after the save that created the folder.
 	doc.write_script_file()
+	_save_baseline(route, blocks, script)
 
 	frappe.clear_document_cache("Studio Page", doc.name)
-	print(f"{action} Studio Page {doc.name} at /{APP_NAME}{route}")
+	print(f"created Studio Page {doc.name} at /{APP_NAME}{route}")
 
 	return doc.name
+
+
+def _merge_page(doc, route, blocks, script, fields, baseline):
+	"""Carry this build into a page that is already laid out, keeping every hand edit."""
+	base = baseline.get("blocks") or []
+	live = frappe.parse_json(doc.blocks or "[]")
+	fields["blocks"] = frappe.as_json(merge.merge_blocks(base, live, blocks))
+
+	# The canvas keeps unpublished work in draft_blocks and the published page in blocks,
+	# and loads the draft in preference to the page. Both are merged against the same
+	# baseline, so neither reading of the page loses what was drawn on it.
+	if doc.draft_blocks and doc.draft_blocks != "[]":
+		draft = frappe.parse_json(doc.draft_blocks)
+		fields["draft_blocks"] = frappe.as_json(merge.merge_blocks(base, draft, blocks))
+
+	# The script is a file the canvas can edit too, and a text file has no ids to merge
+	# on. Rewrite it only while it still reads as the generator left it.
+	live_script = _page_script(doc)
+	rewrite_script = live_script in (None, "", baseline.get("script"))
+	if rewrite_script:
+		fields["script"] = script
+
+	live_resources = _resource_rows(doc)
+	doc.resources = []
+	doc.update(fields)
+	for row in merge.merge_resources(live_resources, fields["resources"]):
+		doc.append("resources", row)
+	doc.save()
+
+	if rewrite_script:
+		doc.write_script_file()
+	else:
+		print(f"kept the hand-edited script for /{APP_NAME}{route}")
+
+	_save_baseline(route, blocks, script if rewrite_script else live_script)
+	frappe.clear_document_cache("Studio Page", doc.name)
+	print(f"merged into Studio Page {doc.name} at /{APP_NAME}{route}")
+
+	return doc.name
+
+
+def _replace_page(doc, route, blocks, script, fields):
+	"""The one run that still overwrites: a page built before there was a baseline.
+
+	A merge needs three trees and such a page has two, and the third cannot be guessed,
+	because of what the ids are made of. A block's `componentId` is stamped from its
+	position, so a baseline of what this build *would* have written describes the shape
+	of the new tree and not the shape of the page. Nothing on the page matches it, every
+	block there reads as hand-added and is kept, and the rebuild stacks the new page on
+	top of the old one -- two of every card, in one card's worth of space.
+
+	Reading the page itself as the baseline lines the ids up but says the same thing this
+	does, only more quietly: whatever is on the canvas is the generator's to overwrite.
+	Better to overwrite it once, in the open, exactly as every run before the merge
+	existed did. The page and its baseline are then the same tree, which is what makes
+	the next run, and every run after it, a merge that keeps hand edits.
+	"""
+	fields["blocks"] = frappe.as_json(blocks)
+	fields["script"] = script
+	# A leftover draft outranks what this just wrote: the canvas loads draft_blocks when
+	# it has one, and so does the published page's preview.
+	fields["draft_blocks"] = None
+
+	doc.resources = []
+	doc.update(fields)
+	doc.save()
+	doc.write_script_file()
+
+	_save_baseline(route, blocks, script)
+	frappe.clear_document_cache("Studio Page", doc.name)
+	print(f"replaced /{APP_NAME}{route} -- it had no baseline, and now has one")
+
+	return doc.name
+
+
+def _save_baseline(route, blocks, script):
+	merge.write_baseline(merge.baseline_key(route), {"route": route, "blocks": blocks, "script": script})
+
+
+def _page_script(doc):
+	"""The page's script, from its companion .ts once exported and from the field before that."""
+	if doc.has_script_file():
+		return frappe.read_file(doc.get_script_file_path())
+
+	return doc.script
+
+
+def _resource_rows(doc):
+	"""The page's data sources as plain rows, ready to append back after a merge."""
+	return [
+		{field: row.get(field) for field in RESOURCE_FIELDS if row.get(field) is not None}
+		for row in doc.resources
+	]

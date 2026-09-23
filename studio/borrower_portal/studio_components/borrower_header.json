@@ -58,6 +58,7 @@
             "script": "open(dataItem.route)"
            }
           },
+          "componentId": "borrower_header-0-container1-repeater1-container1-textblock1",
           "componentName": "TextBlock",
           "componentProps": {
            "fontSize": "text-lg-medium",
@@ -82,6 +83,7 @@
           },
           "children": [],
           "componentEvents": {},
+          "componentId": "borrower_header-0-container1-repeater1-container1-textblock2",
           "componentName": "TextBlock",
           "componentProps": {
            "fontSize": "text-lg-medium",
@@ -100,6 +102,7 @@
           },
           "children": [],
           "componentEvents": {},
+          "componentId": "borrower_header-0-container1-repeater1-container1-textblock3",
           "componentName": "TextBlock",
           "componentProps": {
            "fontSize": "text-base",
@@ -113,6 +116,7 @@
          }
         ],
         "componentEvents": {},
+        "componentId": "borrower_header-0-container1-repeater1-container1",
         "componentName": "container",
         "componentProps": {},
         "componentSlots": {},
@@ -122,6 +126,7 @@
        }
       ],
       "componentEvents": {},
+      "componentId": "borrower_header-0-container1-repeater1",
       "componentName": "Repeater",
       "componentProps": {
        "data": "{{ inputs.breadcrumbs }}",
@@ -144,6 +149,7 @@
       },
       "children": [],
       "componentEvents": {},
+      "componentId": "borrower_header-0-container1-textblock1",
       "componentName": "TextBlock",
       "componentProps": {
        "fontSize": "text-lg",
@@ -159,6 +165,7 @@
       "baseStyles": {},
       "children": [],
       "componentEvents": {},
+      "componentId": "borrower_header-0-container1-badge1",
       "componentName": "Badge",
       "componentProps": {
        "label": "{{ inputs.status }}",
@@ -173,6 +180,7 @@
      }
     ],
     "componentEvents": {},
+    "componentId": "borrower_header-0-container1",
     "componentName": "container",
     "componentProps": {},
     "componentSlots": {},
@@ -186,6 +194,7 @@
     },
     "children": [],
     "componentEvents": {},
+    "componentId": "borrower_header-0-container2",
     "componentName": "container",
     "componentProps": {},
     "componentSlots": {},
@@ -203,6 +212,7 @@
       "script": "showAlerts.value = true; alerts.reload()"
      }
     },
+    "componentId": "borrower_header-0-button1",
     "componentName": "Button",
     "componentProps": {
      "icon": "lucide-bell",
@@ -224,6 +234,7 @@
       "script": "open(inputs.action_route)"
      }
     },
+    "componentId": "borrower_header-0-button2",
     "componentName": "Button",
     "componentProps": {
      "label": "{{ inputs.action_label }}",
@@ -237,6 +248,7 @@
    }
   ],
   "componentEvents": {},
+  "componentId": "borrower_header-0",
   "componentName": "container",
   "componentProps": {},
   "componentSlots": {},
@@ -295,7 +307,7 @@
   }
  ],
  "is_disabled": 0,
- "modified": "2026-09-23 13:33:39.220294",
+ "modified": "2026-09-23 15:19:39.609857",
  "modified_by": "Administrator",
  "name": "borrower_header",
  "owner": "Administrator"

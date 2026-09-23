@@ -40,6 +40,7 @@
           "fontWeight": "600"
          },
          "children": [],
+         "componentId": "track-0-container1-container1-textblock1",
          "componentName": "TextBlock",
          "componentProps": {
           "fontSize": "text-lg",
@@ -52,6 +53,7 @@
           "flex": "1 1 auto"
          },
          "children": [],
+         "componentId": "track-0-container1-container1-container1",
          "componentName": "container",
          "originalElement": "div"
         },
@@ -64,6 +66,7 @@
            "script": "window.location.href = '/apply'"
           }
          },
+         "componentId": "track-0-container1-container1-button1",
          "componentName": "Button",
          "componentProps": {
           "label": "Apply for a loan",
@@ -80,6 +83,7 @@
            "script": "window.location.href = '/login'"
           }
          },
+         "componentId": "track-0-container1-container1-button2",
          "componentName": "Button",
          "componentProps": {
           "label": "Log in",
@@ -88,6 +92,7 @@
          }
         }
        ],
+       "componentId": "track-0-container1-container1",
        "componentName": "container",
        "originalElement": "div"
       },
@@ -107,6 +112,7 @@
           "fontWeight": "600"
          },
          "children": [],
+         "componentId": "track-0-container1-container2-textblock1",
          "componentName": "TextBlock",
          "componentProps": {
           "fontSize": "text-5xl",
@@ -119,6 +125,7 @@
           "color": "var(--ink-gray-6)"
          },
          "children": [],
+         "componentId": "track-0-container1-container2-textblock2",
          "componentName": "TextBlock",
          "componentProps": {
           "fontSize": "text-p-xs",
@@ -151,6 +158,7 @@
               "fontWeight": "600"
              },
              "children": [],
+             "componentId": "track-0-container1-container2-container1-container1-textblock1",
              "componentName": "TextBlock",
              "componentProps": {
               "fontSize": "text-lg",
@@ -163,6 +171,7 @@
               "color": "var(--ink-gray-6)"
              },
              "children": [],
+             "componentId": "track-0-container1-container2-container1-container1-textblock2",
              "componentName": "TextBlock",
              "componentProps": {
               "fontSize": "text-p-xs",
@@ -171,6 +180,7 @@
              }
             }
            ],
+           "componentId": "track-0-container1-container2-container1-container1",
            "componentName": "container",
            "originalElement": "div"
           },
@@ -195,6 +205,7 @@
                 "minWidth": "0px"
                },
                "children": [],
+               "componentId": "track-0-container1-container2-container1-container2-container1-formcontrol1",
                "componentName": "FormControl",
                "componentProps": {
                 "label": "Reference number",
@@ -212,6 +223,7 @@
                 "minWidth": "0px"
                },
                "children": [],
+               "componentId": "track-0-container1-container2-container1-container2-container1-formcontrol2",
                "componentName": "FormControl",
                "componentProps": {
                 "label": "Mobile number",
@@ -224,6 +236,7 @@
                }
               }
              ],
+             "componentId": "track-0-container1-container2-container1-container2-container1",
              "componentName": "container",
              "originalElement": "div"
             },
@@ -236,6 +249,7 @@
                "script": "track()"
               }
              },
+             "componentId": "track-0-container1-container2-container1-container2-button1",
              "componentName": "Button",
              "componentProps": {
               "label": "Show me where it is",
@@ -244,10 +258,12 @@
              }
             }
            ],
+           "componentId": "track-0-container1-container2-container1-container2",
            "componentName": "container",
            "originalElement": "div"
           }
          ],
+         "componentId": "track-0-container1-container2-container1",
          "componentName": "container",
          "originalElement": "div"
         },
@@ -276,6 +292,7 @@
               "fontWeight": "600"
              },
              "children": [],
+             "componentId": "track-0-container1-container2-container2-container1-textblock1",
              "componentName": "TextBlock",
              "componentProps": {
               "fontSize": "text-lg",
@@ -288,6 +305,7 @@
               "color": "var(--ink-gray-6)"
              },
              "children": [],
+             "componentId": "track-0-container1-container2-container2-container1-textblock2",
              "componentName": "TextBlock",
              "componentProps": {
               "fontSize": "text-p-xs",
@@ -296,6 +314,7 @@
              }
             }
            ],
+           "componentId": "track-0-container1-container2-container2-container1",
            "componentName": "container",
            "originalElement": "div"
           },
@@ -335,6 +354,7 @@
                     "color": "var(--ink-gray-6)"
                    },
                    "children": [],
+                   "componentId": "track-0-container1-container2-container2-container2-repeater1-container1-container1-textblock1",
                    "componentName": "TextBlock",
                    "componentProps": {
                     "fontSize": "text-p-xs",
@@ -344,6 +364,7 @@
                   },
                   {
                    "children": [],
+                   "componentId": "track-0-container1-container2-container2-container2-repeater1-container1-container1-textblock2",
                    "componentName": "TextBlock",
                    "componentProps": {
                     "fontSize": "text-base",
@@ -352,6 +373,7 @@
                    }
                   }
                  ],
+                 "componentId": "track-0-container1-container2-container2-container2-repeater1-container1-container1",
                  "componentName": "container",
                  "originalElement": "div"
                 },
@@ -360,6 +382,7 @@
                   "color": "var(--ink-gray-6)"
                  },
                  "children": [],
+                 "componentId": "track-0-container1-container2-container2-container2-repeater1-container1-textblock1",
                  "componentName": "TextBlock",
                  "componentProps": {
                   "fontSize": "text-p-xs",
@@ -368,10 +391,12 @@
                  }
                 }
                ],
+               "componentId": "track-0-container1-container2-container2-container2-repeater1-container1",
                "componentName": "container",
                "originalElement": "div"
               }
              ],
+             "componentId": "track-0-container1-container2-container2-container2-repeater1",
              "componentName": "Repeater",
              "componentProps": {
               "data": "{{ result.steps }}",
@@ -397,6 +422,7 @@
                   "color": "var(--ink-gray-6)"
                  },
                  "children": [],
+                 "componentId": "track-0-container1-container2-container2-container2-repeater2-container1-textblock1",
                  "componentName": "TextBlock",
                  "componentProps": {
                   "fontSize": "text-p-xs",
@@ -406,6 +432,7 @@
                 },
                 {
                  "children": [],
+                 "componentId": "track-0-container1-container2-container2-container2-repeater2-container1-textblock2",
                  "componentName": "TextBlock",
                  "componentProps": {
                   "fontSize": "text-base",
@@ -414,10 +441,12 @@
                  }
                 }
                ],
+               "componentId": "track-0-container1-container2-container2-container2-repeater2-container1",
                "componentName": "container",
                "originalElement": "div"
               }
              ],
+             "componentId": "track-0-container1-container2-container2-container2-repeater2",
              "componentName": "Repeater",
              "componentProps": {
               "data": "{{ result.offer }}",
@@ -427,6 +456,7 @@
             },
             {
              "children": [],
+             "componentId": "track-0-container1-container2-container2-container2-alert1",
              "componentName": "Alert",
              "componentProps": {
               "theme": "blue",
@@ -434,23 +464,28 @@
              }
             }
            ],
+           "componentId": "track-0-container1-container2-container2-container2",
            "componentName": "container",
            "originalElement": "div"
           }
          ],
+         "componentId": "track-0-container1-container2-container2",
          "componentName": "container",
          "originalElement": "div",
          "visibilityCondition": "{{ result.reference }}"
         }
        ],
+       "componentId": "track-0-container1-container2",
        "componentName": "container",
        "originalElement": "div"
       }
      ],
+     "componentId": "track-0-container1",
      "componentName": "container",
      "originalElement": "div"
     }
    ],
+   "componentId": "track-0",
    "componentName": "div",
    "originalElement": "body"
   }
@@ -459,7 +494,7 @@
  "doctype": "Studio Page",
  "frappe_app": "lending",
  "is_standard": 1,
- "modified": "2026-09-23 14:48:31.881824",
+ "modified": "2026-09-23 17:50:00.281689",
  "modified_by": "Administrator",
  "name": "track_your_application",
  "owner": "Administrator",
@@ -467,6 +502,14 @@
  "page_title": "Track your application",
  "published": 1,
  "resources": [
+  {
+   "__unsaved": 1,
+   "auto": 1,
+   "method": "GET",
+   "resource_name": "track",
+   "resource_type": "API Resource",
+   "url": "lending.portal.apply.get_track_page"
+  },
   {
    "__unsaved": 1,
    "auto": 1,

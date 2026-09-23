@@ -14,14 +14,17 @@ record of what happened, and those four rows are a diary of what has not.
 """
 
 from lending.portal.studio_build.app import api_resource, upsert_page
+from lending.portal.studio_build.application_pages import applications
 from lending.portal.studio_build.blocks import (
 	block,
 	card,
+	chevron,
 	click,
 	column,
+	icon_line,
 	muted,
 	reader,
-	record_list,
+	record_stat,
 	repeater,
 	row,
 	slot,
@@ -37,6 +40,9 @@ from lending.portal.studio_build.shell import frame
 TITLE = "Account overview"
 ROUTE = "/overview"
 SOURCE = "overview"
+# Where every figure on this page is answered in full, and so where the head's button
+# and the two figure cards all lead.
+ACCOUNTS_ROUTE = "/loans"
 read = reader(SOURCE)
 
 # The payload's activity rows in the shape ActivityTimeline reads, mapped in the binding
@@ -63,34 +69,83 @@ ACTIVITY_ROWS = (
 )
 
 
+def application_card():
+	"""The newest open application, as the record it is rather than as a figure.
+
+	It sits in a strip of numbers and is not one. The product name is a headline at the
+	weight of a heading, the application's own name and the day it was raised are the
+	two quiet lines under it, and the tile on the left carries the stage's colour the
+	way the badge at the top does. What is waiting on the borrower, and how many more
+	applications the table below holds, follow only when there is something to say.
+	"""
+	stage_tone = f"{SOURCE}.data.application_stage_tone"
+	# The label, the stage, and the chevron at the end of the line the two figure cards
+	# put theirs on. The chevron waits for a destination: a borrower with nothing in
+	# progress reads the same card saying so, and that one opens nothing.
+	label = row(
+		[
+			muted(read("label_application")),
+			toned_badge(read("application_stage"), stage_tone, visible=read("application_stage")),
+			spacer(),
+			chevron(visible=read("application_url")),
+		],
+		gap="8px",
+	)
+	initiated = icon_line(
+		"calendar", read("application_initiated"), visible=read("application_initiated")
+	)
+
+	return record_stat(
+		"file-text",
+		stage_tone,
+		[
+			label,
+			text(
+				read("application_headline"),
+				tag="div",
+				size="text-2xl",
+				styles={"fontWeight": "600", "padding": "2px 0"},
+			),
+			muted(read("application_name"), visible=read("application_name")),
+			initiated,
+			muted(read("application_note"), visible=read("application_note")),
+			muted(read("application_more"), visible=read("application_more")),
+		],
+		script=f"open({SOURCE}.data.application_url)",
+	)
+
+
 def summary():
 	"""The three questions a borrower opens the portal with, in one strip.
 
 	The application leads because it is the one with an answer from the first day: the
 	two figures beside it read "Nothing due" and "No live accounts" until a loan is
 	booked.
+
+	Both figures are answered on the loan accounts page -- the instalment in its Next
+	repayment column, the balance in its Outstanding one -- so both cards open it. The
+	overview is a summary, and a summary that cannot be opened makes a borrower hunt
+	down the rail for the page the figure came from.
 	"""
 	return stat_strip(
 		[
-			stat(
-				read("label_application"),
-				read("application_headline"),
-				read("application_note"),
-				flag=read("application_stage"),
-				flag_tone=f"{SOURCE}.data.application_stage_tone",
-				sub=read("application_more"),
-			),
+			application_card(),
 			stat(
 				read("label_next"),
 				read("next_amount"),
 				read("next_note"),
 				flag=read("next_flag"),
+				icon_name="calendar",
+				note_icon="calendar",
+				script=f"open('{ACCOUNTS_ROUTE}')",
 			),
 			stat(
 				read("label_outstanding"),
 				read("outstanding"),
 				read("outstanding_note"),
 				sub=read("sanctioned_line"),
+				icon_name="database",
+				script=f"open('{ACCOUNTS_ROUTE}')",
 			),
 		]
 	)
@@ -121,24 +176,6 @@ def tasks():
 		read("tasks_note"),
 		repeater(read("tasks"), task),
 		visible="{{ overview.data.tasks && overview.data.tasks.length > 0 }}",
-	)
-
-
-def applications():
-	"""The same table the Applications page draws, so a row means the same thing twice."""
-	return record_list(
-		[("minmax(0, 1fr)", "Application"), ("9rem", "Stage"), ("9rem", "Amount sought")],
-		read("applications"),
-		[
-			[
-				text("{{ item.product }}", size="text-base"),
-				muted("{{ item.reference }}"),
-				muted("{{ item.note }}", visible="{{ item.note }}"),
-			],
-			[toned_badge("{{ item.stage }}", "item.stage_tone")],
-			[text("{{ item.amount }}", size="text-base")],
-		],
-		script="open(item.url)",
 	)
 
 
@@ -201,7 +238,7 @@ def content():
 		tasks(),
 		two_columns(
 			[
-				card("Application status", read("applications_note"), applications()),
+				card("Application status", read("applications_note"), applications(read)),
 				card(
 					"Activity timeline",
 					read("activity_note"),
@@ -225,7 +262,7 @@ def build():
 	return upsert_page(
 		TITLE,
 		ROUTE,
-		frame(SOURCE, content(), action_label="View payment details", action_route="/borrower-portal/loans"),
+		frame(SOURCE, content(), action_label="View payment details", action_route=ACCOUNTS_ROUTE),
 		resources=[
 			api_resource(SOURCE, "lending.portal.core.get_dashboard"),
 			api_resource("alerts", "lending.portal.notifications.get_notifications", auto=0),
