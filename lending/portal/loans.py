@@ -1,10 +1,9 @@
 # Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-"""Read-only data for the borrower's loan list and loan detail pages.
+"""Read-only data for the borrower's loan page.
 
-Both endpoints resolve the borrower's own Customer records first, and the detail
-endpoint checks ownership of the loan named in the route before reading anything
+The endpoint checks ownership of the loan named in the route before reading anything
 else. A loan that belongs to someone else and a loan that does not exist raise the
 same PermissionError, so the portal never confirms that a record exists -- see
 PORTAL_PLAN.md section 8.
@@ -20,16 +19,12 @@ from frappe.utils import flt, nowdate
 from lending.portal.core import (
 	STATUS_LABELS,
 	assert_owns,
-	build_summary,
 	get_loans,
 	get_portal_customers,
-	get_upcoming_repayments,
-	labels,
+	is_live,
 	long_date,
 	money,
-	present_loan,
 	shell_payload,
-	short_date,
 )
 
 # Loan fields the borrower may see. The risk fields are simply never selected.
@@ -54,193 +49,91 @@ DETAIL_FIELDS = (
 
 
 @frappe.whitelist()
-def get_loans_page() -> dict:
-	"""Every loan the borrower holds, one row per loan, each linking to its detail page."""
-	customers = get_portal_customers()
-	loans = get_loans(customers) if customers else []
-	accounts = [present_loan(loan, len(customers) > 1) for loan in loans]
-	payload = shell_payload(_("Loan accounts"), _("Apply for a loan"), customers, loans)
-	payload.update(labels())
-	payload.update(build_summary(loans, get_upcoming_repayments(loans)))
-	payload["accounts"] = accounts
-	payload["accounts_note"] = (
-		_("{0} accounts").format(len(accounts)) if accounts else _("No accounts yet")
-	)
-
-	return payload
-
-
-@frappe.whitelist()
 def get_loan_detail() -> dict:
-	name = frappe.form_dict.get("name")
+	"""One loan's page. With no loan named, the borrower's main loan -- see default_loan."""
+	name = frappe.form_dict.get("name") or default_loan()
 	if not name:
-		raise frappe.PermissionError(_("Not permitted"))
+		return no_loan_payload()
 
 	assert_owns("Loan", name)
 	loan = frappe.db.get_value("Loan", name, DETAIL_FIELDS, as_dict=True)
 
 	payload = shell_payload(loan.loan_product, _("Download statement"), [loan.applicant], [loan])
 	payload["crumb"] = loan.loan_product
-	payload["breadcrumbs"] = [
-		{"label": "Loans", "route": "/borrower-portal/loans"},
-		{"label": loan.loan_product}
-	]
 	payload["head_note"] = "{0} · {1}".format(loan.name, STATUS_LABELS.get(loan.status, loan.status))
 
 	payload.update(
 		{
-			"summary": summary_rows(loan),
-			"summary_note": _("{0} at {1}% p.a.").format(
-				money(loan.loan_amount), flt(loan.rate_of_interest, 2)
-			),
-			"schedule": schedule_rows(name),
-			"disbursements": disbursement_rows(loan),
+			"product": loan.loan_product,
+			"terms": loan_terms(loan),
+			"summary_note": _("Key information about your loan."),
 			"charges": charge_rows(name),
-			"payoff": payoff_rows(name),
+			**payoff_figures(name),
 		}
 	)
-	payload.update(card_notes(payload, loan))
 
 	return payload
 
 
-def summary_rows(loan: dict) -> list[dict]:
-	"""The terms, as label and value pairs the page repeats over."""
-	drawn = flt(loan.disbursed_amount)
-	rows = [
-		(_("Sanctioned"), money(loan.loan_amount)),
-		(_("Disbursed"), money(drawn)),
-		(_("Interest rate"), "{0}% p.a.".format(flt(loan.rate_of_interest, 2))),
-		(
-			_("Instalment"),
-			"{0} · {1}".format(
-				money(loan.monthly_repayment_amount),
-				(loan.repayment_frequency or "Monthly").lower(),
-			),
-		),
-		(_("Instalments"), str(loan.repayment_periods or "")),
-		(_("First due"), long_date(loan.repayment_start_date)),
-		(_("Total payable"), money(loan.total_payment)),
-		(_("Paid so far"), money(loan.total_amount_paid)),
-	]
+def default_loan() -> str | None:
+	"""The loan the sidebar opens: the newest live one, else the newest of any.
 
-	if flt(loan.written_off_amount):
-		rows.append((_("Written off"), money(loan.written_off_amount)))
-
-	return [{"label": label, "value": value} for label, value in rows]
-
-
-def current_schedule(loan: str) -> str | None:
-	"""The schedule in force. A loan drawn in tranches has several; the Active one rules."""
-	active = frappe.db.get_value(
-		"Loan Repayment Schedule", {"loan": loan, "docstatus": 1, "status": "Active"}, "name"
-	)
-
-	return active or frappe.db.get_value(
-		"Loan Repayment Schedule", {"loan": loan, "docstatus": 1}, "name", order_by="creation desc"
-	)
-
-
-def demands_by_instalment(loan: str) -> dict:
-	index = {}
-	rows = frappe.get_all(
-		"Loan Demand",
-		filters={"loan": loan, "docstatus": 1},
-		fields=["repayment_schedule_detail", "demand_amount", "paid_amount", "outstanding_amount"],
-		ignore_permissions=True,
-	)
-
-	for row in rows:
-		if not row.repayment_schedule_detail:
-			continue
-		entry = index.setdefault(row.repayment_schedule_detail, {"paid": 0.0, "outstanding": 0.0})
-		entry["paid"] += flt(row.paid_amount)
-		entry["outstanding"] += flt(row.outstanding_amount)
-
-	return index
-
-
-def instalment_state(row: dict, demands: dict) -> tuple[str, str]:
-	"""What an instalment is, and how loudly the badge says it.
-
-	An instalment the lender has not yet asked for is neutral; one it has asked for is
-	a nudge whether or not the date has passed, because the words already tell the two
-	apart and the colour would only be repeating them.
+	The sidebar goes straight to a loan rather than to a list of them. A borrower with
+	more than one loan still reaches the others from the overview and from search.
 	"""
-	entry = demands.get(row.name)
-	if not entry:
-		return _("Upcoming"), ""
+	customers = get_portal_customers()
+	loans = get_loans(customers) if customers else []
+	if not loans:
+		return None
 
-	if entry["outstanding"] <= 0:
-		return _("Paid"), "ok"
+	newest = sorted(loans, key=lambda loan: loan.posting_date, reverse=True)
+	live = [loan for loan in newest if is_live(loan)]
 
-	return (_("Payment overdue"), "warn") if row.payment_date < nowdate() else (_("Due"), "warn")
+	return (live or newest)[0].name
 
 
-def schedule_rows(loan: str) -> list[dict]:
-	schedule = current_schedule(loan)
-	if not schedule:
-		return []
-
-	rows = frappe.get_all(
-		"Repayment Schedule",
-		filters={"parent": schedule, "parenttype": "Loan Repayment Schedule"},
-		fields=[
-			"name",
-			"payment_date",
-			"principal_amount",
-			"interest_amount",
-			"total_payment",
-			"balance_loan_amount",
-		],
-		order_by="payment_date asc",
-		ignore_permissions=True,
+def no_loan_payload() -> dict:
+	"""The page for a borrower with no loan yet: the frame, and every card empty."""
+	payload = shell_payload(_("Loan account"), _("Apply for a loan"), get_portal_customers(), [])
+	payload.update(
+		{
+			"product": "",
+			"terms": None,
+			"summary_note": _("No loan accounts yet"),
+			"charges": [],
+			"payoff_total": money(0),
+			"payoff_note": _("Nothing outstanding"),
+		}
 	)
 
-	demands = demands_by_instalment(loan)
-
-	presented = []
-	for row in rows:
-		state, tone = instalment_state(row, demands)
-		presented.append(
-			{
-				"date": short_date(row.payment_date),
-				"detail": _("Principal {0} · interest {1}").format(
-					money(row.principal_amount), money(row.interest_amount)
-				),
-				"amount": money(row.total_payment),
-				"state": state,
-				"state_tone": tone,
-				"balance": _("{0} outstanding after").format(money(row.balance_loan_amount)),
-			}
-		)
-
-	return presented
+	return payload
 
 
-def disbursement_rows(loan: dict) -> list[dict]:
-	"""Drawdowns in order, with the running total. A loan can disburse in parts."""
-	rows = frappe.get_all(
-		"Loan Disbursement",
-		filters={"against_loan": loan.name, "docstatus": 1},
-		fields=["disbursement_date", "disbursed_amount", "bank_account"],
-		order_by="disbursement_date asc",
-	)
+def loan_terms(loan: dict) -> dict:
+	"""The terms by name, because the card places each one rather than repeating over them."""
+	written_off = flt(loan.written_off_amount)
 
-	running = 0.0
-	presented = []
-	for row in rows:
-		running += flt(row.disbursed_amount)
-		presented.append(
-			{
-				"date": short_date(row.disbursement_date),
-				"amount": money(row.disbursed_amount),
-				"detail": row.bank_account or _("Bank account not recorded"),
-				"running": _("{0} drawn of {1}").format(money(running), money(loan.loan_amount)),
-			}
-		)
+	return {
+		"sanctioned": money(loan.loan_amount),
+		"disbursed": money(loan.disbursed_amount),
+		"rate": "{0}%".format(flt(loan.rate_of_interest, 2)),
+		"tenure": tenure(loan),
+		"instalment": money(loan.monthly_repayment_amount),
+		"frequency": _(loan.repayment_frequency or "Monthly"),
+		"total": money(loan.total_payment),
+		"paid": money(loan.total_amount_paid),
+		"first_due": long_date(loan.repayment_start_date),
+		"written_off": _("{0} written off").format(money(written_off)) if written_off else "",
+	}
 
-	return presented
+
+def tenure(loan: dict) -> str:
+	"""Months when the loan is repaid monthly; otherwise the count of instalments."""
+	periods = loan.repayment_periods or 0
+	if (loan.repayment_frequency or "Monthly") == "Monthly":
+		return _("{0} months").format(periods)
+
+	return _("{0} instalments").format(periods)
 
 
 def charge_rows(loan: str) -> list[dict]:
@@ -261,55 +154,27 @@ def charge_rows(loan: str) -> list[dict]:
 	]
 
 
-def payoff_rows(loan: str) -> list[dict]:
-	"""What it costs to close the loan today, broken into its parts.
+def payoff_figures(loan: str) -> dict:
+	"""What it costs to close the loan today, and the line under the figure.
 
 	PORTAL_PLAN.md section 6.11: show the figure, never take the money. The button
-	beside this raises a request for staff.
+	under this raises a request for staff.
+
+	The figure is always a sum of money, ₹ 0.00 included, because the card prints it
+	at the same size either way; the note is what tells a settled loan from a live one.
 	"""
 	from lending.loan_management.doctype.loan_repayment.loan_repayment import calculate_amounts
 
 	try:
-		amounts = calculate_amounts(loan, nowdate(), payment_type="Loan Closure")
+		payable = flt(calculate_amounts(loan, nowdate(), payment_type="Loan Closure").get("payable_amount"))
 	except Exception:
 		# A closed or written-off loan has nothing left to price.
 		frappe.clear_last_message()
-		return []
-
-	parts = [
-		(_("Principal"), amounts.get("payable_principal_amount")),
-		(_("Interest"), amounts.get("interest_amount")),
-		(_("Penalty"), amounts.get("penalty_amount")),
-		(_("Charges"), amounts.get("total_charges_payable")),
-	]
-	rows = [{"label": label, "value": money(value)} for label, value in parts if flt(value)]
-	rows.append({"label": _("Payable today"), "value": money(amounts.get("payable_amount"))})
-
-	return rows
-
-
-def card_notes(payload: dict, loan: dict) -> dict:
-	drawn = flt(loan.disbursed_amount)
-	undrawn = flt(loan.loan_amount) - drawn
-	paid = sum(1 for row in payload["schedule"] if row["state"] == _("Paid"))
+		payable = 0
 
 	return {
-		"schedule_note": (
-			_("{0} of {1} instalments paid").format(paid, len(payload["schedule"]))
-			if payload["schedule"]
-			else _("No schedule yet")
-		),
-		"disbursements_note": (
-			_("{0} undrawn").format(money(undrawn)) if undrawn > 0 else _("Fully drawn")
-		),
-		"charges_note": (
-			_("{0} charges").format(len(payload["charges"]))
-			if payload["charges"]
-			else _("No charges on this loan")
-		),
+		"payoff_total": money(max(payable, 0)),
 		"payoff_note": (
-			_("As on {0}").format(long_date(nowdate()))
-			if payload["payoff"]
-			else _("Nothing outstanding")
+			_("As on {0}").format(long_date(nowdate())) if payable > 0 else _("Nothing outstanding")
 		),
 	}

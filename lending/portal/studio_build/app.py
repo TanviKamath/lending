@@ -54,6 +54,8 @@ RESOURCE_FIELDS = (
 SHARED_UTILS_PATH = ("utils", "portal.ts")
 SHARED_UTILS = '''// Shared by every page's setup() module, as "@app/utils/portal".
 
+import { onScopeDispose, ref, watch } from "vue"
+
 const TONES: Record<string, string> = { ok: "green", warn: "orange", danger: "red" }
 
 /** A payload tone -- "", "ok", "warn", "danger" -- as a frappe-ui Badge theme. */
@@ -74,6 +76,92 @@ export function appRoute(url?: string): string {
 \tif (!url) return ""
 \treturn url.replace(/^\\/borrower(-portal)?/, "") || "/overview"
 }
+
+const FIND_URL = "/api/method/lending.portal.search.find"
+
+// The command palette behind Ctrl+K, as the desk's own awesomebar opens: the same
+// shortcut on every page, arrows to move, Enter to go. The dialog is the shell's
+// borrower_search component; everything it reads is returned from here.
+//
+// The results are fetched here rather than through a page data source. A source
+// re-fetches the moment its parameters change, with nothing to hold it back while the
+// borrower is still typing, and every page would have to declare one. `asked` drops an
+// answer that arrives after a newer question was sent.
+//
+// A GET, because find() reads and changes nothing.
+export function useSearch(open: (url?: string) => void) {
+\tconst showSearch = ref(false)
+\tconst searchText = ref("")
+\tconst searchResults = ref<any[]>([])
+\tconst searchNote = ref("")
+\tconst searchIndex = ref(0)
+\tlet asked = 0
+\tlet timer: ReturnType<typeof setTimeout> | undefined
+
+\tasync function find(query: string) {
+\t\tconst ticket = ++asked
+\t\tconst response = await fetch(`${FIND_URL}?q=${encodeURIComponent(query)}`, {
+\t\t\theaders: { Accept: "application/json" },
+\t\t})
+\t\tif (ticket !== asked || !response.ok) return
+
+\t\tconst { message } = await response.json()
+\t\tsearchResults.value = message.results
+\t\tsearchNote.value = message.note
+\t\tsearchIndex.value = 0
+\t}
+
+\twatch(searchText, (query) => {
+\t\tclearTimeout(timer)
+\t\ttimer = setTimeout(() => find(query.trim()), 150)
+\t})
+
+\t// Every opening starts from an empty box, which answers with the portal's own pages.
+\twatch(showSearch, (shown) => {
+\t\tif (!shown) return
+\t\tsearchText.value = ""
+\t\tfind("")
+\t})
+
+\tfunction chooseResult(item?: { url?: string }) {
+\t\tif (!item) return
+\t\tshowSearch.value = false
+\t\topen(item.url)
+\t}
+
+\tfunction move(step: number) {
+\t\tconst count = searchResults.value.length
+\t\tif (count) searchIndex.value = (searchIndex.value + step + count) % count
+\t}
+
+\tfunction onKeydown(event: KeyboardEvent) {
+\t\tif ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
+\t\t\tevent.preventDefault()
+\t\t\tshowSearch.value = !showSearch.value
+\t\t\treturn
+\t\t}
+\t\tif (!showSearch.value || event.isComposing) return
+
+\t\tif (event.key === "ArrowDown" || event.key === "ArrowUp") {
+\t\t\tevent.preventDefault()
+\t\t\tmove(event.key === "ArrowDown" ? 1 : -1)
+\t\t} else if (event.key === "Enter") {
+\t\t\tevent.preventDefault()
+\t\t\tchooseResult(searchResults.value[searchIndex.value])
+\t\t}
+\t}
+
+\t// Studio's editor has a Ctrl+K of its own, and runs a page's setup() on its canvas.
+\tif (!window.location.pathname.startsWith("/studio")) {
+\t\twindow.addEventListener("keydown", onKeydown)
+\t}
+\tonScopeDispose(() => {
+\t\twindow.removeEventListener("keydown", onKeydown)
+\t\tclearTimeout(timer)
+\t})
+
+\treturn { showSearch, searchText, searchResults, searchNote, searchIndex, chooseResult }
+}
 '''
 
 # A page's `setup()` module. An exported Studio app keeps its state in code rather than
@@ -89,9 +177,11 @@ export function appRoute(url?: string): string {
 # "nobody has said yet", under which it collapses on mobile and not otherwise. It is
 # bound out of the Sidebar as a v-model so the blocks in the rail can read it as well --
 # a block cannot inject what frappe-ui's own sidebar parts inject. See shell.EXPANDED.
+#
+# A framed page also spreads in useSearch, which is the Ctrl+K palette the frame draws.
 SCRIPT_TEMPLATE = '''import {{ computed, ref, watch }} from "vue"
 import {{ call, toast }} from "frappe-ui"
-import {{ tone, appRoute }} from "@app/utils/portal"
+import {{ tone, appRoute{search_import} }} from "@app/utils/portal"
 
 export default function setup(context: any) {{
 \tconst {{ router }} = context
@@ -103,24 +193,28 @@ export default function setup(context: any) {{
 \t\tconst to = appRoute(url)
 \t\tif (to) router.push(to)
 \t}}
-{body}
-\treturn {{ tone, open, showAlerts, alertsTab, sidebarCollapsed{returns} }}
+{search}{body}
+\treturn {{ tone, open, showAlerts, alertsTab, sidebarCollapsed{search_returns}{returns} }}
 }}
 '''
 
 
-def page_script(state=(), body="", returns=()):
+def page_script(state=(), body="", returns=(), search=True):
 	"""One page's setup() module: the frame's own bindings, plus whatever the page adds.
 
 	`state` is (name, initial value) pairs declared as refs, `body` is extra source
 	dropped in before the return, and `returns` names anything in `body` the blocks
-	need to reach.
+	need to reach. `search` is off for the pages that have no frame, and so no palette
+	for Ctrl+K to open.
 	"""
 	declarations = "".join(f'\tconst {name} = ref({initial})\n' for name, initial in state)
 	extra = ", ".join(name for name, _initial in state) + (", " if state and returns else "")
 
 	return SCRIPT_TEMPLATE.format(
 		state=declarations,
+		search_import=", useSearch" if search else "",
+		search="\tconst search = useSearch(open)\n" if search else "",
+		search_returns=", ...search" if search else "",
 		body=f"\n{body}\n" if body else "",
 		returns=f", {extra}{', '.join(returns)}" if (state or returns) else "",
 	)
@@ -326,9 +420,10 @@ def _merge_page(doc, route, blocks, script, fields, baseline):
 		fields["script"] = script
 
 	live_resources = _resource_rows(doc)
+	resources = fields.pop("resources")
 	doc.resources = []
 	doc.update(fields)
-	for row in merge.merge_resources(live_resources, fields["resources"]):
+	for row in merge.merge_resources(live_resources, resources):
 		doc.append("resources", row)
 	doc.save()
 

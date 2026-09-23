@@ -48,7 +48,7 @@
             "width": "28px"
            },
            "children": [],
-           "componentId": "application_name-0-sidebar1-div1-container1-imageview1",
+           "componentId": "applications-0-sidebar1-div1-container1-imageview1",
            "componentName": "ImageView",
            "componentProps": {
             "alt": "",
@@ -72,7 +72,7 @@
             "width": "28px"
            },
            "children": [],
-           "componentId": "application_name-0-sidebar1-div1-container1-textblock1",
+           "componentId": "applications-0-sidebar1-div1-container1-textblock1",
            "componentName": "TextBlock",
            "componentProps": {
             "fontSize": "text-base",
@@ -92,7 +92,7 @@
             "whiteSpace": "nowrap"
            },
            "children": [],
-           "componentId": "application_name-0-sidebar1-div1-container1-textblock2",
+           "componentId": "applications-0-sidebar1-div1-container1-textblock2",
            "componentName": "TextBlock",
            "componentProps": {
             "fontSize": "text-base",
@@ -102,7 +102,7 @@
            "visibilityCondition": "{{ typeof sidebarCollapsed === 'undefined' || !sidebarCollapsed }}"
           }
          ],
-         "componentId": "application_name-0-sidebar1-div1-container1",
+         "componentId": "applications-0-sidebar1-div1-container1",
          "componentName": "container",
          "originalElement": "div"
         },
@@ -115,7 +115,7 @@
          "children": [
           {
            "children": [],
-           "componentId": "application_name-0-sidebar1-div1-div1-sidebaritem1",
+           "componentId": "applications-0-sidebar1-div1-div1-sidebaritem1",
            "componentName": "SidebarItem",
            "componentProps": {
             "icon": "lucide-layout-dashboard",
@@ -125,7 +125,7 @@
           },
           {
            "children": [],
-           "componentId": "application_name-0-sidebar1-div1-div1-sidebaritem2",
+           "componentId": "applications-0-sidebar1-div1-div1-sidebaritem2",
            "componentName": "SidebarItem",
            "componentProps": {
             "icon": "lucide-wallet",
@@ -135,7 +135,7 @@
           },
           {
            "children": [],
-           "componentId": "application_name-0-sidebar1-div1-div1-sidebaritem3",
+           "componentId": "applications-0-sidebar1-div1-div1-sidebaritem3",
            "componentName": "SidebarItem",
            "componentProps": {
             "icon": "lucide-file-text",
@@ -145,7 +145,7 @@
           },
           {
            "children": [],
-           "componentId": "application_name-0-sidebar1-div1-div1-sidebaritem4",
+           "componentId": "applications-0-sidebar1-div1-div1-sidebaritem4",
            "componentName": "SidebarItem",
            "componentProps": {
             "icon": "lucide-receipt",
@@ -155,7 +155,7 @@
           },
           {
            "children": [],
-           "componentId": "application_name-0-sidebar1-div1-div1-sidebaritem5",
+           "componentId": "applications-0-sidebar1-div1-div1-sidebaritem5",
            "componentName": "SidebarItem",
            "componentProps": {
             "icon": "lucide-award",
@@ -165,7 +165,7 @@
           },
           {
            "children": [],
-           "componentId": "application_name-0-sidebar1-div1-div1-sidebaritem6",
+           "componentId": "applications-0-sidebar1-div1-div1-sidebaritem6",
            "componentName": "SidebarItem",
            "componentProps": {
             "icon": "lucide-user",
@@ -174,7 +174,7 @@
            }
           }
          ],
-         "componentId": "application_name-0-sidebar1-div1-div1",
+         "componentId": "applications-0-sidebar1-div1-div1",
          "componentName": "div"
         },
         {
@@ -195,7 +195,7 @@
               "fontWeight": "600"
              },
              "children": [],
-             "componentId": "application_name-0-sidebar1-div1-div2-container1-textblock1",
+             "componentId": "applications-0-sidebar1-div1-div2-container1-textblock1",
              "componentName": "TextBlock",
              "componentProps": {
               "fontSize": "text-sm",
@@ -208,7 +208,7 @@
               "color": "var(--ink-gray-6)"
              },
              "children": [],
-             "componentId": "application_name-0-sidebar1-div1-div2-container1-textblock2",
+             "componentId": "applications-0-sidebar1-div1-div2-container1-textblock2",
              "componentName": "TextBlock",
              "componentProps": {
               "fontSize": "text-p-xs",
@@ -217,17 +217,17 @@
              }
             }
            ],
-           "componentId": "application_name-0-sidebar1-div1-div2-container1",
+           "componentId": "applications-0-sidebar1-div1-div2-container1",
            "componentName": "container",
            "originalElement": "div",
            "visibilityCondition": "{{ typeof sidebarCollapsed === 'undefined' || !sidebarCollapsed }}"
           }
          ],
-         "componentId": "application_name-0-sidebar1-div1-div2",
+         "componentId": "applications-0-sidebar1-div1-div2",
          "componentName": "div"
         }
        ],
-       "componentId": "application_name-0-sidebar1-div1",
+       "componentId": "applications-0-sidebar1-div1",
        "componentName": "div"
       },
       {
@@ -256,7 +256,7 @@
          "script": "sidebarCollapsed.value = !sidebarCollapsed.value"
         }
        },
-       "componentId": "application_name-0-sidebar1-button1",
+       "componentId": "applications-0-sidebar1-button1",
        "componentName": "Button",
        "componentProps": {
         "icon": "{{ typeof sidebarCollapsed !== 'undefined' && sidebarCollapsed ? 'lucide-chevron-right' : 'lucide-chevron-left' }}",
@@ -269,7 +269,7 @@
      "classes": [
       "group"
      ],
-     "componentId": "application_name-0-sidebar1",
+     "componentId": "applications-0-sidebar1",
      "componentName": "Sidebar",
      "componentProps": {
       "collapsed": {
@@ -293,7 +293,7 @@
      "children": [
       {
        "children": [],
-       "componentId": "application_name-0-container1-borrower_header1",
+       "componentId": "applications-0-container1-borrower_header1",
        "componentName": "borrower_header",
        "componentProps": {
         "action_label": "",
@@ -356,7 +356,7 @@
                   "fontWeight": "600"
                  },
                  "children": [],
-                 "componentId": "application_name-0-container1-container1-container1-container1-container1-container1-textblock1",
+                 "componentId": "applications-0-container1-container1-container1-container1-container1-container1-textblock1",
                  "componentName": "TextBlock",
                  "componentProps": {
                   "fontSize": "text-2xl",
@@ -369,7 +369,7 @@
                   "flex": "1 1 auto"
                  },
                  "children": [],
-                 "componentId": "application_name-0-container1-container1-container1-container1-container1-container1-container1",
+                 "componentId": "applications-0-container1-container1-container1-container1-container1-container1-container1",
                  "componentName": "container",
                  "originalElement": "div"
                 },
@@ -378,7 +378,7 @@
                   "color": "var(--ink-gray-6)"
                  },
                  "children": [],
-                 "componentId": "application_name-0-container1-container1-container1-container1-container1-container1-textblock2",
+                 "componentId": "applications-0-container1-container1-container1-container1-container1-container1-textblock2",
                  "componentName": "TextBlock",
                  "componentProps": {
                   "fontSize": "text-p-xs",
@@ -387,7 +387,7 @@
                  }
                 }
                ],
-               "componentId": "application_name-0-container1-container1-container1-container1-container1-container1",
+               "componentId": "applications-0-container1-container1-container1-container1-container1-container1",
                "componentName": "container",
                "originalElement": "div"
               },
@@ -396,7 +396,7 @@
                 "color": "var(--ink-gray-6)"
                },
                "children": [],
-               "componentId": "application_name-0-container1-container1-container1-container1-container1-textblock1",
+               "componentId": "applications-0-container1-container1-container1-container1-container1-textblock1",
                "componentName": "TextBlock",
                "componentProps": {
                 "fontSize": "text-p-xs",
@@ -405,7 +405,7 @@
                }
               }
              ],
-             "componentId": "application_name-0-container1-container1-container1-container1-container1",
+             "componentId": "applications-0-container1-container1-container1-container1-container1",
              "componentName": "container",
              "originalElement": "div"
             },
@@ -446,7 +446,7 @@
                     "width": "32px"
                    },
                    "children": [],
-                   "componentId": "application_name-0-container1-container1-container1-container1-repeater1-container1-container1-html1",
+                   "componentId": "applications-0-container1-container1-container1-container1-repeater1-container1-container1-html1",
                    "componentName": "HTML",
                    "componentProps": {
                     "html": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M20 6 9 17l-5-5\"/></svg>"
@@ -478,12 +478,12 @@
                       "width": "10px"
                      },
                      "children": [],
-                     "componentId": "application_name-0-container1-container1-container1-container1-repeater1-container1-container1-container1-container1",
+                     "componentId": "applications-0-container1-container1-container1-container1-repeater1-container1-container1-container1-container1",
                      "componentName": "container",
                      "originalElement": "div"
                     }
                    ],
-                   "componentId": "application_name-0-container1-container1-container1-container1-repeater1-container1-container1-container1",
+                   "componentId": "applications-0-container1-container1-container1-container1-repeater1-container1-container1-container1",
                    "componentName": "container",
                    "mobileStyles": {
                     "height": "24px",
@@ -505,7 +505,7 @@
                     "width": "32px"
                    },
                    "children": [],
-                   "componentId": "application_name-0-container1-container1-container1-container1-repeater1-container1-container1-container2",
+                   "componentId": "applications-0-container1-container1-container1-container1-repeater1-container1-container1-container2",
                    "componentName": "container",
                    "mobileStyles": {
                     "height": "24px",
@@ -524,7 +524,7 @@
                     "whiteSpace": "nowrap"
                    },
                    "children": [],
-                   "componentId": "application_name-0-container1-container1-container1-container1-repeater1-container1-container1-textblock1",
+                   "componentId": "applications-0-container1-container1-container1-container1-repeater1-container1-container1-textblock1",
                    "componentName": "TextBlock",
                    "componentProps": {
                     "fontSize": "text-base",
@@ -546,7 +546,7 @@
                     "whiteSpace": "nowrap"
                    },
                    "children": [],
-                   "componentId": "application_name-0-container1-container1-container1-container1-repeater1-container1-container1-textblock2",
+                   "componentId": "applications-0-container1-container1-container1-container1-repeater1-container1-container1-textblock2",
                    "componentName": "TextBlock",
                    "componentProps": {
                     "fontSize": "text-base",
@@ -559,7 +559,7 @@
                    "visibilityCondition": "{{ dataItem.code === 'pending' }}"
                   }
                  ],
-                 "componentId": "application_name-0-container1-container1-container1-container1-repeater1-container1-container1",
+                 "componentId": "applications-0-container1-container1-container1-container1-repeater1-container1-container1",
                  "componentName": "container",
                  "originalElement": "div"
                 },
@@ -571,7 +571,7 @@
                   "height": "3px"
                  },
                  "children": [],
-                 "componentId": "application_name-0-container1-container1-container1-container1-repeater1-container1-container2",
+                 "componentId": "applications-0-container1-container1-container1-container1-repeater1-container1-container2",
                  "componentName": "container",
                  "originalElement": "div",
                  "visibilityCondition": "{{ dataItem.line === 'ok' }}"
@@ -584,18 +584,18 @@
                   "height": "3px"
                  },
                  "children": [],
-                 "componentId": "application_name-0-container1-container1-container1-container1-repeater1-container1-container3",
+                 "componentId": "applications-0-container1-container1-container1-container1-repeater1-container1-container3",
                  "componentName": "container",
                  "originalElement": "div",
                  "visibilityCondition": "{{ dataItem.line === 'plain' }}"
                 }
                ],
-               "componentId": "application_name-0-container1-container1-container1-container1-repeater1-container1",
+               "componentId": "applications-0-container1-container1-container1-container1-repeater1-container1",
                "componentName": "container",
                "originalElement": "div"
               }
              ],
-             "componentId": "application_name-0-container1-container1-container1-container1-repeater1",
+             "componentId": "applications-0-container1-container1-container1-container1-repeater1",
              "componentName": "Repeater",
              "componentProps": {
               "data": "{{ application.data.steps }}",
@@ -611,7 +611,7 @@
               "color": "var(--ink-gray-6)"
              },
              "children": [],
-             "componentId": "application_name-0-container1-container1-container1-container1-textblock1",
+             "componentId": "applications-0-container1-container1-container1-container1-textblock1",
              "componentName": "TextBlock",
              "componentProps": {
               "fontSize": "text-p-xs",
@@ -624,7 +624,7 @@
               "color": "var(--ink-gray-6)"
              },
              "children": [],
-             "componentId": "application_name-0-container1-container1-container1-container1-textblock2",
+             "componentId": "applications-0-container1-container1-container1-container1-textblock2",
              "componentName": "TextBlock",
              "componentProps": {
               "fontSize": "text-p-xs",
@@ -633,12 +633,12 @@
              }
             }
            ],
-           "componentId": "application_name-0-container1-container1-container1-container1",
+           "componentId": "applications-0-container1-container1-container1-container1",
            "componentName": "container",
            "originalElement": "div"
           }
          ],
-         "componentId": "application_name-0-container1-container1-container1",
+         "componentId": "applications-0-container1-container1-container1",
          "componentName": "container",
          "originalElement": "div"
         },
@@ -667,7 +667,7 @@
               "fontWeight": "600"
              },
              "children": [],
-             "componentId": "application_name-0-container1-container1-container2-container1-textblock1",
+             "componentId": "applications-0-container1-container1-container2-container1-textblock1",
              "componentName": "TextBlock",
              "componentProps": {
               "fontSize": "text-lg",
@@ -680,7 +680,7 @@
               "color": "var(--ink-gray-6)"
              },
              "children": [],
-             "componentId": "application_name-0-container1-container1-container2-container1-textblock2",
+             "componentId": "applications-0-container1-container1-container2-container1-textblock2",
              "componentName": "TextBlock",
              "componentProps": {
               "fontSize": "text-p-xs",
@@ -689,7 +689,7 @@
              }
             }
            ],
-           "componentId": "application_name-0-container1-container1-container2-container1",
+           "componentId": "applications-0-container1-container1-container2-container1",
            "componentName": "container",
            "originalElement": "div"
           },
@@ -726,7 +726,7 @@
                   "whiteSpace": "nowrap"
                  },
                  "children": [],
-                 "componentId": "application_name-0-container1-container1-container2-container2-container1-container1-textblock1",
+                 "componentId": "applications-0-container1-container1-container2-container2-container1-container1-textblock1",
                  "componentName": "TextBlock",
                  "componentProps": {
                   "fontSize": "text-base",
@@ -741,7 +741,7 @@
                   "whiteSpace": "nowrap"
                  },
                  "children": [],
-                 "componentId": "application_name-0-container1-container1-container2-container2-container1-container1-textblock2",
+                 "componentId": "applications-0-container1-container1-container2-container2-container1-container1-textblock2",
                  "componentName": "TextBlock",
                  "componentProps": {
                   "fontSize": "text-base",
@@ -761,7 +761,7 @@
                   "right": "0px"
                  },
                  "children": [],
-                 "componentId": "application_name-0-container1-container1-container2-container2-container1-container1-container1",
+                 "componentId": "applications-0-container1-container1-container2-container2-container1-container1-container1",
                  "componentName": "container",
                  "originalElement": "div",
                  "visibilityCondition": "{{ previewTab === 'terms' }}"
@@ -774,7 +774,7 @@
                  "script": "previewTab.value = 'terms'"
                 }
                },
-               "componentId": "application_name-0-container1-container1-container2-container2-container1-container1",
+               "componentId": "applications-0-container1-container1-container2-container2-container1-container1",
                "componentName": "container",
                "originalElement": "div"
               },
@@ -792,7 +792,7 @@
                   "whiteSpace": "nowrap"
                  },
                  "children": [],
-                 "componentId": "application_name-0-container1-container1-container2-container2-container1-container2-textblock1",
+                 "componentId": "applications-0-container1-container1-container2-container2-container1-container2-textblock1",
                  "componentName": "TextBlock",
                  "componentProps": {
                   "fontSize": "text-base",
@@ -807,7 +807,7 @@
                   "whiteSpace": "nowrap"
                  },
                  "children": [],
-                 "componentId": "application_name-0-container1-container1-container2-container2-container1-container2-textblock2",
+                 "componentId": "applications-0-container1-container1-container2-container2-container1-container2-textblock2",
                  "componentName": "TextBlock",
                  "componentProps": {
                   "fontSize": "text-base",
@@ -827,7 +827,7 @@
                   "right": "0px"
                  },
                  "children": [],
-                 "componentId": "application_name-0-container1-container1-container2-container2-container1-container2-container1",
+                 "componentId": "applications-0-container1-container1-container2-container2-container1-container2-container1",
                  "componentName": "container",
                  "originalElement": "div",
                  "visibilityCondition": "{{ previewTab === 'applicant' }}"
@@ -840,7 +840,7 @@
                  "script": "previewTab.value = 'applicant'"
                 }
                },
-               "componentId": "application_name-0-container1-container1-container2-container2-container1-container2",
+               "componentId": "applications-0-container1-container1-container2-container2-container1-container2",
                "componentName": "container",
                "originalElement": "div"
               },
@@ -858,7 +858,7 @@
                   "whiteSpace": "nowrap"
                  },
                  "children": [],
-                 "componentId": "application_name-0-container1-container1-container2-container2-container1-container3-textblock1",
+                 "componentId": "applications-0-container1-container1-container2-container2-container1-container3-textblock1",
                  "componentName": "TextBlock",
                  "componentProps": {
                   "fontSize": "text-base",
@@ -873,7 +873,7 @@
                   "whiteSpace": "nowrap"
                  },
                  "children": [],
-                 "componentId": "application_name-0-container1-container1-container2-container2-container1-container3-textblock2",
+                 "componentId": "applications-0-container1-container1-container2-container2-container1-container3-textblock2",
                  "componentName": "TextBlock",
                  "componentProps": {
                   "fontSize": "text-base",
@@ -893,7 +893,7 @@
                   "right": "0px"
                  },
                  "children": [],
-                 "componentId": "application_name-0-container1-container1-container2-container2-container1-container3-container1",
+                 "componentId": "applications-0-container1-container1-container2-container2-container1-container3-container1",
                  "componentName": "container",
                  "originalElement": "div",
                  "visibilityCondition": "{{ previewTab === 'co_applicants' }}"
@@ -906,7 +906,7 @@
                  "script": "previewTab.value = 'co_applicants'"
                 }
                },
-               "componentId": "application_name-0-container1-container1-container2-container2-container1-container3",
+               "componentId": "applications-0-container1-container1-container2-container2-container1-container3",
                "componentName": "container",
                "originalElement": "div"
               },
@@ -924,7 +924,7 @@
                   "whiteSpace": "nowrap"
                  },
                  "children": [],
-                 "componentId": "application_name-0-container1-container1-container2-container2-container1-container4-textblock1",
+                 "componentId": "applications-0-container1-container1-container2-container2-container1-container4-textblock1",
                  "componentName": "TextBlock",
                  "componentProps": {
                   "fontSize": "text-base",
@@ -939,7 +939,7 @@
                   "whiteSpace": "nowrap"
                  },
                  "children": [],
-                 "componentId": "application_name-0-container1-container1-container2-container2-container1-container4-textblock2",
+                 "componentId": "applications-0-container1-container1-container2-container2-container1-container4-textblock2",
                  "componentName": "TextBlock",
                  "componentProps": {
                   "fontSize": "text-base",
@@ -959,7 +959,7 @@
                   "right": "0px"
                  },
                  "children": [],
-                 "componentId": "application_name-0-container1-container1-container2-container2-container1-container4-container1",
+                 "componentId": "applications-0-container1-container1-container2-container2-container1-container4-container1",
                  "componentName": "container",
                  "originalElement": "div",
                  "visibilityCondition": "{{ previewTab === 'documents' }}"
@@ -972,12 +972,12 @@
                  "script": "previewTab.value = 'documents'"
                 }
                },
-               "componentId": "application_name-0-container1-container1-container2-container2-container1-container4",
+               "componentId": "applications-0-container1-container1-container2-container2-container1-container4",
                "componentName": "container",
                "originalElement": "div"
               }
              ],
-             "componentId": "application_name-0-container1-container1-container2-container2-container1",
+             "componentId": "applications-0-container1-container1-container2-container2-container1",
              "componentName": "container",
              "originalElement": "div"
             },
@@ -1013,7 +1013,7 @@
                       "color": "var(--ink-gray-5)"
                      },
                      "children": [],
-                     "componentId": "application_name-0-container1-container1-container2-container2-container2-container1-repeater1-container1-textblock1",
+                     "componentId": "applications-0-container1-container1-container2-container2-container2-container1-repeater1-container1-textblock1",
                      "componentName": "TextBlock",
                      "componentProps": {
                       "fontSize": "text-sm",
@@ -1026,7 +1026,7 @@
                       "color": "var(--ink-gray-9)"
                      },
                      "children": [],
-                     "componentId": "application_name-0-container1-container1-container2-container2-container2-container1-repeater1-container1-textblock2",
+                     "componentId": "applications-0-container1-container1-container2-container2-container2-container1-repeater1-container1-textblock2",
                      "componentName": "TextBlock",
                      "componentProps": {
                       "fontSize": "text-base",
@@ -1035,12 +1035,12 @@
                      }
                     }
                    ],
-                   "componentId": "application_name-0-container1-container1-container2-container2-container2-container1-repeater1-container1",
+                   "componentId": "applications-0-container1-container1-container2-container2-container2-container1-repeater1-container1",
                    "componentName": "container",
                    "originalElement": "div"
                   }
                  ],
-                 "componentId": "application_name-0-container1-container1-container2-container2-container2-container1-repeater1",
+                 "componentId": "applications-0-container1-container1-container2-container2-container2-container1-repeater1",
                  "componentName": "Repeater",
                  "componentProps": {
                   "data": "{{ application.data.terms }}",
@@ -1055,12 +1055,12 @@
                  }
                 }
                ],
-               "componentId": "application_name-0-container1-container1-container2-container2-container2-container1",
+               "componentId": "applications-0-container1-container1-container2-container2-container2-container1",
                "componentName": "container",
                "originalElement": "div"
               }
              ],
-             "componentId": "application_name-0-container1-container1-container2-container2-container2",
+             "componentId": "applications-0-container1-container1-container2-container2-container2",
              "componentName": "container",
              "originalElement": "div",
              "visibilityCondition": "{{ previewTab === 'terms' }}"
@@ -1097,7 +1097,7 @@
                       "color": "var(--ink-gray-5)"
                      },
                      "children": [],
-                     "componentId": "application_name-0-container1-container1-container2-container2-container3-container1-repeater1-container1-textblock1",
+                     "componentId": "applications-0-container1-container1-container2-container2-container3-container1-repeater1-container1-textblock1",
                      "componentName": "TextBlock",
                      "componentProps": {
                       "fontSize": "text-sm",
@@ -1110,7 +1110,7 @@
                       "color": "var(--ink-gray-9)"
                      },
                      "children": [],
-                     "componentId": "application_name-0-container1-container1-container2-container2-container3-container1-repeater1-container1-textblock2",
+                     "componentId": "applications-0-container1-container1-container2-container2-container3-container1-repeater1-container1-textblock2",
                      "componentName": "TextBlock",
                      "componentProps": {
                       "fontSize": "text-base",
@@ -1119,12 +1119,12 @@
                      }
                     }
                    ],
-                   "componentId": "application_name-0-container1-container1-container2-container2-container3-container1-repeater1-container1",
+                   "componentId": "applications-0-container1-container1-container2-container2-container3-container1-repeater1-container1",
                    "componentName": "container",
                    "originalElement": "div"
                   }
                  ],
-                 "componentId": "application_name-0-container1-container1-container2-container2-container3-container1-repeater1",
+                 "componentId": "applications-0-container1-container1-container2-container2-container3-container1-repeater1",
                  "componentName": "Repeater",
                  "componentProps": {
                   "data": "{{ application.data.applicant }}",
@@ -1139,12 +1139,12 @@
                  }
                 }
                ],
-               "componentId": "application_name-0-container1-container1-container2-container2-container3-container1",
+               "componentId": "applications-0-container1-container1-container2-container2-container3-container1",
                "componentName": "container",
                "originalElement": "div"
               }
              ],
-             "componentId": "application_name-0-container1-container1-container2-container2-container3",
+             "componentId": "applications-0-container1-container1-container2-container2-container3",
              "componentName": "container",
              "originalElement": "div",
              "visibilityCondition": "{{ previewTab === 'applicant' }}"
@@ -1181,7 +1181,7 @@
                       "color": "var(--ink-gray-5)"
                      },
                      "children": [],
-                     "componentId": "application_name-0-container1-container1-container2-container2-container4-container1-repeater1-container1-textblock1",
+                     "componentId": "applications-0-container1-container1-container2-container2-container4-container1-repeater1-container1-textblock1",
                      "componentName": "TextBlock",
                      "componentProps": {
                       "fontSize": "text-sm",
@@ -1194,7 +1194,7 @@
                       "color": "var(--ink-gray-9)"
                      },
                      "children": [],
-                     "componentId": "application_name-0-container1-container1-container2-container2-container4-container1-repeater1-container1-textblock2",
+                     "componentId": "applications-0-container1-container1-container2-container2-container4-container1-repeater1-container1-textblock2",
                      "componentName": "TextBlock",
                      "componentProps": {
                       "fontSize": "text-base",
@@ -1207,7 +1207,7 @@
                       "color": "var(--ink-gray-6)"
                      },
                      "children": [],
-                     "componentId": "application_name-0-container1-container1-container2-container2-container4-container1-repeater1-container1-textblock3",
+                     "componentId": "applications-0-container1-container1-container2-container2-container4-container1-repeater1-container1-textblock3",
                      "componentName": "TextBlock",
                      "componentProps": {
                       "fontSize": "text-p-xs",
@@ -1217,12 +1217,12 @@
                      "visibilityCondition": "{{ dataItem.detail }}"
                     }
                    ],
-                   "componentId": "application_name-0-container1-container1-container2-container2-container4-container1-repeater1-container1",
+                   "componentId": "applications-0-container1-container1-container2-container2-container4-container1-repeater1-container1",
                    "componentName": "container",
                    "originalElement": "div"
                   }
                  ],
-                 "componentId": "application_name-0-container1-container1-container2-container2-container4-container1-repeater1",
+                 "componentId": "applications-0-container1-container1-container2-container2-container4-container1-repeater1",
                  "componentName": "Repeater",
                  "componentProps": {
                   "data": "{{ application.data.co_applicants }}",
@@ -1237,12 +1237,12 @@
                  }
                 }
                ],
-               "componentId": "application_name-0-container1-container1-container2-container2-container4-container1",
+               "componentId": "applications-0-container1-container1-container2-container2-container4-container1",
                "componentName": "container",
                "originalElement": "div"
               }
              ],
-             "componentId": "application_name-0-container1-container1-container2-container2-container4",
+             "componentId": "applications-0-container1-container1-container2-container2-container4",
              "componentName": "container",
              "originalElement": "div",
              "visibilityCondition": "{{ previewTab === 'co_applicants' }}"
@@ -1279,7 +1279,7 @@
                       "color": "var(--ink-gray-5)"
                      },
                      "children": [],
-                     "componentId": "application_name-0-container1-container1-container2-container2-container5-container1-repeater1-container1-textblock1",
+                     "componentId": "applications-0-container1-container1-container2-container2-container5-container1-repeater1-container1-textblock1",
                      "componentName": "TextBlock",
                      "componentProps": {
                       "fontSize": "text-sm",
@@ -1292,7 +1292,7 @@
                       "color": "var(--ink-gray-9)"
                      },
                      "children": [],
-                     "componentId": "application_name-0-container1-container1-container2-container2-container5-container1-repeater1-container1-textblock2",
+                     "componentId": "applications-0-container1-container1-container2-container2-container5-container1-repeater1-container1-textblock2",
                      "componentName": "TextBlock",
                      "componentProps": {
                       "fontSize": "text-base",
@@ -1305,7 +1305,7 @@
                       "color": "var(--ink-gray-6)"
                      },
                      "children": [],
-                     "componentId": "application_name-0-container1-container1-container2-container2-container5-container1-repeater1-container1-textblock3",
+                     "componentId": "applications-0-container1-container1-container2-container2-container5-container1-repeater1-container1-textblock3",
                      "componentName": "TextBlock",
                      "componentProps": {
                       "fontSize": "text-p-xs",
@@ -1315,12 +1315,12 @@
                      "visibilityCondition": "{{ dataItem.detail }}"
                     }
                    ],
-                   "componentId": "application_name-0-container1-container1-container2-container2-container5-container1-repeater1-container1",
+                   "componentId": "applications-0-container1-container1-container2-container2-container5-container1-repeater1-container1",
                    "componentName": "container",
                    "originalElement": "div"
                   }
                  ],
-                 "componentId": "application_name-0-container1-container1-container2-container2-container5-container1-repeater1",
+                 "componentId": "applications-0-container1-container1-container2-container2-container5-container1-repeater1",
                  "componentName": "Repeater",
                  "componentProps": {
                   "data": "{{ application.data.documents }}",
@@ -1335,34 +1335,34 @@
                  }
                 }
                ],
-               "componentId": "application_name-0-container1-container1-container2-container2-container5-container1",
+               "componentId": "applications-0-container1-container1-container2-container2-container5-container1",
                "componentName": "container",
                "originalElement": "div"
               }
              ],
-             "componentId": "application_name-0-container1-container1-container2-container2-container5",
+             "componentId": "applications-0-container1-container1-container2-container2-container5",
              "componentName": "container",
              "originalElement": "div",
              "visibilityCondition": "{{ previewTab === 'documents' }}"
             }
            ],
-           "componentId": "application_name-0-container1-container1-container2-container2",
+           "componentId": "applications-0-container1-container1-container2-container2",
            "componentName": "container",
            "originalElement": "div"
           }
          ],
-         "componentId": "application_name-0-container1-container1-container2",
+         "componentId": "applications-0-container1-container1-container2",
          "componentName": "container",
          "originalElement": "div"
         }
        ],
-       "componentId": "application_name-0-container1-container1",
+       "componentId": "applications-0-container1-container1",
        "componentName": "container",
        "originalElement": "div"
       },
       {
        "children": [],
-       "componentId": "application_name-0-container1-borrower_footer1",
+       "componentId": "applications-0-container1-borrower_footer1",
        "componentName": "borrower_footer",
        "componentProps": {
         "links": "{{ application.data.footer_links }}",
@@ -1372,44 +1372,43 @@
       },
       {
        "children": [],
-       "componentId": "application_name-0-container1-borrower_alerts1",
+       "componentId": "applications-0-container1-borrower_alerts1",
        "componentName": "borrower_alerts",
        "isStudioComponent": true
       },
       {
        "children": [],
-       "componentId": "application_name-0-container1-borrower_search1",
+       "componentId": "applications-0-container1-borrower_search1",
        "componentName": "borrower_search",
        "isStudioComponent": true
       }
      ],
-     "componentId": "application_name-0-container1",
+     "componentId": "applications-0-container1",
      "componentName": "container",
      "originalElement": "div"
     }
    ],
-   "componentId": "application_name-0",
+   "componentId": "applications-0",
    "componentName": "div",
    "originalElement": "body"
   }
  ],
- "creation": "2026-09-24 00:54:36.903104",
+ "creation": "2026-09-24 00:54:37.226591",
  "doctype": "Studio Page",
  "frappe_app": "lending",
  "is_standard": 1,
- "modified": "2026-09-24 02:22:04.655763",
+ "modified": "2026-09-24 02:22:04.618047",
  "modified_by": "Administrator",
- "name": "application",
+ "name": "loan_application",
  "owner": "Administrator",
- "page_name": "page-2bc511cb",
- "page_title": "Application",
+ "page_name": "page-c4a7bab6",
+ "page_title": "Loan application",
  "published": 1,
  "resources": [
   {
    "__unsaved": 1,
    "auto": 1,
    "method": "GET",
-   "params": "{\"name\": \"{{ route.params.name }}\"}",
    "resource_name": "application",
    "resource_type": "API Resource",
    "url": "lending.portal.applications.get_application_detail"
@@ -1422,7 +1421,7 @@
    "url": "lending.portal.notifications.get_notifications"
   }
  ],
- "route": "/application/:name",
+ "route": "/applications",
  "studio_app": "borrower-portal",
  "variables": []
 }

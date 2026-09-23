@@ -74,6 +74,25 @@ class TestStudioMerge(IntegrationTestCase):
 
 		self.assertEqual(merged[0]["children"], [])
 
+	def test_a_page_studio_has_only_normalised_is_not_hand_edited(self):
+		"""Studio saves an untouched block with None for {} and a `classes: []` of its own.
+
+		Read as an edit, that kept every block the generator dropped beside the block that
+		replaced it, and stopped a new `classes` from reaching a block nobody had touched.
+		"""
+		base = identify([self.with_slot(), self.generated()], "/overview")
+		live = frappe.parse_json(frappe.as_json(base))
+		for node in self.nodes(live):
+			node.update(componentProps=node["componentProps"] or None, componentEvents=None, classes=[])
+			for name, slot in node["componentSlots"].items():
+				slot.update(parentBlockId=node["componentId"], slotId=f"{node['componentId']}:{name}")
+
+		new = identify([self.with_slot(), block("container", classes=["hover:border-outline-gray-3"])], "/overview")
+		merged = merge_blocks(base, live, new)
+
+		self.assertEqual(self.ids(merged), self.ids(new))
+		self.assertEqual(merged[1]["classes"], ["hover:border-outline-gray-3"])
+
 	def test_a_hand_edited_style_survives_a_rebuild(self):
 		base = identify([self.generated()], "/overview")
 		live = frappe.parse_json(frappe.as_json(base))
@@ -113,6 +132,17 @@ class TestStudioMerge(IntegrationTestCase):
 		self.assertEqual(
 			merged[0]["componentSlots"]["default"]["slotContent"][0]["componentProps"]["label"], "Kept"
 		)
+
+	def test_a_slot_the_generator_dropped_goes_unless_it_was_edited(self):
+		base = identify([self.with_slot()], "/overview")
+		new = identify([block("Card")], "/overview")
+
+		untouched = merge_blocks(base, frappe.parse_json(frappe.as_json(base)), new)
+		self.assertNotIn("default", untouched[0].get("componentSlots") or {})
+
+		edited = frappe.parse_json(frappe.as_json(base))
+		edited[0]["componentSlots"]["default"]["slotContent"][0]["componentProps"]["label"] = "Kept"
+		self.assertIn("default", merge_blocks(base, edited, new)[0]["componentSlots"])
 
 	def test_a_page_that_matches_its_baseline_takes_the_rebuild_whole(self):
 		"""What _replace_page buys, and why it overwrites once to buy it.
@@ -160,6 +190,13 @@ class TestStudioMerge(IntegrationTestCase):
 			"Card",
 			slots={"default": {"slotName": "default", "slotContent": [block("TextBlock", {"label": "Hi"})]}},
 		)
+
+	def nodes(self, blocks):
+		for node in blocks:
+			yield node
+			yield from self.nodes(node.get("children") or [])
+			for slot in (node.get("componentSlots") or {}).values():
+				yield from self.nodes(slot.get("slotContent") or [])
 
 	def ids(self, blocks):
 		found = []

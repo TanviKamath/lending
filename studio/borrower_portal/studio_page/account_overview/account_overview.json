@@ -48,7 +48,6 @@
             "width": "28px"
            },
            "children": [],
-           "classes": [],
            "componentId": "overview-0-sidebar1-div1-container1-imageview1",
            "componentName": "ImageView",
            "componentProps": {
@@ -73,7 +72,6 @@
             "width": "28px"
            },
            "children": [],
-           "classes": [],
            "componentId": "overview-0-sidebar1-div1-container1-textblock1",
            "componentName": "TextBlock",
            "componentProps": {
@@ -94,7 +92,6 @@
             "whiteSpace": "nowrap"
            },
            "children": [],
-           "classes": [],
            "componentId": "overview-0-sidebar1-div1-container1-textblock2",
            "componentName": "TextBlock",
            "componentProps": {
@@ -105,7 +102,6 @@
            "visibilityCondition": "{{ typeof sidebarCollapsed === 'undefined' || !sidebarCollapsed }}"
           }
          ],
-         "classes": [],
          "componentId": "overview-0-sidebar1-div1-container1",
          "componentName": "container",
          "originalElement": "div"
@@ -119,7 +115,6 @@
          "children": [
           {
            "children": [],
-           "classes": [],
            "componentId": "overview-0-sidebar1-div1-div1-sidebaritem1",
            "componentName": "SidebarItem",
            "componentProps": {
@@ -130,41 +125,27 @@
           },
           {
            "children": [],
-           "classes": [],
            "componentId": "overview-0-sidebar1-div1-div1-sidebaritem2",
            "componentName": "SidebarItem",
            "componentProps": {
             "icon": "lucide-wallet",
-            "label": "Loan accounts",
+            "label": "Loan account",
             "to": "/loans"
            }
           },
           {
            "children": [],
-           "classes": [],
            "componentId": "overview-0-sidebar1-div1-div1-sidebaritem3",
            "componentName": "SidebarItem",
            "componentProps": {
             "icon": "lucide-file-text",
-            "label": "Applications",
+            "label": "Application",
             "to": "/applications"
            }
           },
           {
            "children": [],
-           "classes": [],
            "componentId": "overview-0-sidebar1-div1-div1-sidebaritem4",
-           "componentName": "SidebarItem",
-           "componentProps": {
-            "icon": "lucide-paperclip",
-            "label": "Documents",
-            "to": "/documents"
-           }
-          },
-          {
-           "children": [],
-           "classes": [],
-           "componentId": "overview-0-sidebar1-div1-div1-sidebaritem5",
            "componentName": "SidebarItem",
            "componentProps": {
             "icon": "lucide-receipt",
@@ -174,8 +155,7 @@
           },
           {
            "children": [],
-           "classes": [],
-           "componentId": "overview-0-sidebar1-div1-div1-sidebaritem6",
+           "componentId": "overview-0-sidebar1-div1-div1-sidebaritem5",
            "componentName": "SidebarItem",
            "componentProps": {
             "icon": "lucide-award",
@@ -185,28 +165,15 @@
           },
           {
            "children": [],
-           "classes": [],
-           "componentId": "overview-0-sidebar1-div1-div1-sidebaritem7",
+           "componentId": "overview-0-sidebar1-div1-div1-sidebaritem6",
            "componentName": "SidebarItem",
            "componentProps": {
             "icon": "lucide-user",
             "label": "Personal details",
             "to": "/profile"
            }
-          },
-          {
-           "children": [],
-           "classes": [],
-           "componentId": "overview-0-sidebar1-div1-div1-sidebaritem8",
-           "componentName": "SidebarItem",
-           "componentProps": {
-            "icon": "lucide-search",
-            "label": "Search",
-            "to": "/search"
-           }
           }
          ],
-         "classes": [],
          "componentId": "overview-0-sidebar1-div1-div1",
          "componentName": "div"
         },
@@ -228,7 +195,6 @@
               "fontWeight": "600"
              },
              "children": [],
-             "classes": [],
              "componentId": "overview-0-sidebar1-div1-div2-container1-textblock1",
              "componentName": "TextBlock",
              "componentProps": {
@@ -242,7 +208,6 @@
               "color": "var(--ink-gray-6)"
              },
              "children": [],
-             "classes": [],
              "componentId": "overview-0-sidebar1-div1-div2-container1-textblock2",
              "componentName": "TextBlock",
              "componentProps": {
@@ -252,19 +217,16 @@
              }
             }
            ],
-           "classes": [],
            "componentId": "overview-0-sidebar1-div1-div2-container1",
            "componentName": "container",
            "originalElement": "div",
            "visibilityCondition": "{{ typeof sidebarCollapsed === 'undefined' || !sidebarCollapsed }}"
           }
          ],
-         "classes": [],
          "componentId": "overview-0-sidebar1-div1-div2",
          "componentName": "div"
         }
        ],
-       "classes": [],
        "componentId": "overview-0-sidebar1-div1",
        "componentName": "div"
       },
@@ -331,7 +293,6 @@
      "children": [
       {
        "children": [],
-       "classes": [],
        "componentId": "overview-0-container1-borrower_header1",
        "componentName": "borrower_header",
        "componentProps": {
@@ -392,7 +353,6 @@
               "width": "40px"
              },
              "children": [],
-             "classes": [],
              "componentId": "overview-0-container1-container1-container1-container1-html1",
              "componentName": "HTML",
              "componentProps": {
@@ -413,7 +373,6 @@
               "width": "40px"
              },
              "children": [],
-             "classes": [],
              "componentId": "overview-0-container1-container1-container1-container1-html2",
              "componentName": "HTML",
              "componentProps": {
@@ -434,7 +393,6 @@
               "width": "40px"
              },
              "children": [],
-             "classes": [],
              "componentId": "overview-0-container1-container1-container1-container1-html3",
              "componentName": "HTML",
              "componentProps": {
@@ -455,7 +413,6 @@
               "width": "40px"
              },
              "children": [],
-             "classes": [],
              "componentId": "overview-0-container1-container1-container1-container1-html4",
              "componentName": "HTML",
              "componentProps": {
@@ -485,7 +442,6 @@
                   "color": "var(--ink-gray-6)"
                  },
                  "children": [],
-                 "classes": [],
                  "componentId": "overview-0-container1-container1-container1-container1-container1-container1-textblock1",
                  "componentName": "TextBlock",
                  "componentProps": {
@@ -496,7 +452,6 @@
                 },
                 {
                  "children": [],
-                 "classes": [],
                  "componentId": "overview-0-container1-container1-container1-container1-container1-container1-badge1",
                  "componentName": "Badge",
                  "componentProps": {
@@ -512,7 +467,6 @@
                   "flex": "1 1 auto"
                  },
                  "children": [],
-                 "classes": [],
                  "componentId": "overview-0-container1-container1-container1-container1-container1-container1-container1",
                  "componentName": "container",
                  "originalElement": "div"
@@ -525,7 +479,6 @@
                   "flex": "0 0 auto"
                  },
                  "children": [],
-                 "classes": [],
                  "componentId": "overview-0-container1-container1-container1-container1-container1-container1-html1",
                  "componentName": "HTML",
                  "componentProps": {
@@ -534,7 +487,6 @@
                  "visibilityCondition": "{{ overview.data.application_url }}"
                 }
                ],
-               "classes": [],
                "componentId": "overview-0-container1-container1-container1-container1-container1-container1",
                "componentName": "container",
                "originalElement": "div"
@@ -545,7 +497,6 @@
                 "padding": "2px 0"
                },
                "children": [],
-               "classes": [],
                "componentId": "overview-0-container1-container1-container1-container1-container1-textblock1",
                "componentName": "TextBlock",
                "componentProps": {
@@ -559,7 +510,6 @@
                 "color": "var(--ink-gray-6)"
                },
                "children": [],
-               "classes": [],
                "componentId": "overview-0-container1-container1-container1-container1-container1-textblock2",
                "componentName": "TextBlock",
                "componentProps": {
@@ -585,7 +535,6 @@
                   "flex": "0 0 auto"
                  },
                  "children": [],
-                 "classes": [],
                  "componentId": "overview-0-container1-container1-container1-container1-container1-container2-html1",
                  "componentName": "HTML",
                  "componentProps": {
@@ -597,7 +546,6 @@
                   "color": "var(--ink-gray-6)"
                  },
                  "children": [],
-                 "classes": [],
                  "componentId": "overview-0-container1-container1-container1-container1-container1-container2-textblock1",
                  "componentName": "TextBlock",
                  "componentProps": {
@@ -607,7 +555,6 @@
                  }
                 }
                ],
-               "classes": [],
                "componentId": "overview-0-container1-container1-container1-container1-container1-container2",
                "componentName": "container",
                "originalElement": "div",
@@ -618,7 +565,6 @@
                 "color": "var(--ink-gray-6)"
                },
                "children": [],
-               "classes": [],
                "componentId": "overview-0-container1-container1-container1-container1-container1-textblock3",
                "componentName": "TextBlock",
                "componentProps": {
@@ -633,7 +579,6 @@
                 "color": "var(--ink-gray-6)"
                },
                "children": [],
-               "classes": [],
                "componentId": "overview-0-container1-container1-container1-container1-container1-textblock4",
                "componentName": "TextBlock",
                "componentProps": {
@@ -644,7 +589,6 @@
                "visibilityCondition": "{{ overview.data.application_more }}"
               }
              ],
-             "classes": [],
              "componentId": "overview-0-container1-container1-container1-container1-container1",
              "componentName": "container",
              "originalElement": "div"
@@ -694,7 +638,6 @@
               "width": "40px"
              },
              "children": [],
-             "classes": [],
              "componentId": "overview-0-container1-container1-container1-container2-html1",
              "componentName": "HTML",
              "componentProps": {
@@ -723,7 +666,6 @@
                   "color": "var(--ink-gray-6)"
                  },
                  "children": [],
-                 "classes": [],
                  "componentId": "overview-0-container1-container1-container1-container2-container1-container1-textblock1",
                  "componentName": "TextBlock",
                  "componentProps": {
@@ -734,7 +676,6 @@
                 },
                 {
                  "children": [],
-                 "classes": [],
                  "componentId": "overview-0-container1-container1-container1-container2-container1-container1-badge1",
                  "componentName": "Badge",
                  "componentProps": {
@@ -750,7 +691,6 @@
                   "flex": "1 1 auto"
                  },
                  "children": [],
-                 "classes": [],
                  "componentId": "overview-0-container1-container1-container1-container2-container1-container1-container1",
                  "componentName": "container",
                  "originalElement": "div"
@@ -763,7 +703,6 @@
                   "flex": "0 0 auto"
                  },
                  "children": [],
-                 "classes": [],
                  "componentId": "overview-0-container1-container1-container1-container2-container1-container1-html1",
                  "componentName": "HTML",
                  "componentProps": {
@@ -771,7 +710,6 @@
                  }
                 }
                ],
-               "classes": [],
                "componentId": "overview-0-container1-container1-container1-container2-container1-container1",
                "componentName": "container",
                "originalElement": "div"
@@ -788,7 +726,6 @@
                   "fontWeight": "600"
                  },
                  "children": [],
-                 "classes": [],
                  "componentId": "overview-0-container1-container1-container1-container2-container1-container2-textblock1",
                  "componentName": "TextBlock",
                  "componentProps": {
@@ -813,7 +750,6 @@
                     "flex": "0 0 auto"
                    },
                    "children": [],
-                   "classes": [],
                    "componentId": "overview-0-container1-container1-container1-container2-container1-container2-container1-html1",
                    "componentName": "HTML",
                    "componentProps": {
@@ -825,7 +761,6 @@
                     "color": "var(--ink-gray-6)"
                    },
                    "children": [],
-                   "classes": [],
                    "componentId": "overview-0-container1-container1-container1-container2-container1-container2-container1-textblock1",
                    "componentName": "TextBlock",
                    "componentProps": {
@@ -835,19 +770,16 @@
                    }
                   }
                  ],
-                 "classes": [],
                  "componentId": "overview-0-container1-container1-container1-container2-container1-container2-container1",
                  "componentName": "container",
                  "originalElement": "div"
                 }
                ],
-               "classes": [],
                "componentId": "overview-0-container1-container1-container1-container2-container1-container2",
                "componentName": "container",
                "originalElement": "div"
               }
              ],
-             "classes": [],
              "componentId": "overview-0-container1-container1-container1-container2-container1",
              "componentName": "container",
              "originalElement": "div"
@@ -897,7 +829,6 @@
               "width": "40px"
              },
              "children": [],
-             "classes": [],
              "componentId": "overview-0-container1-container1-container1-container3-html1",
              "componentName": "HTML",
              "componentProps": {
@@ -926,7 +857,6 @@
                   "color": "var(--ink-gray-6)"
                  },
                  "children": [],
-                 "classes": [],
                  "componentId": "overview-0-container1-container1-container1-container3-container1-container1-textblock1",
                  "componentName": "TextBlock",
                  "componentProps": {
@@ -940,7 +870,6 @@
                   "flex": "1 1 auto"
                  },
                  "children": [],
-                 "classes": [],
                  "componentId": "overview-0-container1-container1-container1-container3-container1-container1-container1",
                  "componentName": "container",
                  "originalElement": "div"
@@ -953,7 +882,6 @@
                   "flex": "0 0 auto"
                  },
                  "children": [],
-                 "classes": [],
                  "componentId": "overview-0-container1-container1-container1-container3-container1-container1-html1",
                  "componentName": "HTML",
                  "componentProps": {
@@ -961,7 +889,6 @@
                  }
                 }
                ],
-               "classes": [],
                "componentId": "overview-0-container1-container1-container1-container3-container1-container1",
                "componentName": "container",
                "originalElement": "div"
@@ -978,7 +905,6 @@
                   "fontWeight": "600"
                  },
                  "children": [],
-                 "classes": [],
                  "componentId": "overview-0-container1-container1-container1-container3-container1-container2-textblock1",
                  "componentName": "TextBlock",
                  "componentProps": {
@@ -992,7 +918,6 @@
                   "color": "var(--ink-gray-6)"
                  },
                  "children": [],
-                 "classes": [],
                  "componentId": "overview-0-container1-container1-container1-container3-container1-container2-textblock2",
                  "componentName": "TextBlock",
                  "componentProps": {
@@ -1006,7 +931,6 @@
                   "color": "var(--ink-gray-6)"
                  },
                  "children": [],
-                 "classes": [],
                  "componentId": "overview-0-container1-container1-container1-container3-container1-container2-textblock3",
                  "componentName": "TextBlock",
                  "componentProps": {
@@ -1017,13 +941,11 @@
                  "visibilityCondition": "{{ overview.data.sanctioned_line }}"
                 }
                ],
-               "classes": [],
                "componentId": "overview-0-container1-container1-container1-container3-container1-container2",
                "componentName": "container",
                "originalElement": "div"
               }
              ],
-             "classes": [],
              "componentId": "overview-0-container1-container1-container1-container3-container1",
              "componentName": "container",
              "originalElement": "div"
@@ -1045,7 +967,6 @@
            "originalElement": "div"
           }
          ],
-         "classes": [],
          "componentId": "overview-0-container1-container1-container1",
          "componentName": "container",
          "mobileStyles": {
@@ -1081,7 +1002,6 @@
               "fontWeight": "600"
              },
              "children": [],
-             "classes": [],
              "componentId": "overview-0-container1-container1-container2-container1-textblock1",
              "componentName": "TextBlock",
              "componentProps": {
@@ -1095,7 +1015,6 @@
               "color": "var(--ink-gray-6)"
              },
              "children": [],
-             "classes": [],
              "componentId": "overview-0-container1-container1-container2-container1-textblock2",
              "componentName": "TextBlock",
              "componentProps": {
@@ -1105,7 +1024,6 @@
              }
             }
            ],
-           "classes": [],
            "componentId": "overview-0-container1-container1-container2-container1",
            "componentName": "container",
            "originalElement": "div"
@@ -1131,7 +1049,6 @@
                "children": [
                 {
                  "children": [],
-                 "classes": [],
                  "componentId": "overview-0-container1-container1-container2-repeater1-container1-container1-textblock1",
                  "componentName": "TextBlock",
                  "componentProps": {
@@ -1145,7 +1062,6 @@
                   "color": "var(--ink-gray-6)"
                  },
                  "children": [],
-                 "classes": [],
                  "componentId": "overview-0-container1-container1-container2-repeater1-container1-container1-textblock2",
                  "componentName": "TextBlock",
                  "componentProps": {
@@ -1155,7 +1071,6 @@
                  }
                 }
                ],
-               "classes": [],
                "componentId": "overview-0-container1-container1-container2-repeater1-container1-container1",
                "componentName": "container",
                "originalElement": "div"
@@ -1165,14 +1080,12 @@
                 "flex": "1 1 auto"
                },
                "children": [],
-               "classes": [],
                "componentId": "overview-0-container1-container1-container2-repeater1-container1-container2",
                "componentName": "container",
                "originalElement": "div"
               },
               {
                "children": [],
-               "classes": [],
                "componentId": "overview-0-container1-container1-container2-repeater1-container1-badge1",
                "componentName": "Badge",
                "componentProps": {
@@ -1183,7 +1096,6 @@
                }
               }
              ],
-             "classes": [],
              "componentEvents": {
               "click": {
                "action": "Run Script",
@@ -1196,7 +1108,6 @@
              "originalElement": "div"
             }
            ],
-           "classes": [],
            "componentId": "overview-0-container1-container1-container2-repeater1",
            "componentName": "Repeater",
            "componentProps": {
@@ -1206,7 +1117,6 @@
            }
           }
          ],
-         "classes": [],
          "componentId": "overview-0-container1-container1-container2",
          "componentName": "container",
          "originalElement": "div",
@@ -1252,7 +1162,6 @@
                   "fontWeight": "600"
                  },
                  "children": [],
-                 "classes": [],
                  "componentId": "overview-0-container1-container1-container3-container1-container1-container1-textblock1",
                  "componentName": "TextBlock",
                  "componentProps": {
@@ -1266,7 +1175,6 @@
                   "color": "var(--ink-gray-6)"
                  },
                  "children": [],
-                 "classes": [],
                  "componentId": "overview-0-container1-container1-container3-container1-container1-container1-textblock2",
                  "componentName": "TextBlock",
                  "componentProps": {
@@ -1276,18 +1184,22 @@
                  }
                 }
                ],
-               "classes": [],
                "componentId": "overview-0-container1-container1-container3-container1-container1-container1",
                "componentName": "container",
                "originalElement": "div"
               },
               {
+               "baseStyles": {
+                "--list-row-padding-x": "12px"
+               },
                "children": [
                 {
                  "baseStyles": {
+                  "--outline-gray-1": "transparent",
                   "backgroundColor": "var(--surface-gray-2)",
                   "borderRadius": "var(--radius-4)",
-                  "height": "40px",
+                  "height": "36px",
+                  "marginBottom": "10px",
                   "paddingBottom": "10px",
                   "paddingLeft": "0px",
                   "paddingRight": "0px",
@@ -1297,65 +1209,74 @@
                   {
                    "children": [
                     {
+                     "baseStyles": {
+                      "color": "var(--ink-gray-5)",
+                      "marginBottom": "0px",
+                      "marginLeft": "10px",
+                      "marginRight": "0px",
+                      "paddingBottom": "0px",
+                      "paddingTop": "10px",
+                      "textAlign": "left"
+                     },
                      "children": [],
-                     "classes": [],
                      "componentId": "overview-0-container1-container1-container3-container1-container1-list1-listheader1-listheadercell1-textblock1",
                      "componentName": "TextBlock",
                      "componentProps": {
-                      "fontSize": "text-xs",
+                      "fontSize": "text-sm",
                       "tag": "p",
                       "text": "Application"
                      }
                     }
                    ],
-                   "classes": [],
                    "componentId": "overview-0-container1-container1-container3-container1-container1-list1-listheader1-listheadercell1",
                    "componentName": "ListHeaderCell"
                   },
                   {
                    "children": [
                     {
+                     "baseStyles": {
+                      "color": "var(--ink-gray-5)",
+                      "paddingTop": "10px"
+                     },
                      "children": [],
-                     "classes": [],
                      "componentId": "overview-0-container1-container1-container3-container1-container1-list1-listheader1-listheadercell2-textblock1",
                      "componentName": "TextBlock",
                      "componentProps": {
-                      "fontSize": "text-xs",
+                      "fontSize": "text-sm",
                       "tag": "p",
                       "text": "Stage"
                      }
                     }
                    ],
-                   "classes": [],
                    "componentId": "overview-0-container1-container1-container3-container1-container1-list1-listheader1-listheadercell2",
                    "componentName": "ListHeaderCell"
                   },
                   {
                    "children": [
                     {
+                     "baseStyles": {
+                      "color": "var(--ink-gray-5)",
+                      "paddingTop": "10px"
+                     },
                      "children": [],
-                     "classes": [],
                      "componentId": "overview-0-container1-container1-container3-container1-container1-list1-listheader1-listheadercell3-textblock1",
                      "componentName": "TextBlock",
                      "componentProps": {
-                      "fontSize": "text-xs",
+                      "fontSize": "text-sm",
                       "tag": "p",
                       "text": "Amount sought"
                      }
                     }
                    ],
-                   "classes": [],
                    "componentId": "overview-0-container1-container1-container3-container1-container1-list1-listheader1-listheadercell3",
                    "componentName": "ListHeaderCell"
                   }
                  ],
-                 "classes": [],
                  "componentId": "overview-0-container1-container1-container3-container1-container1-list1-listheader1",
                  "componentName": "ListHeader"
                 },
                 {
                  "children": [],
-                 "classes": [],
                  "componentId": "overview-0-container1-container1-container3-container1-container1-list1-listrows1",
                  "componentName": "ListRows",
                  "componentProps": {
@@ -1372,7 +1293,7 @@
                       "paddingBottom": "10px",
                       "paddingInlineEnd": "12px",
                       "paddingInlineStart": "12px",
-                      "paddingTop": "10px"
+                      "paddingTop": "12px"
                      },
                      "children": [
                       {
@@ -1389,7 +1310,6 @@
                           "fontWeight": "500"
                          },
                          "children": [],
-                         "classes": [],
                          "componentEvents": {},
                          "componentId": "overview-0-container1-container1-container3-container1-container1-list1-listrows1-default-listrow1-listcell1-textblock1",
                          "componentName": "TextBlock",
@@ -1408,7 +1328,6 @@
                           "color": "var(--ink-gray-6)"
                          },
                          "children": [],
-                         "classes": [],
                          "componentEvents": {},
                          "componentId": "overview-0-container1-container1-container3-container1-container1-list1-listrows1-default-listrow1-listcell1-textblock2",
                          "componentName": "TextBlock",
@@ -1427,7 +1346,6 @@
                           "color": "var(--ink-gray-6)"
                          },
                          "children": [],
-                         "classes": [],
                          "componentEvents": {},
                          "componentId": "overview-0-container1-container1-container3-container1-container1-list1-listrows1-default-listrow1-listcell1-textblock3",
                          "componentName": "TextBlock",
@@ -1446,7 +1364,6 @@
                           "color": "var(--ink-gray-6)"
                          },
                          "children": [],
-                         "classes": [],
                          "componentEvents": {},
                          "componentId": "overview-0-container1-container1-container3-container1-container1-list1-listrows1-default-listrow1-listcell1-textblock4",
                          "componentName": "TextBlock",
@@ -1461,7 +1378,6 @@
                          "visibilityCondition": "{{ item.note }}"
                         }
                        ],
-                       "classes": [],
                        "componentEvents": {},
                        "componentId": "overview-0-container1-container1-container3-container1-container1-list1-listrows1-default-listrow1-listcell1",
                        "componentName": "ListCell",
@@ -1478,7 +1394,6 @@
                          "attributes": {},
                          "baseStyles": {},
                          "children": [],
-                         "classes": [],
                          "componentEvents": {},
                          "componentId": "overview-0-container1-container1-container3-container1-container1-list1-listrows1-default-listrow1-listcell2-badge1",
                          "componentName": "Badge",
@@ -1493,7 +1408,6 @@
                          "tabletStyles": {}
                         }
                        ],
-                       "classes": [],
                        "componentEvents": {},
                        "componentId": "overview-0-container1-container1-container3-container1-container1-list1-listrows1-default-listrow1-listcell2",
                        "componentName": "ListCell",
@@ -1508,11 +1422,8 @@
                        "children": [
                         {
                          "attributes": {},
-                         "baseStyles": {
-                          "fontWeight": "500"
-                         },
+                         "baseStyles": {},
                          "children": [],
-                         "classes": [],
                          "componentEvents": {},
                          "componentId": "overview-0-container1-container1-container3-container1-container1-list1-listrows1-default-listrow1-listcell3-textblock1",
                          "componentName": "TextBlock",
@@ -1526,7 +1437,6 @@
                          "tabletStyles": {}
                         }
                        ],
-                       "classes": [],
                        "componentEvents": {},
                        "componentId": "overview-0-container1-container1-container3-container1-container1-list1-listrows1-default-listrow1-listcell3",
                        "componentName": "ListCell",
@@ -1536,7 +1446,6 @@
                        "tabletStyles": {}
                       }
                      ],
-                     "classes": [],
                      "componentEvents": {
                       "click": {
                        "action": "Run Script",
@@ -1560,9 +1469,6 @@
                  }
                 }
                ],
-               "classes": [
-                "list-row-px-3"
-               ],
                "componentId": "overview-0-container1-container1-container3-container1-container1-list1",
                "componentName": "List",
                "componentProps": {
@@ -1575,7 +1481,6 @@
                "visibilityCondition": "{{ (overview.data.applications || []).length > 0 }}"
               }
              ],
-             "classes": [],
              "componentId": "overview-0-container1-container1-container3-container1-container1",
              "componentName": "container",
              "originalElement": "div"
@@ -1590,7 +1495,7 @@
               "display": "flex",
               "flexDirection": "column",
               "gap": "12px",
-              "padding": "16px"
+              "padding": "20px 20px 12px"
              },
              "children": [
               {
@@ -1605,7 +1510,6 @@
                   "fontWeight": "600"
                  },
                  "children": [],
-                 "classes": [],
                  "componentId": "overview-0-container1-container1-container3-container1-container2-container1-textblock1",
                  "componentName": "TextBlock",
                  "componentProps": {
@@ -1619,7 +1523,6 @@
                   "color": "var(--ink-gray-6)"
                  },
                  "children": [],
-                 "classes": [],
                  "componentId": "overview-0-container1-container1-container3-container1-container2-container1-textblock2",
                  "componentName": "TextBlock",
                  "componentProps": {
@@ -1629,157 +1532,202 @@
                  }
                 }
                ],
-               "classes": [],
                "componentId": "overview-0-container1-container1-container3-container1-container2-container1",
                "componentName": "container",
                "originalElement": "div"
               },
               {
-               "children": [],
-               "classes": [],
-               "componentId": "overview-0-container1-container1-container3-container1-container2-activitytimeline1",
-               "componentName": "ActivityTimeline",
-               "componentProps": {
-                "activities": "{{ (overview.data.activity || []).map((entry, index) => ({ type: 'portal', key: 'portal:' + index, icon: 'info', timestamp: entry.date, data: entry })) }}",
-                "loading": "{{ overview.loading }}"
+               "baseStyles": {
+                "flexDirection": "column",
+                "flexWrap": "nowrap",
+                "gap": "0px",
+                "paddingTop": "4px"
                },
-               "componentSlots": {
-                "default": {
-                 "parentBlockId": "overview-0-container1-container1-container3-container1-container2-activitytimeline1",
-                 "slotContent": [
+               "children": [
+                {
+                 "baseStyles": {
+                  "alignItems": "stretch",
+                  "cursor": "pointer",
+                  "display": "flex",
+                  "flexDirection": "row",
+                  "gap": "28px"
+                 },
+                 "children": [
                   {
-                   "attributes": {},
                    "baseStyles": {
                     "alignItems": "center",
-                    "cursor": "pointer",
                     "display": "flex",
-                    "flexDirection": "row",
-                    "gap": "10px",
-                    "width": "100%"
+                    "flex": "0 0 auto",
+                    "flexDirection": "column",
+                    "gap": "4px",
+                    "width": "20px"
                    },
                    "children": [
                     {
-                     "attributes": {},
                      "baseStyles": {
+                      "alignItems": "center",
+                      "backgroundColor": "var(--surface-green-6)",
+                      "borderRadius": "9999px",
+                      "color": "#fff",
                       "display": "flex",
-                      "flexDirection": "column",
-                      "gap": "2px"
+                      "flex": "0 0 auto",
+                      "height": "18px",
+                      "justifyContent": "center",
+                      "width": "18px"
+                     },
+                     "children": [],
+                     "componentId": "overview-0-container1-container1-container3-container1-container2-repeater1-container1-container1-html1",
+                     "componentName": "HTML",
+                     "componentProps": {
+                      "html": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M20 6 9 17l-5-5\"/></svg>"
+                     },
+                     "visibilityCondition": "{{ dataItem.tone === 'ok' }}"
+                    },
+                    {
+                     "baseStyles": {
+                      "alignItems": "center",
+                      "display": "flex",
+                      "flex": "0 0 auto",
+                      "height": "18px",
+                      "justifyContent": "center",
+                      "width": "18px"
                      },
                      "children": [
                       {
-                       "attributes": {},
-                       "baseStyles": {},
-                       "children": [],
-                       "classes": [],
-                       "componentEvents": {},
-                       "componentId": "overview-0-container1-container1-container3-container1-container2-activitytimeline1-default-container1-container1-textblock1",
-                       "componentName": "TextBlock",
-                       "componentProps": {
-                        "fontSize": "text-base",
-                        "tag": "p",
-                        "text": "{{ item.data.title }}"
-                       },
-                       "componentSlots": {},
-                       "mobileStyles": {},
-                       "tabletStyles": {}
-                      },
-                      {
-                       "attributes": {},
                        "baseStyles": {
-                        "color": "var(--ink-gray-6)"
+                        "backgroundColor": "var(--outline-gray-3)",
+                        "borderRadius": "9999px",
+                        "height": "10px",
+                        "width": "10px"
                        },
                        "children": [],
-                       "classes": [],
-                       "componentEvents": {},
-                       "componentId": "overview-0-container1-container1-container3-container1-container2-activitytimeline1-default-container1-container1-textblock2",
-                       "componentName": "TextBlock",
-                       "componentProps": {
-                        "fontSize": "text-p-xs",
-                        "tag": "p",
-                        "text": "{{ item.data.note }}"
-                       },
-                       "componentSlots": {},
-                       "mobileStyles": {},
-                       "tabletStyles": {}
+                       "componentId": "overview-0-container1-container1-container3-container1-container2-repeater1-container1-container1-container1-container1",
+                       "componentName": "container",
+                       "originalElement": "div"
                       }
                      ],
-                     "classes": [],
-                     "componentEvents": {},
-                     "componentId": "overview-0-container1-container1-container3-container1-container2-activitytimeline1-default-container1-container1",
+                     "componentId": "overview-0-container1-container1-container3-container1-container2-repeater1-container1-container1-container1",
                      "componentName": "container",
-                     "componentProps": {},
-                     "componentSlots": {},
-                     "mobileStyles": {},
                      "originalElement": "div",
-                     "tabletStyles": {}
+                     "visibilityCondition": "{{ dataItem.tone !== 'ok' }}"
                     },
                     {
-                     "attributes": {},
                      "baseStyles": {
-                      "flex": "1 1 auto"
+                      "backgroundColor": "var(--outline-green-3)",
+                      "flex": "1 1 auto",
+                      "marginBottom": "4px",
+                      "width": "1px"
                      },
                      "children": [],
-                     "classes": [],
-                     "componentEvents": {},
-                     "componentId": "overview-0-container1-container1-container3-container1-container2-activitytimeline1-default-container1-container2",
+                     "componentId": "overview-0-container1-container1-container3-container1-container2-repeater1-container1-container1-container2",
                      "componentName": "container",
-                     "componentProps": {},
-                     "componentSlots": {},
-                     "mobileStyles": {},
                      "originalElement": "div",
-                     "tabletStyles": {}
+                     "visibilityCondition": "{{ dataItem.stem === 'ok' }}"
                     },
                     {
-                     "attributes": {},
                      "baseStyles": {
-                      "color": "var(--ink-gray-6)"
+                      "backgroundColor": "var(--outline-gray-1)",
+                      "flex": "1 1 auto",
+                      "marginBottom": "4px",
+                      "width": "1px"
                      },
                      "children": [],
-                     "classes": [],
-                     "componentEvents": {},
-                     "componentId": "overview-0-container1-container1-container3-container1-container2-activitytimeline1-default-container1-textblock1",
-                     "componentName": "TextBlock",
-                     "componentProps": {
-                      "fontSize": "text-p-xs",
-                      "tag": "p",
-                      "text": "{{ item.data.date }}"
-                     },
-                     "componentSlots": {},
-                     "mobileStyles": {},
-                     "tabletStyles": {}
+                     "componentId": "overview-0-container1-container1-container3-container1-container2-repeater1-container1-container1-container3",
+                     "componentName": "container",
+                     "originalElement": "div",
+                     "visibilityCondition": "{{ dataItem.stem === 'plain' }}"
                     }
                    ],
-                   "classes": [],
-                   "componentEvents": {
-                    "click": {
-                     "action": "Run Script",
-                     "event": "click",
-                     "script": "open(item.data.url)"
-                    }
-                   },
-                   "componentId": "overview-0-container1-container1-container3-container1-container2-activitytimeline1-default-container1",
+                   "componentId": "overview-0-container1-container1-container3-container1-container2-repeater1-container1-container1",
                    "componentName": "container",
-                   "componentProps": {},
-                   "componentSlots": {},
-                   "mobileStyles": {},
-                   "originalElement": "div",
-                   "tabletStyles": {}
+                   "originalElement": "div"
+                  },
+                  {
+                   "baseStyles": {
+                    "display": "flex",
+                    "flex": "1 1 auto",
+                    "flexDirection": "column",
+                    "gap": "6px",
+                    "minWidth": "0px",
+                    "paddingBottom": "24px"
+                   },
+                   "children": [
+                    {
+                     "baseStyles": {
+                      "color": "var(--ink-gray-9)",
+                      "fontWeight": "500",
+                      "paddingTop": "1px"
+                     },
+                     "children": [],
+                     "componentId": "overview-0-container1-container1-container3-container1-container2-repeater1-container1-container2-textblock1",
+                     "componentName": "TextBlock",
+                     "componentProps": {
+                      "fontSize": "text-base",
+                      "tag": "p",
+                      "text": "{{ dataItem.title }}"
+                     }
+                    },
+                    {
+                     "baseStyles": {
+                      "color": "var(--ink-gray-5)"
+                     },
+                     "children": [],
+                     "componentId": "overview-0-container1-container1-container3-container1-container2-repeater1-container1-container2-textblock2",
+                     "componentName": "TextBlock",
+                     "componentProps": {
+                      "fontSize": "text-sm",
+                      "tag": "p",
+                      "text": "{{ dataItem.note }}"
+                     }
+                    }
+                   ],
+                   "componentId": "overview-0-container1-container1-container3-container1-container2-repeater1-container1-container2",
+                   "componentName": "container",
+                   "originalElement": "div"
+                  },
+                  {
+                   "baseStyles": {
+                    "color": "var(--ink-gray-5)",
+                    "paddingTop": "2px",
+                    "whiteSpace": "nowrap"
+                   },
+                   "children": [],
+                   "componentId": "overview-0-container1-container1-container3-container1-container2-repeater1-container1-textblock1",
+                   "componentName": "TextBlock",
+                   "componentProps": {
+                    "fontSize": "text-sm",
+                    "tag": "p",
+                    "text": "{{ dataItem.date }}"
+                   }
                   }
                  ],
-                 "slotId": "overview-0-container1-container1-container3-container1-container2-activitytimeline1:default",
-                 "slotName": "default"
+                 "componentEvents": {
+                  "click": {
+                   "action": "Run Script",
+                   "event": "click",
+                   "script": "open(dataItem.url)"
+                  }
+                 },
+                 "componentId": "overview-0-container1-container1-container3-container1-container2-repeater1-container1",
+                 "componentName": "container",
+                 "originalElement": "div"
                 }
+               ],
+               "componentId": "overview-0-container1-container1-container3-container1-container2-repeater1",
+               "componentName": "Repeater",
+               "componentProps": {
+                "data": "{{ overview.data.activity || [] }}",
+                "dataKey": "name",
+                "emptyStateMessage": ""
                }
               }
              ],
-             "classes": [],
              "componentId": "overview-0-container1-container1-container3-container1-container2",
              "componentName": "container",
              "originalElement": "div",
              "visibilityCondition": "{{ overview.data.activity && overview.data.activity.length > 0 }}"
             }
            ],
-           "classes": [],
            "componentId": "overview-0-container1-container1-container3-container1",
            "componentName": "container",
            "originalElement": "div"
@@ -1806,46 +1754,70 @@
              "children": [
               {
                "baseStyles": {
+                "alignItems": "start",
                 "display": "flex",
-                "flexDirection": "column",
-                "gap": "2px"
+                "flexDirection": "row",
+                "gap": "8px"
                },
                "children": [
                 {
                  "baseStyles": {
-                  "fontWeight": "600"
+                  "display": "flex",
+                  "flexDirection": "column",
+                  "gap": "2px"
                  },
-                 "children": [],
-                 "classes": [],
-                 "componentId": "overview-0-container1-container1-container3-container2-container1-container1-textblock1",
-                 "componentName": "TextBlock",
-                 "componentProps": {
-                  "fontSize": "text-lg",
-                  "tag": "h2",
-                  "text": "Scheduled repayments"
-                 }
+                 "children": [
+                  {
+                   "baseStyles": {
+                    "fontWeight": "600"
+                   },
+                   "children": [],
+                   "componentId": "overview-0-container1-container1-container3-container2-container1-container1-container1-textblock1",
+                   "componentName": "TextBlock",
+                   "componentProps": {
+                    "fontSize": "text-lg",
+                    "tag": "h2",
+                    "text": "Scheduled repayments"
+                   }
+                  },
+                  {
+                   "baseStyles": {
+                    "color": "var(--ink-gray-6)"
+                   },
+                   "children": [],
+                   "componentId": "overview-0-container1-container1-container3-container2-container1-container1-container1-textblock2",
+                   "componentName": "TextBlock",
+                   "componentProps": {
+                    "fontSize": "text-p-xs",
+                    "tag": "p",
+                    "text": "{{ overview.data.schedule_note }}"
+                   }
+                  }
+                 ],
+                 "componentId": "overview-0-container1-container1-container3-container2-container1-container1-container1",
+                 "componentName": "container",
+                 "originalElement": "div"
                 },
                 {
                  "baseStyles": {
-                  "color": "var(--ink-gray-6)"
+                  "flex": "1 1 auto"
                  },
                  "children": [],
-                 "classes": [],
-                 "componentId": "overview-0-container1-container1-container3-container2-container1-container1-textblock2",
-                 "componentName": "TextBlock",
-                 "componentProps": {
-                  "fontSize": "text-p-xs",
-                  "tag": "p",
-                  "text": "{{ overview.data.schedule_note }}"
-                 }
+                 "componentId": "overview-0-container1-container1-container3-container2-container1-container1-container2",
+                 "componentName": "container",
+                 "originalElement": "div"
                 }
                ],
-               "classes": [],
                "componentId": "overview-0-container1-container1-container3-container2-container1-container1",
                "componentName": "container",
                "originalElement": "div"
               },
               {
+               "baseStyles": {
+                "flexDirection": "column",
+                "flexWrap": "nowrap",
+                "gap": "6px"
+               },
                "children": [
                 {
                  "baseStyles": {
@@ -1853,38 +1825,93 @@
                   "cursor": "pointer",
                   "display": "flex",
                   "flexDirection": "row",
-                  "gap": "10px",
-                  "padding": "8px 0"
+                  "gap": "14px",
+                  "padding": "6px 0"
                  },
                  "children": [
                   {
                    "baseStyles": {
-                    "color": "var(--ink-gray-6)"
+                    "alignItems": "center",
+                    "backgroundColor": "var(--surface-gray-1)",
+                    "borderColor": "var(--outline-gray-1)",
+                    "borderRadius": "0.5rem",
+                    "borderStyle": "solid",
+                    "borderWidth": "1px",
+                    "display": "flex",
+                    "flex": "0 0 auto",
+                    "flexDirection": "column",
+                    "gap": "1px",
+                    "justifyContent": "center",
+                    "padding": "6px 0",
+                    "width": "48px"
                    },
-                   "children": [],
-                   "classes": [],
-                   "componentId": "overview-0-container1-container1-container3-container2-container1-repeater1-container1-textblock1",
-                   "componentName": "TextBlock",
-                   "componentProps": {
-                    "fontSize": "text-p-xs",
-                    "tag": "p",
-                    "text": "{{ dataItem.date }}"
-                   }
+                   "children": [
+                    {
+                     "baseStyles": {
+                      "color": "var(--ink-gray-9)",
+                      "fontWeight": "600",
+                      "lineHeight": "1.2"
+                     },
+                     "children": [],
+                     "componentId": "overview-0-container1-container1-container3-container2-container1-repeater1-container1-container1-textblock1",
+                     "componentName": "TextBlock",
+                     "componentProps": {
+                      "fontSize": "text-lg",
+                      "tag": "div",
+                      "text": "{{ dataItem.day }}"
+                     }
+                    },
+                    {
+                     "baseStyles": {
+                      "color": "var(--ink-gray-5)",
+                      "lineHeight": "1.2"
+                     },
+                     "children": [],
+                     "componentId": "overview-0-container1-container1-container3-container2-container1-repeater1-container1-container1-textblock2",
+                     "componentName": "TextBlock",
+                     "componentProps": {
+                      "fontSize": "text-xs",
+                      "tag": "div",
+                      "text": "{{ dataItem.month }}"
+                     }
+                    },
+                    {
+                     "baseStyles": {
+                      "color": "var(--ink-gray-5)",
+                      "lineHeight": "1.2"
+                     },
+                     "children": [],
+                     "componentId": "overview-0-container1-container1-container3-container2-container1-repeater1-container1-container1-textblock3",
+                     "componentName": "TextBlock",
+                     "componentProps": {
+                      "fontSize": "text-xs",
+                      "tag": "div",
+                      "text": "{{ dataItem.year }}"
+                     }
+                    }
+                   ],
+                   "componentId": "overview-0-container1-container1-container3-container2-container1-repeater1-container1-container1",
+                   "componentName": "container",
+                   "originalElement": "div"
                   },
                   {
                    "baseStyles": {
                     "display": "flex",
+                    "flex": "1 1 auto",
                     "flexDirection": "column",
-                    "gap": "2px"
+                    "gap": "2px",
+                    "minWidth": "0px"
                    },
                    "children": [
                     {
+                     "baseStyles": {
+                      "color": "var(--ink-gray-8)"
+                     },
                      "children": [],
-                     "classes": [],
-                     "componentId": "overview-0-container1-container1-container3-container2-container1-repeater1-container1-container1-textblock1",
+                     "componentId": "overview-0-container1-container1-container3-container2-container1-repeater1-container1-container2-textblock1",
                      "componentName": "TextBlock",
                      "componentProps": {
-                      "fontSize": "text-base",
+                      "fontSize": "text-sm",
                       "tag": "p",
                       "text": "{{ dataItem.title }}"
                      }
@@ -1894,35 +1921,28 @@
                       "color": "var(--ink-gray-6)"
                      },
                      "children": [],
-                     "classes": [],
-                     "componentId": "overview-0-container1-container1-container3-container2-container1-repeater1-container1-container1-textblock2",
+                     "componentId": "overview-0-container1-container1-container3-container2-container1-repeater1-container1-container2-textblock2",
                      "componentName": "TextBlock",
                      "componentProps": {
                       "fontSize": "text-p-xs",
                       "tag": "p",
                       "text": "{{ dataItem.sub }}"
-                     }
+                     },
+                     "visibilityCondition": "{{ dataItem.sub }}"
                     }
                    ],
-                   "classes": [],
-                   "componentId": "overview-0-container1-container1-container3-container2-container1-repeater1-container1-container1",
-                   "componentName": "container",
-                   "originalElement": "div"
-                  },
-                  {
-                   "baseStyles": {
-                    "flex": "1 1 auto"
-                   },
-                   "children": [],
-                   "classes": [],
                    "componentId": "overview-0-container1-container1-container3-container2-container1-repeater1-container1-container2",
                    "componentName": "container",
                    "originalElement": "div"
                   },
                   {
+                   "baseStyles": {
+                    "color": "var(--ink-gray-9)",
+                    "fontWeight": "500",
+                    "whiteSpace": "nowrap"
+                   },
                    "children": [],
-                   "classes": [],
-                   "componentId": "overview-0-container1-container1-container3-container2-container1-repeater1-container1-textblock2",
+                   "componentId": "overview-0-container1-container1-container3-container2-container1-repeater1-container1-textblock1",
                    "componentName": "TextBlock",
                    "componentProps": {
                     "fontSize": "text-base",
@@ -1931,7 +1951,6 @@
                    }
                   }
                  ],
-                 "classes": [],
                  "componentEvents": {
                   "click": {
                    "action": "Run Script",
@@ -1944,7 +1963,6 @@
                  "originalElement": "div"
                 }
                ],
-               "classes": [],
                "componentId": "overview-0-container1-container1-container3-container2-container1-repeater1",
                "componentName": "Repeater",
                "componentProps": {
@@ -1954,20 +1972,17 @@
                }
               }
              ],
-             "classes": [],
              "componentId": "overview-0-container1-container1-container3-container2-container1",
              "componentName": "container",
              "originalElement": "div",
              "visibilityCondition": "{{ overview.data.schedule && overview.data.schedule.length > 0 }}"
             }
            ],
-           "classes": [],
            "componentId": "overview-0-container1-container1-container3-container2",
            "componentName": "container",
            "originalElement": "div"
           }
          ],
-         "classes": [],
          "componentId": "overview-0-container1-container1-container3",
          "componentName": "container",
          "originalElement": "div",
@@ -1976,14 +1991,12 @@
          }
         }
        ],
-       "classes": [],
        "componentId": "overview-0-container1-container1",
        "componentName": "container",
        "originalElement": "div"
       },
       {
        "children": [],
-       "classes": [],
        "componentId": "overview-0-container1-borrower_footer1",
        "componentName": "borrower_footer",
        "componentProps": {
@@ -1994,29 +2007,32 @@
       },
       {
        "children": [],
-       "classes": [],
        "componentId": "overview-0-container1-borrower_alerts1",
        "componentName": "borrower_alerts",
        "isStudioComponent": true
+      },
+      {
+       "children": [],
+       "componentId": "overview-0-container1-borrower_search1",
+       "componentName": "borrower_search",
+       "isStudioComponent": true
       }
      ],
-     "classes": [],
      "componentId": "overview-0-container1",
      "componentName": "container",
      "originalElement": "div"
     }
    ],
-   "classes": [],
    "componentId": "overview-0",
    "componentName": "div",
    "originalElement": "body"
   }
  ],
- "creation": "2026-09-23 12:26:28.435989",
+ "creation": "2026-09-24 00:54:36.833835",
  "doctype": "Studio Page",
  "frappe_app": "lending",
  "is_standard": 1,
- "modified": "2026-09-23 17:49:59.895352",
+ "modified": "2026-09-24 02:22:04.472391",
  "modified_by": "Administrator",
  "name": "account_overview",
  "owner": "Administrator",
@@ -2024,21 +2040,6 @@
  "page_title": "Account overview",
  "published": 1,
  "resources": [
-  {
-   "__unsaved": 1,
-   "auto": 1,
-   "method": "GET",
-   "resource_name": "overview",
-   "resource_type": "API Resource",
-   "url": "lending.portal.core.get_dashboard"
-  },
-  {
-   "__unsaved": 1,
-   "method": "GET",
-   "resource_name": "alerts",
-   "resource_type": "API Resource",
-   "url": "lending.portal.notifications.get_notifications"
-  },
   {
    "__unsaved": 1,
    "auto": 1,

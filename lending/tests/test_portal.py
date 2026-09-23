@@ -37,8 +37,8 @@ from lending.loan_management.doctype.lending_settings.lending_settings import (
 )
 from lending.portal.accounts import customer_for_email
 from lending.portal.applications import (
+	default_application,
 	get_application_detail,
-	get_applications_page,
 	get_document_choices,
 	upload_document,
 )
@@ -75,7 +75,7 @@ from lending.portal.core import (
 	standing_line,
 	waiting_on_borrower,
 )
-from lending.portal.loans import get_loan_detail, get_loans_page
+from lending.portal.loans import default_loan, get_loan_detail
 from lending.portal.notifications import (
 	ATTENTION_LIMIT,
 	READ_KEY,
@@ -87,7 +87,7 @@ from lending.portal.notifications import (
 	row_key,
 )
 from lending.portal.profile import get_profile_page, save_profile
-from lending.portal.search import DIALOG_LIMIT, RESULT_LIMIT, find, get_search_page, results_note
+from lending.portal.search import RESULT_LIMIT, find, results_note
 from lending.tests.test_utils import (
 	create_loan,
 	create_loan_accounts,
@@ -338,19 +338,18 @@ class TestPortalOwnership(LendingTestSuite):
 
 	# --- lists ----------------------------------------------------------------------
 
-	def test_a_borrower_sees_only_their_own_loans(self):
+	def test_the_default_loan_is_the_borrowers_own(self):
 		self.as_alpha()
-		names = [row["name"] for row in get_loans_page()["accounts"]]
 
-		self.assertIn(self.alpha_loan, names)
-		self.assertNotIn(self.beta_loan, names)
+		applicant = frappe.db.get_value("Loan", default_loan(), "applicant")
 
-	def test_a_borrower_sees_only_their_own_applications(self):
+		self.assertIn(applicant, get_portal_customers())
+
+	def test_the_default_application_is_the_borrowers_own(self):
 		self.as_alpha()
-		payload = get_applications_page()
-		names = [row.get("name") for row in payload.get("applications", [])]
 
-		self.assertNotIn(self.beta_application, names)
+		self.assertNotEqual(default_application(), self.beta_application)
+		self.assertTrue(default_application())
 
 	# --- the guard itself -----------------------------------------------------------
 
@@ -387,12 +386,17 @@ class TestPortalOwnership(LendingTestSuite):
 		with self.assertRaises(frappe.PermissionError):
 			get_application_detail()
 
-	def test_a_loan_detail_with_no_name_is_refused(self):
+	def test_an_application_detail_with_no_name_opens_the_newest(self):
 		self.as_alpha()
 		frappe.form_dict.pop("name", None)
 
-		with self.assertRaises(frappe.PermissionError):
-			get_loan_detail()
+		self.assertEqual(get_application_detail()["product"], PRODUCT)
+
+	def test_a_loan_detail_with_no_name_opens_the_default_loan(self):
+		self.as_alpha()
+		frappe.form_dict.pop("name", None)
+
+		self.assertEqual(get_loan_detail()["crumb"], PRODUCT)
 
 	def test_a_missing_loan_and_another_borrowers_loan_are_indistinguishable(self):
 		"""The refusal must not tell a stranger which loan numbers exist."""
@@ -660,6 +664,8 @@ class TestPortalProfileWrite(PortalPeople):
 		self.assertEqual(form["form_email"], "alpha.saved@example.com")
 		self.assertEqual(form["form_mobile"], "9812340001")
 		self.assertEqual(form["form_city"], "Mumbai")
+		# The page switches records from this map rather than asking again.
+		self.assertEqual(form["forms"][ALPHA_CUSTOMER]["city"], "Mumbai")
 
 	def test_a_landline_does_not_overwrite_the_mobile(self):
 		"""Both live in phone_nos under different flags, so the write must not
@@ -954,7 +960,6 @@ class TestPortalSignUp(LendingTestSuite):
 		frappe.local.form_dict = frappe._dict()
 
 		self.assertIn(offer["reference"], [row.name for row in leads_for_login()])
-		self.assertTrue(get_applications_page()["enquiries"])
 
 	def test_an_account_needs_a_token(self):
 		self.apply_as(PERSON_EMAIL, "9812340106")
@@ -1366,7 +1371,7 @@ class TestPortalMenu(LendingTestSuite):
 		self.assertNotIn("/invoices", routes)
 
 	def test_the_page_being_served_is_the_row_that_lights(self):
-		marks = self.serving("/borrower/statement")
+		marks = self.serving("/borrower-portal/statement")
 
 		self.assertEqual(marks["Statement of account"], "page")
 		self.assertEqual(marks["Account overview"], "false")
@@ -1374,14 +1379,16 @@ class TestPortalMenu(LendingTestSuite):
 
 	def test_a_detail_page_lights_the_list_it_belongs_to(self):
 		"""A loan has no row of its own, and a page with nothing lit reads as lost."""
-		self.assertEqual(self.serving("/borrower/loan/LOAN-0001")["Loan accounts"], "page")
-		self.assertEqual(self.serving("/borrower/application/LN-APP-0001")["Applications"], "page")
+		self.assertEqual(self.serving("/borrower-portal/loan/LOAN-0001")["Loan accounts"], "page")
+		self.assertEqual(
+			self.serving("/borrower-portal/application/LN-APP-0001")["Application"], "page"
+		)
 
 	def test_a_list_is_not_swallowed_by_the_section_beside_it(self):
-		"""/borrower/applications starts with /borrower/application, and is not one."""
-		marks = self.serving("/borrower/applications")
+		"""/borrower-portal/applications starts with /borrower-portal/application, and is not one."""
+		marks = self.serving("/borrower-portal/applications")
 
-		self.assertEqual(marks["Applications"], "page")
+		self.assertEqual(marks["Application"], "page")
 		self.assertEqual([*marks.values()].count("page"), 1)
 
 	def test_off_a_request_the_menu_still_comes_out(self):
@@ -1434,19 +1441,14 @@ class TestPortalRail(LendingTestSuite):
 		frappe.set_user(ALPHA_USER)
 		frappe.local.form_dict = frappe._dict({"q": query})
 
-		return get_search_page()
-
-	def search_dialog(self, query: str) -> dict:
-		frappe.set_user(ALPHA_USER)
-		frappe.local.form_dict = frappe._dict({"q": query})
-
 		return find()
 
 	# --- the rail -------------------------------------------------------------------
 
-	def test_the_page_the_sidebar_opens_is_published(self):
-		"""Search is a row in the sidebar like any other, so it needs a page behind it."""
-		self.assertIn("/search", published_portal_routes())
+	def test_the_search_page_is_gone(self):
+		"""Search is the Ctrl+K palette on every page, so there is no page of it left
+		to serve -- nor a sidebar row pointing at one."""
+		self.assertNotIn("/search", published_portal_routes())
 
 	def test_the_notifications_page_is_gone(self):
 		"""The panel says everything the page said, and a bell with two answers is one
@@ -1469,14 +1471,14 @@ class TestPortalRail(LendingTestSuite):
 	def test_a_loan_is_found_by_its_number(self):
 		results = self.search(self.alpha_loan)["results"]
 
-		self.assertEqual([row["url"] for row in results], [f"/borrower/loan/{self.alpha_loan}"])
+		self.assertEqual([row["url"] for row in results], [f"/borrower-portal/loan/{self.alpha_loan}"])
 
 	def test_an_application_is_found_and_opens_its_own_page(self):
 		results = self.search(self.alpha_application)["results"]
 
 		self.assertEqual(
 			[(row["kind"], row["url"]) for row in results],
-			[("Application", f"/borrower/application/{self.alpha_application}")],
+			[("Application", f"/borrower-portal/application/{self.alpha_application}")],
 		)
 
 	def test_a_search_cannot_reach_another_borrowers_loan(self):
@@ -1495,20 +1497,19 @@ class TestPortalRail(LendingTestSuite):
 		borrower with no loans yet has nothing else worth offering."""
 		payload = self.search("")
 
-		self.assertEqual(payload["query"], "")
 		self.assertEqual(
 			[row["url"] for row in payload["results"]],
-			[item["route"] for item in frappe.get_hooks("portal_menu_items")],
+			[item["route"] for item in frappe.get_hooks("portal_menu_items")][:RESULT_LIMIT],
 		)
 		self.assertEqual({row["kind"] for row in payload["results"]}, {"Page"})
-		self.assertIn("Type to search", payload["results_note"])
+		self.assertEqual(payload["note"], "")
 
 	def test_a_page_is_findable_by_name_like_anything_else(self):
 		"""The pages are in the same list the records are, so one query searches both."""
 		results = self.search("interest certificate")["results"]
 
 		self.assertEqual(
-			[(row["kind"], row["url"]) for row in results], [("Page", "/borrower/certificate")]
+			[(row["kind"], row["url"]) for row in results], [("Page", "/borrower-portal/certificate")]
 		)
 
 	def test_a_search_that_matches_everything_is_cut_down(self):
@@ -1516,13 +1517,10 @@ class TestPortalRail(LendingTestSuite):
 		self.assertIn(str(RESULT_LIMIT), results_note("loan", RESULT_LIMIT + 10))
 		self.assertIn(str(RESULT_LIMIT + 10), results_note("loan", RESULT_LIMIT + 10))
 
-	def test_the_dialog_shows_five_where_the_page_shows_them_all(self):
-		"""The dialog is a peek over the page behind it; the page is the list. The menu
-		is longer than five, so an empty box is enough to tell the two apart."""
-		self.assertGreater(len(frappe.get_hooks("portal_menu_items")), DIALOG_LIMIT)
-
-		self.assertEqual(len(self.search_dialog("")["results"]), DIALOG_LIMIT)
-		self.assertGreater(len(self.search("")["results"]), DIALOG_LIMIT)
+	def test_the_palette_never_answers_past_its_limit(self):
+		"""The fixture's product name matches every loan it has made, and this database
+		is not rolled back between runs, so there are more of them than fit."""
+		self.assertLessEqual(len(self.search(PRODUCT)["results"]), RESULT_LIMIT)
 
 	# --- notifications --------------------------------------------------------------
 

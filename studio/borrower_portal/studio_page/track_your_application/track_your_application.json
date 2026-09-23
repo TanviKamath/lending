@@ -490,11 +490,11 @@
    "originalElement": "body"
   }
  ],
- "creation": "2026-09-23 12:26:28.560682",
+ "creation": "2026-09-24 00:35:37.360997",
  "doctype": "Studio Page",
  "frappe_app": "lending",
  "is_standard": 1,
- "modified": "2026-09-23 17:50:00.281689",
+ "modified": "2026-09-24 02:22:04.822880",
  "modified_by": "Administrator",
  "name": "track_your_application",
  "owner": "Administrator",
@@ -502,14 +502,6 @@
  "page_title": "Track your application",
  "published": 1,
  "resources": [
-  {
-   "__unsaved": 1,
-   "auto": 1,
-   "method": "GET",
-   "resource_name": "track",
-   "resource_type": "API Resource",
-   "url": "lending.portal.apply.get_track_page"
-  },
   {
    "__unsaved": 1,
    "auto": 1,

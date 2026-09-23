@@ -1,7 +1,8 @@
 # Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-"""The portal's frame: the sidebar, the page header, the notifications and the footer.
+"""The portal's frame: the sidebar, the page header, the notifications, the Ctrl+K
+search palette and the footer.
 
 The Builder shell is one component wrapped *around* each page's content: Builder
 merges a component into a page through extend_block, so a page can mirror the frame's
@@ -26,6 +27,7 @@ authenticated page carries one under that name for this reason.
 
 from lending.portal.studio_build.app import upsert_component
 from lending.portal.studio_build.blocks import (
+	any_row,
 	badge,
 	block,
 	button,
@@ -33,6 +35,7 @@ from lending.portal.studio_build.blocks import (
 	column,
 	container,
 	fallback,
+	icon,
 	instance,
 	muted,
 	repeater,
@@ -45,6 +48,48 @@ from lending.portal.studio_build.blocks import (
 HEADER = "borrower_header"
 FOOTER = "borrower_footer"
 ALERTS = "borrower_alerts"
+SEARCH = "borrower_search"
+
+# The Ctrl+K palette is drawn to the desk's awesomebar, measured off a running desk in
+# Chromium rather than read out of its stylesheets: a 575px card 28px from the top, a
+# 1px #ededed border at 12px, 33.5px rows 5px apart, a 40px footer of 18px keys, and
+# the page behind it dimmed with rgb(56, 56, 56) at 0.8. Every number below is one of
+# those.
+#
+# The dialog's `title` is never shown -- the dialog is bare -- but frappe-ui stamps it
+# on the overlay as `data-dialog`, and that is the only handle there is on the overlay
+# or on the panel's own frame: Dialog renders no element of its own to put a class on.
+PALETTE_TITLE = "Borrower search"
+PALETTE_CSS = f"""
+.dialog-overlay[data-dialog="{PALETTE_TITLE}"] {{ background-color: rgba(56, 56, 56, 0.8); }}
+.dialog-overlay[data-dialog="{PALETTE_TITLE}"] .dialog-content {{
+	max-width: 575px;
+	margin: 28px 0 0;
+	border: 1px solid #ededed;
+	border-radius: 12px;
+	box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+	background-color: #fff;
+}}
+"""
+
+# One line of palette text: the desk's 13px on a 19.5px line, at Inter's 0.02em.
+PALETTE_TEXT = {"fontSize": "13px", "lineHeight": "19.5px", "letterSpacing": "0.02em", "color": "#171717"}
+FOOT_TEXT = {
+	"fontSize": "12px",
+	"lineHeight": "18px",
+	"letterSpacing": "0.02em",
+	"color": "#525252",
+	"whiteSpace": "nowrap",
+}
+
+# The grey key a shortcut sits on: an 18px square round a 12px glyph, or a padded
+# word for the chords.
+KEYCAP = {"borderRadius": "4px", "backgroundColor": "#ededed", "color": "#525252", "flexShrink": "0"}
+GLYPH_KEY = dict(KEYCAP, width="18px", height="18px", padding="3px", justifyContent="center")
+WORD_KEY = dict(
+	KEYCAP, padding="2px 4px", fontSize="10px", lineHeight="15px", letterSpacing="0.02em", whiteSpace="nowrap"
+)
+ICON_KEYS = ("arrow-up", "arrow-down", "corner-down-left")
 
 # The crumb trail, as frappe-ui draws one. `Breadcrumbs.vue` gives every crumb
 # `px-0.5 py-1 text-lg-medium`, colours the trail `ink-gray-5` and the last one
@@ -66,13 +111,11 @@ CRUMB_BOX = {"display": "flex", "alignItems": "center", "padding": "4px 2px"}
 # are declared once, here, and a page added is a line here plus a rebuild.
 NAV_ITEMS = (
 	("Account overview", "/overview", "layout-dashboard"),
-	("Loan accounts", "/loans", "wallet"),
-	("Applications", "/applications", "file-text"),
-	("Documents", "/documents", "paperclip"),
+	("Loan account", "/loans", "wallet"),
+	("Application", "/applications", "file-text"),
 	("Statement of account", "/statement", "receipt"),
 	("Interest certificate", "/certificate", "award"),
 	("Personal details", "/profile", "user"),
-	("Search", "/search", "search"),
 )
 
 # Whether the rail is open, as every block in it has to ask.
@@ -486,6 +529,127 @@ def alerts_tree():
 	)
 
 
+def search_tree():
+	"""The Ctrl+K palette: one box, the rows it finds, and the keys that drive it.
+
+	Laid out as the desk's command palette is, to the pixel -- see PALETTE_CSS for the
+	numbers. The one thing added is the grey note at the end of a row: eight rows all
+	reading "Personal Loan Application" need their reference to be told apart. There is
+	no Search page behind it any more, so this is the whole of search. The state is the
+	page script's; see useSearch in utils/portal.ts.
+	"""
+	# A style element, rather than styles on a block, because the overlay and the panel
+	# frame are frappe-ui's and no block reaches them. Hidden, and still applied.
+	frame_css = block("HTML", props={"html": f"<div><style>{PALETTE_CSS}</style></div>"}, styles={"display": "none"})
+
+	# 8px round a 28px row, less 4 under it: the desk's input row and the gap to its rule.
+	# `sm` is frappe-ui's 28px input at 14px with 6px 8px of padding, which is the desk's.
+	box = row(
+		[
+			icon("search", size=16, styles={"color": "#525252", "padding": "0 2px 0 10px"}),
+			block(
+				"TextInput",
+				props={
+					"placeholder": "Search your loans, applications and pages",
+					"variant": "ghost",
+					"size": "sm",
+					"modelValue": {"$type": "variable", "name": "searchText"},
+				},
+				styles={"flex": "1", "minWidth": "0px"},
+			),
+		],
+		gap="0px",
+		styles={"height": "28px", "margin": "8px 8px 4px"},
+	)
+	rule = container(styles={"height": "1px", "backgroundColor": "#ededed"})
+
+	# The desk's `<b>Loan Lead</b> List`: the name bold, the kind in the same ink after a
+	# space. The space is the kind's own, held open by `pre`, so it is Inter's space and
+	# not a gap guessed at in pixels.
+	result = row(
+		[
+			text("{{ dataItem.title }}", styles=dict(PALETTE_TEXT, fontWeight="700", whiteSpace="nowrap")),
+			text("{{ ' ' + dataItem.kind }}", styles=dict(PALETTE_TEXT, fontWeight="400", whiteSpace="pre")),
+			spacer(),
+			text(
+				"{{ dataItem.note }}",
+				styles=dict(
+					PALETTE_TEXT,
+					color="#7c7c7c",
+					minWidth="0px",
+					overflow="hidden",
+					textOverflow="ellipsis",
+					whiteSpace="nowrap",
+					paddingLeft="12px",
+				),
+			),
+		],
+		gap="0px",
+		# `minWidth: 0` or the row grows to its note -- a flex item's floor is its content
+		# -- and the note runs off the card instead of truncating.
+		styles={
+			"width": "100%",
+			"minWidth": "0px",
+			"height": "33.5px",
+			"padding": "0px 7px",
+			"borderRadius": "8px",
+			"cursor": "pointer",
+			"backgroundColor": "{{ dataIndex === searchIndex ? '#f3f3f3' : 'transparent' }}",
+		},
+		events={
+			**click("chooseResult(dataItem)"),
+			"mousemove": {"event": "mousemove", "action": "Run Script", "script": "searchIndex.value = dataIndex"},
+		},
+	)
+	# 12px under the rule, 13 either side and below: the desk's list padding plus the
+	# wrapper's, and the last row's 5px margin that the desk leaves in.
+	results = repeater(
+		"{{ searchResults }}",
+		result,
+		data_key="url",
+		empty="Nothing matches that",
+		styles={"display": "flex", "flexDirection": "column", "gap": "5px", "padding": "12px 13px 13px"},
+	)
+
+	def hint(keys, label):
+		caps = [
+			container([icon(key, size=12)], styles=GLYPH_KEY) if key in ICON_KEYS else text(key, styles=WORD_KEY)
+			for key in keys
+		]
+		return row([*caps, text(label, styles=FOOT_TEXT)], gap="5px", styles={"flexShrink": "0"})
+
+	# The note gives way before the keys do: it truncates, they never wrap.
+	note = text(
+		"{{ searchNote }}",
+		styles=dict(FOOT_TEXT, minWidth="0px", overflow="hidden", textOverflow="ellipsis"),
+	)
+	# 40px: a 1px rule, 10px either side of an 18px line of keys.
+	foot = row(
+		[
+			hint(["arrow-up", "arrow-down"], "to navigate"),
+			hint(["corner-down-left"], "to select"),
+			hint(["Ctrl+K"], "to close"),
+			spacer(),
+			note,
+		],
+		gap="15px",
+		styles={"height": "40px", "padding": "10px", "borderTop": "1px solid #ededed"},
+	)
+
+	return block(
+		"Dialog",
+		props={
+			"modelValue": {"$type": "variable", "name": "showSearch"},
+			"title": PALETTE_TITLE,
+			"bare": True,
+			"position": "top",
+			# A padding of its own replaces `top`'s 20vh; PALETTE_CSS sets the 28px.
+			"paddingTop": "0px",
+		},
+		children=[column([frame_css, box, rule, results, foot], gap="0px")],
+	)
+
+
 def footer_tree():
 	"""Whose portal this is, and the policies. Both are Lending Settings, read per request."""
 	link = button(
@@ -499,7 +663,15 @@ def footer_tree():
 		[
 			muted("{{ inputs.note }}"),
 			spacer(),
-			repeater("{{ inputs.links }}", link, data_key="label", styles={"display": "flex", "gap": "4px"}),
+			# Hidden when Lending Settings lists no links: an empty Repeater prints
+			# "No data" whatever it is told, and a footer has nothing to apologise for.
+			repeater(
+				"{{ inputs.links }}",
+				link,
+				data_key="label",
+				visible=any_row("{{ inputs.links }}"),
+				styles={"display": "flex", "gap": "4px"},
+			),
 		],
 		gap="10px",
 		styles={
@@ -518,7 +690,7 @@ def footer_tree():
 
 
 def upsert_frame():
-	"""Create or replace the three shared components. Safe to re-run.
+	"""Create or replace the four shared components. Safe to re-run.
 
 	The sidebar is not one of them; see `sidebar` for why it is built into each page.
 	"""
@@ -537,6 +709,7 @@ def upsert_frame():
 		),
 	)
 	upsert_component(ALERTS, "Borrower Notifications", alerts_tree())
+	upsert_component(SEARCH, "Borrower Search", search_tree())
 	upsert_component(
 		FOOTER,
 		"Borrower Footer",
@@ -584,7 +757,7 @@ def frame(source, content, action_label="", action_route=""):
 		},
 	)
 	main = container(
-		[header, body, footer, instance(ALERTS)],
+		[header, body, footer, instance(ALERTS), instance(SEARCH)],
 		styles={
 			"display": "flex",
 			"flexDirection": "column",

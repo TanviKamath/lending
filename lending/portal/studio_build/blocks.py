@@ -71,6 +71,13 @@ def any_row(expression):
 	return "{{ (%s || []).length > 0 }}" % inner
 
 
+def no_rows(expression):
+	"""The condition that `expression` holds nothing: what an empty state shows on."""
+	inner = expression[2:-2].strip() if expression.startswith("{{") else expression
+
+	return "{{ !(%s || []).length }}" % inner
+
+
 def block(name, props=None, styles=None, children=None, **kwargs):
 	"""One block. `name` is the component, everything else is optional."""
 	node = {
@@ -187,8 +194,8 @@ def subject(value, **kwargs):
 
 	The List family paints no cell -- unlike the ListView it replaces, it sets no ink on
 	the first column and none on the rest -- so every line of a row arrives at one
-	weight. `muted` quiets the describing lines; this lifts the two a borrower scans for,
-	what the row stands for and what it is worth.
+	weight. `muted` quiets the describing lines; this lifts the one a borrower scans for,
+	what the row stands for, the way the desk's list view sets its first column.
 	"""
 	styles = {"fontWeight": "500"}
 	styles.update(kwargs.pop("styles", None) or {})
@@ -217,12 +224,52 @@ ICON_PATHS = {
 		'<ellipse cx="12" cy="5" rx="9" ry="3"/>'
 		'<path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/>'
 	),
+	"file": (
+		'<path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588'
+		'A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/>'
+		'<path d="M14 2v5a1 1 0 0 0 1 1h5"/>'
+	),
 	"chevron-right": '<path d="m9 18 6-6-6-6"/>',
+	"search": '<path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/>',
+	"arrow-up": '<path d="m5 12 7-7 7 7"/><path d="M12 19V5"/>',
+	"arrow-down": '<path d="M12 5v14"/><path d="m19 12-7 7-7-7"/>',
+	"corner-down-left": '<path d="M20 4v7a4 4 0 0 1-4 4H4"/><path d="m9 10-5 5 5 5"/>',
+	"check": '<path d="M20 6 9 17l-5-5"/>',
+	"percent": (
+		'<line x1="19" x2="5" y1="5" y2="19"/>'
+		'<circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/>'
+	),
+	"wallet": (
+		'<path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3'
+		'a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/>'
+		'<path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/>'
+	),
+	"info": '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>',
+	"square-pen": (
+		'<path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>'
+		'<path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84'
+		'a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z"/>'
+	),
+	"file-user": (
+		'<path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588'
+		'A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/>'
+		'<path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M16 22a4 4 0 0 0-8 0"/>'
+		'<circle cx="12" cy="15" r="3"/>'
+	),
+	"phone": (
+		'<path d="M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3'
+		'a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351'
+		'a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384"/>'
+	),
+	"map-pin": (
+		'<path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993'
+		' 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/>'
+	),
 }
 
 SVG = (
 	'<svg xmlns="http://www.w3.org/2000/svg" width="{size}" height="{size}" viewBox="0 0 24 24"'
-	' fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"'
+	' fill="none" stroke="currentColor" stroke-width="{stroke}" stroke-linecap="round"'
 	' stroke-linejoin="round">{paths}</svg>'
 )
 
@@ -232,12 +279,18 @@ SVG = (
 TILE_THEMES = {"": "gray", "ok": "green", "warn": "orange", "danger": "red"}
 
 
-def icon(name, size=16, **kwargs):
-	"""One glyph, drawn at `size` and painted by whatever colour it inherits."""
+def icon(name, size=16, stroke=2, hint=None, **kwargs):
+	"""One glyph, drawn at `size` and painted by whatever colour it inherits.
+
+	`stroke` is in the glyph's own 24-unit box, so it thins as `size` shrinks: a 12px
+	glyph at the default draws a 1px line. `hint` becomes the SVG's own `<title>`, which
+	the browser shows on hover -- no Tooltip component, so nothing that can crash on the canvas.
+	"""
 	styles = {"display": "flex", "alignItems": "center", "flex": "0 0 auto"}
 	styles.update(kwargs.pop("styles", None) or {})
 
-	props = {"html": SVG.format(size=size, paths=ICON_PATHS[name])}
+	paths = (f"<title>{hint}</title>" if hint else "") + ICON_PATHS[name]
+	props = {"html": SVG.format(size=size, stroke=stroke, paths=paths)}
 
 	return block("HTML", props=props, styles=styles, **kwargs)
 
@@ -265,7 +318,7 @@ def icon_line(name, value, size=14, **kwargs):
 	)
 
 
-def icon_tile(name, theme="gray", **kwargs):
+def icon_tile(name, theme="gray", tile=40, glyph=20, **kwargs):
 	"""A glyph on a tinted square: what a card about a record or a figure leads with.
 
 	The one place besides PANEL that names a colour, and for the same reason -- a tile
@@ -277,8 +330,8 @@ def icon_tile(name, theme="gray", **kwargs):
 	lead has square corners of its own.
 	"""
 	styles = {
-		"width": "40px",
-		"height": "40px",
+		"width": f"{tile}px",
+		"height": f"{tile}px",
 		"justifyContent": "center",
 		"borderRadius": "var(--radius-5)",
 		"backgroundColor": f"var(--surface-{theme}-2)",
@@ -286,7 +339,7 @@ def icon_tile(name, theme="gray", **kwargs):
 	}
 	styles.update(kwargs.pop("styles", None) or {})
 
-	return icon(name, size=20, styles=styles, **kwargs)
+	return icon(name, size=glyph, styles=styles, **kwargs)
 
 
 def toned_tile(name, tone_expression):
@@ -388,7 +441,7 @@ def repeater(data, template, data_key="name", empty="", **kwargs):
 # A row is as tall as what is in it, so the padding is what keeps two of them apart.
 # Rows here are two lines or four -- a draft application carries a line saying what it
 # is waiting for -- and the fixed `rowHeight` this replaces fitted only two. The inline
-# 12px is the inset the column names take from `list-row-px-3`, said here so that a row
+# 12px is the inset the column names take from LIST_INSET, said here so that a row
 # without a hover surface to inset itself from still lines up with them; on a row that
 # has one it lands on exactly the 12px the family was already giving it.
 ROW_PADDING = {
@@ -400,13 +453,29 @@ ROW_PADDING = {
 
 # The band the column names sit on. frappe-ui's own header is a rule under the labels
 # and nothing else, which the portal's rows are too tall and too quiet to be told from;
-# this is the filled strip the Builder pages drew, kept. `height` is a style because the
+# this is the filled strip the desk's list view draws. `height` is a style because the
 # component sets 32px as a class, and only a style outranks one.
+#
+# The rule itself is still drawn, as a child of the header that no block reaches, and
+# under a filled band it reads as a grey line along the band's bottom edge. That child is
+# the only thing in the header coloured `outline-gray-1`, so the header redefines the
+# token as transparent for itself and its children and the line goes with it.
+#
+# The gap under the band is the header's margin, not the first row's padding-top: on
+# the published bundle the row's padding-top never reached the page, and the first row
+# sat flush against the band.
 HEADER_BAND = {
-	"height": "40px",
+	"height": "36px",
 	"borderRadius": "var(--radius-4)",
 	"backgroundColor": "var(--surface-gray-2)",
+	"--outline-gray-1": "transparent",
+	"marginBottom": "10px",
 }
+
+# The inset the column names take, through the family's own hook. `list-row-px-3` is
+# the class the family documents for this, but Studio's Tailwind has no rule for it, so
+# the header stood flush with the band's edge, 12px left of the text under it.
+LIST_INSET = {"--list-row-padding-x": "12px"}
 
 # What a cell of more than one line needs. A ListCell is a flex box with `items-center`,
 # which is a row -- so its lines were laid side by side, and "Personal Loan" ran into the
@@ -431,23 +500,39 @@ def record_list(columns, items, cells, row_key="name", script=None):
 	An empty list is the whole block hidden rather than a header standing over nothing.
 	Every card that holds one of these already says in its subtitle how many rows it
 	has, so the column names are the only thing left to say it a second time and worse.
-	"""
 
-	def cell(content):
-		return block("ListCell", children=content, styles=CELL_STACK if len(content) > 1 else None)
+	A column may carry a third item, "end", to set its heading and its cells flush
+	right -- the way the desk's report view sets a column of money, so the figures line
+	up by their last digit.
+	"""
+	ends = [len(column) > 2 and column[2] == "end" for column in columns]
+
+	def aligned(styles, end):
+		return dict(styles or {}, justifyContent="flex-end", textAlign="right") if end else styles
+
+	def cell(content, end):
+		return block(
+			"ListCell",
+			children=content,
+			styles=aligned(CELL_STACK if len(content) > 1 else None, end),
+		)
 
 	header = block(
 		"ListHeader",
 		children=[
-			block("ListHeaderCell", children=[text(label, size="text-xs")])
-			for _track, label in columns
+			block(
+				"ListHeaderCell",
+				children=[text(column[1], size="text-sm", styles={"color": "var(--ink-gray-5)"})],
+				styles=aligned(None, end),
+			)
+			for column, end in zip(columns, ends)
 		],
 		styles=HEADER_BAND,
 	)
 	record = block(
 		"ListRow",
 		props={"value": "{{ value }}"},
-		children=[cell(content) for content in cells],
+		children=[cell(content, end) for content, end in zip(cells, ends)],
 		events=click(script) if script else None,
 		styles=ROW_PADDING,
 	)
@@ -459,14 +544,14 @@ def record_list(columns, items, cells, row_key="name", script=None):
 
 	return block(
 		"List",
-		props={"columns": [track for track, _label in columns]},
+		props={"columns": [column[0] for column in columns]},
 		children=[header, rows],
 		visible=any_row(items),
 		# The header's own inset, which it takes from this hook and nowhere else. The
 		# rows take the same 12px from ROW_PADDING rather than from the hook, because
 		# the family hands it only to a row with a hover surface to inset it from -- so
 		# a list of plain rows would otherwise sit 12px left of the names of its columns.
-		classes=["list-row-px-3"],
+		styles=LIST_INSET,
 	)
 
 
@@ -497,6 +582,114 @@ def pair_grid(items, with_detail=False, **kwargs):
 		tablet=tablet,
 		mobile=mobile,
 		**kwargs,
+	)
+
+
+# Where a field grid's column rule sits: the inset each reading keeps from the rule on
+# its left, plus the rule itself. The grid is pulled left by both, so the first
+# column's rule falls outside its clipping box and the readings line up with the text above.
+FIELD_INSET = 16
+FIELD_RULE = 1
+
+
+def field_grid(items, with_detail=False, **kwargs):
+	"""{label, value, detail} rows as the desk reads a record: three columns with a rule between them.
+
+	A label in grey over its value, the way a read-only field sits on a Frappe form. The
+	rule is each reading's left border. A repeated block cannot tell which copy starts a
+	row, so the grid is pulled left by one inset and one rule, and the wrapper clips what
+	lands outside -- the first column's rule, at every column count the grid falls to.
+	"""
+	pull = f"{FIELD_INSET + FIELD_RULE}px"
+	body = [
+		text("{{ dataItem.label }}", size="text-sm", styles={"color": "var(--ink-gray-5)"}),
+		text("{{ dataItem.value }}", size="text-base", styles={"color": "var(--ink-gray-9)"}),
+	]
+	if with_detail:
+		body.append(muted("{{ dataItem.detail }}", visible="{{ dataItem.detail }}"))
+
+	reading = column(
+		body,
+		gap="6px",
+		styles={
+			"minWidth": "0px",
+			"paddingInlineStart": f"{FIELD_INSET}px",
+			"paddingInlineEnd": f"{FIELD_INSET}px",
+			"borderInlineStart": f"{FIELD_RULE}px solid var(--outline-gray-1)",
+		},
+	)
+	grid = repeater(
+		items,
+		reading,
+		empty="Nothing to show",
+		styles={
+			"display": "grid",
+			"gridTemplateColumns": "repeat(3, minmax(0, 1fr))",
+			"columnGap": "0px",
+			"rowGap": "20px",
+			"marginInlineStart": f"-{pull}",
+		},
+		tablet={"gridTemplateColumns": "repeat(2, minmax(0, 1fr))"},
+		mobile={"gridTemplateColumns": "minmax(0, 1fr)"},
+		**kwargs,
+	)
+
+	return container([grid], styles={"overflow": "hidden"})
+
+
+def tab_strip(tabs, state):
+	"""frappe-ui's Tabs, drawn from blocks: a row of labels on a rule, the open one underlined.
+
+	Not the Tabs component, which renders its panel slot once for whichever tab is open --
+	so every panel under it would draw at once. The look is copied from its source: 14px
+	labels 20px apart, grey-5 until open and grey-9 once it is, and a 2px bar in
+	surface-gray-10 standing on the rule under the open one.
+
+	`tabs` is (label, value) pairs and `state` the page ref that holds the open value.
+	A label's colour is a style, and only props are evaluated, so each label is in the
+	tree twice and the ref shows one.
+	"""
+
+	def tab(label, value):
+		is_open = "%s === '%s'" % (state, value)
+		label_style = {"whiteSpace": "nowrap"}
+
+		return container(
+			[
+				text(label, size="text-base", styles=dict(label_style, color="var(--ink-gray-9)"), visible="{{ %s }}" % is_open),
+				text(label, size="text-base", styles=dict(label_style, color="var(--ink-gray-5)"), visible="{{ !(%s) }}" % is_open),
+				container(
+					styles={
+						"position": "absolute",
+						"left": "0px",
+						"right": "0px",
+						# Inside the tab rather than over the rule: the strip clips at its
+						# padding edge, and the rule is outside it.
+						"bottom": "0px",
+						"height": "2px",
+						"borderRadius": "9999px",
+						"backgroundColor": "var(--surface-gray-10)",
+					},
+					visible="{{ %s }}" % is_open,
+				),
+			],
+			styles={"position": "relative", "padding": "10px 0", "cursor": "pointer", "flex": "0 0 auto"},
+			events=click(f"{state}.value = '{value}'"),
+		)
+
+	# The strip scrolls rather than wrapping, as frappe-ui's does, so four tabs on a phone
+	# do not push the page wider than the screen. The bar is hidden: the cut-off label
+	# already says there is more, and a bar under the rule reads as a second rule.
+	return row(
+		[tab(label, value) for label, value in tabs],
+		gap="20px",
+		align="stretch",
+		styles={
+			"borderBottom": "1px solid var(--outline-gray-2)",
+			"overflowX": "auto",
+			"overflowY": "hidden",
+			"scrollbarWidth": "none",
+		},
 	)
 
 

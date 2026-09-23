@@ -1,7 +1,7 @@
 # Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-"""What the rail's search icon finds: the borrower's own records, by any word in them.
+"""What the Ctrl+K palette finds: the borrower's own records, by any word in them.
 
 Nothing here queries with a LIKE. The page asks the same functions every other portal
 page asks -- get_loans, get_applications -- and filters what comes back. That is what
@@ -28,19 +28,13 @@ from lending.portal.core import (
 	money,
 	nav_items,
 	outstanding_of,
-	shell_payload,
 	status_label,
 )
 
 # A borrower with hundreds of accounts can match hundreds of rows on one common word,
-# and a page of those is not an answer. It shows the first of them and says how many
-# it is holding back, which is the prompt to type a second word.
-RESULT_LIMIT = 50
-
-# The dialog is a peek and the page is the list. Five rows is the whole of what the
-# dialog offers: enough that the thing you meant is usually among them, few enough that
-# the panel never grows a scrollbar of its own over the page behind it.
-DIALOG_LIMIT = 5
+# and a palette of those is not an answer. It shows five, as the desk's awesomebar
+# does, and says how many it is holding back, which is the prompt to type a second word.
+RESULT_LIMIT = 5
 
 
 def results_for(query: str, customers: list[str], limit: int = RESULT_LIMIT) -> tuple[list[dict], str]:
@@ -72,36 +66,16 @@ def page_rows() -> list[dict]:
 	]
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["GET"])
 def find() -> dict:
-	"""The results on their own, for the dialog the rail opens.
+	"""The results for the palette, fetched as the borrower types.
 
-	A GET, because it reads and changes nothing -- and because a portal page carries
-	none of the frappe bundle, so it has no CSRF token to send with a POST.
+	Only the results, not the portal frame: the palette sits over a page that already
+	has one, and it asks again on every pause in the typing.
 	"""
-	results, note = results_for(
-		clean(frappe.form_dict.get("q")), get_portal_customers(), limit=DIALOG_LIMIT
-	)
+	results, note = results_for(clean(frappe.form_dict.get("q")), get_portal_customers())
 
 	return {"results": results, "note": note}
-
-
-@frappe.whitelist()
-def get_search_page() -> dict:
-	"""The same results, wearing the portal frame.
-
-	The query arrives on the URL because the box on the page is a plain GET form: a
-	search is worth a link, and one that answers on the address bar still works where
-	the dialog's script does not run.
-	"""
-	customers = get_portal_customers()
-	query = clean(frappe.form_dict.get("q"))
-	results, note = results_for(query, customers)
-
-	payload = shell_payload(_("Search"), _("Account overview"), customers, [])
-	payload.update({"query": query, "results": results, "results_note": note})
-
-	return payload
 
 
 def searchable(customers: list[str]) -> list[dict]:
@@ -188,8 +162,9 @@ def haystack(row: dict) -> str:
 
 
 def results_note(query: str, total: int, limit: int = RESULT_LIMIT) -> str:
+	# An empty box needs no caption: the placeholder already says what to type.
 	if not query:
-		return _("Type to search your loan accounts, applications and documents")
+		return ""
 
 	if not total:
 		return _("Nothing matches that")

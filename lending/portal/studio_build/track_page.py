@@ -136,6 +136,7 @@ def build_track():
 			state=[("reference", '""'), ("mobileNumber", '""')],
 			body=TRACK_SCRIPT,
 			returns=["busy", "result", "track"],
+			search=False,
 		),
 		allow_guest=True,
 	)

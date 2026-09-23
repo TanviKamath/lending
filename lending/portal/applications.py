@@ -1,7 +1,7 @@
 # Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-"""Read-only data for the borrower's application list and application detail pages.
+"""Read-only data for the borrower's application page.
 
 Ownership is checked before anything is read, and a application that belongs to
 someone else raises the same PermissionError as one that does not exist, so the
@@ -24,7 +24,6 @@ from lending.portal.core import (
 	clean,
 	get_applications,
 	get_portal_customers,
-	leads_for_login,
 	long_date,
 	money,
 	shell_payload,
@@ -66,70 +65,19 @@ DETAIL_FIELDS = (
 
 
 @frappe.whitelist()
-def get_applications_page() -> dict:
-	"""Every application in progress, each linking to its own tracker."""
-	customers = get_portal_customers()
-	applications = get_applications(customers) if customers else []
-	enquiries = get_enquiries()
-	waiting = sum(1 for row in applications if row["needs_borrower"])
-	payload = shell_payload(_("Applications"), _("Apply for a loan"), customers, [])
-	payload.update(
-		{
-			"applications": applications,
-			"applications_note": (
-				_("{0} in progress · {1} waiting on you").format(len(applications), waiting)
-				if applications
-				else _("No applications in progress")
-			),
-			"enquiries": enquiries,
-			"enquiries_note": (
-				_("{0} raised from this website").format(len(enquiries))
-				if enquiries
-				else _("No enquiries")
-			),
-		}
-	)
-
-	return payload
-
-
-def get_enquiries() -> list[dict]:
-	"""What the borrower asked for before any of it became an application.
-
-	A new borrower has one of these and nothing else, so this is the whole of their
-	account on the day they sign up. Each row carries the reference they were given,
-	because that is what the public tracker asks for.
-	"""
-	from lending.portal.apply import tracker_stage
-
-	return [
-		{
-			"label": row.loan_product,
-			"value": money(row.loan_amount),
-			"detail": "{0} · {1} · {2}".format(
-				row.name, long_date(row.creation), tracker_stage(row)
-			),
-		}
-		for row in leads_for_login()
-	]
-
-
-@frappe.whitelist()
 def get_application_detail() -> dict:
-	"""One application: where it stands, what it asks for, who else is on it."""
-	name = frappe.form_dict.get("name")
+	"""One application: where it stands, what it asks for, who else is on it.
+
+	With no application named, the borrower's newest -- see default_application.
+	"""
+	name = frappe.form_dict.get("name") or default_application()
 	if not name:
-		raise frappe.PermissionError(_("Not permitted"))
+		return no_application_payload()
 
 	assert_owns("Loan Application", name)
 	application = frappe.db.get_value("Loan Application", name, DETAIL_FIELDS, as_dict=True)
 
 	payload = shell_payload(_("Application"), _("Contact us"), [application.applicant], [])
-	payload["crumb"] = application.loan_product
-	payload["breadcrumbs"] = [
-		{"label": "Applications", "route": "/borrower-portal/applications"},
-		{"label": _("Application {0}").format(application.name)}
-	]
 	payload["head_note"] = "{0} · {1}".format(
 		application.name, stage_label(application)
 	)
@@ -153,6 +101,45 @@ def get_application_detail() -> dict:
 			"co_applicants_note": co_applicants_note(name),
 			"documents": documents,
 			"documents_note": documents_note(documents),
+		}
+	)
+
+	return payload
+
+
+def default_application() -> str | None:
+	"""The application the sidebar opens: the borrower's newest.
+
+	The sidebar goes straight to an application rather than to a list of them, as it
+	does for loans. A borrower with more than one reaches the others from the overview
+	and from search.
+	"""
+	customers = get_portal_customers()
+	applications = get_applications(customers) if customers else []
+
+	return applications[0]["name"] if applications else None
+
+
+def no_application_payload() -> dict:
+	"""The page for a borrower with no application yet: the frame, and every card empty."""
+	payload = shell_payload(_("Application"), _("Apply for a loan"), get_portal_customers(), [])
+	payload.update(
+		{
+			"product": _("No application yet"),
+			"reference": "",
+			"headline": _("Apply for a loan and you can follow it here."),
+			"headline_note": "",
+			"steps": [],
+			"steps_note": "",
+			"preview_note": _("Nothing sent yet"),
+			"terms": [],
+			"terms_note": "",
+			"applicant": [],
+			"applicant_note": "",
+			"co_applicants": [],
+			"co_applicants_note": "",
+			"documents": [],
+			"documents_note": _("Nothing attached yet"),
 		}
 	)
 
@@ -285,39 +272,13 @@ def get_application_steps(application: dict) -> list[dict]:
 			)
 		)
 
+	# The connector to the next step: green once both ends are done, and none after the
+	# last. A repeated block cannot tell which copy of it is the last, so the data says.
+	for this, after in zip(steps, steps[1:]):
+		this["line"] = "ok" if this["code"] == after["code"] == "done" else "plain"
+	steps[-1]["line"] = ""
+
 	return steps
-
-
-def progress_line(steps: list[dict]) -> str:
-	"""Where a tracker has reached, in one line: "Step 3 of 4 - Under review".
-
-	A page with room for a timeline draws the steps. A page with room for a line says
-	which one of them the application is standing on, which is the part a borrower
-	checking in actually wants.
-	"""
-	at = next(
-		(index for index, row in enumerate(steps) if row["code"] == "current"), len(steps) - 1
-	)
-
-	return _("Step {0} of {1} · {2}").format(at + 1, len(steps), steps[at]["title"])
-
-
-def progress_by_application(names: list[str]) -> dict[str, str]:
-	"""One progress line per application, read in a single query.
-
-	The names come from the borrower's own list, never from the request, so this reads
-	them without a second ownership check.
-	"""
-	if not names:
-		return {}
-
-	rows = frappe.get_all(
-		"Loan Application",
-		filters={"name": ["in", names]},
-		fields=["name", "status", "docstatus", "posting_date"],
-	)
-
-	return {row.name: progress_line(get_application_steps(row)) for row in rows}
 
 
 def stage_note(application: dict) -> str:
@@ -441,66 +402,7 @@ def documents_note(documents: list[dict]) -> str:
 	)
 
 
-@frappe.whitelist()
-def get_documents_page() -> dict:
-	"""Every document attached to any of the borrower's applications.
-
-	There is no checklist to show against them, for the reason document_rows() gives:
-	an outstanding document is not a row with an empty file, it is no row at all, and
-	nothing records what a product expects. So this page answers "what have I sent
-	you" honestly, and cannot yet answer "what do you still need".
-	"""
-	customers = get_portal_customers()
-	applications = get_applications(customers) if customers else []
-
-	progress = progress_by_application([row["name"] for row in applications])
-
-	documents = []
-	listed = []
-	for application in applications:
-		attached = document_rows(application["name"])
-		documents.extend({**document, "detail": application["product"]} for document in attached)
-		listed.append(
-			{
-				**application,
-				"progress": progress.get(application["name"], ""),
-				# This page is about files, so the column that carries money elsewhere
-				# counts what the application already holds.
-				"attached": (
-					_("{0} sent").format(len(attached)) if attached else _("Nothing sent")
-				),
-			}
-		)
-
-	payload = shell_payload(_("Documents"), _("Contact us"), customers, [])
-	payload.update(
-		{
-			"documents": documents,
-			"documents_note": (
-				_("{0} attached across {1} applications").format(len(documents), len(applications))
-				if documents
-				else _("Nothing attached yet")
-			),
-			"applications": listed,
-			"applications_note": (
-				_("{0} in progress · tap one to see its tracker").format(len(applications))
-				if applications
-				else _("No applications in progress")
-			),
-			# The wording that went with having no upload form at all. Both notes are
-			# returned; the page shows whichever fits, on can_upload.
-			"upload_note": _("Attach it to one of your applications. Only you and we can see it."),
-			"no_upload_note": _(
-				"There is no application open for new documents just now. "
-				"Once we have your application in draft, you can attach files here."
-			),
-		}
-	)
-
-	return payload
-
-
-# --- the one write this page accepts ------------------------------------------------
+# --- sending a document -------------------------------------------------------------
 
 # A borrower sends identity and income papers, so images and PDFs and nothing else.
 # Checked on the extension here and again by the File doctype's own rules.

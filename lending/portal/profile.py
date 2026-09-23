@@ -68,7 +68,7 @@ def get_profile_page() -> dict:
 			),
 			"edit_note": _(
 				"Contact details and address can be corrected. Name and tax id come from "
-				"your verified records -- write to us to change those."
+				"your verified records — write to us to change those."
 			),
 		}
 	)
@@ -85,11 +85,35 @@ def chosen_customer(customers: list[str]) -> str | None:
 
 
 def edit_form(customers: list[str]) -> dict:
-	"""Current values for the edit form, so the boxes open filled in."""
+	"""Current values for the edit form, so the boxes open filled in.
+
+	`forms` holds every record's values, keyed by customer, so a page that switches
+	between records can refill its boxes without asking again. The `form_*` keys are
+	the chosen record's, flattened.
+	"""
 	name = chosen_customer(customers)
 	if not name:
-		return {"form_customer": "", "customer_options": [], "form_note": ""}
+		return {"form_customer": "", "customer_options": [], "form_note": "", "forms": {}}
 
+	forms = {row: record_values(row) for row in customers}
+	chosen = forms[name]
+
+	form = {
+		"form_customer": name,
+		"forms": forms,
+		"customer_options": [
+			{"label": values["customer_name"] or row, "value": row} for row, values in forms.items()
+		],
+		"form_note": _("Editing {0}").format(chosen["customer_name"]),
+		"save_label": _("Save my details"),
+	}
+	form.update({f"form_{field}": chosen[field] for field in EDITABLE_CONTACT + EDITABLE_ADDRESS})
+
+	return form
+
+
+def record_values(name: str) -> dict:
+	"""One record's identity, contact details and address, as the form's boxes read them."""
 	customer = frappe.db.get_value("Customer", name, CUSTOMER_FIELDS, as_dict=True)
 	contact = frappe.db.get_value(
 		"Contact", primary_contact(customer), ["email_id", "mobile_no", "phone"], as_dict=True
@@ -98,18 +122,17 @@ def edit_form(customers: list[str]) -> dict:
 		"Address", primary_address(customer), EDITABLE_ADDRESS, as_dict=True
 	) or frappe._dict()
 
-	form = {
-		"form_customer": name,
-		"form_email": contact.email_id or customer.email_id or "",
-		"form_mobile": contact.mobile_no or customer.mobile_no or "",
-		"form_phone": contact.phone or "",
-		"customer_options": [{"label": row, "value": row} for row in customers],
-		"form_note": _("Editing {0}").format(customer.customer_name),
-		"save_label": _("Save my details"),
+	values = {
+		"customer_name": customer.customer_name or "",
+		"customer_type": customer.customer_type or "",
+		"tax_id": customer.tax_id or "",
+		"email": contact.email_id or customer.email_id or "",
+		"mobile": contact.mobile_no or customer.mobile_no or "",
+		"phone": contact.phone or "",
 	}
-	form.update({f"form_{field}": address.get(field) or "" for field in EDITABLE_ADDRESS})
+	values.update({field: address.get(field) or "" for field in EDITABLE_ADDRESS})
 
-	return form
+	return values
 
 
 def row(label: str, value: str, detail: str = "") -> dict:

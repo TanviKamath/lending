@@ -102,9 +102,10 @@ fixtures = [
 #
 # What still reads them is portal.core.nav_items(), and through it portal.search: a
 # borrower searching for "statement" should find the page as well as the entries on it.
-# The routes stay in the /borrower/ form the rest of the data layer speaks -- loan_url
-# and application_url too -- and the Studio app turns them into its own routes as it
-# renders. See utils/portal.ts in the exported app.
+# The routes are in the /borrower-portal/ form the rest of the data layer speaks --
+# loan_url and application_url too -- because nav_items keeps only the rows under
+# core.PORTAL_ROUTE_PREFIX. The Studio app strips the prefix as it routes; see
+# utils/portal.ts in the exported app.
 #
 # standard_portal_menu_items is the other door, and the wrong one: it syncs into Portal
 # Settings, whose sync drops every row that does not name an existing DocType, and four
@@ -123,13 +124,16 @@ fixtures = [
 # repayments, disbursements and charges as sections of a loan rather than as pages of
 # their own, so the sidebar does not offer them.
 portal_menu_items = [
-	{"title": "Account overview", "route": "/borrower/overview"},
-	{"title": "Loan accounts", "route": "/borrower/loans", "covers": "/borrower/loan"},
-	{"title": "Applications", "route": "/borrower/applications", "covers": "/borrower/application"},
-	{"title": "Documents", "route": "/borrower/documents"},
-	{"title": "Statement of account", "route": "/borrower/statement"},
-	{"title": "Interest certificate", "route": "/borrower/certificate"},
-	{"title": "Personal details", "route": "/borrower/profile"},
+	{"title": "Account overview", "route": "/borrower-portal/overview"},
+	{"title": "Loan accounts", "route": "/borrower-portal/loans", "covers": "/borrower-portal/loan"},
+	{
+		"title": "Application",
+		"route": "/borrower-portal/applications",
+		"covers": "/borrower-portal/application",
+	},
+	{"title": "Statement of account", "route": "/borrower-portal/statement"},
+	{"title": "Interest certificate", "route": "/borrower-portal/certificate"},
+	{"title": "Personal details", "route": "/borrower-portal/profile"},
 ]
 
 # Home Pages

@@ -43,6 +43,12 @@ import frappe
 
 BASELINE_FOLDER = ("portal", "studio_build", "baseline")
 
+# What the canvas writes into a block that nobody has edited. The empty fields the
+# generator writes as {} come back as None, `classes` appears as [], and every slot gains
+# the two ids Studio keeps it by. None of it is a hand edit, so none of it may count as
+# one -- see same().
+SLOT_BOOKKEEPING = ("parentBlockId", "slotId")
+
 # Set while a build is throwing the merge away -- see reset(). A flag on the module
 # rather than an argument, because a reset is a property of the run and not of any one
 # page, and every page's build() calls upsert_page for itself.
@@ -72,6 +78,26 @@ def identify(blocks, route):
 def merge_blocks(base, live, new):
 	"""The tree to save: `new` carried onto `live`, with the canvas's own work kept."""
 	return PageMerge().children(base, live, new)
+
+
+def same(first, second):
+	"""Whether two values say the same thing, once the canvas's own bookkeeping is set aside.
+
+	Plain equality read every block a page had been opened with as changed by hand, so a
+	block the generator dropped was kept beside its replacement, and a generated value
+	under a field the canvas had only normalised never landed.
+	"""
+	return _settled(first) == _settled(second)
+
+
+def _settled(value):
+	if isinstance(value, dict):
+		kept = {key: _settled(item) for key, item in value.items() if key not in SLOT_BOOKKEEPING}
+		return {key: item for key, item in kept.items() if item not in (None, "", [], {})} or None
+	if isinstance(value, list):
+		return [_settled(item) for item in value] or None
+
+	return None if value == "" else value
 
 
 def merge_resources(live, new):
@@ -130,7 +156,7 @@ class PageMerge:
 		merged = dict(live)
 
 		for field in self.SCALARS:
-			if live.get(field) != base.get(field):
+			if not same(live.get(field), base.get(field)):
 				continue
 			if field in new:
 				merged[field] = new[field]
@@ -188,8 +214,19 @@ class PageMerge:
 		return merged
 
 	def slots(self, base, live, new):
-		"""Named slots. A slot the generator has dropped stays, since it may hold hand-added blocks."""
+		"""Named slots, merged by the same rule as children.
+
+		A slot the generator has dropped goes only while the canvas holds exactly what the
+		generator last put there. One that was changed by hand may hold hand-added blocks,
+		so it stays.
+		"""
 		merged = dict(live)
+
+		for name, base_slot in base.items():
+			if name in new or name not in live:
+				continue
+			if same(live[name].get("slotContent"), base_slot.get("slotContent")):
+				merged.pop(name)
 
 		for name, slot in new.items():
 			live_slot = live.get(name)
@@ -219,7 +256,7 @@ class PageMerge:
 			node_id = node.get("componentId")
 			if node_id in new_by_id:
 				continue
-			if node_id in base_by_id and node == base_by_id[node_id]:
+			if node_id in base_by_id and same(node, base_by_id[node_id]):
 				continue
 
 			self.kept.append(node_id)

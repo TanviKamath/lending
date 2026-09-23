@@ -1694,11 +1694,11 @@
    "originalElement": "body"
   }
  ],
- "creation": "2026-09-23 12:26:28.473453",
+ "creation": "2026-09-24 00:54:36.991704",
  "doctype": "Studio Page",
  "frappe_app": "lending",
  "is_standard": 1,
- "modified": "2026-09-23 17:50:00.253257",
+ "modified": "2026-09-24 02:22:04.794016",
  "modified_by": "Administrator",
  "name": "apply_for_a_loan",
  "owner": "Administrator",
@@ -1706,14 +1706,6 @@
  "page_title": "Apply for a loan",
  "published": 1,
  "resources": [
-  {
-   "__unsaved": 1,
-   "auto": 1,
-   "method": "GET",
-   "resource_name": "apply",
-   "resource_type": "API Resource",
-   "url": "lending.portal.apply.get_apply_page"
-  },
   {
    "__unsaved": 1,
    "auto": 1,

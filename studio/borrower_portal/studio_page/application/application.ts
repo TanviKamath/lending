@@ -1,6 +1,6 @@
 import { computed, ref, watch } from "vue"
 import { call, toast } from "frappe-ui"
-import { tone, appRoute } from "@app/utils/portal"
+import { tone, appRoute, useSearch } from "@app/utils/portal"
 
 export default function setup(context: any) {
 	const { router } = context
@@ -13,6 +13,7 @@ export default function setup(context: any) {
 		const to = appRoute(url)
 		if (to) router.push(to)
 	}
+	const search = useSearch(open)
 
-	return { tone, open, showAlerts, alertsTab, sidebarCollapsed, previewTab }
+	return { tone, open, showAlerts, alertsTab, sidebarCollapsed, ...search, previewTab }
 }

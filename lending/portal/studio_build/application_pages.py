@@ -1,37 +1,38 @@
 # Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-"""The borrower's Applications list, and one application's tracker.
+"""One application's tracker, and the applications table the overview draws.
 
-Both replace pages of the Builder portal this one was migrated from, and read the
-same two endpoints it read.
+There is no list page. The sidebar opens the borrower's newest application straight
+away, as it opens their loan; the overview's table is the way to any other.
 
 The tracker leads on the detail page, because "where has my application got to" is the
 question that brings a borrower here. Under it, what they asked for: four sets of
 label-and-value pairs, which the Builder page stacked behind a tab strip built out of
-buttons and a stylesheet, and this one hands to frappe-ui's TabButtons.
+buttons and a stylesheet, and this one draws as frappe-ui's underlined Tabs, each set's
+fields laid straight on the card under them.
 """
 
 from lending.portal.studio_build.app import api_resource, page_script, upsert_page
 from lending.portal.studio_build.blocks import (
-	block,
 	card,
 	column,
+	container,
+	field_grid,
+	icon,
 	muted,
-	pair_grid,
-	pair_rows,
 	reader,
 	record_list,
 	repeater,
 	row,
 	spacer,
 	subject,
+	tab_strip,
 	text,
 	toned_badge,
 )
 from lending.portal.studio_build.shell import frame
 
-LIST_SOURCE = "applications"
 DETAIL_SOURCE = "application"
 ALERTS = ("alerts", "lending.portal.notifications.get_notifications")
 
@@ -43,6 +44,13 @@ SECTIONS = (
 	("Co-applicants", "co_applicants", True),
 	("Documents", "documents", True),
 )
+
+# The tracker's geometry and its one colour: the circle, the space between it and the
+# name under it, and the green a done step and the line between two of them share.
+STEP_NODE = "32px"
+STEP_NODE_MOBILE = "24px"
+STEP_LABEL_GAP = "8px"
+STEP_GREEN = "var(--surface-green-8)"
 
 
 # --- the list -----------------------------------------------------------------------
@@ -73,65 +81,122 @@ def applications(read):
 				muted("{{ item.note }}", visible="{{ item.note }}"),
 			],
 			[toned_badge("{{ item.stage }}", "item.stage_tone", size="lg")],
-			[subject("{{ item.amount }}")],
+			[text("{{ item.amount }}", size="text-base")],
 		],
 		script="open(item.url)",
-	)
-
-
-def list_content(read):
-	return [
-		card("Applications", read("applications_note"), applications(read)),
-		# What a borrower has before any of it becomes an application. On the day they
-		# sign up this card is their whole account, so the page cannot leave it out.
-		card("Enquiries", read("enquiries_note"), pair_rows(read("enquiries"), with_detail=True)),
-	]
-
-
-def build_list():
-	read = reader(LIST_SOURCE)
-
-	return upsert_page(
-		"Applications",
-		"/applications",
-		frame(
-			LIST_SOURCE,
-			list_content(read),
-			action_label="Apply for a loan",
-			action_route="/apply",
-		),
-		[
-			api_resource(LIST_SOURCE, "lending.portal.applications.get_applications_page"),
-			api_resource(*ALERTS, auto=0),
-		],
 	)
 
 
 # --- one application ------------------------------------------------------------------
 
 
-def tracker(read):
-	"""How far the file has got, as a step per stage.
+def step_node():
+	"""The circle for one step, with its short name hung under it.
 
-	`mark` is the tick, the ring or the empty dot the data layer decides, and `tone`
-	is how loudly it says so -- the same {title, note, mark, tone} rows the public
-	tracker at /track draws.
+	A done step is a green disc with a tick, the step in progress a green ring round a
+	dot, and one still ahead an empty grey ring. All three are in the tree and the step's
+	`code` shows one, because a fill is a style and only props are evaluated.
+
+	The name is placed absolutely, centred on the circle, so a name wider than the circle
+	does not push the connectors away from it.
 	"""
-	step = column(
-		[
-			row([muted("{{ dataItem.mark }}"), text("{{ dataItem.title }}", size="text-base")], gap="6px"),
-			muted("{{ dataItem.note }}"),
-		],
-		gap="2px",
-		styles={"flex": "1", "minWidth": "0px"},
+	ring = {
+		"width": STEP_NODE,
+		"height": STEP_NODE,
+		"borderRadius": "9999px",
+		"display": "flex",
+		"alignItems": "center",
+		"justifyContent": "center",
+		"boxSizing": "border-box",
+	}
+	# Five circles at full size leave a phone's short connectors no room between names.
+	small = {"width": STEP_NODE_MOBILE, "height": STEP_NODE_MOBILE}
+	done = icon(
+		"check",
+		size=16,
+		stroke=3,
+		styles=dict(ring, backgroundColor=STEP_GREEN, color="#fff"),
+		mobile=small,
+		visible="{{ dataItem.code === 'done' }}",
+	)
+	current = container(
+		[container(styles={"width": "10px", "height": "10px", "borderRadius": "9999px", "backgroundColor": STEP_GREEN})],
+		styles=dict(ring, border=f"2px solid {STEP_GREEN}", backgroundColor="var(--surface-white)"),
+		mobile=small,
+		visible="{{ dataItem.code === 'current' }}",
+	)
+	pending = container(
+		styles=dict(ring, border="2px solid var(--outline-gray-2)", backgroundColor="var(--surface-white)"),
+		mobile=small,
+		visible="{{ dataItem.code === 'pending' }}",
+	)
+
+	label = {
+		"position": "absolute",
+		"top": f"calc(100% + {STEP_LABEL_GAP})",
+		"left": "50%",
+		"transform": "translateX(-50%)",
+		"whiteSpace": "nowrap",
+	}
+	reached = text(
+		"{{ dataItem.short }}",
+		size="text-base",
+		styles=dict(label, color="var(--ink-gray-7)"),
+		mobile={"fontSize": "12px"},
+		visible="{{ dataItem.code !== 'pending' }}",
+	)
+	ahead = text(
+		"{{ dataItem.short }}",
+		size="text-base",
+		styles=dict(label, color="var(--ink-gray-5)"),
+		mobile={"fontSize": "12px"},
+		visible="{{ dataItem.code === 'pending' }}",
+	)
+
+	return container(
+		[done, current, pending, reached, ahead],
+		styles={"position": "relative", "flex": "0 0 auto"},
+	)
+
+
+def step_line(tone, colour):
+	return container(
+		styles={"flex": "1 1 auto", "height": "3px", "borderRadius": "9999px", "backgroundColor": colour},
+		visible="{{ dataItem.line === '%s' }}" % tone,
+	)
+
+
+def tracker(read):
+	"""How far the file has got: a circle per stage, joined by a line across the card.
+
+	Each copy of the template is `display: contents`, so its circle and the line after
+	it are laid out as the repeater's own children -- circle, line, circle, line, circle
+	-- and the lines share out the width between the circles. The payload's `line` says
+	which colour the line after a step is, and that there is none after the last.
+
+	The inline padding is room for the first and last names, which overhang their
+	circles; the bottom padding is room for all of them.
+	"""
+	step = container(
+		[step_node(), step_line("ok", STEP_GREEN), step_line("plain", "var(--outline-gray-2)")],
+		styles={"display": "contents"},
 	)
 
 	return repeater(
 		read("steps"),
 		step,
 		data_key="title",
-		styles={"display": "flex", "flexDirection": "row", "gap": "12px", "width": "100%"},
-		mobile={"flexDirection": "column"},
+		styles={
+			"display": "flex",
+			"flexDirection": "row",
+			"flexWrap": "nowrap",
+			"alignItems": "center",
+			"gap": "0px",
+			"width": "100%",
+			"boxSizing": "border-box",
+			"padding": "4px 28px 32px",
+		},
+		mobile={"padding": "4px 20px 28px"},
 	)
 
 
@@ -159,44 +224,37 @@ def lead_card(read):
 	)
 
 
-def preview(read):
-	"""Four sets of pairs behind four tabs, rather than four screens of scroll.
-
-	TabButtons and a ref, rather than the Tabs component: Tabs renders its panel slot
-	once for whichever tab is open and hands the tab to the slot, so four panels in it
-	would all draw at once. Which section is showing is this page's own state, so the
-	page script holds it and each panel says when it is the one being read.
-	"""
-	tabs = block(
-		"TabButtons",
-		props={
-			"options": [{"label": label, "value": key} for label, key, _detail in SECTIONS],
-			"modelValue": {"$type": "variable", "name": "previewTab"},
-			"size": "sm",
-		},
+def section_panel(read, key, detail):
+	"""One section's fields, straight on the card. The open tab already names it, and a
+	border round them would draw a second box inside the card's own."""
+	return container(
+		[field_grid(read(key), with_detail=detail)],
+		visible="{{ previewTab === '%s' }}" % key,
 	)
-	panels = [
-		column(
-			[muted(read(f"{key}_note")), pair_grid(read(key), with_detail=detail)],
-			gap="10px",
-			visible="{{ previewTab === '%s' }}" % key,
-		)
-		for _label, key, detail in SECTIONS
-	]
 
-	return column([tabs, *panels], gap="12px")
+
+def preview(read):
+	"""Four sections behind four tabs, rather than four screens of scroll.
+
+	Which section is showing is this page's own state, so the page script holds it,
+	the tab strip sets it and each panel says when it is the one being read.
+	"""
+	tabs = tab_strip([(label, key) for label, key, _detail in SECTIONS], "previewTab")
+	panels = [section_panel(read, key, detail) for _label, key, detail in SECTIONS]
+
+	return column([tabs, *panels], gap="16px")
 
 
 def detail_content(read):
 	return [lead_card(read), card("Application preview", read("preview_note"), preview(read))]
 
 
-def build_detail():
+def build_detail(title, route, params=None):
 	read = reader(DETAIL_SOURCE)
 
 	return upsert_page(
-		"Application",
-		"/application/:name",
+		title,
+		route,
 		frame(
 			DETAIL_SOURCE,
 			detail_content(read),
@@ -205,7 +263,7 @@ def build_detail():
 			api_resource(
 				DETAIL_SOURCE,
 				"lending.portal.applications.get_application_detail",
-				params={"name": "{{ route.params.name }}"},
+				params=params,
 			),
 			api_resource(*ALERTS, auto=0),
 		],
@@ -214,4 +272,12 @@ def build_detail():
 
 
 def build():
-	return build_list(), build_detail()
+	"""The sidebar's page, which opens the newest application, and one per application.
+
+	The same pair the loan pages are: /applications names nothing and the data layer
+	picks, /application/:name is where a row on the overview leads.
+	"""
+	return (
+		build_detail("Loan application", "/applications"),
+		build_detail("Application", "/application/:name", params={"name": "{{ route.params.name }}"}),
+	)

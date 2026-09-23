@@ -5,9 +5,8 @@
 
 It replaces the overview of the Builder portal this one was migrated from, and reads
 the same payload: `lending.portal.core.get_dashboard`, unchanged. What differs is what
-draws it -- a stage is a frappe-ui Badge rather than a styled span, the record tables
-are the List family rather than a grid of divs, and the account's history is
-@framework/ui's ActivityTimeline rather than dots and stems drawn by hand.
+draws it -- a stage is a frappe-ui Badge rather than a styled span, and the record
+tables are the List family rather than a grid of divs.
 
 The scheduled repayments beside it are still a repeater, deliberately: a timeline is a
 record of what happened, and those four rows are a diary of what has not.
@@ -16,18 +15,20 @@ record of what happened, and those four rows are a diary of what has not.
 from lending.portal.studio_build.app import api_resource, upsert_page
 from lending.portal.studio_build.application_pages import applications
 from lending.portal.studio_build.blocks import (
-	block,
+	button,
 	card,
 	chevron,
 	click,
 	column,
+	container,
+	fallback,
+	icon,
 	icon_line,
 	muted,
 	reader,
 	record_stat,
 	repeater,
 	row,
-	slot,
 	spacer,
 	stat,
 	stat_strip,
@@ -45,28 +46,16 @@ SOURCE = "overview"
 ACCOUNTS_ROUTE = "/loans"
 read = reader(SOURCE)
 
-# The payload's activity rows in the shape ActivityTimeline reads, mapped in the binding
-# rather than in the page script.
-#
-# It has to be the binding. ActivityTimeline declares `activities` required with no
-# default and reads `activities.length` on its first line, while Studio's expression
-# evaluator answers `undefined` for anything it cannot resolve -- so a binding that can
-# be undefined is a crash rather than an empty list. A page-script binding can be
-# undefined: an exported page's script is a module the editor loads through the Vite dev
-# server, so on a canvas without `bench start` it never arrives, and even in the built
-# app it is loaded asynchronously. A data source is there from the first render.
-#
-# `|| []` is what makes that guarantee hold while the source is still fetching.
-#
-# `icon` is one of the seven names the gutter knows (see the ui package's
-# LUCIDE_ICON_CLASS); anything else falls through to a comment bubble, which is not what
-# a repayment is. `type` is deliberately none of the built-in kinds, which is what sends
-# every row through the default slot.
-ACTIVITY_ROWS = (
-	"{{ (%s.data.activity || []).map((entry, index) => ({"
-	" type: 'portal', key: 'portal:' + index, icon: 'info',"
-	" timestamp: entry.date, data: entry })) }}" % SOURCE
-)
+# The timeline's geometry. The marker's box is the height of the title's line, so a
+# marker of either size sits centred on it; the stem stops STEM_GAP short of the marker
+# at each end.
+MARKER = "18px"
+DOT = "10px"
+STEM_GAP = "4px"
+# The row's own space below its lines, which the stem runs down through to the next.
+ROW_GAP = "24px"
+# Wide enough for "Nov" at the tile's size, and the same for every month.
+DATE_TILE = "48px"
 
 
 def application_card():
@@ -179,57 +168,175 @@ def tasks():
 	)
 
 
-def activity():
-	"""The record of the account, on @framework/ui's own ActivityTimeline.
+def marker():
+	"""A green check for a step of the loan itself, a grey dot for one that led up to it.
 
-	The Builder page drew this as a repeater over rows, with a dot, a stem and a
-	stylesheet rule to cut the stem off the last one -- the one rule it could not put on
-	a block, because the rows were one repeated block and only their position told them
-	apart. The component owns the axis, so that rule goes with it.
-
-	Its rows are `{type, key, icon, data}` and the portal's are `{title, note, date,
-	url, ...}`, so ACTIVITY_ROWS maps between them -- see there for why that mapping is
-	a binding rather than a line of the page script.
+	Both are in the tree and the row's `tone` shows one, because a fill is a style and
+	only props are evaluated. The dot sits in a box the check's size, so the two centre
+	on the same line.
 	"""
-	event = row(
+	box = {"width": MARKER, "height": MARKER, "justifyContent": "center", "flex": "0 0 auto"}
+	done = icon(
+		"check",
+		size=12,
+		stroke=3,
+		styles=dict(box, borderRadius="9999px", backgroundColor="var(--surface-green-6)", color="#fff"),
+		visible="{{ dataItem.tone === 'ok' }}",
+	)
+	dot = container(
 		[
-			column(
-				[text("{{ item.data.title }}", size="text-base"), muted("{{ item.data.note }}")],
-				gap="2px",
-			),
-			spacer(),
-			muted("{{ item.data.date }}"),
+			container(
+				styles={
+					"width": DOT,
+					"height": DOT,
+					"borderRadius": "9999px",
+					"backgroundColor": "var(--outline-gray-3)",
+				}
+			)
 		],
-		gap="10px",
-		styles={"width": "100%", "cursor": "pointer"},
-		events=click("open(item.data.url)"),
+		styles=dict(box, display="flex", alignItems="center"),
+		visible="{{ dataItem.tone !== 'ok' }}",
 	)
 
-	return block(
-		"ActivityTimeline",
-		props={"activities": ACTIVITY_ROWS, "loading": "{{ %s.loading }}" % SOURCE},
-		slots=slot("default", [event]),
+	return [done, dot]
+
+
+def stems():
+	"""The line down to the next marker: green between two steps that are both done.
+
+	The payload decides which, and that there is none under the last row -- a repeated
+	block cannot tell which copy of it is the last.
+	"""
+
+	def stem(tone, colour):
+		return container(
+			styles={
+				"flex": "1 1 auto",
+				"width": "1px",
+				"marginBottom": STEM_GAP,
+				"backgroundColor": colour,
+			},
+			visible="{{ dataItem.stem === '%s' }}" % tone,
+		)
+
+	return [stem("ok", "var(--outline-green-3)"), stem("plain", "var(--outline-gray-1)")]
+
+
+def activity():
+	"""The record of the account: a marker per event, and a stem joining it to the next.
+
+	Drawn by hand rather than on @framework/ui's ActivityTimeline, whose gutter no block
+	reaches -- its connector is one grey line, and this one turns green between two
+	steps that are done.
+
+	The stem runs through the space under a row's lines, so that space is the lines'
+	padding rather than a gap between rows: a gap is outside every row, and nothing
+	could be drawn across it.
+	"""
+	gutter = column(
+		[*marker(), *stems()],
+		gap=STEM_GAP,
+		styles={"alignItems": "center", "width": "20px", "flex": "0 0 auto"},
+	)
+	lines = column(
+		[
+			text(
+				"{{ dataItem.title }}",
+				size="text-base",
+				styles={"fontWeight": "500", "color": "var(--ink-gray-9)", "paddingTop": "1px"},
+			),
+			text("{{ dataItem.note }}", size="text-sm", styles={"color": "var(--ink-gray-5)"}),
+		],
+		gap="6px",
+		styles={"flex": "1 1 auto", "minWidth": "0px", "paddingBottom": ROW_GAP},
+	)
+	date = text(
+		"{{ dataItem.date }}",
+		size="text-sm",
+		styles={"color": "var(--ink-gray-5)", "paddingTop": "2px", "whiteSpace": "nowrap"},
+	)
+	event = row(
+		[gutter, lines, date],
+		gap="28px",
+		align="stretch",
+		styles={"cursor": "pointer"},
+		events=click("open(dataItem.url)"),
+	)
+
+	return repeater(
+		fallback(read("activity"), "[]"),
+		event,
+		styles={"flexDirection": "column", "flexWrap": "nowrap", "gap": "0px", "paddingTop": "4px"},
+	)
+
+
+def date_tile():
+	"""The day an instalment falls due, as a leaf off a desk calendar.
+
+	The day leads because it is what a borrower checks against payday; the month and
+	year under it are only there to say which one.
+	"""
+	quiet = {"color": "var(--ink-gray-5)", "lineHeight": "1.2"}
+
+	return column(
+		[
+			text(
+				"{{ dataItem.day }}",
+				tag="div",
+				size="text-lg",
+				styles={"fontWeight": "600", "color": "var(--ink-gray-9)", "lineHeight": "1.2"},
+			),
+			text("{{ dataItem.month }}", tag="div", size="text-xs", styles=quiet),
+			text("{{ dataItem.year }}", tag="div", size="text-xs", styles=quiet),
+		],
+		gap="1px",
+		styles={
+			"alignItems": "center",
+			"justifyContent": "center",
+			"width": DATE_TILE,
+			"flex": "0 0 auto",
+			"padding": "6px 0",
+			"borderRadius": "0.5rem",
+			"backgroundColor": "var(--surface-gray-1)",
+			"borderWidth": "1px",
+			"borderStyle": "solid",
+			"borderColor": "var(--outline-gray-1)",
+		},
 	)
 
 
 def schedule():
-	"""The four instalments coming, as a diary rather than a record."""
-	instalment = row(
+	"""The four instalments coming, as a diary rather than a record.
+
+	The breakdown is the one part that can run long, so it is the part that wraps: the
+	amount and the chevron keep to one line at the end of the row.
+	"""
+	lines = column(
 		[
-			muted("{{ dataItem.date }}"),
-			column(
-				[text("{{ dataItem.title }}", size="text-base"), muted("{{ dataItem.sub }}")],
-				gap="2px",
-			),
-			spacer(),
-			text("{{ dataItem.amount }}", size="text-base"),
+			text("{{ dataItem.title }}", size="text-sm", styles={"color": "var(--ink-gray-8)"}),
+			muted("{{ dataItem.sub }}", visible="{{ dataItem.sub }}"),
 		],
-		gap="10px",
-		styles={"padding": "8px 0", "cursor": "pointer"},
+		gap="2px",
+		styles={"flex": "1 1 auto", "minWidth": "0px"},
+	)
+	amount = text(
+		"{{ dataItem.amount }}",
+		size="text-base",
+		styles={"fontWeight": "500", "color": "var(--ink-gray-9)", "whiteSpace": "nowrap"},
+	)
+	instalment = row(
+		[date_tile(), lines, amount, chevron()],
+		gap="14px",
+		styles={"padding": "6px 0", "cursor": "pointer"},
 		events=click("open(dataItem.url)"),
 	)
 
-	return repeater(read("schedule"), instalment, empty="Nothing due")
+	return repeater(
+		read("schedule"),
+		instalment,
+		empty="Nothing due",
+		styles={"flexDirection": "column", "flexWrap": "nowrap", "gap": "6px"},
+	)
 
 
 def content():
@@ -243,6 +350,9 @@ def content():
 					"Activity timeline",
 					read("activity_note"),
 					activity(),
+					# The last row's own ROW_GAP is most of the space under it, so the
+					# card's padding gives up the difference at the bottom.
+					styles={"padding": "20px 20px 12px"},
 					visible="{{ overview.data.activity && overview.data.activity.length > 0 }}",
 				),
 			],
@@ -251,6 +361,13 @@ def content():
 					"Scheduled repayments",
 					read("schedule_note"),
 					schedule(),
+					# The rest of the schedule: the loan's own page when there is one loan,
+					# the list of them when there are several.
+					action=button(
+						"View all",
+						script=f"open({SOURCE}.data.schedule_url || '{ACCOUNTS_ROUTE}')",
+						variant="outline",
+					),
 					visible="{{ overview.data.schedule && overview.data.schedule.length > 0 }}",
 				)
 			],

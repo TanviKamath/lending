@@ -477,7 +477,7 @@ def build_apply():
 		"/apply",
 		page(read_apply, [("Track an application", "/track"), ("Log in", "/login")], body),
 		[api_resource(APPLY_SOURCE, "lending.portal.apply.get_apply_page")],
-		script=page_script(state=APPLY_STATE, body=APPLY_SCRIPT, returns=APPLY_RETURNS),
+		script=page_script(state=APPLY_STATE, body=APPLY_SCRIPT, returns=APPLY_RETURNS, search=False),
 		allow_guest=True,
 	)
 

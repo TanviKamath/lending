@@ -65,6 +65,22 @@ def requested_year(label: str | None) -> tuple[str, str, str]:
 	return f"{start}-{start + 1}", f"{start}-04-01", f"{start + 1}-03-31"
 
 
+def requested_date(value: str | None, default: str) -> str:
+	"""The date the borrower asked for, or `default` when there is none to read.
+
+	A Studio page fires its data source once before its script has loaded, and a
+	binding to a ref that does not exist yet arrives as the string "undefined". That is
+	no reason to fail the page, so anything that is not a date is read as no date.
+	"""
+	if not value:
+		return default
+
+	try:
+		return str(getdate(value))
+	except frappe.ValidationError:
+		return default
+
+
 def year_options(count: int = 5) -> list[dict]:
 	current, _start, _end = financial_year()
 	first = int(current.split("-")[0])
@@ -125,8 +141,8 @@ def get_statement_page() -> dict:
 
 	loan = frappe.form_dict.get("loan")
 	_label, year_start, _year_end = financial_year()
-	from_date = frappe.form_dict.get("from_date") or year_start
-	to_date = frappe.form_dict.get("to_date") or nowdate()
+	from_date = requested_date(frappe.form_dict.get("from_date"), year_start)
+	to_date = requested_date(frappe.form_dict.get("to_date"), nowdate())
 
 	customers, loans = owned_loans(loan)
 	entries = []
@@ -145,7 +161,12 @@ def get_statement_page() -> dict:
 		entries.extend(data)
 
 	entries.sort(key=lambda row: getdate(row.get("posting_date")))
-	rows = [present_entry(row) for row in entries]
+	# A voucher can post more than one entry, so a row's key is its place in the list.
+	rows = [dict(present_entry(row), name=str(index)) for index, row in enumerate(entries)]
+	accounts_note = (
+		_("across 1 account") if len(loans) == 1 else _("across {0} accounts").format(len(loans))
+	)
+	summary = statement_summary(entries, to_date, accounts_note)
 
 	# No header button on this page -- the download lives inside it, next to the dates
 	# it obeys -- so there is no label for one either.
@@ -156,7 +177,7 @@ def get_statement_page() -> dict:
 		{
 			"rows": rows,
 			"rows_note": (
-				_("{0} entries from {1} to {2}").format(
+				(_("1 entry from {1} to {2}") if len(rows) == 1 else _("{0} entries from {1} to {2}")).format(
 					len(rows), short_date(from_date), short_date(to_date)
 				)
 				if rows
@@ -164,8 +185,11 @@ def get_statement_page() -> dict:
 					short_date(from_date), short_date(to_date)
 				)
 			),
-			"totals": statement_totals(entries),
-			"totals_note": _("Across {0} accounts").format(len(loans)),
+			"totals": statement_totals(summary),
+			"summary": summary,
+			"totals_note": (
+				_("Across 1 account") if len(loans) == 1 else _("Across {0} accounts").format(len(loans))
+			),
 			"from_date": from_date,
 			"to_date": to_date,
 			"download_url": download_url(
@@ -190,19 +214,34 @@ def present_entry(row: dict) -> dict:
 		"detail": " · ".join(part for part in (row.get("transaction_name"), row.get("loan")) if part),
 		"amount": money(debit) if debit else money(credit),
 		"direction": _("Charged") if debit else _("Paid"),
+		# One column each, the way a ledger reads, so an entry's side is where it
+		# stands rather than a word beside it. The empty side stays blank.
+		"debit": money(debit) if debit else "",
+		"credit": money(credit) if credit else "",
 		"balance": money(row.get("balance")),
 	}
 
 
-def statement_totals(entries: list[dict]) -> list[dict]:
+def statement_totals(summary: dict) -> list[dict]:
+	"""The summary as labelled rows, which is the shape the PDF prints."""
+	return [
+		{"label": _("Charged"), "value": summary["charged"]},
+		{"label": _("Paid"), "value": summary["paid"]},
+		{"label": _("Closing balance"), "value": summary["balance"]},
+	]
+
+
+def statement_summary(entries: list[dict], to_date: str, accounts_note: str) -> dict:
+	"""The three totals by name, for a page that sets each in a card of its own."""
 	debit = sum(flt(row.get("debit")) for row in entries)
 	credit = sum(flt(row.get("credit")) for row in entries)
 
-	return [
-		{"label": _("Charged"), "value": money(debit)},
-		{"label": _("Paid"), "value": money(credit)},
-		{"label": _("Closing balance"), "value": money(debit - credit)},
-	]
+	return {
+		"charged": money(debit),
+		"paid": money(credit),
+		"balance": money(debit - credit),
+		"balance_note": _("As on {0}, {1}").format(short_date(to_date), accounts_note),
+	}
 
 
 @frappe.whitelist()
@@ -217,15 +256,13 @@ def get_certificate_page() -> dict:
 	customers, loans = owned_loans(frappe.form_dict.get("loan"))
 	names = [row.name for row in loans]
 
-	paid = paid_in_period(names, start, end)
 	running = getdate(end) > getdate(nowdate())
-	scheduled = scheduled_in_period(names, nowdate(), end) if running else {}
+	by_loan = amounts_by_loan(names, start, end, running)
+	totals = {field: sum(amounts[field] for amounts in by_loan.values()) for field, _title in PAID_FIELDS}
 
-	rows = []
-	for field, title in PAID_FIELDS:
-		total = flt(paid.get(field)) + flt(scheduled.get(field))
-		if total:
-			rows.append({"label": _(title), "value": money(total)})
+	rows = [
+		{"label": _(title), "value": money(totals[field])} for field, title in PAID_FIELDS if totals[field]
+	]
 
 	# No header button on this page -- the download lives inside it, under the year it
 	# obeys -- so there is no label for one either.
@@ -245,12 +282,15 @@ def get_certificate_page() -> dict:
 					long_date(start), long_date(end)
 				)
 			),
+			"year": label,
 			"year_label": _("Financial year {0}").format(label),
 			"kind": _("Provisional") if running else _("Final"),
-			"accounts": [
-				{"label": row.loan_product, "value": row.name, "detail": ""} for row in loans
-			],
-			"accounts_note": _("{0} accounts covered").format(len(loans)),
+			"kind_theme": "orange" if running else "green",
+			"summary": certificate_summary(totals),
+			"accounts": [account_row(row, by_loan[row.name]) for row in loans],
+			"accounts_note": (
+				_("1 account covered") if len(loans) == 1 else _("{0} accounts covered").format(len(loans))
+			),
 			"years": year_options(),
 			# No tax figure and no section of the Act. Section 6.10: the certificate
 			# reports what was paid, and the borrower's accountant works out the relief.
@@ -268,10 +308,52 @@ def get_certificate_page() -> dict:
 	return payload
 
 
-def paid_in_period(loans: list[str], start: str, end: str) -> dict:
-	"""Money that actually moved, from submitted repayments only."""
+def certificate_summary(totals: dict) -> dict:
+	"""The year's figures by name, for a page that sets each in a card of its own.
+
+	Penalty and charges share one card: they are rare, and neither is what a borrower
+	opens an interest certificate for.
+	"""
+	other = flt(totals["total_penalty_paid"]) + flt(totals["total_charges_paid"])
+
+	return {
+		"interest": money(totals["total_interest_paid"]),
+		"principal": money(totals["principal_amount_paid"]),
+		"other": money(other) if other else "",
+		"total": money(sum(flt(value) for value in totals.values())),
+	}
+
+
+def account_row(loan, amounts: dict) -> dict:
+	"""One loan's share of the year. `label` and `value` are what the PDF prints."""
+	return {
+		"name": loan.name,
+		"label": loan.loan_product,
+		"value": loan.name,
+		"detail": "",
+		"interest": money(amounts["total_interest_paid"]),
+		"principal": money(amounts["principal_amount_paid"]),
+		"total": money(sum(amounts.values())),
+	}
+
+
+def amounts_by_loan(loans: list[str], start: str, end: str, running: bool) -> dict:
+	"""Each loan's amounts for the year: paid, plus what is still scheduled if it is running."""
+	by_loan = {loan: dict.fromkeys((field for field, _title in PAID_FIELDS), 0.0) for loan in loans}
+
+	for loan, field, amount in paid_in_period(loans, start, end):
+		by_loan[loan][field] += amount
+	if running:
+		for loan, field, amount in scheduled_in_period(loans, nowdate(), end):
+			by_loan[loan][field] += amount
+
+	return by_loan
+
+
+def paid_in_period(loans: list[str], start: str, end: str):
+	"""Money that actually moved, from submitted repayments only, as (loan, field, amount)."""
 	if not loans:
-		return {}
+		return
 
 	rows = frappe.get_all(
 		"Loan Repayment",
@@ -280,39 +362,41 @@ def paid_in_period(loans: list[str], start: str, end: str) -> dict:
 			"docstatus": 1,
 			"posting_date": ["between", [start, end]],
 		},
-		fields=[field for field, _title in PAID_FIELDS],
+		fields=["against_loan", *(field for field, _title in PAID_FIELDS)],
 	)
 
-	return {
-		field: sum(flt(row.get(field)) for row in rows) for field, _title in PAID_FIELDS
-	}
+	for row in rows:
+		for field, _title in PAID_FIELDS:
+			yield row.against_loan, field, flt(row.get(field))
 
 
-def scheduled_in_period(loans: list[str], start: str, end: str) -> dict:
-	"""What the schedule still expects before the year closes, for a provisional only."""
+def scheduled_in_period(loans: list[str], start: str, end: str):
+	"""What the schedule still expects before the year closes, as (loan, field, amount)."""
 	if not loans:
-		return {}
+		return
 
-	schedules = frappe.get_all(
-		"Loan Repayment Schedule",
-		filters={"loan": ["in", loans], "docstatus": 1, "status": "Active"},
-		pluck="name",
+	loan_of = dict(
+		frappe.get_all(
+			"Loan Repayment Schedule",
+			filters={"loan": ["in", loans], "docstatus": 1, "status": "Active"},
+			fields=["name", "loan"],
+			as_list=True,
+		)
 	)
-	if not schedules:
-		return {}
+	if not loan_of:
+		return
 
 	rows = frappe.get_all(
 		"Repayment Schedule",
 		filters={
-			"parent": ["in", schedules],
+			"parent": ["in", list(loan_of)],
 			"parenttype": "Loan Repayment Schedule",
 			"payment_date": ["between", [start, end]],
 		},
-		fields=["principal_amount", "interest_amount"],
+		fields=["parent", "principal_amount", "interest_amount"],
 		ignore_permissions=True,
 	)
 
-	return {
-		"total_interest_paid": sum(flt(row.interest_amount) for row in rows),
-		"principal_amount_paid": sum(flt(row.principal_amount) for row in rows),
-	}
+	for row in rows:
+		yield loan_of[row.parent], "total_interest_paid", flt(row.interest_amount)
+		yield loan_of[row.parent], "principal_amount_paid", flt(row.principal_amount)

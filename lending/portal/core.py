@@ -270,7 +270,7 @@ def get_dashboard() -> dict:
 	loans = get_loans(customers)
 	schedule = get_upcoming_repayments(loans)
 	applications = get_applications(customers)
-	activity = get_activity(loans)
+	activity = get_timeline(customers, loans)
 	accounts = [present_loan(loan, len(customers) > 1) for loan in loans]
 
 	payload = {
@@ -285,6 +285,9 @@ def get_dashboard() -> dict:
 		# The subtitle takes the loan's name when the rows have given it up, so it is
 		# still on the card -- once, where a heading belongs -- rather than down it.
 		"schedule_note": one_loan_note(_("Next four instalments"), schedule),
+		# Where the whole schedule is: the loan's own page when every row is one loan,
+		# and empty for the page to send the borrower to the list of them otherwise.
+		"schedule_url": one_loan_url(schedule),
 		"activity_note": one_loan_note(_("Last 60 days"), activity),
 	}
 	payload.update(shell_payload(_("Account overview"), _("View payment details"), customers, loans))
@@ -586,6 +589,7 @@ def get_loans(customers: list[str]) -> list[dict]:
 			"applicant",
 			"loan_product",
 			"status",
+			"posting_date",
 			"loan_amount",
 			"rate_of_interest",
 			"repayment_periods",
@@ -726,8 +730,12 @@ def get_upcoming_repayments(loans: list[dict], limit: int = 4) -> list[dict]:
 		presented.append(
 			{
 				"date": short_date(row.payment_date),
+				# The same day, a line each, for the calendar tile the overview leads with.
+				"day": formatdate(row.payment_date, "dd"),
+				"month": formatdate(row.payment_date, "MMM"),
+				"year": formatdate(row.payment_date, "yyyy"),
 				"product": product_of.get(loan_name, ""),
-				"detail": _("Principal {0} · interest {1}").format(
+				"detail": _("Principal {0} · Interest {1}").format(
 					money(row.principal_amount), money(row.interest_amount)
 				),
 				"amount": money(row.total_payment),
@@ -743,6 +751,13 @@ def one_loan_note(base: str, rows: list[dict]) -> str:
 	products = {row["product"] for row in rows}
 
 	return _("{0} · {1}").format(base, products.pop()) if len(products) == 1 else base
+
+
+def one_loan_url(rows: list[dict]) -> str:
+	"""The page of the one loan these rows are all about, or empty when they are not."""
+	urls = {row["url"] for row in rows}
+
+	return urls.pop() if len(urls) == 1 else ""
 
 
 def name_once(rows: list[dict]) -> list[dict]:
@@ -995,7 +1010,42 @@ def draft_note(application: str) -> str:
 	)
 
 
-def get_activity(loans: list[dict], limit: int = 5) -> list[dict]:
+# Where each kind of event falls in a loan's life. Events on one day are told in the
+# order they happened -- raised, submitted, sanctioned, paid out, repaid -- rather than
+# in whatever order the queries behind them returned.
+EVENT_ORDER = {"created": 0, "submitted": 1, "sanctioned": 2, "disbursed": 3, "repaid": 4}
+
+
+def event(kind, day, title, line, product, url, tone="ok", amount=""):
+	"""One row of a history. `line` is what the overview's timeline says under the title.
+
+	`tone` is the payload's usual "ok" or "": a step of the loan itself -- sanctioned,
+	paid out, repaid -- is done in the sense the borrower is waiting for, and a step of
+	the application only led up to it.
+	"""
+	return {
+		"date": short_date(day),
+		"when": days_ago(day),
+		"sort": (str(getdate(day)), EVENT_ORDER[kind]),
+		"title": title,
+		"line": line,
+		"product": product,
+		"amount": amount,
+		"url": url,
+		"tone": tone,
+	}
+
+
+def latest(events: list[dict], limit: int) -> list[dict]:
+	events.sort(key=lambda event: event["sort"], reverse=True)
+	for event in events:
+		event.pop("sort", None)
+
+	return events[:limit]
+
+
+def money_events(loans: list[dict], limit: int) -> list[dict]:
+	"""The newest repayments and disbursements on these loans, `limit` of each."""
 	loan_names = [loan.name for loan in loans]
 	if not loan_names:
 		return []
@@ -1010,16 +1060,17 @@ def get_activity(loans: list[dict], limit: int = 5) -> list[dict]:
 		order_by="posting_date desc",
 		limit=limit,
 	):
+		amount = money(row.amount_paid)
 		events.append(
-			{
-				"date": short_date(row.posting_date),
-				"when": days_ago(row.posting_date),
-				"sort": str(getdate(row.posting_date)),
-				"title": _("Repayment received"),
-				"product": product_of.get(row.against_loan, ""),
-				"amount": money(row.amount_paid),
-				"url": loan_url(row.against_loan),
-			}
+			event(
+				"repaid",
+				row.posting_date,
+				_("Repayment received"),
+				amount,
+				product_of.get(row.against_loan, ""),
+				loan_url(row.against_loan),
+				amount=amount,
+			)
 		)
 
 	for row in frappe.get_all(
@@ -1029,23 +1080,24 @@ def get_activity(loans: list[dict], limit: int = 5) -> list[dict]:
 		order_by="disbursement_date desc",
 		limit=limit,
 	):
+		amount = money(row.disbursed_amount)
 		events.append(
-			{
-				"date": short_date(row.disbursement_date),
-				"when": days_ago(row.disbursement_date),
-				"sort": str(getdate(row.disbursement_date)),
-				"title": _("Amount disbursed"),
-				"product": product_of.get(row.against_loan, ""),
-				"amount": money(row.disbursed_amount),
-				"url": loan_url(row.against_loan),
-			}
+			event(
+				"disbursed",
+				row.disbursement_date,
+				_("Amount disbursed"),
+				amount,
+				product_of.get(row.against_loan, ""),
+				loan_url(row.against_loan),
+				amount=amount,
+			)
 		)
 
-	events.sort(key=lambda event: event["sort"], reverse=True)
-	for event in events:
-		event.pop("sort", None)
+	return events
 
-	events = events[:limit]
+
+def get_activity(loans: list[dict], limit: int = 5) -> list[dict]:
+	events = latest(money_events(loans, limit), limit)
 
 	# Same rule as the schedule, but the other way up: an event's title already varies
 	# -- received, disbursed -- so here it is the rest of the sentence that gives up the
@@ -1060,5 +1112,116 @@ def get_activity(loans: list[dict], limit: int = 5) -> list[dict]:
 		event["note"] = " · ".join(
 			part for part in (event["amount"], event["sub"], event["when"]) if part
 		)
+
+	return events
+
+
+def submission_times(applications: list[str]) -> dict:
+	"""When each of these applications was submitted, from its version history.
+
+	Loan Application keeps no submission date. `posting_date` is the day it was raised,
+	and `modified` moves with every later save, so the Version row that records docstatus
+	going from 0 to 1 is the only record of the moment itself.
+	"""
+	if not applications:
+		return {}
+
+	submitted = {}
+	for version in frappe.get_all(
+		"Version",
+		filters={
+			"ref_doctype": "Loan Application",
+			"docname": ["in", applications],
+			"data": ["like", '%"docstatus"%'],
+		},
+		fields=["docname", "creation", "data"],
+		order_by="creation asc",
+	):
+		changed = frappe.parse_json(version.data or "{}").get("changed") or []
+		if ["docstatus", 0, 1] in changed:
+			submitted.setdefault(version.docname, version.creation)
+
+	return submitted
+
+
+def milestone_events(customers: list[str], loans: list[dict], limit: int) -> list[dict]:
+	"""How the borrower's loans came about: each application raised and submitted, and
+	each loan sanctioned."""
+	applications = frappe.get_all(
+		"Loan Application",
+		filters={"applicant": ["in", customers], "docstatus": ["<", 2]},
+		fields=["name", "loan_product", "creation", "posting_date", "docstatus"],
+		order_by="creation desc",
+		limit=limit,
+	)
+	submitted = submission_times([row.name for row in applications if row.docstatus == 1])
+	events = []
+
+	for row in applications:
+		url = application_url(row.name)
+		events.append(
+			event(
+				"created",
+				row.creation,
+				_("Application created"),
+				_("You started a new loan application."),
+				row.loan_product,
+				url,
+				tone="",
+			)
+		)
+		if row.docstatus == 1:
+			events.append(
+				event(
+					"submitted",
+					submitted.get(row.name) or row.posting_date,
+					_("Application submitted"),
+					_("Your application has been submitted."),
+					row.loan_product,
+					url,
+					tone="",
+				)
+			)
+
+	for loan in loans:
+		events.append(
+			event(
+				"sanctioned",
+				loan.posting_date,
+				_("Loan sanctioned"),
+				_("Your loan has been sanctioned."),
+				loan.loan_product,
+				loan_url(loan.name),
+			)
+		)
+
+	return events
+
+
+def get_timeline(customers: list[str], loans: list[dict], limit: int = 5) -> list[dict]:
+	"""The overview's activity timeline: the account's money and the milestones before it.
+
+	The bell's panel reads get_activity instead, which is the money alone. Its rows are
+	marked read by a digest of what they say, so a new kind of row there is a burst of
+	unread ones for every borrower.
+
+	`stem` is the line drawn down from a row's marker to the next one's: "ok" between two
+	steps that are both done, "plain" otherwise, and "" under the last row, which has
+	nothing to lead to.
+	"""
+	events = latest(money_events(loans, limit) + milestone_events(customers, loans, limit), limit)
+
+	one_loan = len({event["product"] for event in events}) == 1
+	for index, event in enumerate(events):
+		event["sub"] = "" if one_loan else event["product"]
+		event["note"] = " · ".join(part for part in (event.pop("line"), event["sub"]) if part)
+
+		following = events[index + 1] if index + 1 < len(events) else None
+		if not following:
+			event["stem"] = ""
+		elif event["tone"] == following["tone"] == "ok":
+			event["stem"] = "ok"
+		else:
+			event["stem"] = "plain"
 
 	return events
