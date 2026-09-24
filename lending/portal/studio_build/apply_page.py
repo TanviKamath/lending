@@ -112,12 +112,30 @@ APPLY_SCRIPT = '''\tconst busy = ref(false)
 
 \tconst chooseProduct = (product: string) => { loanProduct.value = product }
 
+\tconst resendIn = ref(0)
+\tconst countDown = () => {
+\t\tresendIn.value = 30
+\t\tconst timer = setInterval(() => {
+\t\t\tif (--resendIn.value <= 0) clearInterval(timer)
+\t\t}, 1000)
+\t}
+
 \tconst sendCode = () => {
 \t\tbusy.value = true
 \t\tcall("lending.portal.apply.send_mobile_code", { mobile_number: mobileNumber.value })
-\t\t\t.then((result: any) => { codeSent.value = true; toast.success(result.message) })
+\t\t\t.then((result: any) => {
+\t\t\t\tcodeSent.value = true
+\t\t\t\tcountDown()
+\t\t\t\ttoast.success(result.message)
+\t\t\t})
 \t\t\t.catch(fail)
 \t\t\t.finally(() => { busy.value = false })
+\t}
+
+\t// The link stays in place through the countdown, and does nothing until it ends.
+\tconst resendCode = () => {
+\t\tif (resendIn.value > 0 || busy.value) return
+\t\tsendCode()
 \t}
 
 \tconst confirmCode = () => {
@@ -166,6 +184,7 @@ APPLY_SCRIPT = '''\tconst busy = ref(false)
 \t\tcall("lending.portal.apply.create_account", {
 \t\t\ttoken: accountToken.value,
 \t\t\tpassword: password.value,
+\t\t\tconfirm_password: confirmPassword.value,
 \t\t})
 \t\t\t.then(() => { window.location.href = "/borrower-portal/overview" })
 \t\t\t.catch(fail)
@@ -184,6 +203,7 @@ APPLY_STATE = [
 	("otp", '""'),
 	("employmentType", '"Salaried"'),
 	("password", '""'),
+	("confirmPassword", '""'),
 ] + [(ref_name, '""') for _label, ref_name, *_rest in DETAIL_FIELDS]
 
 APPLY_RETURNS = [
@@ -194,6 +214,8 @@ APPLY_RETURNS = [
 	"choose",
 	"chooseProduct",
 	"sendCode",
+	"resendIn",
+	"resendCode",
 	"confirmCode",
 	"submit",
 	"createAccount",
@@ -433,32 +455,9 @@ def start_card():
 
 def how_it_works():
 	"""What happens after the button, in the three steps a visitor will see."""
-	number = text(
-		"{{ dataItem.step }}",
-		size="text-sm",
-		styles={
-			"display": "flex",
-			"alignItems": "center",
-			"justifyContent": "center",
-			"flexShrink": "0",
-			"width": "32px",
-			"height": "32px",
-			"borderRadius": "9999px",
-			"fontWeight": "500",
-			"backgroundColor": "var(--surface-gray-2)",
-			"color": "var(--ink-gray-8)",
-		},
-	)
 	step = row(
 		[
-			number,
-			*glyph(
-				("file-text", "search", "percent"),
-				"dataItem.icon",
-				tile=32,
-				glyph=24,
-				styles={"backgroundColor": "transparent", "color": "var(--ink-gray-8)"},
-			),
+			*glyph(("file-text", "search", "percent"), "dataItem.icon", tile=44, glyph=20),
 			column(
 				[
 					text("{{ dataItem.title }}", size="text-base", styles={"fontWeight": "600"}),
@@ -485,7 +484,7 @@ def how_it_works():
 			repeater(
 				read_apply("benefits"),
 				step,
-				data_key="step",
+				data_key="icon",
 				styles={"display": "flex", "flexDirection": "row", "gap": "16px", "flexWrap": "wrap"},
 			),
 		],
@@ -572,6 +571,27 @@ def product_panel():
 	)
 
 
+def resend_line():
+	"""The hint under the OTP box: a link to send it again, and how long until it may."""
+	link = text(
+		"Resend OTP",
+		styles={"color": "var(--ink-gray-9)", "fontWeight": "500", "cursor": "pointer"},
+		events=click("resendCode()"),
+	)
+
+	return row(
+		[
+			row([muted("Didn't receive the OTP?"), link], gap="6px"),
+			muted(
+				"{{ 'Resend in 00:' + String(resendIn).padStart(2, '0') }}",
+				styles={"color": "var(--ink-gray-5)"},
+				visible="{{ resendIn > 0 }}",
+			),
+		],
+		styles={"justifyContent": "space-between", "width": "100%"},
+	)
+
+
 def verify_panel():
 	"""Screen 4. Nothing is written here -- the code is checked against the number alone."""
 	number = block(
@@ -589,12 +609,12 @@ def verify_panel():
 			block(
 				"FormControl",
 				props={
-					"type": "text",
-					"label": "The six digits we sent you",
+					"type": "password",
+					"label": "OTP",
 					"modelValue": {"$type": "variable", "name": "otp"},
 				},
 			),
-			button("Send it again", script="sendCode()", variant="ghost"),
+			resend_line(),
 		],
 		gap="8px",
 		visible="{{ codeSent }}",
@@ -608,7 +628,7 @@ def verify_panel():
 		back=3,
 		# One button, in the same place, whichever half of this screen is showing.
 		forward=[
-			action("Send me a code", "sendCode()", visible="{{ !codeSent }}"),
+			action("Send OTP", "sendCode()", visible="{{ !codeSent }}"),
 			action("Confirm my number", "confirmCode()", visible="{{ codeSent }}"),
 		],
 	)
@@ -700,7 +720,15 @@ def account_panel():
 					"label": "Choose a password",
 					"modelValue": {"$type": "variable", "name": "password"},
 				},
-			)
+			),
+			block(
+				"FormControl",
+				props={
+					"type": "password",
+					"label": "Confirm password",
+					"modelValue": {"$type": "variable", "name": "confirmPassword"},
+				},
+			),
 		],
 		forward=[action("Create my account", "createAccount()")],
 	)

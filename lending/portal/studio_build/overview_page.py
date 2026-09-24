@@ -12,7 +12,7 @@ The scheduled repayments beside it are still a repeater, deliberately: a timelin
 record of what happened, and those four rows are a diary of what has not.
 """
 
-from lending.portal.studio_build.app import api_resource, upsert_page
+from lending.portal.studio_build.app import api_resource, page_script, upsert_page
 from lending.portal.studio_build.application_pages import applications
 from lending.portal.studio_build.blocks import (
 	button,
@@ -57,6 +57,16 @@ ROW_GAP = "24px"
 # Wide enough for "Nov" at the tile's size, and the same for every month.
 DATE_TILE = "48px"
 
+# A borrower with more than one loan chooses one before the overview reads as any of
+# them. The overview is the app's home, so every sign-in passes through here.
+SCRIPT = page_script(
+	body='''\twatch(
+\t\t() => context.overview?.data?.choose_account,
+\t\t(choose) => { if (choose) router.replace("/accounts") },
+\t\t{ immediate: true },
+\t)'''
+)
+
 
 def application_card():
 	"""The newest open application, as the record it is rather than as a figure.
@@ -96,6 +106,7 @@ def application_card():
 				tag="div",
 				size="text-2xl",
 				styles={"fontWeight": "600", "padding": "2px 0"},
+				visible=read("application_headline"),
 			),
 			stage,
 			muted(read("application_name"), visible=read("application_name")),
@@ -412,4 +423,5 @@ def build():
 			api_resource(SOURCE, "lending.portal.core.get_dashboard"),
 			api_resource("alerts", "lending.portal.notifications.get_notifications", auto=0),
 		],
+		script=SCRIPT,
 	)

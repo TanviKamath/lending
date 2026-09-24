@@ -40,6 +40,7 @@ from lending.portal.applications import (
 	default_application,
 	get_application_detail,
 	get_document_choices,
+	open_lead,
 	upload_document,
 )
 from lending.portal.apply import (
@@ -54,6 +55,7 @@ from lending.portal.apply import (
 )
 from lending.portal.brand import brand_style, brand_tokens, channels, contrast
 from lending.portal.core import (
+	CHOSEN_LOAN_KEY,
 	DEFAULT_BRAND_NAME,
 	PORTAL_ROUTE_PREFIX,
 	REPAYMENTS_ROUTE,
@@ -66,6 +68,7 @@ from lending.portal.core import (
 	copyright_note,
 	days_ago,
 	footer_links,
+	get_dashboard,
 	get_portal_customers,
 	leads_for_login,
 	money,
@@ -76,7 +79,7 @@ from lending.portal.core import (
 	standing_line,
 	waiting_on_borrower,
 )
-from lending.portal.loans import default_loan, get_loan_detail
+from lending.portal.loans import default_loan, get_loan_detail, request_disbursement
 from lending.portal.notifications import (
 	ATTENTION_LIMIT,
 	READ_KEY,
@@ -89,6 +92,8 @@ from lending.portal.notifications import (
 )
 from lending.portal.profile import get_profile_page, save_profile
 from lending.portal.search import RESULT_LIMIT, find, results_note
+from lending.portal.statement import owned_loans
+from lending.portal.switcher import choose_account, get_accounts_page
 from lending.tests.test_utils import (
 	create_loan,
 	create_loan_accounts,
@@ -107,6 +112,10 @@ BETA_USER = "portal-beta@example.com"
 ALPHA_CUSTOMER = "_Test Portal Alpha"
 ALPHA_OTHER_CUSTOMER = "_Test Portal Alpha Second"
 BETA_CUSTOMER = "_Test Portal Beta"
+
+# A borrower who only ever holds one loan, for the account switch.
+SINGLE_USER = "portal-single@example.com"
+SINGLE_CUSTOMER = "_Test Portal Single"
 
 # Used only by the shared-record test, which pins a Contact onto its customer. That
 # is a lasting change, and this database is not rolled back between runs, so it gets
@@ -927,9 +936,13 @@ class TestPortalSignUp(LendingTestSuite):
 
 		return submit_lead()
 
-	def open_account(self, offer, password="Kh8!zQr2wLp5"):
+	def open_account(self, offer, password="Kh8!zQr2wLp5", confirm_password=None):
 		frappe.local.form_dict = frappe._dict(
-			{"token": offer["account_token"], "password": password}
+			{
+				"token": offer["account_token"],
+				"password": password,
+				"confirm_password": password if confirm_password is None else confirm_password,
+			}
 		)
 
 		return create_account()
@@ -1005,6 +1018,33 @@ class TestPortalSignUp(LendingTestSuite):
 
 		self.assertIn(offer["reference"], [row.name for row in leads_for_login()])
 
+	def test_the_application_page_follows_an_enquiry_before_it_is_an_application(self):
+		offer = self.apply_as(PERSON_EMAIL, "9812340107")
+		self.open_account(offer)
+
+		frappe.set_user(PERSON_EMAIL)
+		frappe.local.form_dict = frappe._dict()
+
+		# The newest enquiry, not whatever else this address raised in earlier runs.
+		lead = leads_for_login()[0]
+		self.assertEqual(lead.name, offer["reference"])
+
+		with patch("lending.portal.applications.default_application", return_value=None):
+			payload = get_application_detail()
+
+		self.assertIs(payload["has_application"], True)
+		self.assertEqual(payload["reference"], "Enquiry {0}".format(offer["reference"]))
+		self.assertEqual(payload["steps"][0]["code"], "done")
+
+	def test_a_converted_enquiry_gives_way_to_its_application(self):
+		lead = frappe._dict(name="LN-LEAD-CONVERTED")
+
+		with patch("lending.portal.applications.leads_for_login", return_value=[lead]):
+			self.assertEqual(open_lead(), lead)
+
+			with patch("frappe.get_all", return_value=[lead.name]):
+				self.assertIsNone(open_lead())
+
 	def test_an_account_needs_a_token(self):
 		self.apply_as(PERSON_EMAIL, "9812340106")
 		frappe.local.form_dict = frappe._dict({"password": "Kh8!zQr2wLp5"})
@@ -1033,6 +1073,14 @@ class TestPortalSignUp(LendingTestSuite):
 
 		with self.assertRaises(frappe.ValidationError):
 			self.open_account(offer, password="a")
+
+		self.assertFalse(frappe.db.exists("User", PERSON_EMAIL))
+
+	def test_a_password_that_does_not_match_its_confirmation_is_refused(self):
+		offer = self.apply_as(PERSON_EMAIL, "9812340113")
+
+		with self.assertRaises(frappe.ValidationError):
+			self.open_account(offer, confirm_password="Kh8!zQr2wLp6")
 
 		self.assertFalse(frappe.db.exists("User", PERSON_EMAIL))
 
@@ -2090,3 +2138,202 @@ class TestPortalActivityList(LendingTestSuite):
 
 		self.assertEqual(said, ["3 days ago", "1 week ago", "1 month ago", "1 year ago"])
 
+
+class TestPortalDisbursementRequest(LendingTestSuite):
+	"""A borrower asks for money on a sanctioned loan; staff pay it out.
+
+	The request is a draft Loan Disbursement. What matters is that it is only ever a
+	draft, only on the borrower's own loan, and never for more than the loan has left.
+	"""
+
+	def setUp(self):
+		set_loan_settings_in_company()
+		create_loan_accounts()
+		setup_loan_demand_offset_order()
+		set_loan_accrual_frequency("Monthly")
+		create_loan_product(
+			PRODUCT,
+			PRODUCT,
+			500000,
+			8.4,
+			repayment_schedule_type="Monthly as per repayment start date",
+		)
+
+		make_website_user(ALPHA_USER)
+		make_website_user(BETA_USER)
+		make_portal_customer(ALPHA_CUSTOMER, ALPHA_USER)
+		make_portal_customer(BETA_CUSTOMER, BETA_USER)
+
+		self.alpha_loan = make_submitted_loan(ALPHA_CUSTOMER).name
+		self.beta_loan = make_submitted_loan(BETA_CUSTOMER).name
+		frappe.db.commit()  # nosemgrep
+
+		frappe.set_user(ALPHA_USER)
+
+	def tearDown(self):
+		frappe.set_user("Administrator")
+		frappe.local.form_dict = frappe._dict()
+
+	def ask(self, loan, amount):
+		frappe.local.form_dict = frappe._dict({"name": loan, "amount": amount})
+		return request_disbursement()
+
+	def drafts(self, loan):
+		return frappe.get_all(
+			"Loan Disbursement",
+			filters={"against_loan": loan},
+			fields=["name", "docstatus", "disbursed_amount"],
+			ignore_permissions=True,
+		)
+
+	def test_a_sanctioned_loan_offers_its_whole_amount(self):
+		frappe.local.form_dict = frappe._dict({"name": self.alpha_loan})
+		drawdown = get_loan_detail()["drawdown"]
+
+		self.assertTrue(drawdown["open"])
+		self.assertEqual(drawdown["available"], 100000)
+
+	def test_a_request_raises_a_draft_and_nothing_more(self):
+		self.ask(self.alpha_loan, 40000)
+
+		(draft,) = self.drafts(self.alpha_loan)
+		self.assertEqual(draft.docstatus, 0)
+		self.assertEqual(draft.disbursed_amount, 40000)
+		# The loan itself is untouched until staff submit the draft.
+		self.assertEqual(frappe.db.get_value("Loan", self.alpha_loan, "status"), "Sanctioned")
+		self.assertTrue(
+			frappe.db.exists(
+				"Comment", {"reference_doctype": "Loan Disbursement", "reference_name": draft.name}
+			)
+		)
+
+	def test_another_borrowers_loan_is_refused(self):
+		with self.assertRaises(frappe.PermissionError):
+			self.ask(self.beta_loan, 40000)
+
+		self.assertEqual(self.drafts(self.beta_loan), [])
+
+	def test_more_than_the_loan_has_left_is_refused(self):
+		with self.assertRaises(frappe.ValidationError):
+			self.ask(self.alpha_loan, 100001)
+
+		self.assertEqual(self.drafts(self.alpha_loan), [])
+
+	def test_nothing_is_not_an_amount(self):
+		with self.assertRaises(frappe.ValidationError):
+			self.ask(self.alpha_loan, 0)
+
+	def test_a_waiting_draft_stands_in_for_the_button(self):
+		self.ask(self.alpha_loan, 40000)
+
+		with self.assertRaises(frappe.ValidationError):
+			self.ask(self.alpha_loan, 10000)
+
+		frappe.local.form_dict = frappe._dict({"name": self.alpha_loan})
+		drawdown = get_loan_detail()["drawdown"]
+
+		self.assertFalse(drawdown["open"])
+		self.assertIn(money(40000), drawdown["note"])
+		self.assertEqual(len(self.drafts(self.alpha_loan)), 1)
+
+
+
+class TestPortalAccountSwitch(LendingTestSuite):
+	"""A borrower with several loans picks one, and the portal then reads that one alone.
+
+	The choice is the borrower's own record of which loan to show, so it must only ever
+	name one of their loans: a choice that names somebody else's is refused, and one
+	that stops being theirs is ignored.
+	"""
+
+	def setUp(self):
+		set_loan_settings_in_company()
+		create_loan_accounts()
+		setup_loan_demand_offset_order()
+		set_loan_accrual_frequency("Monthly")
+		create_loan_product(
+			PRODUCT,
+			PRODUCT,
+			500000,
+			8.4,
+			repayment_schedule_type="Monthly as per repayment start date",
+		)
+
+		make_website_user(ALPHA_USER)
+		make_website_user(BETA_USER)
+		make_portal_customer(ALPHA_CUSTOMER, ALPHA_USER)
+		make_portal_customer(ALPHA_OTHER_CUSTOMER, ALPHA_USER)
+		make_portal_customer(BETA_CUSTOMER, BETA_USER)
+
+		self.alpha_loan = make_submitted_loan(ALPHA_CUSTOMER).name
+		self.alpha_other_loan = make_submitted_loan(ALPHA_OTHER_CUSTOMER).name
+		self.beta_loan = make_submitted_loan(BETA_CUSTOMER).name
+		frappe.db.commit()  # nosemgrep
+
+		frappe.set_user(ALPHA_USER)
+
+	def tearDown(self):
+		frappe.defaults.clear_user_default(CHOSEN_LOAN_KEY, ALPHA_USER)
+		frappe.set_user("Administrator")
+		frappe.local.form_dict = frappe._dict()
+
+	def test_a_borrower_with_several_loans_is_asked_to_choose(self):
+		self.assertIs(get_dashboard()["choose_account"], True)
+
+		page = get_accounts_page()
+		names = [row["name"] for row in page["accounts"]]
+
+		self.assertIn(self.alpha_loan, names)
+		self.assertIn(self.alpha_other_loan, names)
+		self.assertNotIn(self.beta_loan, names)
+		self.assertFalse(any(row["chosen"] for row in page["accounts"]))
+		self.assertIs(page["can_switch"], True)
+
+	def test_the_chosen_loan_is_the_one_every_page_reads(self):
+		choose_account(self.alpha_other_loan)
+
+		dashboard = get_dashboard()
+		self.assertIs(dashboard["choose_account"], False)
+		self.assertEqual([row["name"] for row in dashboard["accounts"]], [self.alpha_other_loan])
+		self.assertIs(dashboard["can_switch"], True)
+
+		self.assertEqual(default_loan(), self.alpha_other_loan)
+		self.assertEqual([row.name for row in owned_loans()[1]], [self.alpha_other_loan])
+
+		chosen = [row["name"] for row in get_accounts_page()["accounts"] if row["chosen"]]
+		self.assertEqual(chosen, [self.alpha_other_loan])
+
+	def test_a_loan_named_in_the_request_still_wins_over_the_choice(self):
+		choose_account(self.alpha_other_loan)
+
+		self.assertEqual([row.name for row in owned_loans(self.alpha_loan)[1]], [self.alpha_loan])
+
+	def test_choosing_another_borrowers_loan_is_refused(self):
+		choose_account(self.alpha_loan)
+
+		with self.assertRaises(frappe.PermissionError):
+			choose_account(self.beta_loan)
+
+		self.assertEqual(default_loan(), self.alpha_loan)
+
+	def test_a_choice_that_is_no_longer_yours_is_ignored(self):
+		frappe.defaults.set_user_default(CHOSEN_LOAN_KEY, self.beta_loan)
+
+		self.assertIs(get_dashboard()["choose_account"], True)
+		self.assertNotEqual(default_loan(), self.beta_loan)
+
+	def test_a_borrower_with_one_loan_is_never_asked(self):
+		# A borrower of its own: every setUp in this file gives Beta another loan, and
+		# nothing rolls them back.
+		frappe.set_user("Administrator")
+		make_website_user(SINGLE_USER)
+		make_portal_customer(SINGLE_CUSTOMER, SINGLE_USER)
+		loan = frappe.db.get_value("Loan", {"applicant": SINGLE_CUSTOMER, "docstatus": 1}, "name")
+		loan = loan or make_submitted_loan(SINGLE_CUSTOMER).name
+
+		frappe.set_user(SINGLE_USER)
+		dashboard = get_dashboard()
+
+		self.assertIs(dashboard["choose_account"], False)
+		self.assertIs(dashboard["can_switch"], False)
+		self.assertEqual([row["name"] for row in dashboard["accounts"]], [loan])

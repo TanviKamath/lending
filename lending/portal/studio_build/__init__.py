@@ -54,6 +54,7 @@ lending/studio/borrower_portal/ as it is saved.
 """
 
 from lending.portal.studio_build import (
+	accounts_page,
 	app,
 	application_pages,
 	apply_page,
@@ -94,6 +95,7 @@ def build(reset=False):
 
 		pages = [
 			overview_page.build(),
+			accounts_page.build(),
 			*loan_pages.build(),
 			*application_pages.build(),
 			*statement_pages.build(),

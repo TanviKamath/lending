@@ -17,6 +17,7 @@ import frappe
 from frappe import _
 from frappe.utils import flt
 
+from lending.portal.apply import tracker_stage
 from lending.portal.core import (
 	APPLICATION_STAGES,
 	STATUS_LABELS,
@@ -26,6 +27,7 @@ from lending.portal.core import (
 	get_loans,
 	get_portal_customers,
 	is_live,
+	leads_for_login,
 	long_date,
 	money,
 	shell_payload,
@@ -74,7 +76,8 @@ def get_application_detail() -> dict:
 	"""
 	name = frappe.form_dict.get("name") or default_application()
 	if not name:
-		return no_application_payload()
+		lead = open_lead()
+		return lead_payload(lead) if lead else no_application_payload()
 
 	assert_owns("Loan Application", name)
 	application = frappe.db.get_value("Loan Application", name, DETAIL_FIELDS, as_dict=True)
@@ -164,6 +167,102 @@ def no_application_payload() -> dict:
 	)
 
 	return payload
+
+
+def open_lead() -> dict | None:
+	"""The borrower's newest enquiry that our team has not yet made an application of.
+
+	A portal enquiry is a Loan Lead, and it stays one until staff convert it. Until then
+	there is no Loan Application to open, and without this the borrower who has just
+	applied is told they have not. A converted lead is skipped: its application is what
+	the page shows, once the borrower's customer record reaches it.
+	"""
+	leads = leads_for_login()
+	converted = set(
+		frappe.get_all(
+			"Loan Application",
+			filters={"loan_lead": ["in", [lead.name for lead in leads]]},
+			pluck="loan_lead",
+			ignore_permissions=True,
+		)
+		if leads
+		else []
+	)
+
+	return next((lead for lead in leads if lead.name not in converted), None)
+
+
+def lead_payload(lead: dict) -> dict:
+	"""The page for an enquiry that is in but not yet an application: a shorter tracker.
+
+	Read the way the public /track page reads it, so the two cannot disagree about where
+	the same enquiry stands.
+	"""
+	declined = lead.prequalification_status == "Not Pre-Qualified"
+
+	payload = no_application_payload()
+	payload["action_label"] = _("Contact us")
+	payload["head_note"] = "{0} · {1}".format(lead.name, tracker_stage(lead))
+	payload.update(
+		{
+			"has_application": True,
+			"product": lead.loan_product,
+			"reference": _("Enquiry {0}").format(lead.name),
+			"headline": _("Not taken forward this time") if declined else _("We have your enquiry"),
+			"headline_note": _("We cannot offer you a loan on these details. You may apply again later.")
+			if declined
+			else _("Our team will look at it and turn it into your application. You can follow it here."),
+			"steps": get_lead_steps(lead),
+			"steps_note": _("Closed") if declined else _("Waiting on us"),
+			"preview_note": _("As you sent it on {0}").format(long_date(lead.creation)),
+			"terms": [
+				{"label": _("Product"), "value": lead.loan_product},
+				{"label": _("Amount sought"), "value": money(lead.loan_amount)},
+			],
+			"terms_note": _("The loan you asked for"),
+			"applicant": [{"label": _("Name"), "value": lead.applicant_name}],
+			"applicant_note": _("From your enquiry"),
+			"co_applicants_note": _("Just you"),
+		}
+	)
+
+	return payload
+
+
+def get_lead_steps(lead: dict) -> list[dict]:
+	"""The tracker for an enquiry: received, checked, made an application, decided."""
+	declined = lead.prequalification_status == "Not Pre-Qualified"
+	qualified = lead.prequalification_status == "Pre-Qualified"
+
+	steps = [
+		step(
+			_("Enquiry received"),
+			_("Sent {0}").format(long_date(lead.creation)),
+			DONE,
+			_("Enquiry"),
+		),
+		step(
+			_("Checked against our rules"),
+			_("Not taken forward")
+			if declined
+			else (_("Pre-qualified") if qualified else _("Our team is looking at your enquiry")),
+			DONE if declined or qualified else CURRENT,
+			_("Checks"),
+		),
+	]
+
+	if not declined:
+		steps += [
+			step(
+				_("Your application"),
+				_("Our team is preparing it") if qualified else _("Starts once the checks are done"),
+				CURRENT if qualified else PENDING,
+				_("Application"),
+			),
+			step(_("Decision"), _("Awaited"), PENDING, _("Decision")),
+		]
+
+	return join_steps(steps)
 
 
 def stage_label(application: dict) -> str:
@@ -298,8 +397,12 @@ def get_application_steps(application: dict) -> list[dict]:
 			)
 		)
 
-	# The connector to the next step: green once both ends are done, and none after the
-	# last. A repeated block cannot tell which copy of it is the last, so the data says.
+	return join_steps(steps)
+
+
+def join_steps(steps: list[dict]) -> list[dict]:
+	"""The connector to the next step: green once both ends are done, and none after the
+	last. A repeated block cannot tell which copy of it is the last, so the data says."""
 	for this, after in zip(steps, steps[1:]):
 		this["line"] = "ok" if this["code"] == after["code"] == "done" else "plain"
 	steps[-1]["line"] = ""

@@ -14,6 +14,7 @@ export default function setup(context: any) {
 	const otp = ref("")
 	const employmentType = ref("Salaried")
 	const password = ref("")
+	const confirmPassword = ref("")
 	const companyName = ref("")
 	const applicantName = ref("")
 	const dateOfBirth = ref("")
@@ -54,12 +55,30 @@ export default function setup(context: any) {
 
 	const chooseProduct = (product: string) => { loanProduct.value = product }
 
+	const resendIn = ref(0)
+	const countDown = () => {
+		resendIn.value = 30
+		const timer = setInterval(() => {
+			if (--resendIn.value <= 0) clearInterval(timer)
+		}, 1000)
+	}
+
 	const sendCode = () => {
 		busy.value = true
 		call("lending.portal.apply.send_mobile_code", { mobile_number: mobileNumber.value })
-			.then((result: any) => { codeSent.value = true; toast.success(result.message) })
+			.then((result: any) => {
+				codeSent.value = true
+				countDown()
+				toast.success(result.message)
+			})
 			.catch(fail)
 			.finally(() => { busy.value = false })
+	}
+
+	// The link stays in place through the countdown, and does nothing until it ends.
+	const resendCode = () => {
+		if (resendIn.value > 0 || busy.value) return
+		sendCode()
 	}
 
 	const confirmCode = () => {
@@ -116,11 +135,12 @@ export default function setup(context: any) {
 		call("lending.portal.apply.create_account", {
 			token: accountToken.value,
 			password: password.value,
+			confirm_password: confirmPassword.value,
 		})
 			.then(() => { window.location.href = "/borrower-portal/overview" })
 			.catch(fail)
 			.finally(() => { busy.value = false })
 	}
 
-	return { tone, open, logout, showAlerts, alertsTab, sidebarCollapsed, step, applicantType, loanProduct, mobileNumber, otp, employmentType, password, companyName, applicantName, dateOfBirth, pan, applicantCountry, email, loanAmount, proposedTenure, income, busy, codeSent, offer, go, choose, chooseProduct, sendCode, confirmCode, submit, createAccount }
+	return { tone, open, logout, showAlerts, alertsTab, sidebarCollapsed, step, applicantType, loanProduct, mobileNumber, otp, employmentType, password, confirmPassword, companyName, applicantName, dateOfBirth, pan, applicantCountry, email, loanAmount, proposedTenure, income, busy, codeSent, offer, go, choose, chooseProduct, sendCode, resendIn, resendCode, confirmCode, submit, createAccount }
 }

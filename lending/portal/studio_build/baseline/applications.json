@@ -277,7 +277,7 @@
           {
            "componentName": "Dropdown",
            "componentProps": {
-            "options": "{{ [{ label: 'Log out', icon: 'lucide-log-out', onClick: () => logout() }] }}",
+            "options": "{{ [application.data.can_switch && { label: 'Switch account', icon: 'lucide-arrow-left-right', onClick: () => open('/accounts') }, { label: 'Log out', icon: 'lucide-log-out', onClick: () => logout() }].filter(Boolean) }}",
             "side": "top",
             "align": "start"
            },

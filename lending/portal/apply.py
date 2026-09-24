@@ -158,19 +158,16 @@ def get_apply_page() -> dict:
 		"how_note": _("Get from application to an offer in a few simple steps."),
 		"benefits": [
 			{
-				"step": "1",
 				"icon": "file-text",
 				"title": _("Answer a few questions"),
 				"note": _("Six short steps. You can go back to any of them before you send it."),
 			},
 			{
-				"step": "2",
 				"icon": "search",
 				"title": _("We review your application"),
 				"note": _("Our team checks the details and runs the necessary checks."),
 			},
 			{
-				"step": "3",
 				"icon": "percent",
 				"title": _("See your indicative offer"),
 				"note": _("View a personalized offer before you decide anything."),
@@ -180,10 +177,10 @@ def get_apply_page() -> dict:
 		"product_note": _("These are the products open to you. Pick the one that fits."),
 		"verify_title": _("Your mobile number"),
 		"verify_note": _(
-			"We send a six digit code to check the number is yours. "
+			"We send an OTP to check the number is yours. "
 			"It is the only thing we need to start."
 		),
-		"code_note": _("Enter the six digits we sent you."),
+		"code_note": _("Enter the OTP we sent you."),
 		"details_title": _("About you"),
 		"details_note": _(
 			"The more you tell us, the closer the indicative offer is to the real one. "
@@ -260,8 +257,8 @@ def send_mobile_code() -> dict:
 	return {
 		"sent": True,
 		"mobile": mask(mobile),
-		"headline": _("Code sent"),
-		"message": _("We sent a six digit code to the number ending {0}.").format(mask(mobile)),
+		"headline": _("OTP sent"),
+		"message": _("We sent an OTP to the number ending {0}.").format(mask(mobile)),
 	}
 
 
@@ -275,14 +272,14 @@ def confirm_mobile_code() -> dict:
 	code = clean(frappe.form_dict.get("otp"))
 
 	if not code:
-		frappe.throw(_("Please enter the code we sent you."), frappe.ValidationError)
+		frappe.throw(_("Please enter the OTP we sent you."), frappe.ValidationError)
 
 	# A failed verification comes back as a value, not an exception, and turning it
 	# into a raise would roll back the attempt the telephony app just recorded.
 	result = telephony_otp().verify_otp(mobile, VERIFY_CHANNEL, code, purpose=VERIFY_PURPOSE)
 
 	if not result.get("verified"):
-		return {"verified": False, "message": _("That code is wrong or has expired.")}
+		return {"verified": False, "message": _("That OTP is wrong or has expired.")}
 
 	token = frappe.generate_hash(length=32)
 	frappe.cache.set_value(
@@ -623,6 +620,8 @@ def create_account() -> dict:
 			),
 			frappe.ValidationError,
 		)
+	if password != (frappe.form_dict.get("confirm_password") or ""):
+		frappe.throw(_("The two passwords do not match."), frappe.ValidationError)
 
 	lead = frappe.db.get_value(
 		"Loan Lead",

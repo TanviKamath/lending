@@ -197,7 +197,7 @@
            "componentName": "Dropdown",
            "componentProps": {
             "align": "start",
-            "options": "{{ [{ label: 'Log out', icon: 'lucide-log-out', onClick: () => logout() }] }}",
+            "options": "{{ [overview.data.can_switch && { label: 'Switch account', icon: 'lucide-arrow-left-right', onClick: () => open('/accounts') }, { label: 'Log out', icon: 'lucide-log-out', onClick: () => logout() }].filter(Boolean) }}",
             "side": "top"
            },
            "componentSlots": {
@@ -485,7 +485,8 @@
                 "fontSize": "text-2xl",
                 "tag": "div",
                 "text": "{{ overview.data.application_headline }}"
-               }
+               },
+               "visibilityCondition": "{{ overview.data.application_headline }}"
               },
               {
                "baseStyles": {
@@ -729,7 +730,8 @@
                   "fontSize": "text-2xl",
                   "tag": "div",
                   "text": "{{ overview.data.next_amount }}"
-                 }
+                 },
+                 "visibilityCondition": "{{ overview.data.next_amount }}"
                 },
                 {
                  "baseStyles": {
@@ -908,7 +910,8 @@
                   "fontSize": "text-2xl",
                   "tag": "div",
                   "text": "{{ overview.data.outstanding }}"
-                 }
+                 },
+                 "visibilityCondition": "{{ overview.data.outstanding }}"
                 },
                 {
                  "baseStyles": {
@@ -2056,11 +2059,11 @@
    "originalElement": "body"
   }
  ],
- "creation": "2026-09-24 20:50:28.938081",
+ "creation": "2026-09-25 00:43:20.030707",
  "doctype": "Studio Page",
  "frappe_app": "lending",
  "is_standard": 1,
- "modified": "2026-09-24 22:47:53.670551",
+ "modified": "2026-09-25 02:08:02.383824",
  "modified_by": "Administrator",
  "name": "account_overview",
  "owner": "Administrator",

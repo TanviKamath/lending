@@ -328,7 +328,12 @@ def account_menu(data):
 	return block(
 		"Dropdown",
 		props={
-			"options": "{{ [{ label: 'Log out', icon: 'lucide-log-out', onClick: () => logout() }] }}",
+			"options": (
+				"{{ [%s.can_switch && { label: 'Switch account', icon: 'lucide-arrow-left-right', "
+				"onClick: () => open('/accounts') }, "
+				"{ label: 'Log out', icon: 'lucide-log-out', onClick: () => logout() }].filter(Boolean) }}"
+			)
+			% data,
 			"side": "top",
 			"align": "start",
 		},

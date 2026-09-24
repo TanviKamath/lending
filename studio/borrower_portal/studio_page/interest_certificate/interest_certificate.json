@@ -197,7 +197,7 @@
            "componentName": "Dropdown",
            "componentProps": {
             "align": "start",
-            "options": "{{ [{ label: 'Log out', icon: 'lucide-log-out', onClick: () => logout() }] }}",
+            "options": "{{ [certificate.data.can_switch && { label: 'Switch account', icon: 'lucide-arrow-left-right', onClick: () => open('/accounts') }, { label: 'Log out', icon: 'lucide-log-out', onClick: () => logout() }].filter(Boolean) }}",
             "side": "top"
            },
            "componentSlots": {
@@ -1220,11 +1220,11 @@
    "originalElement": "body"
   }
  ],
- "creation": "2026-09-24 13:59:27.353242",
+ "creation": "2026-09-25 00:43:20.169929",
  "doctype": "Studio Page",
  "frappe_app": "lending",
  "is_standard": 1,
- "modified": "2026-09-24 22:47:53.965283",
+ "modified": "2026-09-25 02:08:02.639560",
  "modified_by": "Administrator",
  "name": "interest_certificate",
  "owner": "Administrator",

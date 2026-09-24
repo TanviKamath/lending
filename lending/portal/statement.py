@@ -21,6 +21,7 @@ from frappe import _
 from frappe.utils import flt, getdate, nowdate
 
 from lending.portal.core import (
+	chosen_loan,
 	get_loans,
 	get_portal_customers,
 	long_date,
@@ -92,7 +93,8 @@ def year_options(count: int = 5) -> list[dict]:
 
 
 def owned_loans(loan: str | None = None) -> tuple[list[str], list]:
-	"""The borrower's loans, narrowed to one when the request names it.
+	"""The borrower's loans, narrowed to one when the request names it, and otherwise to
+	the account they chose.
 
 	Narrowing by filtering the borrower's own list is the ownership check: a name that
 	is not in it simply matches nothing, so an unowned loan cannot widen the result.
@@ -101,9 +103,11 @@ def owned_loans(loan: str | None = None) -> tuple[list[str], list]:
 	loans = get_loans(customers) if customers else []
 
 	if loan:
-		loans = [row for row in loans if row.name == loan]
+		return customers, [row for row in loans if row.name == loan]
 
-	return customers, loans
+	chosen = chosen_loan(loans)
+
+	return customers, [chosen] if chosen else loans
 
 
 def loan_groups(loans: list) -> dict:
@@ -146,7 +150,7 @@ def get_statement_page() -> dict:
 
 	customers, loans = owned_loans(loan)
 	entries = []
-	for (company, applicant), _names in loan_groups(loans).items():
+	for (company, applicant), names in loan_groups(loans).items():
 		if not company:
 			continue
 		_columns, data = execute(
@@ -154,6 +158,9 @@ def get_statement_page() -> dict:
 				"company": company,
 				"applicant": applicant,
 				"applicant_type": "Customer",
+				# The report reads every loan of the applicant unless told one. A group of
+				# one is either all the applicant has or the account the borrower chose.
+				"loan": names[0] if len(names) == 1 else None,
 				"from_date": from_date,
 				"to_date": to_date,
 			}

@@ -101,7 +101,7 @@
  },
  "component_id": "borrower_footer",
  "component_name": "Borrower Footer",
- "creation": "2026-09-24 13:59:27.047712",
+ "creation": "2026-09-25 00:32:04.307252",
  "docstatus": 0,
  "doctype": "Studio Component",
  "idx": 0,
@@ -113,14 +113,14 @@
    "type": "string"
   },
   {
-   "description": "The policy links, as {label, href} rows",
+   "description": "The policy links, as {footer_label, footer_href} rows",
    "input_name": "links",
    "required": 0,
    "type": "string"
   }
  ],
  "is_disabled": 0,
- "modified": "2026-09-24 21:37:05.678898",
+ "modified": "2026-09-25 01:15:05.275760",
  "modified_by": "Administrator",
  "name": "borrower_footer",
  "owner": "Administrator"

@@ -197,7 +197,7 @@
            "componentName": "Dropdown",
            "componentProps": {
             "align": "start",
-            "options": "{{ [{ label: 'Log out', icon: 'lucide-log-out', onClick: () => logout() }] }}",
+            "options": "{{ [loan.data.can_switch && { label: 'Switch account', icon: 'lucide-arrow-left-right', onClick: () => open('/accounts') }, { label: 'Log out', icon: 'lucide-log-out', onClick: () => logout() }].filter(Boolean) }}",
             "side": "top"
            },
            "componentSlots": {
@@ -389,6 +389,7 @@
             "alignItems": "start",
             "display": "flex",
             "flexDirection": "row",
+            "flexWrap": "wrap",
             "gap": "12px"
            },
            "children": [
@@ -446,6 +447,60 @@
               }
              ],
              "componentId": "loan_name-0-container1-container1-container1-container1-container1",
+             "componentName": "container",
+             "originalElement": "div"
+            },
+            {
+             "baseStyles": {
+              "flex": "1 1 auto"
+             },
+             "children": [],
+             "componentId": "loan_name-0-container1-container1-container1-container1-container2",
+             "componentName": "container",
+             "originalElement": "div"
+            },
+            {
+             "baseStyles": {
+              "alignItems": "flex-end",
+              "display": "flex",
+              "flexDirection": "column",
+              "gap": "4px"
+             },
+             "children": [
+              {
+               "children": [],
+               "componentEvents": {
+                "click": {
+                 "action": "Run Script",
+                 "event": "click",
+                 "script": "openRequest()"
+                }
+               },
+               "componentId": "loan_name-0-container1-container1-container1-container1-container3-button1",
+               "componentName": "Button",
+               "componentProps": {
+                "label": "Request disbursement",
+                "size": "md",
+                "variant": "solid"
+               },
+               "visibilityCondition": "{{ loan.data.drawdown.open }}"
+              },
+              {
+               "baseStyles": {
+                "color": "var(--ink-gray-6)"
+               },
+               "children": [],
+               "componentId": "loan_name-0-container1-container1-container1-container1-container3-textblock1",
+               "componentName": "TextBlock",
+               "componentProps": {
+                "fontSize": "text-p-sm",
+                "tag": "p",
+                "text": "{{ loan.data.drawdown.note }}"
+               },
+               "visibilityCondition": "{{ loan.data.drawdown.note }}"
+              }
+             ],
+             "componentId": "loan_name-0-container1-container1-container1-container1-container3",
              "componentName": "container",
              "originalElement": "div"
             }
@@ -1486,6 +1541,132 @@
          "componentId": "loan_name-0-container1-container1-container2",
          "componentName": "container",
          "originalElement": "div"
+        },
+        {
+         "children": [
+          {
+           "baseStyles": {
+            "display": "flex",
+            "flexDirection": "column",
+            "gap": "12px"
+           },
+           "children": [
+            {
+             "baseStyles": {
+              "color": "var(--ink-gray-6)"
+             },
+             "children": [],
+             "componentId": "loan_name-0-container1-container1-dialog1-container1-textblock1",
+             "componentName": "TextBlock",
+             "componentProps": {
+              "fontSize": "text-p-sm",
+              "tag": "p",
+              "text": "{{ loan.data.drawdown.note }}"
+             }
+            },
+            {
+             "children": [],
+             "componentId": "loan_name-0-container1-container1-dialog1-container1-formcontrol1",
+             "componentName": "FormControl",
+             "componentProps": {
+              "label": "Amount",
+              "modelValue": {
+               "$type": "variable",
+               "name": "requestAmount"
+              },
+              "placeholder": "0.00",
+              "required": true,
+              "type": "number",
+              "variant": "outline"
+             }
+            },
+            {
+             "baseStyles": {
+              "color": "var(--ink-gray-6)"
+             },
+             "children": [],
+             "componentId": "loan_name-0-container1-container1-dialog1-container1-textblock2",
+             "componentName": "TextBlock",
+             "componentProps": {
+              "fontSize": "text-p-sm",
+              "tag": "p",
+              "text": "We will check your request and be in touch before we pay it out."
+             }
+            },
+            {
+             "baseStyles": {
+              "alignItems": "center",
+              "display": "flex",
+              "flexDirection": "row",
+              "gap": "8px"
+             },
+             "children": [
+              {
+               "baseStyles": {
+                "flex": "1 1 auto"
+               },
+               "children": [],
+               "componentId": "loan_name-0-container1-container1-dialog1-container1-container1-container1",
+               "componentName": "container",
+               "originalElement": "div"
+              },
+              {
+               "children": [],
+               "componentEvents": {
+                "click": {
+                 "action": "Run Script",
+                 "event": "click",
+                 "script": "requestOpen.value = false"
+                }
+               },
+               "componentId": "loan_name-0-container1-container1-dialog1-container1-container1-button1",
+               "componentName": "Button",
+               "componentProps": {
+                "label": "Cancel",
+                "size": "sm",
+                "variant": "subtle"
+               }
+              },
+              {
+               "children": [],
+               "componentEvents": {
+                "click": {
+                 "action": "Run Script",
+                 "event": "click",
+                 "script": "sendRequest()"
+                }
+               },
+               "componentId": "loan_name-0-container1-container1-dialog1-container1-container1-button2",
+               "componentName": "Button",
+               "componentProps": {
+                "disabled": "{{ !requestAmount }}",
+                "label": "Send request",
+                "loading": "{{ requesting }}",
+                "size": "sm",
+                "variant": "solid"
+               }
+              }
+             ],
+             "componentId": "loan_name-0-container1-container1-dialog1-container1-container1",
+             "componentName": "container",
+             "originalElement": "div"
+            }
+           ],
+           "componentId": "loan_name-0-container1-container1-dialog1-container1",
+           "componentName": "container",
+           "originalElement": "div"
+          }
+         ],
+         "componentId": "loan_name-0-container1-container1-dialog1",
+         "componentName": "Dialog",
+         "componentProps": {
+          "modelValue": {
+           "$type": "variable",
+           "name": "requestOpen"
+          },
+          "size": "sm",
+          "title": "Request a disbursement"
+         }
         }
        ],
        "componentId": "loan_name-0-container1-container1",
@@ -1539,11 +1720,11 @@
    "originalElement": "body"
   }
  ],
- "creation": "2026-09-24 20:50:28.999755",
+ "creation": "2026-09-25 00:43:20.196835",
  "doctype": "Studio Page",
  "frappe_app": "lending",
  "is_standard": 1,
- "modified": "2026-09-24 22:47:53.790483",
+ "modified": "2026-09-25 02:08:02.498039",
  "modified_by": "Administrator",
  "name": "loan",
  "owner": "Administrator",

@@ -277,7 +277,7 @@
           {
            "componentName": "Dropdown",
            "componentProps": {
-            "options": "{{ [{ label: 'Log out', icon: 'lucide-log-out', onClick: () => logout() }] }}",
+            "options": "{{ [loan.data.can_switch && { label: 'Switch account', icon: 'lucide-arrow-left-right', onClick: () => open('/accounts') }, { label: 'Log out', icon: 'lucide-log-out', onClick: () => logout() }].filter(Boolean) }}",
             "side": "top",
             "align": "start"
            },
@@ -494,7 +494,8 @@
             "display": "flex",
             "flexDirection": "row",
             "alignItems": "start",
-            "gap": "12px"
+            "gap": "12px",
+            "flexWrap": "wrap"
            },
            "mobileStyles": {},
            "tabletStyles": {},
@@ -572,6 +573,78 @@
              ],
              "originalElement": "div",
              "componentId": "loan_name-0-container1-container1-container1-container1-container1"
+            },
+            {
+             "componentName": "container",
+             "componentProps": {},
+             "componentSlots": {},
+             "componentEvents": {},
+             "baseStyles": {
+              "flex": "1 1 auto"
+             },
+             "mobileStyles": {},
+             "tabletStyles": {},
+             "children": [],
+             "originalElement": "div",
+             "componentId": "loan_name-0-container1-container1-container1-container1-container2"
+            },
+            {
+             "componentName": "container",
+             "componentProps": {},
+             "componentSlots": {},
+             "componentEvents": {},
+             "baseStyles": {
+              "display": "flex",
+              "flexDirection": "column",
+              "gap": "4px",
+              "alignItems": "flex-end"
+             },
+             "mobileStyles": {},
+             "tabletStyles": {},
+             "children": [
+              {
+               "componentName": "Button",
+               "componentProps": {
+                "label": "Request disbursement",
+                "variant": "solid",
+                "size": "md"
+               },
+               "componentSlots": {},
+               "componentEvents": {
+                "click": {
+                 "event": "click",
+                 "action": "Run Script",
+                 "script": "openRequest()"
+                }
+               },
+               "baseStyles": {},
+               "mobileStyles": {},
+               "tabletStyles": {},
+               "children": [],
+               "visibilityCondition": "{{ loan.data.drawdown.open }}",
+               "componentId": "loan_name-0-container1-container1-container1-container1-container3-button1"
+              },
+              {
+               "componentName": "TextBlock",
+               "componentProps": {
+                "text": "{{ loan.data.drawdown.note }}",
+                "tag": "p",
+                "fontSize": "text-p-sm"
+               },
+               "componentSlots": {},
+               "componentEvents": {},
+               "baseStyles": {
+                "color": "var(--ink-gray-6)"
+               },
+               "mobileStyles": {},
+               "tabletStyles": {},
+               "children": [],
+               "visibilityCondition": "{{ loan.data.drawdown.note }}",
+               "componentId": "loan_name-0-container1-container1-container1-container1-container3-textblock1"
+              }
+             ],
+             "originalElement": "div",
+             "componentId": "loan_name-0-container1-container1-container1-container1-container3"
             }
            ],
            "originalElement": "div",
@@ -1932,6 +2005,173 @@
          ],
          "originalElement": "div",
          "componentId": "loan_name-0-container1-container1-container2"
+        },
+        {
+         "componentName": "Dialog",
+         "componentProps": {
+          "modelValue": {
+           "$type": "variable",
+           "name": "requestOpen"
+          },
+          "title": "Request a disbursement",
+          "size": "sm"
+         },
+         "componentSlots": {},
+         "componentEvents": {},
+         "baseStyles": {},
+         "mobileStyles": {},
+         "tabletStyles": {},
+         "children": [
+          {
+           "componentName": "container",
+           "componentProps": {},
+           "componentSlots": {},
+           "componentEvents": {},
+           "baseStyles": {
+            "display": "flex",
+            "flexDirection": "column",
+            "gap": "12px"
+           },
+           "mobileStyles": {},
+           "tabletStyles": {},
+           "children": [
+            {
+             "componentName": "TextBlock",
+             "componentProps": {
+              "text": "{{ loan.data.drawdown.note }}",
+              "tag": "p",
+              "fontSize": "text-p-sm"
+             },
+             "componentSlots": {},
+             "componentEvents": {},
+             "baseStyles": {
+              "color": "var(--ink-gray-6)"
+             },
+             "mobileStyles": {},
+             "tabletStyles": {},
+             "children": [],
+             "componentId": "loan_name-0-container1-container1-dialog1-container1-textblock1"
+            },
+            {
+             "componentName": "FormControl",
+             "componentProps": {
+              "type": "number",
+              "label": "Amount",
+              "placeholder": "0.00",
+              "required": true,
+              "variant": "outline",
+              "modelValue": {
+               "$type": "variable",
+               "name": "requestAmount"
+              }
+             },
+             "componentSlots": {},
+             "componentEvents": {},
+             "baseStyles": {},
+             "mobileStyles": {},
+             "tabletStyles": {},
+             "children": [],
+             "componentId": "loan_name-0-container1-container1-dialog1-container1-formcontrol1"
+            },
+            {
+             "componentName": "TextBlock",
+             "componentProps": {
+              "text": "We will check your request and be in touch before we pay it out.",
+              "tag": "p",
+              "fontSize": "text-p-sm"
+             },
+             "componentSlots": {},
+             "componentEvents": {},
+             "baseStyles": {
+              "color": "var(--ink-gray-6)"
+             },
+             "mobileStyles": {},
+             "tabletStyles": {},
+             "children": [],
+             "componentId": "loan_name-0-container1-container1-dialog1-container1-textblock2"
+            },
+            {
+             "componentName": "container",
+             "componentProps": {},
+             "componentSlots": {},
+             "componentEvents": {},
+             "baseStyles": {
+              "display": "flex",
+              "flexDirection": "row",
+              "alignItems": "center",
+              "gap": "8px"
+             },
+             "mobileStyles": {},
+             "tabletStyles": {},
+             "children": [
+              {
+               "componentName": "container",
+               "componentProps": {},
+               "componentSlots": {},
+               "componentEvents": {},
+               "baseStyles": {
+                "flex": "1 1 auto"
+               },
+               "mobileStyles": {},
+               "tabletStyles": {},
+               "children": [],
+               "originalElement": "div",
+               "componentId": "loan_name-0-container1-container1-dialog1-container1-container1-container1"
+              },
+              {
+               "componentName": "Button",
+               "componentProps": {
+                "label": "Cancel",
+                "variant": "subtle",
+                "size": "sm"
+               },
+               "componentSlots": {},
+               "componentEvents": {
+                "click": {
+                 "event": "click",
+                 "action": "Run Script",
+                 "script": "requestOpen.value = false"
+                }
+               },
+               "baseStyles": {},
+               "mobileStyles": {},
+               "tabletStyles": {},
+               "children": [],
+               "componentId": "loan_name-0-container1-container1-dialog1-container1-container1-button1"
+              },
+              {
+               "componentName": "Button",
+               "componentProps": {
+                "label": "Send request",
+                "variant": "solid",
+                "size": "sm",
+                "disabled": "{{ !requestAmount }}",
+                "loading": "{{ requesting }}"
+               },
+               "componentSlots": {},
+               "componentEvents": {
+                "click": {
+                 "event": "click",
+                 "action": "Run Script",
+                 "script": "sendRequest()"
+                }
+               },
+               "baseStyles": {},
+               "mobileStyles": {},
+               "tabletStyles": {},
+               "children": [],
+               "componentId": "loan_name-0-container1-container1-dialog1-container1-container1-button2"
+              }
+             ],
+             "originalElement": "div",
+             "componentId": "loan_name-0-container1-container1-dialog1-container1-container1"
+            }
+           ],
+           "originalElement": "div",
+           "componentId": "loan_name-0-container1-container1-dialog1-container1"
+          }
+         ],
+         "componentId": "loan_name-0-container1-container1-dialog1"
         }
        ],
        "originalElement": "div",
@@ -2004,5 +2244,5 @@
    "componentId": "loan_name-0"
   }
  ],
- "script": "import { computed, ref, watch } from \"vue\"\nimport { call, toast } from \"frappe-ui\"\nimport { tone, appRoute, logout as endSession, useSearch } from \"@app/utils/portal\"\n\nexport default function setup(context: any) {\n\tconst { router } = context\n\tconst showAlerts = ref(false)\n\tconst alertsTab = ref(\"attention\")\n\tconst sidebarCollapsed = ref<boolean | null>(null)\n\n\tconst open = (url?: string) => {\n\t\tconst to = appRoute(url)\n\t\tif (to) router.push(to)\n\t}\n\tconst logout = () => endSession(router)\n\tconst search = useSearch(open)\n\n\treturn { tone, open, logout, showAlerts, alertsTab, sidebarCollapsed, ...search }\n}\n"
+ "script": "import { computed, ref, watch } from \"vue\"\nimport { call, toast } from \"frappe-ui\"\nimport { tone, appRoute, logout as endSession, useSearch } from \"@app/utils/portal\"\n\nexport default function setup(context: any) {\n\tconst { router } = context\n\tconst showAlerts = ref(false)\n\tconst alertsTab = ref(\"attention\")\n\tconst sidebarCollapsed = ref<boolean | null>(null)\n\tconst requestOpen = ref(false)\n\tconst requestAmount = ref(\"\")\n\n\tconst open = (url?: string) => {\n\t\tconst to = appRoute(url)\n\t\tif (to) router.push(to)\n\t}\n\tconst logout = () => endSession(router)\n\tconst search = useSearch(open)\n\n\tconst requesting = ref(false)\n\n\tconst openRequest = () => {\n\t\trequestAmount.value = \"\"\n\t\trequestOpen.value = true\n\t}\n\n\tconst sendRequest = () => {\n\t\trequesting.value = true\n\t\tcall(\"lending.portal.loans.request_disbursement\", {\n\t\t\tname: context.loan.data?.drawdown?.loan,\n\t\t\tamount: requestAmount.value,\n\t\t})\n\t\t\t.then((result: any) => {\n\t\t\t\ttoast.success(result?.message || \"We have your request.\")\n\t\t\t\trequestOpen.value = false\n\t\t\t\tcontext.loan.reload()\n\t\t\t})\n\t\t\t.catch((error: any) =>\n\t\t\t\ttoast.error(String(error?.messages?.[0] || error?.message || error)),\n\t\t\t)\n\t\t\t.finally(() => { requesting.value = false })\n\t}\n\n\treturn { tone, open, logout, showAlerts, alertsTab, sidebarCollapsed, ...search, requestOpen, requestAmount, requesting, openRequest, sendRequest }\n}\n"
 }

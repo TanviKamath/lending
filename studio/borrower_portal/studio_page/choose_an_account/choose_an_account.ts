@@ -15,11 +15,18 @@ export default function setup(context: any) {
 	const logout = () => endSession(router)
 	const search = useSearch(open)
 
-	watch(
-		() => context.overview?.data?.choose_account,
-		(choose) => { if (choose) router.replace("/accounts") },
-		{ immediate: true },
-	)
+	const choosing = ref("")
 
-	return { tone, open, logout, showAlerts, alertsTab, sidebarCollapsed, ...search }
+	const chooseAccount = (name: string) => {
+		if (choosing.value) return
+		choosing.value = name
+		call("lending.portal.switcher.choose_account", { name })
+			.then((result: any) => open(result?.url))
+			.catch((error: any) =>
+				toast.error(String(error?.messages?.[0] || error?.message || error)),
+			)
+			.finally(() => { choosing.value = "" })
+	}
+
+	return { tone, open, logout, showAlerts, alertsTab, sidebarCollapsed, ...search, choosing, chooseAccount }
 }

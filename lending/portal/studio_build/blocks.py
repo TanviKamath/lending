@@ -792,7 +792,7 @@ def stat(
 
 	figure = "text-2xl" if icon_name else "text-4xl"
 	note_line = icon_line(note_icon, note) if note_icon else muted(note)
-	body = [text(value, tag="div", size=figure, styles={"fontWeight": "600"}), note_line]
+	body = [text(value, tag="div", size=figure, styles={"fontWeight": "600"}, visible=value), note_line]
 	if sub:
 		body.append(muted(sub, visible=sub))
 

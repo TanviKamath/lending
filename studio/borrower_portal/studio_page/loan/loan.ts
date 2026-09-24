@@ -7,6 +7,8 @@ export default function setup(context: any) {
 	const showAlerts = ref(false)
 	const alertsTab = ref("attention")
 	const sidebarCollapsed = ref<boolean | null>(null)
+	const requestOpen = ref(false)
+	const requestAmount = ref("")
 
 	const open = (url?: string) => {
 		const to = appRoute(url)
@@ -15,5 +17,29 @@ export default function setup(context: any) {
 	const logout = () => endSession(router)
 	const search = useSearch(open)
 
-	return { tone, open, logout, showAlerts, alertsTab, sidebarCollapsed, ...search }
+	const requesting = ref(false)
+
+	const openRequest = () => {
+		requestAmount.value = ""
+		requestOpen.value = true
+	}
+
+	const sendRequest = () => {
+		requesting.value = true
+		call("lending.portal.loans.request_disbursement", {
+			name: context.loan.data?.drawdown?.loan,
+			amount: requestAmount.value,
+		})
+			.then((result: any) => {
+				toast.success(result?.message || "We have your request.")
+				requestOpen.value = false
+				context.loan.reload()
+			})
+			.catch((error: any) =>
+				toast.error(String(error?.messages?.[0] || error?.message || error)),
+			)
+			.finally(() => { requesting.value = false })
+	}
+
+	return { tone, open, logout, showAlerts, alertsTab, sidebarCollapsed, ...search, requestOpen, requestAmount, requesting, openRequest, sendRequest }
 }

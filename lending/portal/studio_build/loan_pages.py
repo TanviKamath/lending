@@ -12,12 +12,16 @@ angle brackets and frappe's router put the match in `frappe.form_dict`; Studio's
 is vue-router, so the segment is `:name` and the page hands it to the endpoint as a
 request parameter. `get_loan_detail` reads it from `form_dict` either way, and proves
 the borrower owns the loan before reading further.
+
+A loan with money left to draw offers a disbursement request: a dialog asking how much,
+posted to `request_disbursement`. What reaches the desk is a draft, never a payment.
 """
 
-from lending.portal.studio_build.app import api_resource, upsert_page
+from lending.portal.studio_build.app import api_resource, page_script, upsert_page
 from lending.portal.studio_build.blocks import (
 	PANEL,
 	any_row,
+	block,
 	button,
 	column,
 	container,
@@ -40,6 +44,38 @@ from lending.portal.studio_build.shell import frame
 DETAIL_SOURCE = "loan"
 ALERTS = ("alerts", "lending.portal.notifications.get_notifications")
 
+# The request dialog's own state. The loan comes from the payload rather than the route,
+# because /loans names none.
+REQUEST = '''\tconst requesting = ref(false)
+
+\tconst openRequest = () => {
+\t\trequestAmount.value = ""
+\t\trequestOpen.value = true
+\t}
+
+\tconst sendRequest = () => {
+\t\trequesting.value = true
+\t\tcall("lending.portal.loans.request_disbursement", {
+\t\t\tname: context.loan.data?.drawdown?.loan,
+\t\t\tamount: requestAmount.value,
+\t\t})
+\t\t\t.then((result: any) => {
+\t\t\t\ttoast.success(result?.message || "We have your request.")
+\t\t\t\trequestOpen.value = false
+\t\t\t\tcontext.loan.reload()
+\t\t\t})
+\t\t\t.catch((error: any) =>
+\t\t\t\ttoast.error(String(error?.messages?.[0] || error?.message || error)),
+\t\t\t)
+\t\t\t.finally(() => { requesting.value = false })
+\t}'''
+
+DETAIL_SCRIPT = page_script(
+	state=[("requestOpen", "false"), ("requestAmount", '""')],
+	body=REQUEST,
+	returns=["requesting", "openRequest", "sendRequest"],
+)
+
 
 def terms_card(read):
 	"""The loan's terms as two rows of four figures, split by rules.
@@ -53,9 +89,12 @@ def terms_card(read):
 		[
 			icon_tile("file-text"),
 			column([heading("Loan details"), muted(read("summary_note"))], gap="2px"),
+			spacer(),
+			drawdown_action(read),
 		],
 		gap="12px",
 		align="start",
+		styles={"flexWrap": "wrap"},
 	)
 	figures = column(
 		[
@@ -78,6 +117,68 @@ def terms_card(read):
 	)
 
 	return column([head, figures], gap="20px", styles=dict(PANEL, padding="20px"))
+
+
+def drawdown_action(read):
+	"""The request button over what the loan has left to draw, or the word that a
+	disbursement is already on its way. Neither shows on a loan with nothing to draw."""
+	request = button(
+		"Request disbursement",
+		script="openRequest()",
+		variant="solid",
+		props={"size": "md"},
+		visible=read("drawdown.open"),
+	)
+	note = muted(read("drawdown.note"), visible=read("drawdown.note"))
+
+	return column([request, note], gap="4px", styles={"alignItems": "flex-end"})
+
+
+def request_dialog(read):
+	"""How much, and a send. The endpoint holds the limit; the note repeats it so the
+	borrower knows it before they type."""
+	amount = block(
+		"FormControl",
+		props={
+			"type": "number",
+			"label": "Amount",
+			"placeholder": "0.00",
+			"required": True,
+			"variant": "outline",
+			"modelValue": {"$type": "variable", "name": "requestAmount"},
+		},
+	)
+	actions = row(
+		[
+			spacer(),
+			button("Cancel", script="requestOpen.value = false"),
+			button(
+				"Send request",
+				script="sendRequest()",
+				variant="solid",
+				props={"disabled": "{{ !requestAmount }}", "loading": "{{ requesting }}"},
+			),
+		],
+	)
+	body = column(
+		[
+			muted(read("drawdown.note")),
+			amount,
+			muted("We will check your request and be in touch before we pay it out."),
+			actions,
+		],
+		gap="12px",
+	)
+
+	return block(
+		"Dialog",
+		props={
+			"modelValue": {"$type": "variable", "name": "requestOpen"},
+			"title": "Request a disbursement",
+			"size": "sm",
+		},
+		children=[body],
+	)
 
 
 class TermCell:
@@ -278,10 +379,13 @@ PAYOFF_FIGURE = {
 
 
 def detail_content(read):
-	"""The terms, then what closing the loan takes beside what it carries."""
+	"""The terms, then what closing the loan takes beside what it carries.
+
+	The request dialog rides along at the end; it draws nothing until it is opened."""
 	return [
 		terms_card(read),
 		side_by_side((payoff_card(read), "1 1 320px"), (charges_card(read), "1 1 320px")),
+		request_dialog(read),
 	]
 
 
@@ -319,6 +423,7 @@ def build_detail(title, route, params=None):
 			api_resource(DETAIL_SOURCE, "lending.portal.loans.get_loan_detail", params=params),
 			api_resource(*ALERTS, auto=0),
 		],
+		script=DETAIL_SCRIPT,
 	)
 
 

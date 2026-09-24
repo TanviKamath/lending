@@ -684,81 +684,59 @@
                  "baseStyles": {
                   "alignItems": "center",
                   "backgroundColor": "var(--surface-gray-2)",
-                  "borderRadius": "9999px",
-                  "color": "var(--ink-gray-8)",
-                  "display": "flex",
-                  "flexShrink": "0",
-                  "fontWeight": "500",
-                  "height": "32px",
-                  "justifyContent": "center",
-                  "width": "32px"
-                 },
-                 "children": [],
-                 "componentId": "apply-0-container1-container2-container2-container3-repeater1-container1-textblock1",
-                 "componentName": "TextBlock",
-                 "componentProps": {
-                  "fontSize": "text-sm",
-                  "tag": "p",
-                  "text": "{{ dataItem.step }}"
-                 }
-                },
-                {
-                 "baseStyles": {
-                  "alignItems": "center",
-                  "backgroundColor": "transparent",
                   "borderRadius": "var(--radius-5)",
-                  "color": "var(--ink-gray-8)",
+                  "color": "var(--ink-gray-7)",
                   "display": "flex",
                   "flex": "0 0 auto",
-                  "height": "32px",
+                  "height": "44px",
                   "justifyContent": "center",
-                  "width": "32px"
+                  "width": "44px"
                  },
                  "children": [],
                  "componentId": "apply-0-container1-container2-container2-container3-repeater1-container1-html1",
                  "componentName": "HTML",
                  "componentProps": {
-                  "html": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z\"/><path d=\"M14 2v5a1 1 0 0 0 1 1h5\"/><path d=\"M10 9H8\"/><path d=\"M16 13H8\"/><path d=\"M16 17H8\"/></svg>"
+                  "html": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z\"/><path d=\"M14 2v5a1 1 0 0 0 1 1h5\"/><path d=\"M10 9H8\"/><path d=\"M16 13H8\"/><path d=\"M16 17H8\"/></svg>"
                  },
                  "visibilityCondition": "{{ dataItem.icon === 'file-text' }}"
                 },
                 {
                  "baseStyles": {
                   "alignItems": "center",
-                  "backgroundColor": "transparent",
+                  "backgroundColor": "var(--surface-gray-2)",
                   "borderRadius": "var(--radius-5)",
-                  "color": "var(--ink-gray-8)",
+                  "color": "var(--ink-gray-7)",
                   "display": "flex",
                   "flex": "0 0 auto",
-                  "height": "32px",
+                  "height": "44px",
                   "justifyContent": "center",
-                  "width": "32px"
+                  "width": "44px"
                  },
                  "children": [],
                  "componentId": "apply-0-container1-container2-container2-container3-repeater1-container1-html2",
                  "componentName": "HTML",
                  "componentProps": {
-                  "html": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m21 21-4.34-4.34\"/><circle cx=\"11\" cy=\"11\" r=\"8\"/></svg>"
+                  "html": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m21 21-4.34-4.34\"/><circle cx=\"11\" cy=\"11\" r=\"8\"/></svg>"
                  },
                  "visibilityCondition": "{{ dataItem.icon === 'search' }}"
                 },
                 {
                  "baseStyles": {
                   "alignItems": "center",
-                  "backgroundColor": "transparent",
+                  "backgroundColor": "var(--surface-gray-2)",
                   "borderRadius": "var(--radius-5)",
-                  "color": "var(--ink-gray-8)",
+                  "color": "var(--ink-gray-7)",
                   "display": "flex",
                   "flex": "0 0 auto",
-                  "height": "32px",
+                  "height": "44px",
                   "justifyContent": "center",
-                  "width": "32px"
+                  "width": "44px"
                  },
                  "children": [],
                  "componentId": "apply-0-container1-container2-container2-container3-repeater1-container1-html3",
                  "componentName": "HTML",
                  "componentProps": {
-                  "html": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><line x1=\"19\" x2=\"5\" y1=\"5\" y2=\"19\"/><circle cx=\"6.5\" cy=\"6.5\" r=\"2.5\"/><circle cx=\"17.5\" cy=\"17.5\" r=\"2.5\"/></svg>"
+                  "html": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><line x1=\"19\" x2=\"5\" y1=\"5\" y2=\"19\"/><circle cx=\"6.5\" cy=\"6.5\" r=\"2.5\"/><circle cx=\"17.5\" cy=\"17.5\" r=\"2.5\"/></svg>"
                  },
                  "visibilityCondition": "{{ dataItem.icon === 'percent' }}"
                 },
@@ -813,7 +791,7 @@
              "componentName": "Repeater",
              "componentProps": {
               "data": "{{ apply.data.benefits }}",
-              "dataKey": "step",
+              "dataKey": "icon",
               "emptyStateMessage": ""
              }
             }
@@ -1732,30 +1710,90 @@
              "componentId": "apply-0-container1-container2-container5-container2-formcontrol1",
              "componentName": "FormControl",
              "componentProps": {
-              "label": "The six digits we sent you",
+              "label": "OTP",
               "modelValue": {
                "$type": "variable",
                "name": "otp"
               },
-              "type": "text"
+              "type": "password"
              }
             },
             {
-             "children": [],
-             "componentEvents": {
-              "click": {
-               "action": "Run Script",
-               "event": "click",
-               "script": "sendCode()"
-              }
+             "baseStyles": {
+              "alignItems": "center",
+              "display": "flex",
+              "flexDirection": "row",
+              "gap": "8px",
+              "justifyContent": "space-between",
+              "width": "100%"
              },
-             "componentId": "apply-0-container1-container2-container5-container2-button1",
-             "componentName": "Button",
-             "componentProps": {
-              "label": "Send it again",
-              "size": "sm",
-              "variant": "ghost"
-             }
+             "children": [
+              {
+               "baseStyles": {
+                "alignItems": "center",
+                "display": "flex",
+                "flexDirection": "row",
+                "gap": "6px"
+               },
+               "children": [
+                {
+                 "baseStyles": {
+                  "color": "var(--ink-gray-6)"
+                 },
+                 "children": [],
+                 "componentId": "apply-0-container1-container2-container5-container2-container1-container1-textblock1",
+                 "componentName": "TextBlock",
+                 "componentProps": {
+                  "fontSize": "text-p-sm",
+                  "tag": "p",
+                  "text": "Didn't receive the OTP?"
+                 }
+                },
+                {
+                 "baseStyles": {
+                  "color": "var(--ink-gray-9)",
+                  "cursor": "pointer",
+                  "fontWeight": "500"
+                 },
+                 "children": [],
+                 "componentEvents": {
+                  "click": {
+                   "action": "Run Script",
+                   "event": "click",
+                   "script": "resendCode()"
+                  }
+                 },
+                 "componentId": "apply-0-container1-container2-container5-container2-container1-container1-textblock2",
+                 "componentName": "TextBlock",
+                 "componentProps": {
+                  "fontSize": "text-p-sm",
+                  "tag": "p",
+                  "text": "Resend OTP"
+                 }
+                }
+               ],
+               "componentId": "apply-0-container1-container2-container5-container2-container1-container1",
+               "componentName": "container",
+               "originalElement": "div"
+              },
+              {
+               "baseStyles": {
+                "color": "var(--ink-gray-5)"
+               },
+               "children": [],
+               "componentId": "apply-0-container1-container2-container5-container2-container1-textblock1",
+               "componentName": "TextBlock",
+               "componentProps": {
+                "fontSize": "text-p-sm",
+                "tag": "p",
+                "text": "{{ 'Resend in 00:' + String(resendIn).padStart(2, '0') }}"
+               },
+               "visibilityCondition": "{{ resendIn > 0 }}"
+              }
+             ],
+             "componentId": "apply-0-container1-container2-container5-container2-container1",
+             "componentName": "container",
+             "originalElement": "div"
             }
            ],
            "componentId": "apply-0-container1-container2-container5-container2",
@@ -1809,7 +1847,7 @@
              "componentId": "apply-0-container1-container2-container5-container3-button2",
              "componentName": "Button",
              "componentProps": {
-              "label": "Send me a code",
+              "label": "Send OTP",
               "loading": "{{ busy }}",
               "size": "md",
               "variant": "solid"
@@ -2415,6 +2453,19 @@
            }
           },
           {
+           "children": [],
+           "componentId": "apply-0-container1-container2-container8-formcontrol2",
+           "componentName": "FormControl",
+           "componentProps": {
+            "label": "Confirm password",
+            "modelValue": {
+             "$type": "variable",
+             "name": "confirmPassword"
+            },
+            "type": "password"
+           }
+          },
+          {
            "baseStyles": {
             "alignItems": "center",
             "display": "flex",
@@ -2493,11 +2544,11 @@
    "originalElement": "body"
   }
  ],
- "creation": "2026-09-24 13:59:27.319872",
+ "creation": "2026-09-25 00:43:20.134399",
  "doctype": "Studio Page",
  "frappe_app": "lending",
  "is_standard": 1,
- "modified": "2026-09-24 22:47:54.057110",
+ "modified": "2026-09-25 02:08:02.704786",
  "modified_by": "Administrator",
  "name": "apply_for_a_loan",
  "owner": "Administrator",

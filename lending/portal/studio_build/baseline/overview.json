@@ -277,7 +277,7 @@
           {
            "componentName": "Dropdown",
            "componentProps": {
-            "options": "{{ [{ label: 'Log out', icon: 'lucide-log-out', onClick: () => logout() }] }}",
+            "options": "{{ [overview.data.can_switch && { label: 'Switch account', icon: 'lucide-arrow-left-right', onClick: () => open('/accounts') }, { label: 'Log out', icon: 'lucide-log-out', onClick: () => logout() }].filter(Boolean) }}",
             "side": "top",
             "align": "start"
            },
@@ -634,6 +634,7 @@
                "mobileStyles": {},
                "tabletStyles": {},
                "children": [],
+               "visibilityCondition": "{{ overview.data.application_headline }}",
                "componentId": "overview-0-container1-container1-container1-container1-container1-textblock1"
               },
               {
@@ -953,6 +954,7 @@
                  "mobileStyles": {},
                  "tabletStyles": {},
                  "children": [],
+                 "visibilityCondition": "{{ overview.data.next_amount }}",
                  "componentId": "overview-0-container1-container1-container1-container2-container1-container2-textblock1"
                 },
                 {
@@ -1185,6 +1187,7 @@
                  "mobileStyles": {},
                  "tabletStyles": {},
                  "children": [],
+                 "visibilityCondition": "{{ overview.data.outstanding }}",
                  "componentId": "overview-0-container1-container1-container1-container3-container1-container2-textblock1"
                 },
                 {
@@ -2630,5 +2633,5 @@
    "componentId": "overview-0"
   }
  ],
- "script": "import { computed, ref, watch } from \"vue\"\nimport { call, toast } from \"frappe-ui\"\nimport { tone, appRoute, logout as endSession, useSearch } from \"@app/utils/portal\"\n\nexport default function setup(context: any) {\n\tconst { router } = context\n\tconst showAlerts = ref(false)\n\tconst alertsTab = ref(\"attention\")\n\tconst sidebarCollapsed = ref<boolean | null>(null)\n\n\tconst open = (url?: string) => {\n\t\tconst to = appRoute(url)\n\t\tif (to) router.push(to)\n\t}\n\tconst logout = () => endSession(router)\n\tconst search = useSearch(open)\n\n\treturn { tone, open, logout, showAlerts, alertsTab, sidebarCollapsed, ...search }\n}\n"
+ "script": "import { computed, ref, watch } from \"vue\"\nimport { call, toast } from \"frappe-ui\"\nimport { tone, appRoute, logout as endSession, useSearch } from \"@app/utils/portal\"\n\nexport default function setup(context: any) {\n\tconst { router } = context\n\tconst showAlerts = ref(false)\n\tconst alertsTab = ref(\"attention\")\n\tconst sidebarCollapsed = ref<boolean | null>(null)\n\n\tconst open = (url?: string) => {\n\t\tconst to = appRoute(url)\n\t\tif (to) router.push(to)\n\t}\n\tconst logout = () => endSession(router)\n\tconst search = useSearch(open)\n\n\twatch(\n\t\t() => context.overview?.data?.choose_account,\n\t\t(choose) => { if (choose) router.replace(\"/accounts\") },\n\t\t{ immediate: true },\n\t)\n\n\treturn { tone, open, logout, showAlerts, alertsTab, sidebarCollapsed, ...search }\n}\n"
 }

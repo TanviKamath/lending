@@ -830,7 +830,7 @@
              "componentName": "Repeater",
              "componentProps": {
               "data": "{{ apply.data.benefits }}",
-              "dataKey": "step",
+              "dataKey": "icon",
               "emptyStateMessage": ""
              },
              "componentSlots": {},
@@ -866,35 +866,9 @@
                "tabletStyles": {},
                "children": [
                 {
-                 "componentName": "TextBlock",
-                 "componentProps": {
-                  "text": "{{ dataItem.step }}",
-                  "tag": "p",
-                  "fontSize": "text-sm"
-                 },
-                 "componentSlots": {},
-                 "componentEvents": {},
-                 "baseStyles": {
-                  "display": "flex",
-                  "alignItems": "center",
-                  "justifyContent": "center",
-                  "flexShrink": "0",
-                  "width": "32px",
-                  "height": "32px",
-                  "borderRadius": "9999px",
-                  "fontWeight": "500",
-                  "backgroundColor": "var(--surface-gray-2)",
-                  "color": "var(--ink-gray-8)"
-                 },
-                 "mobileStyles": {},
-                 "tabletStyles": {},
-                 "children": [],
-                 "componentId": "apply-0-container1-container2-container2-container3-repeater1-container1-textblock1"
-                },
-                {
                  "componentName": "HTML",
                  "componentProps": {
-                  "html": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z\"/><path d=\"M14 2v5a1 1 0 0 0 1 1h5\"/><path d=\"M10 9H8\"/><path d=\"M16 13H8\"/><path d=\"M16 17H8\"/></svg>"
+                  "html": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z\"/><path d=\"M14 2v5a1 1 0 0 0 1 1h5\"/><path d=\"M10 9H8\"/><path d=\"M16 13H8\"/><path d=\"M16 17H8\"/></svg>"
                  },
                  "componentSlots": {},
                  "componentEvents": {},
@@ -902,12 +876,12 @@
                   "display": "flex",
                   "alignItems": "center",
                   "flex": "0 0 auto",
-                  "width": "32px",
-                  "height": "32px",
+                  "width": "44px",
+                  "height": "44px",
                   "justifyContent": "center",
                   "borderRadius": "var(--radius-5)",
-                  "backgroundColor": "transparent",
-                  "color": "var(--ink-gray-8)"
+                  "backgroundColor": "var(--surface-gray-2)",
+                  "color": "var(--ink-gray-7)"
                  },
                  "mobileStyles": {},
                  "tabletStyles": {},
@@ -918,7 +892,7 @@
                 {
                  "componentName": "HTML",
                  "componentProps": {
-                  "html": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m21 21-4.34-4.34\"/><circle cx=\"11\" cy=\"11\" r=\"8\"/></svg>"
+                  "html": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m21 21-4.34-4.34\"/><circle cx=\"11\" cy=\"11\" r=\"8\"/></svg>"
                  },
                  "componentSlots": {},
                  "componentEvents": {},
@@ -926,12 +900,12 @@
                   "display": "flex",
                   "alignItems": "center",
                   "flex": "0 0 auto",
-                  "width": "32px",
-                  "height": "32px",
+                  "width": "44px",
+                  "height": "44px",
                   "justifyContent": "center",
                   "borderRadius": "var(--radius-5)",
-                  "backgroundColor": "transparent",
-                  "color": "var(--ink-gray-8)"
+                  "backgroundColor": "var(--surface-gray-2)",
+                  "color": "var(--ink-gray-7)"
                  },
                  "mobileStyles": {},
                  "tabletStyles": {},
@@ -942,7 +916,7 @@
                 {
                  "componentName": "HTML",
                  "componentProps": {
-                  "html": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><line x1=\"19\" x2=\"5\" y1=\"5\" y2=\"19\"/><circle cx=\"6.5\" cy=\"6.5\" r=\"2.5\"/><circle cx=\"17.5\" cy=\"17.5\" r=\"2.5\"/></svg>"
+                  "html": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><line x1=\"19\" x2=\"5\" y1=\"5\" y2=\"19\"/><circle cx=\"6.5\" cy=\"6.5\" r=\"2.5\"/><circle cx=\"17.5\" cy=\"17.5\" r=\"2.5\"/></svg>"
                  },
                  "componentSlots": {},
                  "componentEvents": {},
@@ -950,12 +924,12 @@
                   "display": "flex",
                   "alignItems": "center",
                   "flex": "0 0 auto",
-                  "width": "32px",
-                  "height": "32px",
+                  "width": "44px",
+                  "height": "44px",
                   "justifyContent": "center",
                   "borderRadius": "var(--radius-5)",
-                  "backgroundColor": "transparent",
-                  "color": "var(--ink-gray-8)"
+                  "backgroundColor": "var(--surface-gray-2)",
+                  "color": "var(--ink-gray-7)"
                  },
                  "mobileStyles": {},
                  "tabletStyles": {},
@@ -2202,8 +2176,8 @@
             {
              "componentName": "FormControl",
              "componentProps": {
-              "type": "text",
-              "label": "The six digits we sent you",
+              "type": "password",
+              "label": "OTP",
               "modelValue": {
                "$type": "variable",
                "name": "otp"
@@ -2218,25 +2192,102 @@
              "componentId": "apply-0-container1-container2-container5-container2-formcontrol1"
             },
             {
-             "componentName": "Button",
-             "componentProps": {
-              "label": "Send it again",
-              "variant": "ghost",
-              "size": "sm"
-             },
+             "componentName": "container",
+             "componentProps": {},
              "componentSlots": {},
-             "componentEvents": {
-              "click": {
-               "event": "click",
-               "action": "Run Script",
-               "script": "sendCode()"
-              }
+             "componentEvents": {},
+             "baseStyles": {
+              "display": "flex",
+              "flexDirection": "row",
+              "alignItems": "center",
+              "gap": "8px",
+              "justifyContent": "space-between",
+              "width": "100%"
              },
-             "baseStyles": {},
              "mobileStyles": {},
              "tabletStyles": {},
-             "children": [],
-             "componentId": "apply-0-container1-container2-container5-container2-button1"
+             "children": [
+              {
+               "componentName": "container",
+               "componentProps": {},
+               "componentSlots": {},
+               "componentEvents": {},
+               "baseStyles": {
+                "display": "flex",
+                "flexDirection": "row",
+                "alignItems": "center",
+                "gap": "6px"
+               },
+               "mobileStyles": {},
+               "tabletStyles": {},
+               "children": [
+                {
+                 "componentName": "TextBlock",
+                 "componentProps": {
+                  "text": "Didn't receive the OTP?",
+                  "tag": "p",
+                  "fontSize": "text-p-sm"
+                 },
+                 "componentSlots": {},
+                 "componentEvents": {},
+                 "baseStyles": {
+                  "color": "var(--ink-gray-6)"
+                 },
+                 "mobileStyles": {},
+                 "tabletStyles": {},
+                 "children": [],
+                 "componentId": "apply-0-container1-container2-container5-container2-container1-container1-textblock1"
+                },
+                {
+                 "componentName": "TextBlock",
+                 "componentProps": {
+                  "text": "Resend OTP",
+                  "tag": "p",
+                  "fontSize": "text-p-sm"
+                 },
+                 "componentSlots": {},
+                 "componentEvents": {
+                  "click": {
+                   "event": "click",
+                   "action": "Run Script",
+                   "script": "resendCode()"
+                  }
+                 },
+                 "baseStyles": {
+                  "color": "var(--ink-gray-9)",
+                  "fontWeight": "500",
+                  "cursor": "pointer"
+                 },
+                 "mobileStyles": {},
+                 "tabletStyles": {},
+                 "children": [],
+                 "componentId": "apply-0-container1-container2-container5-container2-container1-container1-textblock2"
+                }
+               ],
+               "originalElement": "div",
+               "componentId": "apply-0-container1-container2-container5-container2-container1-container1"
+              },
+              {
+               "componentName": "TextBlock",
+               "componentProps": {
+                "text": "{{ 'Resend in 00:' + String(resendIn).padStart(2, '0') }}",
+                "tag": "p",
+                "fontSize": "text-p-sm"
+               },
+               "componentSlots": {},
+               "componentEvents": {},
+               "baseStyles": {
+                "color": "var(--ink-gray-5)"
+               },
+               "mobileStyles": {},
+               "tabletStyles": {},
+               "children": [],
+               "visibilityCondition": "{{ resendIn > 0 }}",
+               "componentId": "apply-0-container1-container2-container5-container2-container1-textblock1"
+              }
+             ],
+             "originalElement": "div",
+             "componentId": "apply-0-container1-container2-container5-container2-container1"
             }
            ],
            "visibilityCondition": "{{ codeSent }}",
@@ -2295,7 +2346,7 @@
             {
              "componentName": "Button",
              "componentProps": {
-              "label": "Send me a code",
+              "label": "Send OTP",
               "variant": "solid",
               "size": "md",
               "loading": "{{ busy }}"
@@ -3109,6 +3160,24 @@
            "componentId": "apply-0-container1-container2-container8-formcontrol1"
           },
           {
+           "componentName": "FormControl",
+           "componentProps": {
+            "type": "password",
+            "label": "Confirm password",
+            "modelValue": {
+             "$type": "variable",
+             "name": "confirmPassword"
+            }
+           },
+           "componentSlots": {},
+           "componentEvents": {},
+           "baseStyles": {},
+           "mobileStyles": {},
+           "tabletStyles": {},
+           "children": [],
+           "componentId": "apply-0-container1-container2-container8-formcontrol2"
+          },
+          {
            "componentName": "container",
            "componentProps": {},
            "componentSlots": {},
@@ -3199,5 +3268,5 @@
    "componentId": "apply-0"
   }
  ],
- "script": "import { computed, ref, watch } from \"vue\"\nimport { call, toast } from \"frappe-ui\"\nimport { tone, appRoute, logout as endSession } from \"@app/utils/portal\"\n\nexport default function setup(context: any) {\n\tconst { router } = context\n\tconst showAlerts = ref(false)\n\tconst alertsTab = ref(\"attention\")\n\tconst sidebarCollapsed = ref<boolean | null>(null)\n\tconst step = ref(1)\n\tconst applicantType = ref(\"Individual\")\n\tconst loanProduct = ref(\"\")\n\tconst mobileNumber = ref(\"\")\n\tconst otp = ref(\"\")\n\tconst employmentType = ref(\"Salaried\")\n\tconst password = ref(\"\")\n\tconst companyName = ref(\"\")\n\tconst applicantName = ref(\"\")\n\tconst dateOfBirth = ref(\"\")\n\tconst pan = ref(\"\")\n\tconst applicantCountry = ref(\"\")\n\tconst email = ref(\"\")\n\tconst loanAmount = ref(\"\")\n\tconst proposedTenure = ref(\"\")\n\tconst income = ref(\"\")\n\n\tconst open = (url?: string) => {\n\t\tconst to = appRoute(url)\n\t\tif (to) router.push(to)\n\t}\n\tconst logout = () => endSession(router)\n\n\tconst busy = ref(false)\n\tconst codeSent = ref(false)\n\tconst token = ref(\"\")\n\tconst accountToken = ref(\"\")\n\tconst offer = ref<Record<string, any>>({})\n\n\tconst fail = (error: any) =>\n\t\ttoast.error(String(error?.messages?.[0] || error?.message || error))\n\n\t// A confirmed number is not asked for twice: the mobile screen is stepped over in\n\t// whichever direction the visitor is going.\n\tconst go = (to: number) => {\n\t\tif (to === 4 && token.value) to = step.value > 4 ? 3 : 5\n\t\tstep.value = to\n\t}\n\n\t// Each type is offered its own products, so a product picked for the other one goes.\n\tconst choose = (type: string) => {\n\t\tif (type !== applicantType.value) loanProduct.value = \"\"\n\t\tapplicantType.value = type\n\t}\n\n\tconst chooseProduct = (product: string) => { loanProduct.value = product }\n\n\tconst sendCode = () => {\n\t\tbusy.value = true\n\t\tcall(\"lending.portal.apply.send_mobile_code\", { mobile_number: mobileNumber.value })\n\t\t\t.then((result: any) => { codeSent.value = true; toast.success(result.message) })\n\t\t\t.catch(fail)\n\t\t\t.finally(() => { busy.value = false })\n\t}\n\n\tconst confirmCode = () => {\n\t\tbusy.value = true\n\t\tcall(\"lending.portal.apply.confirm_mobile_code\", {\n\t\t\tmobile_number: mobileNumber.value,\n\t\t\totp: otp.value,\n\t\t})\n\t\t\t.then((result: any) => {\n\t\t\t\tif (!result.verified) { toast.error(result.message); return }\n\t\t\t\ttoken.value = result.token\n\t\t\t\tstep.value = 5\n\t\t\t})\n\t\t\t.catch(fail)\n\t\t\t.finally(() => { busy.value = false })\n\t}\n\n\tconst submit = () => {\n\t\tbusy.value = true\n\t\tcall(\"lending.portal.apply.submit_lead\", {\n\t\t\ttoken: token.value,\n\t\t\tapplicant_type: applicantType.value,\n\t\t\tloan_product: loanProduct.value,\n\t\t\tcompany_name: companyName.value,\n\t\t\tapplicant_name: applicantName.value,\n\t\t\tdate_of_birth: dateOfBirth.value,\n\t\t\tpan: pan.value,\n\t\t\tapplicant_country: applicantCountry.value,\n\t\t\temail: email.value,\n\t\t\tloan_amount: loanAmount.value,\n\t\t\tproposed_tenure: proposedTenure.value,\n\t\t\tincome: income.value,\n\t\t\temployment_type: employmentType.value,\n\t\t})\n\t\t\t.then((result: any) => {\n\t\t\t\toffer.value = result\n\t\t\t\taccountToken.value = result.account_token\n\t\t\t\tstep.value = 6\n\t\t\t})\n\t\t\t.catch((error: any) => {\n\t\t\t\tfail(error)\n\t\t\t\t// The proof of the number is gone: verify again, keeping every answer given.\n\t\t\t\tif (error?.exc_type !== \"VerificationExpiredError\") return\n\t\t\t\ttoken.value = \"\"\n\t\t\t\tcodeSent.value = false\n\t\t\t\totp.value = \"\"\n\t\t\t\tstep.value = 4\n\t\t\t})\n\t\t\t.finally(() => { busy.value = false })\n\t}\n\n\tconst createAccount = () => {\n\t\tbusy.value = true\n\t\tcall(\"lending.portal.apply.create_account\", {\n\t\t\ttoken: accountToken.value,\n\t\t\tpassword: password.value,\n\t\t})\n\t\t\t.then(() => { window.location.href = \"/borrower-portal/overview\" })\n\t\t\t.catch(fail)\n\t\t\t.finally(() => { busy.value = false })\n\t}\n\n\treturn { tone, open, logout, showAlerts, alertsTab, sidebarCollapsed, step, applicantType, loanProduct, mobileNumber, otp, employmentType, password, companyName, applicantName, dateOfBirth, pan, applicantCountry, email, loanAmount, proposedTenure, income, busy, codeSent, offer, go, choose, chooseProduct, sendCode, confirmCode, submit, createAccount }\n}\n"
+ "script": "import { computed, ref, watch } from \"vue\"\nimport { call, toast } from \"frappe-ui\"\nimport { tone, appRoute, logout as endSession } from \"@app/utils/portal\"\n\nexport default function setup(context: any) {\n\tconst { router } = context\n\tconst showAlerts = ref(false)\n\tconst alertsTab = ref(\"attention\")\n\tconst sidebarCollapsed = ref<boolean | null>(null)\n\tconst step = ref(1)\n\tconst applicantType = ref(\"Individual\")\n\tconst loanProduct = ref(\"\")\n\tconst mobileNumber = ref(\"\")\n\tconst otp = ref(\"\")\n\tconst employmentType = ref(\"Salaried\")\n\tconst password = ref(\"\")\n\tconst confirmPassword = ref(\"\")\n\tconst companyName = ref(\"\")\n\tconst applicantName = ref(\"\")\n\tconst dateOfBirth = ref(\"\")\n\tconst pan = ref(\"\")\n\tconst applicantCountry = ref(\"\")\n\tconst email = ref(\"\")\n\tconst loanAmount = ref(\"\")\n\tconst proposedTenure = ref(\"\")\n\tconst income = ref(\"\")\n\n\tconst open = (url?: string) => {\n\t\tconst to = appRoute(url)\n\t\tif (to) router.push(to)\n\t}\n\tconst logout = () => endSession(router)\n\n\tconst busy = ref(false)\n\tconst codeSent = ref(false)\n\tconst token = ref(\"\")\n\tconst accountToken = ref(\"\")\n\tconst offer = ref<Record<string, any>>({})\n\n\tconst fail = (error: any) =>\n\t\ttoast.error(String(error?.messages?.[0] || error?.message || error))\n\n\t// A confirmed number is not asked for twice: the mobile screen is stepped over in\n\t// whichever direction the visitor is going.\n\tconst go = (to: number) => {\n\t\tif (to === 4 && token.value) to = step.value > 4 ? 3 : 5\n\t\tstep.value = to\n\t}\n\n\t// Each type is offered its own products, so a product picked for the other one goes.\n\tconst choose = (type: string) => {\n\t\tif (type !== applicantType.value) loanProduct.value = \"\"\n\t\tapplicantType.value = type\n\t}\n\n\tconst chooseProduct = (product: string) => { loanProduct.value = product }\n\n\tconst resendIn = ref(0)\n\tconst countDown = () => {\n\t\tresendIn.value = 30\n\t\tconst timer = setInterval(() => {\n\t\t\tif (--resendIn.value <= 0) clearInterval(timer)\n\t\t}, 1000)\n\t}\n\n\tconst sendCode = () => {\n\t\tbusy.value = true\n\t\tcall(\"lending.portal.apply.send_mobile_code\", { mobile_number: mobileNumber.value })\n\t\t\t.then((result: any) => {\n\t\t\t\tcodeSent.value = true\n\t\t\t\tcountDown()\n\t\t\t\ttoast.success(result.message)\n\t\t\t})\n\t\t\t.catch(fail)\n\t\t\t.finally(() => { busy.value = false })\n\t}\n\n\t// The link stays in place through the countdown, and does nothing until it ends.\n\tconst resendCode = () => {\n\t\tif (resendIn.value > 0 || busy.value) return\n\t\tsendCode()\n\t}\n\n\tconst confirmCode = () => {\n\t\tbusy.value = true\n\t\tcall(\"lending.portal.apply.confirm_mobile_code\", {\n\t\t\tmobile_number: mobileNumber.value,\n\t\t\totp: otp.value,\n\t\t})\n\t\t\t.then((result: any) => {\n\t\t\t\tif (!result.verified) { toast.error(result.message); return }\n\t\t\t\ttoken.value = result.token\n\t\t\t\tstep.value = 5\n\t\t\t})\n\t\t\t.catch(fail)\n\t\t\t.finally(() => { busy.value = false })\n\t}\n\n\tconst submit = () => {\n\t\tbusy.value = true\n\t\tcall(\"lending.portal.apply.submit_lead\", {\n\t\t\ttoken: token.value,\n\t\t\tapplicant_type: applicantType.value,\n\t\t\tloan_product: loanProduct.value,\n\t\t\tcompany_name: companyName.value,\n\t\t\tapplicant_name: applicantName.value,\n\t\t\tdate_of_birth: dateOfBirth.value,\n\t\t\tpan: pan.value,\n\t\t\tapplicant_country: applicantCountry.value,\n\t\t\temail: email.value,\n\t\t\tloan_amount: loanAmount.value,\n\t\t\tproposed_tenure: proposedTenure.value,\n\t\t\tincome: income.value,\n\t\t\temployment_type: employmentType.value,\n\t\t})\n\t\t\t.then((result: any) => {\n\t\t\t\toffer.value = result\n\t\t\t\taccountToken.value = result.account_token\n\t\t\t\tstep.value = 6\n\t\t\t})\n\t\t\t.catch((error: any) => {\n\t\t\t\tfail(error)\n\t\t\t\t// The proof of the number is gone: verify again, keeping every answer given.\n\t\t\t\tif (error?.exc_type !== \"VerificationExpiredError\") return\n\t\t\t\ttoken.value = \"\"\n\t\t\t\tcodeSent.value = false\n\t\t\t\totp.value = \"\"\n\t\t\t\tstep.value = 4\n\t\t\t})\n\t\t\t.finally(() => { busy.value = false })\n\t}\n\n\tconst createAccount = () => {\n\t\tbusy.value = true\n\t\tcall(\"lending.portal.apply.create_account\", {\n\t\t\ttoken: accountToken.value,\n\t\t\tpassword: password.value,\n\t\t\tconfirm_password: confirmPassword.value,\n\t\t})\n\t\t\t.then(() => { window.location.href = \"/borrower-portal/overview\" })\n\t\t\t.catch(fail)\n\t\t\t.finally(() => { busy.value = false })\n\t}\n\n\treturn { tone, open, logout, showAlerts, alertsTab, sidebarCollapsed, step, applicantType, loanProduct, mobileNumber, otp, employmentType, password, confirmPassword, companyName, applicantName, dateOfBirth, pan, applicantCountry, email, loanAmount, proposedTenure, income, busy, codeSent, offer, go, choose, chooseProduct, sendCode, resendIn, resendCode, confirmCode, submit, createAccount }\n}\n"
 }

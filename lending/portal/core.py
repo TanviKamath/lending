@@ -84,6 +84,11 @@ STAGE_TONES = {
 	"Rejected": "warn",
 }
 
+# The loan a borrower with more than one is looking at, kept the way a bank's app keeps
+# the account you last switched to. One DefaultValue against the borrower's User, for
+# the reason notifications.READ_KEY gives.
+CHOSEN_LOAN_KEY = "lending_portal_chosen_loan"
+
 
 def assert_portal_enabled():
 	if not frappe.db.get_single_value("Lending Settings", "enable_borrower_portal"):
@@ -247,9 +252,32 @@ def shell_payload(crumb: str, action_label: str, loans: list[dict]) -> dict:
 		"holder_name": holder_name(),
 		"head_note": head_note(),
 		**account_status(loans),
+		**account_switch(),
 		"crumb": crumb,
 		"action_label": action_label,
 	}
+
+
+def chosen_loan(loans: list[dict]) -> dict | None:
+	"""The loan the portal is showing: the borrower's only one, or the one they chose.
+
+	None for a borrower with several loans who has not chosen yet, or whose choice is no
+	longer among their loans. Reading the choice back through `loans` is the ownership
+	check, as statement.owned_loans does it.
+	"""
+	if len(loans) == 1:
+		return loans[0]
+
+	chosen = frappe.defaults.get_user_default(CHOSEN_LOAN_KEY)
+
+	return next((loan for loan in loans if loan.name == chosen), None)
+
+
+def account_switch() -> dict:
+	"""Whether the account menu offers to switch: only with another loan to switch to."""
+	customers = get_portal_customers()
+
+	return {"can_switch": len(get_loans(customers)) > 1 if customers else False}
 
 
 @frappe.whitelist()
@@ -259,12 +287,17 @@ def get_dashboard() -> dict:
 	Amounts and dates are formatted here rather than in the page blocks. A block binds a
 	value straight into a component prop, so a raw float would render as "317450.0", and
 	money is formatted to the company's currency by rules a binding has no access to.
+
+	A borrower with several loans sees the one they chose. Until they choose,
+	`choose_account` sends the page to the chooser, and the figures cover every loan.
 	"""
 	customers = get_portal_customers()
 	if not customers:
 		return empty_dashboard()
 
-	loans = get_loans(customers)
+	all_loans = get_loans(customers)
+	chosen = chosen_loan(all_loans)
+	loans = [chosen] if chosen else all_loans
 	schedule = get_upcoming_repayments(loans)
 	applications = get_applications(customers)
 	activity = get_timeline(customers, loans)
@@ -296,6 +329,7 @@ def get_dashboard() -> dict:
 	# After build_summary, which is what decides whether an instalment is near enough
 	# to be anyone's business today. next_flag is empty when none is.
 	payload.update(next_action(bool(payload["next_flag"])))
+	payload["choose_account"] = chosen is None and len(all_loans) > 1
 
 	return payload
 
@@ -310,7 +344,7 @@ def empty_dashboard() -> dict:
 		"applications_note": _("Nothing to show"),
 		"schedule_note": _("Nothing due"),
 		"activity_note": _("No activity"),
-		"next_amount": "\u2014",
+		"next_amount": "",
 		"next_note": _("Nothing due"),
 		"next_flag": "",
 		"outstanding": money(0),
@@ -392,7 +426,7 @@ def application_lead(applications: list[dict]) -> dict:
 	"""
 	if not applications:
 		return {
-			"application_headline": "—",
+			"application_headline": "",
 			"application_stage": "",
 			"application_stage_tone": "",
 			"application_name": "",
@@ -799,7 +833,7 @@ def build_summary(loans: list[dict], schedule: list[dict]) -> dict:
 	sanctioned_note = _("{0} undrawn").format(money(undrawn)) if undrawn else _("Fully drawn")
 
 	return {
-		"next_amount": first.get("amount", "—"),
+		"next_amount": first.get("amount", ""),
 		"next_note": (_("Due {0}").format(first.get("date")) if first else _("Nothing due")),
 		"next_flag": next_flag(loans),
 		"outstanding": money(outstanding),

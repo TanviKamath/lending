@@ -1,24 +1,33 @@
 # Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-"""Read-only data for the borrower's loan page.
+"""The borrower's loan page: its data, and the one request it can raise.
 
-The endpoint checks ownership of the loan named in the route before reading anything
+Every endpoint checks ownership of the loan named in the request before reading anything
 else. A loan that belongs to someone else and a loan that does not exist raise the
 same PermissionError, so the portal never confirms that a record exists -- see
 PORTAL_PLAN.md section 8.
 
 Internal risk labels stay out. Delinquency reaches the borrower as a plain overdue
 instalment, never as days past due or an NPA classification (section 6.7).
+
+A disbursement request is a draft Loan Disbursement and nothing more. Staff check it,
+add the bank details and submit it from the desk, so no money moves on the borrower's
+word alone.
 """
 
 import frappe
 from frappe import _
 from frappe.utils import flt, nowdate
 
+from lending.loan_management.doctype.loan.loan import new_loan_disbursement
+from lending.loan_management.doctype.loan_disbursement.loan_disbursement import (
+	calculate_disbursal_amount,
+)
 from lending.portal.core import (
 	STATUS_LABELS,
 	assert_owns,
+	chosen_loan,
 	get_loans,
 	get_portal_customers,
 	is_live,
@@ -47,6 +56,10 @@ DETAIL_FIELDS = (
 	"written_off_amount",
 )
 
+# The statuses the desk offers Create > Loan Disbursement on, and so the ones a borrower
+# may ask for one on.
+DRAWABLE_STATUSES = ("Sanctioned", "Partially Disbursed", "Active")
+
 
 @frappe.whitelist()
 def get_loan_detail() -> dict:
@@ -68,6 +81,7 @@ def get_loan_detail() -> dict:
 			"terms": loan_terms(loan),
 			"summary_note": _("Key information about your loan."),
 			"charges": charge_rows(name),
+			"drawdown": drawdown(loan),
 			**payoff_figures(name),
 		}
 	)
@@ -75,16 +89,107 @@ def get_loan_detail() -> dict:
 	return payload
 
 
+@frappe.whitelist(methods=["POST"])
+def request_disbursement() -> dict:
+	"""Raise a draft disbursement on one of the borrower's own loans.
+
+	Inserted with ignore_permissions for the reason save_profile gives: a Website User
+	holds no rights on Loan Disbursement, and granting them would open every other
+	borrower's too. The narrowing is done here instead: a loan the borrower owns, in a
+	status the desk would disburse, with no draft already waiting, for no more than the
+	loan has left to draw. The draft is never submitted from here.
+	"""
+	name = frappe.form_dict.get("name")
+	assert_owns("Loan", name)
+
+	# Locked, so that two requests sent together cannot both find no draft waiting.
+	status = frappe.db.get_value("Loan", name, "status", for_update=True)
+	if status not in DRAWABLE_STATUSES:
+		frappe.throw(_("This loan is not open for a disbursement."), frappe.ValidationError)
+
+	if pending_disbursement(name):
+		frappe.throw(
+			_("We already have a disbursement request on this loan. We will be in touch about it."),
+			frappe.ValidationError,
+		)
+
+	amount = flt(frappe.form_dict.get("amount"))
+	available = drawable_amount(name)
+	if amount <= 0:
+		frappe.throw(_("Please give the amount you need."), frappe.ValidationError)
+
+	if amount > available:
+		frappe.throw(
+			_("You can ask for up to {0} on this loan.").format(money(available)), frappe.ValidationError
+		)
+
+	disbursement = new_loan_disbursement(name, amount)
+	disbursement.insert(ignore_permissions=True)
+	disbursement.add_comment("Comment", _("Requested by {0} from the borrower portal.").format(frappe.session.user))
+
+	return {
+		"headline": _("Request sent"),
+		"message": _("We have your request for {0}. We will be in touch before we pay it out.").format(
+			money(amount)
+		),
+	}
+
+
+def drawdown(loan: dict) -> dict:
+	"""Whether the loan page offers a disbursement request, and what it says about one.
+
+	A draft disbursement already on the loan, whether the borrower raised it or staff
+	did, stands in for the button: the money is on its way either way.
+	"""
+	pending = pending_disbursement(loan.name)
+	if pending:
+		return {
+			"loan": loan.name,
+			"open": False,
+			"available": 0,
+			"note": _("A disbursement of {0} is being prepared.").format(money(pending)),
+		}
+
+	available = drawable_amount(loan.name) if loan.status in DRAWABLE_STATUSES else 0
+
+	# `loan` because /loans names none in its route, and the request must say which.
+	return {
+		"loan": loan.name,
+		"open": available > 0,
+		"available": available,
+		"note": _("Up to {0} available to draw.").format(money(available)) if available > 0 else "",
+	}
+
+
+def pending_disbursement(loan: str) -> float:
+	"""The amount on the loan's draft disbursement, or 0 when it has none."""
+	return flt(
+		frappe.db.get_value("Loan Disbursement", {"against_loan": loan, "docstatus": 0}, "disbursed_amount")
+	)
+
+
+def drawable_amount(loan: str) -> float:
+	# A secured loan with a security shortfall answers with a bare 0 rather than the
+	# usual (amount, pending principal) pair.
+	result = calculate_disbursal_amount(loan)
+	return max(flt(result[0] if isinstance(result, tuple) else result), 0)
+
+
 def default_loan() -> str | None:
-	"""The loan the sidebar opens: the newest live one, else the newest of any.
+	"""The loan the sidebar opens: the one the borrower chose, else the newest live one,
+	else the newest of any.
 
 	The sidebar goes straight to a loan rather than to a list of them. A borrower with
-	more than one loan still reaches the others from the overview and from search.
+	more than one loan switches between them from the account menu, and still reaches the others
+	from search.
 	"""
 	customers = get_portal_customers()
 	loans = get_loans(customers) if customers else []
 	if not loans:
 		return None
+
+	if chosen := chosen_loan(loans):
+		return chosen.name
 
 	newest = sorted(loans, key=lambda loan: loan.posting_date, reverse=True)
 	live = [loan for loan in newest if is_live(loan)]
@@ -101,6 +206,7 @@ def no_loan_payload() -> dict:
 			"terms": None,
 			"summary_note": _("No loan accounts yet"),
 			"charges": [],
+			"drawdown": {"loan": "", "open": False, "available": 0, "note": ""},
 			"payoff_total": money(0),
 			"payoff_note": _("Nothing outstanding"),
 		}
