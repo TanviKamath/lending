@@ -22,14 +22,12 @@ from lending.portal.studio_build.app import api_resource, page_script, upsert_pa
 from lending.portal.studio_build.blocks import (
 	PANEL,
 	alert,
-	badge,
 	block,
 	button,
 	click,
 	column,
 	container,
 	divider,
-	heading,
 	icon,
 	icon_tile,
 	muted,
@@ -40,6 +38,7 @@ from lending.portal.studio_build.blocks import (
 	slot,
 	spacer,
 	text,
+	tile_styles,
 )
 from lending.portal.studio_build.public import page
 
@@ -85,7 +84,23 @@ read_apply = reader(APPLY_SOURCE)
 
 # The opening screen is a landing page and takes the width of one; the questions after it
 # are a form, and keep a form's measure.
-PAGE_WIDTH = "1080px"
+PAGE_WIDTH = "1128px"
+
+# The mockup the opening screen is drawn to: a 719px-tall window under a 54px bar, and a
+# 26px glyph on each 50px tile.
+MOCKUP_HEIGHT = 719
+BAR_HEIGHT = 54
+TILE = 50
+GLYPH = 26
+
+# The mockup's own colours. Its greys lean cool where frappe-ui's are neutral, and the
+# portal has no dark theme for a fixed colour to break.
+INK = "#0a0a0a"
+INTRO = "#4f5d6e"
+NOTE = "#5a616d"
+TAG = "#51575d"
+RULE = "#e7eaec"
+DIVIDER = "#e2e3e6"
 FORM = {"width": "100%", "maxWidth": "720px", "margin": "0 auto"}
 
 APPLY_SCRIPT = '''\tconst busy = ref(false)
@@ -348,73 +363,121 @@ def tile(label, note, glyph_name, script, chosen):
 	)
 
 
-def glyph(names, expression, **kwargs):
+def glyph(names, expression):
 	"""The glyph a payload row names, out of the few it may name.
 
 	An icon is SVG written at build time and the row picks it at render time, so this is
 	one block per name, each shown when the row says it.
 	Returns a list, to be spread into the row that carries it.
 	"""
-	return [
-		icon_tile(name, visible="{{ %s === '%s' }}" % (expression, name), **kwargs) for name in names
-	]
+	return [glyph_tile(name, visible="{{ %s === '%s' }}" % (expression, name)) for name in names]
 
 
-def fit(low, share, high):
-	"""A length that follows the window's height between two bounds.
+def glyph_tile(name, **kwargs):
+	"""A glyph on its tile, both drawn in the opening screen's unit.
 
-	The opening screen is meant to be taken in without scrolling, so its gaps and its
-	headline give way on a short laptop screen and keep the mockup's measure on a tall one.
+	The SVG fills the tile's padding box, because an SVG's own width is an attribute,
+	and an attribute cannot hold the calc() the unit is.
 	"""
-	return f"clamp({low}px, {share}vh, {high}px)"
+	styles = dict(tile_styles(), width=u(TILE), height=u(TILE), padding=u((TILE - GLYPH) / 2))
+
+	return icon(name, size="100%", styles=styles, **kwargs)
+
+
+# The opening screen's pixel. It is a pixel in the mockup's window, and shrinks in step
+# with a shorter one -- the bar keeps its 54px -- so the whole screen fits the height
+# it is given, down to three fifths of its size, before anything has to scroll.
+UNIT = f"max(0.6px, min(1px, calc((100vh - {BAR_HEIGHT}px) / {MOCKUP_HEIGHT - BAR_HEIGHT})))"
+
+
+def u(length):
+	"""`length` mockup pixels, in the opening screen's unit."""
+	return f"calc({length:g} * var(--u, 1px))"
+
+
+def copy(value, size, weight="400", color=INK, line=None, tag="p", **kwargs):
+	"""A line of the opening screen, set in the mockup's pixels.
+
+	Studio's size classes carry their own tracking and weight, and the mockup is set in
+	plain Inter, so every property the class would decide is said here instead.
+	"""
+	styles = {
+		"fontSize": u(size),
+		"lineHeight": u(line or round(size * 1.4)),
+		"fontWeight": weight,
+		"letterSpacing": "0em",
+		"color": color,
+	}
+	styles.update(kwargs.pop("styles", None) or {})
+
+	return text(value, tag=tag, size="text-base", styles=styles, **kwargs)
+
+
+OPENING_CARD = dict(PANEL, borderColor=RULE, borderRadius="10px")
 
 
 def hero():
 	"""The promise: what this is, how long it takes, and that it costs nothing to look."""
-	tagline = badge(read_apply("tagline"), size="lg", styles={"alignSelf": "flex-start"})
-	title = text(
-		read_apply("heading"),
-		tag="h1",
-		size="text-5xl",
-		# Studio's type scale stops short of a landing page's headline, so the size is a style.
+	tagline = copy(
+		read_apply("tagline"),
+		14,
+		color=TAG,
+		line=26,
+		tag="span",
 		styles={
-			"fontSize": fit(32, 5.6, 48),
-			"fontWeight": "700",
-			"lineHeight": "1.08",
-			"letterSpacing": "-0.02em",
-			"whiteSpace": "pre-line",
-			"color": "var(--ink-gray-9)",
+			"padding": f"0 {u(12)}",
+			"marginBottom": u(3),
+			"borderRadius": "9999px",
+			"backgroundColor": "var(--surface-gray-2)",
 		},
-		mobile={"fontSize": "2.25rem"},
 	)
-	intro = text(
-		read_apply("intro"),
-		size="text-lg",
-		styles={"maxWidth": "640px", "lineHeight": "1.5", "color": "var(--ink-gray-6)"},
+	title = copy(
+		read_apply("heading"),
+		40,
+		weight="700",
+		line=45,
+		tag="h1",
+		styles={"whiteSpace": "pre-line"},
+		mobile={"fontSize": "32px", "lineHeight": "38px"},
 	)
+	intro = copy(read_apply("intro"), 17, color=INTRO, line=22, styles={"maxWidth": u(560)})
+
+	return column(
+		[tagline, title, intro],
+		gap=u(12),
+		styles={"alignItems": "center", "textAlign": "center"},
+	)
+
+
+def card_text(title, note, size=15, line=20, gap="0px", tracking="-0.01em", note_tracking="0em"):
+	"""A card's bold line and the grey one under it."""
+	return column(
+		[
+			copy(title, size, weight="600", line=line, styles={"letterSpacing": tracking}),
+			copy(note, 14, color=NOTE, line=20, styles={"letterSpacing": note_tracking}),
+		],
+		gap=gap,
+		styles={"flex": "1 1 160px", "minWidth": "0px"},
+	)
+
+
+def trust_points():
+	"""The three reassurances, each on a card of its own under the promise."""
 	point = row(
 		[
-			*glyph(("chart-no-axes", "shield", "receipt-text"), "dataItem.icon", tile=44, glyph=20),
-			column(
-				[
-					text("{{ dataItem.title }}", size="text-base", styles={"color": "var(--ink-gray-8)"}),
-					text("{{ dataItem.note }}", size="text-base", styles={"color": "var(--ink-gray-7)"}),
-				],
-				gap="0px",
-			),
+			*glyph(("chart-no-axes", "shield", "receipt-text"), "dataItem.icon"),
+			card_text("{{ dataItem.title }}", "{{ dataItem.note }}"),
 		],
-		gap="16px",
+		gap=u(24),
+		# Wrapped by the card's own width, since a tablet breakpoint fires only below 768px.
+		styles=dict(OPENING_CARD, padding=f"{u(18)} {u(20)}", flex="1 1 240px"),
 	)
-	trust = repeater(
+
+	return repeater(
 		read_apply("trust_points"),
 		point,
 		data_key="title",
-		styles={"display": "flex", "flexDirection": "row", "columnGap": "36px", "rowGap": "16px", "flexWrap": "wrap"},
-	)
-
-	return column(
-		[tagline, column([title, intro], gap=fit(10, 2, 20)), trust],
-		gap=fit(14, 2.6, 26),
+		styles={"display": "flex", "flexDirection": "row", "gap": u(16), "flexWrap": "wrap"},
 	)
 
 
@@ -429,27 +492,30 @@ def start_card():
 		props={"size": "lg"},
 		slots={
 			**slot("suffix", [icon("arrow-right", size=16)]),
-			**slot("default", [text("Apply now", tag="span", size="text-lg", styles={"fontWeight": "500"})]),
+			**slot("default", [copy("Apply now", 15, weight="500", line=20, tag="span", color="inherit")]),
 		},
+		styles={"height": u(45), "padding": f"0 {u(15)}", "borderRadius": u(8)},
 		mobile={"width": "100%"},
 	)
 
 	return row(
 		[
-			icon_tile("file-text", tile=48, glyph=22),
+			glyph_tile("file-text"),
 			column(
 				[
-					heading(read_apply("start_title"), size="text-xl"),
-					text(read_apply("start_note"), size="text-base", styles={"color": "var(--ink-gray-6)"}),
+					copy(read_apply("start_title"), 20, weight="600", line=26, styles={"letterSpacing": "-0.015em"}),
+					copy(
+						read_apply("start_note"), 14, color=NOTE, line=20, styles={"letterSpacing": "0.015em"}
+					),
 				],
-				gap="4px",
+				gap="0px",
 				styles={"flex": "1 1 240px"},
 			),
 			apply,
 		],
-		gap="20px",
-		styles=dict(PANEL, padding=f"{fit(16, 2.4, 24)} 24px", borderRadius="var(--radius-6)", flexWrap="wrap"),
-		mobile={"padding": "20px"},
+		gap=u(28),
+		styles=dict(OPENING_CARD, padding=f"{u(21)} {u(22)}", flexWrap="wrap"),
+		mobile={"padding": "16px", "gap": "16px"},
 	)
 
 
@@ -457,48 +523,49 @@ def how_it_works():
 	"""What happens after the button, in the three steps a visitor will see."""
 	step = row(
 		[
-			*glyph(("file-text", "search", "percent"), "dataItem.icon", tile=44, glyph=20),
-			column(
-				[
-					text("{{ dataItem.title }}", size="text-base", styles={"fontWeight": "600"}),
-					text("{{ dataItem.note }}", size="text-sm", styles={"color": "var(--ink-gray-6)", "lineHeight": "1.5"}),
-				],
-				gap="6px",
-				styles={"flex": "1", "minWidth": "0px"},
+			*glyph(("file-text", "search", "percent"), "dataItem.icon"),
+			card_text(
+				"{{ dataItem.title }}", "{{ dataItem.note }}", size=14, line=18, gap=u(6), tracking="0em", note_tracking="0.02em"
 			),
 		],
-		gap="16px",
+		gap=u(24),
 		align="start",
-		styles=dict(PANEL, padding=f"{fit(14, 2.2, 22)} 16px", borderRadius="var(--radius-6)", flex="1 1 240px"),
+		styles=dict(OPENING_CARD, padding=f"{u(20)} {u(20)} {u(21)}", flex="1 1 0px", minWidth="0px"),
 	)
 
 	return column(
 		[
 			column(
 				[
-					heading(read_apply("how_title"), size="text-xl", styles={"fontWeight": "700"}),
-					text(read_apply("how_note"), size="text-base", styles={"color": "var(--ink-gray-6)"}),
+					copy(read_apply("how_title"), 22, weight="700", line=28, styles={"letterSpacing": "-0.025em"}),
+					copy(read_apply("how_note"), 14, color=NOTE, line=20, styles={"letterSpacing": "0.02em"}),
 				],
-				gap="2px",
+				gap=u(2),
 			),
 			repeater(
 				read_apply("benefits"),
 				step,
 				data_key="icon",
-				styles={"display": "flex", "flexDirection": "row", "gap": "16px", "flexWrap": "wrap"},
+				styles={"display": "flex", "flexDirection": "row", "gap": u(16)},
+				tablet={"flexDirection": "column", "gap": "12px"},
 			),
 		],
-		gap=fit(12, 1.8, 20),
+		gap=u(8),
+		styles={"marginTop": u(-2)},
 	)
 
 
 def opening():
 	"""Screen 1. It asks for nothing: the promise, the three reassurances, one button."""
+	offer = column([hero(), trust_points(), start_card()], gap=u(16))
+
 	return column(
-		[hero(), start_card(), divider(), how_it_works()],
-		gap=fit(14, 2.6, 28),
+		[offer, divider(styles={"borderColor": DIVIDER}), how_it_works()],
+		gap=u(24),
 		# Centred in the height the frame leaves, so a tall window has no empty band below.
-		styles={"marginTop": "auto", "marginBottom": "auto"},
+		# A phone stacks every card and scrolls whatever its height, so it keeps full size.
+		styles={"marginTop": "auto", "marginBottom": "auto", "--u": UNIT},
+		mobile={"--u": "1px"},
 		visible="{{ step === 1 }}",
 	)
 
@@ -749,7 +816,14 @@ def build_apply():
 	return upsert_page(
 		"Apply for a loan",
 		"/apply",
-		page(read_apply, [("Track an application", "/track"), ("Log in", "/login", "user")], body, width=PAGE_WIDTH),
+		page(
+			read_apply,
+			[("Track an application", "/track"), ("Log in", "/login", "user")],
+			body,
+			width=PAGE_WIDTH,
+			# Top and bottom as the mockup leaves them, so its window holds the page exactly.
+			padding=f"calc(34 * {UNIT}) 20px calc(16 * {UNIT})",
+		),
 		[api_resource(APPLY_SOURCE, "lending.portal.apply.get_apply_page")],
 		script=page_script(state=APPLY_STATE, body=APPLY_SCRIPT, returns=APPLY_RETURNS, search=False),
 		allow_guest=True,

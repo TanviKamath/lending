@@ -1199,24 +1199,14 @@
                   "backgroundColor": "var(--portal-action-soft, var(--surface-gray-2))",
                   "borderRadius": "var(--radius-4)",
                   "height": "36px",
-                  "marginBottom": "10px",
-                  "paddingBottom": "10px",
-                  "paddingLeft": "0px",
-                  "paddingRight": "0px",
-                  "paddingTop": "0px"
+                  "marginBottom": "10px"
                  },
                  "children": [
                   {
                    "children": [
                     {
                      "baseStyles": {
-                      "color": "var(--portal-action-deep, var(--ink-gray-5))",
-                      "marginBottom": "0px",
-                      "marginLeft": "10px",
-                      "marginRight": "0px",
-                      "paddingBottom": "0px",
-                      "paddingTop": "10px",
-                      "textAlign": "left"
+                      "color": "var(--portal-action-deep, var(--ink-gray-5))"
                      },
                      "children": [],
                      "componentId": "overview-0-container1-container1-container3-container1-container1-list1-listheader1-listheadercell1-textblock1",
@@ -1235,8 +1225,7 @@
                    "children": [
                     {
                      "baseStyles": {
-                      "color": "var(--portal-action-deep, var(--ink-gray-5))",
-                      "paddingTop": "10px"
+                      "color": "var(--portal-action-deep, var(--ink-gray-5))"
                      },
                      "children": [],
                      "componentId": "overview-0-container1-container1-container3-container1-container1-list1-listheader1-listheadercell2-textblock1",
@@ -1255,8 +1244,7 @@
                    "children": [
                     {
                      "baseStyles": {
-                      "color": "var(--portal-action-deep, var(--ink-gray-5))",
-                      "paddingTop": "10px"
+                      "color": "var(--portal-action-deep, var(--ink-gray-5))"
                      },
                      "children": [],
                      "componentId": "overview-0-container1-container1-container3-container1-container1-list1-listheader1-listheadercell3-textblock1",
@@ -1285,19 +1273,16 @@
                  },
                  "componentSlots": {
                   "default": {
-                   "parentBlockId": "overview-0-container1-container1-container3-container1-container1-list1-listrows1",
                    "slotContent": [
                     {
-                     "attributes": {},
                      "baseStyles": {
                       "paddingBottom": "10px",
                       "paddingInlineEnd": "12px",
                       "paddingInlineStart": "12px",
-                      "paddingTop": "12px"
+                      "paddingTop": "10px"
                      },
                      "children": [
                       {
-                       "attributes": {},
                        "baseStyles": {
                         "alignItems": "stretch",
                         "flexDirection": "column",
@@ -1305,7 +1290,6 @@
                        },
                        "children": [
                         {
-                         "attributes": {},
                          "baseStyles": {
                           "fontWeight": "500"
                          },
@@ -1323,7 +1307,6 @@
                          "tabletStyles": {}
                         },
                         {
-                         "attributes": {},
                          "baseStyles": {
                           "color": "var(--ink-gray-6)"
                          },
@@ -1341,7 +1324,6 @@
                          "tabletStyles": {}
                         },
                         {
-                         "attributes": {},
                          "baseStyles": {
                           "color": "var(--ink-gray-6)"
                          },
@@ -1359,7 +1341,6 @@
                          "tabletStyles": {}
                         },
                         {
-                         "attributes": {},
                          "baseStyles": {
                           "color": "var(--ink-gray-6)"
                          },
@@ -1387,11 +1368,9 @@
                        "tabletStyles": {}
                       },
                       {
-                       "attributes": {},
                        "baseStyles": {},
                        "children": [
                         {
-                         "attributes": {},
                          "baseStyles": {},
                          "children": [],
                          "componentEvents": {},
@@ -1417,11 +1396,9 @@
                        "tabletStyles": {}
                       },
                       {
-                       "attributes": {},
                        "baseStyles": {},
                        "children": [
                         {
-                         "attributes": {},
                          "baseStyles": {},
                          "children": [],
                          "componentEvents": {},
@@ -1463,7 +1440,6 @@
                      "tabletStyles": {}
                     }
                    ],
-                   "slotId": "overview-0-container1-container1-container3-container1-container1-list1-listrows1:default",
                    "slotName": "default"
                   }
                  }
@@ -1807,6 +1783,23 @@
                  "componentId": "overview-0-container1-container1-container3-container2-container1-container1-container2",
                  "componentName": "container",
                  "originalElement": "div"
+                },
+                {
+                 "children": [],
+                 "componentEvents": {
+                  "click": {
+                   "action": "Run Script",
+                   "event": "click",
+                   "script": "open(overview.data.schedule_url || '/loans')"
+                  }
+                 },
+                 "componentId": "overview-0-container1-container1-container3-container2-container1-container1-button1",
+                 "componentName": "Button",
+                 "componentProps": {
+                  "label": "View all",
+                  "size": "sm",
+                  "variant": "outline"
+                 }
                 }
                ],
                "componentId": "overview-0-container1-container1-container3-container2-container1-container1",
@@ -1966,6 +1959,20 @@
                     "tag": "p",
                     "text": "{{ dataItem.amount }}"
                    }
+                  },
+                  {
+                   "baseStyles": {
+                    "alignItems": "center",
+                    "color": "var(--ink-gray-4)",
+                    "display": "flex",
+                    "flex": "0 0 auto"
+                   },
+                   "children": [],
+                   "componentId": "overview-0-container1-container1-container3-container2-container1-repeater1-container1-html1",
+                   "componentName": "HTML",
+                   "componentProps": {
+                    "html": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m9 18 6-6-6-6\"/></svg>"
+                   }
                   }
                  ],
                  "componentEvents": {
@@ -2063,7 +2070,7 @@
  "doctype": "Studio Page",
  "frappe_app": "lending",
  "is_standard": 1,
- "modified": "2026-09-25 02:08:02.383824",
+ "modified": "2026-09-25 03:19:45.090437",
  "modified_by": "Administrator",
  "name": "account_overview",
  "owner": "Administrator",

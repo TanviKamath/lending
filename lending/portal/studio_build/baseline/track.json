@@ -44,7 +44,8 @@
         "flexDirection": "row",
         "alignItems": "center",
         "gap": "12px",
-        "padding": "10px 32px",
+        "height": "54px",
+        "padding": "0 44px 0 56px",
         "flexShrink": "0",
         "width": "100%",
         "borderWidth": "0px 0px 1px 0px",
@@ -69,10 +70,10 @@
          "componentSlots": {},
          "componentEvents": {},
          "baseStyles": {
-          "width": "36px",
-          "height": "36px",
+          "width": "26px",
+          "height": "26px",
           "flexShrink": "0",
-          "borderRadius": "8px",
+          "borderRadius": "6px",
           "overflow": "hidden"
          },
          "mobileStyles": {},
@@ -86,22 +87,23 @@
          "componentProps": {
           "text": "{{ (track.data.brand_name || '').charAt(0) }}",
           "tag": "p",
-          "fontSize": "text-lg"
+          "fontSize": "text-base"
          },
          "componentSlots": {},
          "componentEvents": {},
          "baseStyles": {
-          "width": "36px",
-          "height": "36px",
+          "width": "26px",
+          "height": "26px",
           "flexShrink": "0",
-          "borderRadius": "8px",
+          "borderRadius": "6px",
           "display": "flex",
           "alignItems": "center",
           "justifyContent": "center",
-          "fontWeight": "600",
+          "fontSize": "15px",
+          "fontWeight": "700",
           "textTransform": "uppercase",
-          "backgroundColor": "var(--portal-primary-ink, var(--surface-gray-2))",
-          "color": "var(--portal-primary, var(--ink-gray-8))"
+          "backgroundColor": "var(--portal-primary-ink, var(--ink-gray-9))",
+          "color": "var(--portal-primary, var(--surface-base))"
          },
          "mobileStyles": {},
          "tabletStyles": {},
@@ -114,14 +116,17 @@
          "componentProps": {
           "text": "{{ track.data.brand_name }}",
           "tag": "span",
-          "fontSize": "text-lg"
+          "fontSize": "text-base"
          },
          "componentSlots": {},
          "componentEvents": {},
          "baseStyles": {
+          "fontSize": "17px",
           "fontWeight": "600",
+          "letterSpacing": "0em",
           "whiteSpace": "nowrap",
-          "color": "var(--ink-gray-9)"
+          "color": "var(--ink-gray-9)",
+          "marginLeft": "2px"
          },
          "mobileStyles": {
           "display": "none"
@@ -151,7 +156,32 @@
           "variant": "ghost",
           "size": "md"
          },
-         "componentSlots": {},
+         "componentSlots": {
+          "default": {
+           "slotName": "default",
+           "slotContent": [
+            {
+             "componentName": "TextBlock",
+             "componentProps": {
+              "text": "Apply for a loan",
+              "tag": "span",
+              "fontSize": "text-base"
+             },
+             "componentSlots": {},
+             "componentEvents": {},
+             "baseStyles": {
+              "fontSize": "15px",
+              "lineHeight": "20px",
+              "letterSpacing": "0em"
+             },
+             "mobileStyles": {},
+             "tabletStyles": {},
+             "children": [],
+             "componentId": "track-0-container1-container1-button1-default-textblock1"
+            }
+           ]
+          }
+         },
          "componentEvents": {
           "click": {
            "event": "click",
@@ -159,7 +189,11 @@
            "script": "open('/apply')"
           }
          },
-         "baseStyles": {},
+         "baseStyles": {
+          "height": "35px",
+          "padding": "0 12px",
+          "borderRadius": "8px"
+         },
          "mobileStyles": {},
          "tabletStyles": {},
          "children": [],
@@ -169,17 +203,41 @@
          "componentName": "Button",
          "componentProps": {
           "label": "Log in",
-          "variant": "solid",
+          "variant": "{{ track.data.brand_style ? 'solid' : 'outline' }}",
           "size": "md"
          },
          "componentSlots": {
+          "default": {
+           "slotName": "default",
+           "slotContent": [
+            {
+             "componentName": "TextBlock",
+             "componentProps": {
+              "text": "Log in",
+              "tag": "span",
+              "fontSize": "text-base"
+             },
+             "componentSlots": {},
+             "componentEvents": {},
+             "baseStyles": {
+              "fontSize": "15px",
+              "lineHeight": "20px",
+              "letterSpacing": "0em"
+             },
+             "mobileStyles": {},
+             "tabletStyles": {},
+             "children": [],
+             "componentId": "track-0-container1-container1-button2-default-textblock1"
+            }
+           ]
+          },
           "prefix": {
            "slotName": "prefix",
            "slotContent": [
             {
              "componentName": "HTML",
              "componentProps": {
-              "html": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2\"/><circle cx=\"12\" cy=\"7\" r=\"4\"/></svg>"
+              "html": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2\"/><circle cx=\"12\" cy=\"7\" r=\"4\"/></svg>"
              },
              "componentSlots": {},
              "componentEvents": {},
@@ -194,26 +252,6 @@
              "componentId": "track-0-container1-container1-button2-prefix-html1"
             }
            ]
-          },
-          "default": {
-           "slotName": "default",
-           "slotContent": [
-            {
-             "componentName": "TextBlock",
-             "componentProps": {
-              "text": "Log in",
-              "tag": "span",
-              "fontSize": "text-base"
-             },
-             "componentSlots": {},
-             "componentEvents": {},
-             "baseStyles": {},
-             "mobileStyles": {},
-             "tabletStyles": {},
-             "children": [],
-             "componentId": "track-0-container1-container1-button2-default-textblock1"
-            }
-           ]
           }
          },
          "componentEvents": {
@@ -223,7 +261,11 @@
            "script": "window.location.href = '/login'"
           }
          },
-         "baseStyles": {},
+         "baseStyles": {
+          "height": "35px",
+          "padding": "0 14px",
+          "borderRadius": "8px"
+         },
          "mobileStyles": {},
          "tabletStyles": {},
          "children": [],

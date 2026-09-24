@@ -25,14 +25,18 @@ from lending.portal.studio_build.blocks import (
 	text,
 )
 
-MARK = {"width": "36px", "height": "36px", "flexShrink": "0", "borderRadius": "8px"}
+MARK = {"width": "26px", "height": "26px", "flexShrink": "0", "borderRadius": "6px"}
+
+# The bar's links are set in pixels, as the opening screen of /apply is, and without the
+# tracking Studio's size classes add.
+LINK_TEXT = {"fontSize": "15px", "lineHeight": "20px", "letterSpacing": "0em"}
 
 # Routes the site serves rather than the app. The rest are the app's own, and go through
 # its router: a bare /track is the Builder page, which is not this portal.
 SITE_ROUTES = {"/login"}
 
 
-def page(read, links, body, width="720px"):
+def page(read, links, body, width="720px", padding="clamp(16px, 3.6vh, 40px) 20px"):
 	"""A public page: the bar, then one column of content, centred and capped at `width`."""
 	well = container(
 		body,
@@ -41,7 +45,7 @@ def page(read, links, body, width="720px"):
 			"flexDirection": "column",
 			"gap": "16px",
 			# Shorter windows give up the padding first, before anything has to scroll.
-			"padding": "clamp(16px, 3.6vh, 40px) 20px",
+			"padding": padding,
 			"width": "100%",
 			"maxWidth": width,
 			"margin": "0 auto",
@@ -85,17 +89,19 @@ def mark(read):
 	)
 	letter = text(
 		"{{ (%s || '').charAt(0) }}" % read("brand_name")[2:-2].strip(),
-		size="text-lg",
+		size="text-base",
 		styles=dict(
 			MARK,
 			display="flex",
 			alignItems="center",
 			justifyContent="center",
-			fontWeight="600",
+			fontSize="15px",
+			fontWeight="700",
 			textTransform="uppercase",
-			# Inverted, because the bar behind it is already the primary.
-			backgroundColor="var(--portal-primary-ink, var(--surface-gray-2))",
-			color="var(--portal-primary, var(--ink-gray-8))",
+			# Inverted, because the bar behind it is already the primary; on a plain bar,
+			# a black tile.
+			backgroundColor="var(--portal-primary-ink, var(--ink-gray-9))",
+			color="var(--portal-primary, var(--surface-base))",
 		),
 		visible=read("show_wordmark"),
 	)
@@ -109,12 +115,9 @@ def link_button(label, href, glyph=None, variant="ghost"):
 	The label goes in the default slot as well as the prop: once a block has any slot,
 	Studio hands Button an empty default one too, and Button renders that over `label`.
 	"""
-	slots = {}
+	slots = slot("default", [text(label, tag="span", size="text-base", styles=LINK_TEXT)])
 	if glyph:
-		slots = {
-			**slot("prefix", [icon(glyph, size=16)]),
-			**slot("default", [text(label, tag="span", size="text-base")]),
-		}
+		slots.update(slot("prefix", [icon(glyph, size=18)]))
 
 	go = f"window.location.href = '{href}'" if href in SITE_ROUTES else f"open('{href}')"
 
@@ -124,6 +127,8 @@ def link_button(label, href, glyph=None, variant="ghost"):
 		variant=variant,
 		props={"size": "md"},
 		slots=slots,
+		# A bare label needs less room round it than a button with a rule.
+		styles={"height": "35px", "padding": "0 12px" if variant == "ghost" else "0 14px", "borderRadius": "8px"},
 	)
 
 
@@ -131,23 +136,34 @@ def top_bar(read, links):
 	"""The lender's name, and the two other places a visitor might want to be.
 
 	A link is (label, href) or (label, href, glyph). The last one is the one a returning
-	borrower wants, so it is the one drawn as a solid button rather than as a bare label:
-	an outline's grey rule is lost on the primary, and a solid one on the band wears the
-	action colour the signed-in header's button does.
+	borrower wants, so it is the one drawn as a button rather than as a bare label. On a
+	plain bar that is an outline. On a branded band it is solid, because an outline's grey
+	rule is lost on the primary, and a solid one wears the action colour the signed-in
+	header's button does.
 	"""
+	branded = read("brand_style")[2:-2].strip()
+	last = "{{ %s ? 'solid' : 'outline' }}" % branded
+
 	return row(
 		[
 			*mark(read),
 			text(
 				read("brand_name"),
 				tag="span",
-				size="text-lg",
-				styles={"fontWeight": "600", "whiteSpace": "nowrap", "color": "var(--ink-gray-9)"},
+				size="text-base",
+				styles={
+					"fontSize": "17px",
+					"fontWeight": "600",
+					"letterSpacing": "0em",
+					"whiteSpace": "nowrap",
+					"color": "var(--ink-gray-9)",
+					"marginLeft": "2px",
+				},
 				mobile={"display": "none"},
 			),
 			spacer(),
 			*[
-				link_button(*link, variant="solid" if index == len(links) - 1 else "ghost")
+				link_button(*link, variant=last if index == len(links) - 1 else "ghost")
 				for index, link in enumerate(links)
 			],
 		],
@@ -156,7 +172,9 @@ def top_bar(read, links):
 		# also turns the greys the bar's text and buttons use into the band's own ink.
 		classes=["portal-header"],
 		styles={
-			"padding": "10px 32px",
+			# 54px tall with its rule, and the mockup's own margins either side.
+			"height": "54px",
+			"padding": "0 44px 0 56px",
 			"flexShrink": "0",
 			"width": "100%",
 			"borderWidth": "0px 0px 1px 0px",
