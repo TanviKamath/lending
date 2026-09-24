@@ -33,6 +33,7 @@ from lending.portal.studio_build.blocks import (
 	spacer,
 	subject,
 	text,
+	tile_styles,
 )
 from lending.portal.studio_build.shell import frame
 
@@ -50,7 +51,7 @@ def terms_card(read):
 	term = TermCell(read)
 	head = row(
 		[
-			icon_tile("file-text", "blue"),
+			icon_tile("file-text"),
 			column([heading("Loan details"), muted(read("summary_note"))], gap="2px"),
 		],
 		gap="12px",
@@ -154,13 +155,11 @@ class TermCell:
 def payoff_card(read):
 	"""The figure, and a request. PORTAL_PLAN.md section 6.11 takes no money here.
 
-	Not `card()`: it leads with a tile, and the figure sits on a green panel of its
-	own. The sizes and gaps are measured off the design this card was drawn from,
-	which sets its type tighter than frappe-ui's -- hence the letter spacing written
-	out on the title, the subtitle and the figure.
+	Not `card()`: it leads with a tile. The figure sits straight on the card, not on a
+	panel of its own: a box inside the card's box says nothing the card does not.
 	"""
 	head = half_head(
-		container([text("₹", tag="div", size="text-2xl", styles=RUPEE)], styles=round_tile("green")),
+		container([text("₹", tag="div", size="text-xl", styles=RUPEE)], styles=tile_styles()),
 		"Payoff amount",
 		"Total amount required to close this loan.",
 	)
@@ -171,17 +170,12 @@ def payoff_card(read):
 			text(read("payoff_note"), size="text-sm", styles={"marginTop": "4px", "color": "var(--ink-gray-5)"}),
 		],
 		gap="0px",
-		styles={
-			"padding": "20px 22px 18px",
-			"borderRadius": "var(--radius-5)",
-			"backgroundColor": "var(--surface-green-1)",
-		},
 	)
 	request = button(
 		"Request closure",
 		script="toast.success('We will be in touch about closing this loan.')",
 		props={"size": "md"},
-		styles={"width": "100%", "height": "34px", "fontSize": "13px"},
+		styles={"width": "100%"},
 	)
 
 	return column([head, figure, request], gap="20px", styles=HALF_PANEL)
@@ -191,13 +185,13 @@ def charges_card(read):
 	"""What the loan carries besides principal and interest, or a word that it carries none.
 
 	Drawn to the payoff card's measure, since the two stand side by side: the same
-	round tile, the same heading, the same panel. The subtitle says what the card
+	tile, the same heading, the same panel. The subtitle says what the card
 	is for rather than how many rows it holds -- the rows say that themselves, and an
 	empty card says it in its own words below.
 	"""
 	charges = read("charges")
 	head = half_head(
-		icon("file-text", size=22, styles=dict(round_tile("purple"), color="var(--ink-purple-7)")),
+		icon_tile("file-text"),
 		"Charges",
 		"Additional charges applicable on this loan.",
 	)
@@ -221,16 +215,7 @@ def charges_card(read):
 		gap="12px",
 		styles={"padding": "10px 0"},
 	)
-	listed = repeater(
-		charges,
-		entry,
-		visible=any_row(charges),
-		styles={
-			"padding": "6px 18px",
-			"borderRadius": "var(--radius-5)",
-			"backgroundColor": "var(--surface-gray-1)",
-		},
-	)
+	listed = repeater(charges, entry, visible=any_row(charges))
 
 	return column([head, listed, charges_empty(charges)], gap="20px", styles=HALF_PANEL)
 
@@ -242,11 +227,7 @@ def charges_empty(charges):
 	"""
 	return column(
 		[
-			icon(
-				"file",
-				size=22,
-				styles=dict(round_tile("gray"), color="var(--ink-gray-6)", marginBottom="10px"),
-			),
+			icon_tile("file", styles={"marginBottom": "10px"}),
 			text(
 				"No charges on this loan",
 				size="text-base",
@@ -261,7 +242,8 @@ def charges_empty(charges):
 
 
 def half_head(tile, title, subtitle):
-	"""The round tile and two lines that lead each of the two half-width cards."""
+	"""The tile and two lines that lead each of the two half-width cards, as the terms
+	card above them is led."""
 	return row(
 		[
 			tile,
@@ -270,38 +252,19 @@ def half_head(tile, title, subtitle):
 					heading(title, size="text-lg", styles={"letterSpacing": "0"}),
 					muted(subtitle, styles={"letterSpacing": "0"}),
 				],
-				gap="6px",
+				gap="2px",
 			),
 		],
-		gap="20px",
+		gap="12px",
+		align="start",
 	)
 
 
-def round_tile(theme):
-	"""A disc rather than icon_tile's square: the design this column was drawn from rounds it."""
-	return {
-		"display": "flex",
-		"alignItems": "center",
-		"justifyContent": "center",
-		"flex": "0 0 auto",
-		"width": "48px",
-		"height": "48px",
-		"borderRadius": "var(--radius-full)",
-		"backgroundColor": f"var(--surface-{theme}-1)",
-	}
+HALF_PANEL = dict(PANEL, padding="20px", flex="1 1 auto")
 
-
-HALF_PANEL = dict(PANEL, padding="22px", borderRadius="var(--radius-5)", flex="1 1 auto")
-
-# The payoff tile's glyph is type rather than a lucide icon: the design draws the rupee
-# in the face of the figure beside it, not as a stroked outline.
-RUPEE = {
-	"fontSize": "27px",
-	"fontWeight": "500",
-	"lineHeight": "1",
-	"letterSpacing": "0",
-	"color": "var(--ink-green-8)",
-}
+# The payoff tile's glyph is type rather than a lucide icon: the rupee is drawn in the
+# face of the figure beside it, not as a stroked outline.
+RUPEE = {"fontWeight": "500", "lineHeight": "1", "letterSpacing": "0"}
 # Inter's display cut, which is narrower than the text cut frappe-ui sets everywhere
 # else: at this size the text cut ran the figure a tenth wider than the design.
 PAYOFF_FIGURE = {

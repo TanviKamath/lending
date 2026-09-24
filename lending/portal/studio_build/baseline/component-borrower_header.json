@@ -10,8 +10,7 @@
    "flexDirection": "row",
    "alignItems": "center",
    "gap": "10px",
-   "padding": "0px",
-   "paddingLeft": "15px",
+   "padding": "0 20px",
    "width": "100%",
    "minHeight": "48.8px",
    "borderBottom": "1px solid var(--outline-gray-1)"
@@ -255,6 +254,9 @@
    }
   ],
   "originalElement": "div",
+  "classes": [
+   "portal-header"
+  ],
   "componentId": "borrower_header-0"
  }
 }

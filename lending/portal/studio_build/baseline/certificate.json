@@ -62,7 +62,8 @@
           "flexDirection": "row",
           "alignItems": "center",
           "gap": "8px",
-          "height": "48px",
+          "height": "48.8px",
+          "marginTop": "-8px",
           "flexShrink": "0",
           "justifyContent": "center",
           "padding": "0 6px"
@@ -111,8 +112,8 @@
             "alignItems": "center",
             "justifyContent": "center",
             "textTransform": "uppercase",
-            "backgroundColor": "var(--surface-gray-4)",
-            "color": "var(--ink-gray-7)"
+            "backgroundColor": "var(--portal-primary, var(--surface-gray-4))",
+            "color": "var(--portal-primary-ink, var(--ink-gray-7))"
            },
            "mobileStyles": {},
            "tabletStyles": {},
@@ -156,7 +157,9 @@
          "baseStyles": {
           "flex": "1 1 0%",
           "overflowY": "auto",
-          "overflowX": "hidden"
+          "overflowX": "hidden",
+          "margin": "0 -4px",
+          "padding": "2px 4px"
          },
          "mobileStyles": {},
          "tabletStyles": {},
@@ -166,7 +169,8 @@
            "componentProps": {
             "label": "Account overview",
             "icon": "lucide-layout-dashboard",
-            "to": "/overview"
+            "to": "/overview",
+            "active": "{{ typeof route !== 'undefined' && (route.path === '/overview') }}"
            },
            "componentSlots": {},
            "componentEvents": {},
@@ -181,7 +185,8 @@
            "componentProps": {
             "label": "Loan account",
             "icon": "lucide-wallet",
-            "to": "/loans"
+            "to": "/loans",
+            "active": "{{ typeof route !== 'undefined' && (route.path === '/loans' || route.path.startsWith('/loan/')) }}"
            },
            "componentSlots": {},
            "componentEvents": {},
@@ -196,7 +201,8 @@
            "componentProps": {
             "label": "Application",
             "icon": "lucide-file-text",
-            "to": "/applications"
+            "to": "/applications",
+            "active": "{{ typeof route !== 'undefined' && (route.path === '/applications' || route.path.startsWith('/application/')) }}"
            },
            "componentSlots": {},
            "componentEvents": {},
@@ -211,7 +217,8 @@
            "componentProps": {
             "label": "Statement of account",
             "icon": "lucide-receipt",
-            "to": "/statement"
+            "to": "/statement",
+            "active": "{{ typeof route !== 'undefined' && (route.path === '/statement') }}"
            },
            "componentSlots": {},
            "componentEvents": {},
@@ -226,7 +233,8 @@
            "componentProps": {
             "label": "Interest certificate",
             "icon": "lucide-award",
-            "to": "/certificate"
+            "to": "/certificate",
+            "active": "{{ typeof route !== 'undefined' && (route.path === '/certificate') }}"
            },
            "componentSlots": {},
            "componentEvents": {},
@@ -241,7 +249,8 @@
            "componentProps": {
             "label": "Personal details",
             "icon": "lucide-user",
-            "to": "/profile"
+            "to": "/profile",
+            "active": "{{ typeof route !== 'undefined' && (route.path === '/profile') }}"
            },
            "componentSlots": {},
            "componentEvents": {},
@@ -266,57 +275,94 @@
          "tabletStyles": {},
          "children": [
           {
-           "componentName": "container",
-           "componentProps": {},
-           "componentSlots": {},
-           "componentEvents": {},
-           "baseStyles": {
-            "display": "flex",
-            "flexDirection": "column",
-            "gap": "2px",
-            "padding": "12px"
+           "componentName": "Dropdown",
+           "componentProps": {
+            "options": "{{ [{ label: 'Log out', icon: 'lucide-log-out', onClick: () => logout() }] }}",
+            "side": "top",
+            "align": "start"
            },
+           "componentSlots": {
+            "trigger": {
+             "slotName": "trigger",
+             "slotContent": [
+              {
+               "componentName": "container",
+               "componentProps": {},
+               "componentSlots": {},
+               "componentEvents": {},
+               "baseStyles": {
+                "display": "flex",
+                "flexDirection": "row",
+                "alignItems": "center",
+                "gap": "8px",
+                "height": "32px",
+                "padding": "0 6px",
+                "borderRadius": "8px",
+                "cursor": "pointer",
+                "justifyContent": "center"
+               },
+               "mobileStyles": {},
+               "tabletStyles": {},
+               "children": [
+                {
+                 "componentName": "Avatar",
+                 "componentProps": {
+                  "label": "{{ certificate.data.holder_name || '' }}",
+                  "size": "md",
+                  "shape": "circle"
+                 },
+                 "componentSlots": {},
+                 "componentEvents": {},
+                 "baseStyles": {
+                  "flexShrink": "0"
+                 },
+                 "mobileStyles": {},
+                 "tabletStyles": {},
+                 "children": [],
+                 "classes": [
+                  "portal-avatar"
+                 ],
+                 "componentId": "certificate-0-sidebar1-div1-div2-dropdown1-trigger-container1-avatar1"
+                },
+                {
+                 "componentName": "TextBlock",
+                 "componentProps": {
+                  "text": "{{ certificate.data.holder_name || '' }}",
+                  "tag": "p",
+                  "fontSize": "text-sm"
+                 },
+                 "componentSlots": {},
+                 "componentEvents": {},
+                 "baseStyles": {
+                  "flex": "1 1 0%",
+                  "minWidth": "0px",
+                  "color": "var(--ink-gray-7)",
+                  "overflow": "hidden",
+                  "textOverflow": "ellipsis",
+                  "whiteSpace": "nowrap"
+                 },
+                 "mobileStyles": {},
+                 "tabletStyles": {},
+                 "children": [],
+                 "visibilityCondition": "{{ typeof sidebarCollapsed === 'undefined' || !sidebarCollapsed }}",
+                 "componentId": "certificate-0-sidebar1-div1-div2-dropdown1-trigger-container1-textblock1"
+                }
+               ],
+               "originalElement": "div",
+               "classes": [
+                "hover:bg-surface-gray-2"
+               ],
+               "componentId": "certificate-0-sidebar1-div1-div2-dropdown1-trigger-container1"
+              }
+             ]
+            }
+           },
+           "componentEvents": {},
+           "baseStyles": {},
            "mobileStyles": {},
            "tabletStyles": {},
-           "children": [
-            {
-             "componentName": "TextBlock",
-             "componentProps": {
-              "text": "{{ certificate.data.holder_name }}",
-              "tag": "p",
-              "fontSize": "text-sm"
-             },
-             "componentSlots": {},
-             "componentEvents": {},
-             "baseStyles": {
-              "fontWeight": "600"
-             },
-             "mobileStyles": {},
-             "tabletStyles": {},
-             "children": [],
-             "componentId": "certificate-0-sidebar1-div1-div2-container1-textblock1"
-            },
-            {
-             "componentName": "TextBlock",
-             "componentProps": {
-              "text": "{{ certificate.data.customer_note }}",
-              "tag": "p",
-              "fontSize": "text-p-xs"
-             },
-             "componentSlots": {},
-             "componentEvents": {},
-             "baseStyles": {
-              "color": "var(--ink-gray-6)"
-             },
-             "mobileStyles": {},
-             "tabletStyles": {},
-             "children": [],
-             "componentId": "certificate-0-sidebar1-div1-div2-container1-textblock2"
-            }
-           ],
-           "visibilityCondition": "{{ typeof sidebarCollapsed === 'undefined' || !sidebarCollapsed }}",
-           "originalElement": "div",
-           "componentId": "certificate-0-sidebar1-div1-div2-container1"
+           "children": [],
+           "componentId": "certificate-0-sidebar1-div1-div2-dropdown1"
           }
          ],
          "componentId": "certificate-0-sidebar1-div1-div2"
@@ -505,7 +551,7 @@
              "componentProps": {
               "text": "{{ certificate.data.rows_note }}",
               "tag": "p",
-              "fontSize": "text-p-xs"
+              "fontSize": "text-p-sm"
              },
              "componentSlots": {},
              "componentEvents": {},
@@ -609,7 +655,7 @@
           "borderWidth": "1px",
           "borderStyle": "solid",
           "borderColor": "var(--outline-gray-2)",
-          "borderRadius": "0.5rem",
+          "borderRadius": "var(--radius-4)",
           "backgroundColor": "var(--surface-base)",
           "overflow": "hidden"
          },
@@ -688,7 +734,7 @@
                "componentProps": {
                 "text": "On your loans this year",
                 "tag": "p",
-                "fontSize": "text-p-xs"
+                "fontSize": "text-p-sm"
                },
                "componentSlots": {},
                "componentEvents": {},
@@ -762,7 +808,7 @@
                "componentProps": {
                 "text": "Towards the amount borrowed",
                 "tag": "p",
-                "fontSize": "text-p-xs"
+                "fontSize": "text-p-sm"
                },
                "componentSlots": {},
                "componentEvents": {},
@@ -836,7 +882,7 @@
                "componentProps": {
                 "text": "Late fees and other charges",
                 "tag": "p",
-                "fontSize": "text-p-xs"
+                "fontSize": "text-p-sm"
                },
                "componentSlots": {},
                "componentEvents": {},
@@ -911,7 +957,7 @@
                "componentProps": {
                 "text": "Interest, principal and charges",
                 "tag": "p",
-                "fontSize": "text-p-xs"
+                "fontSize": "text-p-sm"
                },
                "componentSlots": {},
                "componentEvents": {},
@@ -948,7 +994,7 @@
           "borderWidth": "1px",
           "borderStyle": "solid",
           "borderColor": "var(--outline-gray-2)",
-          "borderRadius": "0.5rem",
+          "borderRadius": "var(--radius-4)",
           "backgroundColor": "var(--surface-base)"
          },
          "mobileStyles": {},
@@ -989,7 +1035,7 @@
              "componentProps": {
               "text": "{{ certificate.data.accounts_note }}",
               "tag": "p",
-              "fontSize": "text-p-xs"
+              "fontSize": "text-p-sm"
              },
              "componentSlots": {},
              "componentEvents": {},
@@ -1057,7 +1103,7 @@
                  "baseStyles": {
                   "height": "36px",
                   "borderRadius": "var(--radius-4)",
-                  "backgroundColor": "var(--surface-gray-2)",
+                  "backgroundColor": "var(--portal-action-soft, var(--surface-gray-2))",
                   "--outline-gray-1": "transparent",
                   "marginBottom": "10px"
                  },
@@ -1083,7 +1129,7 @@
                      "componentSlots": {},
                      "componentEvents": {},
                      "baseStyles": {
-                      "color": "var(--ink-gray-5)"
+                      "color": "var(--portal-action-deep, var(--ink-gray-5))"
                      },
                      "mobileStyles": {},
                      "tabletStyles": {},
@@ -1098,10 +1144,7 @@
                    "componentProps": {},
                    "componentSlots": {},
                    "componentEvents": {},
-                   "baseStyles": {
-                    "justifyContent": "flex-end",
-                    "textAlign": "right"
-                   },
+                   "baseStyles": {},
                    "mobileStyles": {},
                    "tabletStyles": {},
                    "children": [
@@ -1115,7 +1158,7 @@
                      "componentSlots": {},
                      "componentEvents": {},
                      "baseStyles": {
-                      "color": "var(--ink-gray-5)"
+                      "color": "var(--portal-action-deep, var(--ink-gray-5))"
                      },
                      "mobileStyles": {},
                      "tabletStyles": {},
@@ -1130,10 +1173,7 @@
                    "componentProps": {},
                    "componentSlots": {},
                    "componentEvents": {},
-                   "baseStyles": {
-                    "justifyContent": "flex-end",
-                    "textAlign": "right"
-                   },
+                   "baseStyles": {},
                    "mobileStyles": {},
                    "tabletStyles": {},
                    "children": [
@@ -1147,7 +1187,7 @@
                      "componentSlots": {},
                      "componentEvents": {},
                      "baseStyles": {
-                      "color": "var(--ink-gray-5)"
+                      "color": "var(--portal-action-deep, var(--ink-gray-5))"
                      },
                      "mobileStyles": {},
                      "tabletStyles": {},
@@ -1162,10 +1202,7 @@
                    "componentProps": {},
                    "componentSlots": {},
                    "componentEvents": {},
-                   "baseStyles": {
-                    "justifyContent": "flex-end",
-                    "textAlign": "right"
-                   },
+                   "baseStyles": {},
                    "mobileStyles": {},
                    "tabletStyles": {},
                    "children": [
@@ -1179,7 +1216,7 @@
                      "componentSlots": {},
                      "componentEvents": {},
                      "baseStyles": {
-                      "color": "var(--ink-gray-5)"
+                      "color": "var(--portal-action-deep, var(--ink-gray-5))"
                      },
                      "mobileStyles": {},
                      "tabletStyles": {},
@@ -1253,7 +1290,7 @@
                          "componentProps": {
                           "text": "{{ item.value }}",
                           "tag": "p",
-                          "fontSize": "text-p-xs"
+                          "fontSize": "text-p-sm"
                          },
                          "componentSlots": {},
                          "componentEvents": {},
@@ -1273,10 +1310,7 @@
                        "componentProps": {},
                        "componentSlots": {},
                        "componentEvents": {},
-                       "baseStyles": {
-                        "justifyContent": "flex-end",
-                        "textAlign": "right"
-                       },
+                       "baseStyles": {},
                        "mobileStyles": {},
                        "tabletStyles": {},
                        "children": [
@@ -1306,10 +1340,7 @@
                        "componentProps": {},
                        "componentSlots": {},
                        "componentEvents": {},
-                       "baseStyles": {
-                        "justifyContent": "flex-end",
-                        "textAlign": "right"
-                       },
+                       "baseStyles": {},
                        "mobileStyles": {},
                        "tabletStyles": {},
                        "children": [
@@ -1339,10 +1370,7 @@
                        "componentProps": {},
                        "componentSlots": {},
                        "componentEvents": {},
-                       "baseStyles": {
-                        "justifyContent": "flex-end",
-                        "textAlign": "right"
-                       },
+                       "baseStyles": {},
                        "mobileStyles": {},
                        "tabletStyles": {},
                        "children": [
@@ -1428,7 +1456,7 @@
                "componentProps": {
                 "text": "{{ certificate.data.disclaimer }}",
                 "tag": "p",
-                "fontSize": "text-p-xs"
+                "fontSize": "text-p-sm"
                },
                "componentSlots": {},
                "componentEvents": {},
@@ -1499,12 +1527,30 @@
      ],
      "originalElement": "div",
      "componentId": "certificate-0-container1"
+    },
+    {
+     "componentName": "HTML",
+     "componentProps": {
+      "html": "{{ certificate.data.brand_style || '' }}"
+     },
+     "componentSlots": {},
+     "componentEvents": {},
+     "baseStyles": {
+      "display": "none"
+     },
+     "mobileStyles": {},
+     "tabletStyles": {},
+     "children": [],
+     "componentId": "certificate-0-html1"
     }
+   ],
+   "classes": [
+    "borrower-portal"
    ],
    "originalElement": "body",
    "blockName": "body",
    "componentId": "certificate-0"
   }
  ],
- "script": "import { computed, ref, watch } from \"vue\"\nimport { call, toast } from \"frappe-ui\"\nimport { tone, appRoute, useSearch } from \"@app/utils/portal\"\n\nexport default function setup(context: any) {\n\tconst { router } = context\n\tconst showAlerts = ref(false)\n\tconst alertsTab = ref(\"attention\")\n\tconst sidebarCollapsed = ref<boolean | null>(null)\n\tconst year = ref(currentYear())\n\n\tconst open = (url?: string) => {\n\t\tconst to = appRoute(url)\n\t\tif (to) router.push(to)\n\t}\n\tconst search = useSearch(open)\n\n\tfunction currentYear() {\n\t\tconst today = new Date()\n\t\tconst start = today.getFullYear() - (today.getMonth() < 3 ? 1 : 0)\n\t\treturn `${start}-${start + 1}`\n\t}\n\n\treturn { tone, open, showAlerts, alertsTab, sidebarCollapsed, ...search, year }\n}\n"
+ "script": "import { computed, ref, watch } from \"vue\"\nimport { call, toast } from \"frappe-ui\"\nimport { tone, appRoute, logout as endSession, useSearch } from \"@app/utils/portal\"\n\nexport default function setup(context: any) {\n\tconst { router } = context\n\tconst showAlerts = ref(false)\n\tconst alertsTab = ref(\"attention\")\n\tconst sidebarCollapsed = ref<boolean | null>(null)\n\tconst year = ref(currentYear())\n\n\tconst open = (url?: string) => {\n\t\tconst to = appRoute(url)\n\t\tif (to) router.push(to)\n\t}\n\tconst logout = () => endSession(router)\n\tconst search = useSearch(open)\n\n\tfunction currentYear() {\n\t\tconst today = new Date()\n\t\tconst start = today.getFullYear() - (today.getMonth() < 3 ? 1 : 0)\n\t\treturn `${start}-${start + 1}`\n\t}\n\n\treturn { tone, open, logout, showAlerts, alertsTab, sidebarCollapsed, ...search, year }\n}\n"
 }

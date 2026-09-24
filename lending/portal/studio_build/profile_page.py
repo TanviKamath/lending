@@ -151,7 +151,7 @@ def header():
 	"""The borrower's avatar and name, and what the form offers to press."""
 	avatar = block(
 		"Avatar",
-		props={"label": "{{ identity.customer_name }}", "size": "2xl", "shape": "circle"},
+		props={"label": "{{ identity.customer_name }}", "size": "2xl", "shape": "circle", "theme": "blue"},
 		styles={"flex": "0 0 auto"},
 	)
 	name = text(
@@ -178,8 +178,8 @@ def header():
 		script="edit()",
 		variant="outline",
 		slots={
-			**slot("prefix", [icon("square-pen", size=14)]),
-			**slot("default", [text("Edit", tag="span", size="text-sm")]),
+			**slot("prefix", [icon("square-pen", size=16)]),
+			**slot("default", [text("Edit", tag="span", size="text-base")]),
 		},
 		visible="{{ !editing }}",
 	)

@@ -62,7 +62,8 @@
           "flexDirection": "row",
           "alignItems": "center",
           "gap": "8px",
-          "height": "48px",
+          "height": "48.8px",
+          "marginTop": "-8px",
           "flexShrink": "0",
           "justifyContent": "center",
           "padding": "0 6px"
@@ -111,8 +112,8 @@
             "alignItems": "center",
             "justifyContent": "center",
             "textTransform": "uppercase",
-            "backgroundColor": "var(--surface-gray-4)",
-            "color": "var(--ink-gray-7)"
+            "backgroundColor": "var(--portal-primary, var(--surface-gray-4))",
+            "color": "var(--portal-primary-ink, var(--ink-gray-7))"
            },
            "mobileStyles": {},
            "tabletStyles": {},
@@ -156,7 +157,9 @@
          "baseStyles": {
           "flex": "1 1 0%",
           "overflowY": "auto",
-          "overflowX": "hidden"
+          "overflowX": "hidden",
+          "margin": "0 -4px",
+          "padding": "2px 4px"
          },
          "mobileStyles": {},
          "tabletStyles": {},
@@ -166,7 +169,8 @@
            "componentProps": {
             "label": "Account overview",
             "icon": "lucide-layout-dashboard",
-            "to": "/overview"
+            "to": "/overview",
+            "active": "{{ typeof route !== 'undefined' && (route.path === '/overview') }}"
            },
            "componentSlots": {},
            "componentEvents": {},
@@ -181,7 +185,8 @@
            "componentProps": {
             "label": "Loan account",
             "icon": "lucide-wallet",
-            "to": "/loans"
+            "to": "/loans",
+            "active": "{{ typeof route !== 'undefined' && (route.path === '/loans' || route.path.startsWith('/loan/')) }}"
            },
            "componentSlots": {},
            "componentEvents": {},
@@ -196,7 +201,8 @@
            "componentProps": {
             "label": "Application",
             "icon": "lucide-file-text",
-            "to": "/applications"
+            "to": "/applications",
+            "active": "{{ typeof route !== 'undefined' && (route.path === '/applications' || route.path.startsWith('/application/')) }}"
            },
            "componentSlots": {},
            "componentEvents": {},
@@ -211,7 +217,8 @@
            "componentProps": {
             "label": "Statement of account",
             "icon": "lucide-receipt",
-            "to": "/statement"
+            "to": "/statement",
+            "active": "{{ typeof route !== 'undefined' && (route.path === '/statement') }}"
            },
            "componentSlots": {},
            "componentEvents": {},
@@ -226,7 +233,8 @@
            "componentProps": {
             "label": "Interest certificate",
             "icon": "lucide-award",
-            "to": "/certificate"
+            "to": "/certificate",
+            "active": "{{ typeof route !== 'undefined' && (route.path === '/certificate') }}"
            },
            "componentSlots": {},
            "componentEvents": {},
@@ -241,7 +249,8 @@
            "componentProps": {
             "label": "Personal details",
             "icon": "lucide-user",
-            "to": "/profile"
+            "to": "/profile",
+            "active": "{{ typeof route !== 'undefined' && (route.path === '/profile') }}"
            },
            "componentSlots": {},
            "componentEvents": {},
@@ -266,57 +275,94 @@
          "tabletStyles": {},
          "children": [
           {
-           "componentName": "container",
-           "componentProps": {},
-           "componentSlots": {},
-           "componentEvents": {},
-           "baseStyles": {
-            "display": "flex",
-            "flexDirection": "column",
-            "gap": "2px",
-            "padding": "12px"
+           "componentName": "Dropdown",
+           "componentProps": {
+            "options": "{{ [{ label: 'Log out', icon: 'lucide-log-out', onClick: () => logout() }] }}",
+            "side": "top",
+            "align": "start"
            },
+           "componentSlots": {
+            "trigger": {
+             "slotName": "trigger",
+             "slotContent": [
+              {
+               "componentName": "container",
+               "componentProps": {},
+               "componentSlots": {},
+               "componentEvents": {},
+               "baseStyles": {
+                "display": "flex",
+                "flexDirection": "row",
+                "alignItems": "center",
+                "gap": "8px",
+                "height": "32px",
+                "padding": "0 6px",
+                "borderRadius": "8px",
+                "cursor": "pointer",
+                "justifyContent": "center"
+               },
+               "mobileStyles": {},
+               "tabletStyles": {},
+               "children": [
+                {
+                 "componentName": "Avatar",
+                 "componentProps": {
+                  "label": "{{ loan.data.holder_name || '' }}",
+                  "size": "md",
+                  "shape": "circle"
+                 },
+                 "componentSlots": {},
+                 "componentEvents": {},
+                 "baseStyles": {
+                  "flexShrink": "0"
+                 },
+                 "mobileStyles": {},
+                 "tabletStyles": {},
+                 "children": [],
+                 "classes": [
+                  "portal-avatar"
+                 ],
+                 "componentId": "loans-0-sidebar1-div1-div2-dropdown1-trigger-container1-avatar1"
+                },
+                {
+                 "componentName": "TextBlock",
+                 "componentProps": {
+                  "text": "{{ loan.data.holder_name || '' }}",
+                  "tag": "p",
+                  "fontSize": "text-sm"
+                 },
+                 "componentSlots": {},
+                 "componentEvents": {},
+                 "baseStyles": {
+                  "flex": "1 1 0%",
+                  "minWidth": "0px",
+                  "color": "var(--ink-gray-7)",
+                  "overflow": "hidden",
+                  "textOverflow": "ellipsis",
+                  "whiteSpace": "nowrap"
+                 },
+                 "mobileStyles": {},
+                 "tabletStyles": {},
+                 "children": [],
+                 "visibilityCondition": "{{ typeof sidebarCollapsed === 'undefined' || !sidebarCollapsed }}",
+                 "componentId": "loans-0-sidebar1-div1-div2-dropdown1-trigger-container1-textblock1"
+                }
+               ],
+               "originalElement": "div",
+               "classes": [
+                "hover:bg-surface-gray-2"
+               ],
+               "componentId": "loans-0-sidebar1-div1-div2-dropdown1-trigger-container1"
+              }
+             ]
+            }
+           },
+           "componentEvents": {},
+           "baseStyles": {},
            "mobileStyles": {},
            "tabletStyles": {},
-           "children": [
-            {
-             "componentName": "TextBlock",
-             "componentProps": {
-              "text": "{{ loan.data.holder_name }}",
-              "tag": "p",
-              "fontSize": "text-sm"
-             },
-             "componentSlots": {},
-             "componentEvents": {},
-             "baseStyles": {
-              "fontWeight": "600"
-             },
-             "mobileStyles": {},
-             "tabletStyles": {},
-             "children": [],
-             "componentId": "loans-0-sidebar1-div1-div2-container1-textblock1"
-            },
-            {
-             "componentName": "TextBlock",
-             "componentProps": {
-              "text": "{{ loan.data.customer_note }}",
-              "tag": "p",
-              "fontSize": "text-p-xs"
-             },
-             "componentSlots": {},
-             "componentEvents": {},
-             "baseStyles": {
-              "color": "var(--ink-gray-6)"
-             },
-             "mobileStyles": {},
-             "tabletStyles": {},
-             "children": [],
-             "componentId": "loans-0-sidebar1-div1-div2-container1-textblock2"
-            }
-           ],
-           "visibilityCondition": "{{ typeof sidebarCollapsed === 'undefined' || !sidebarCollapsed }}",
-           "originalElement": "div",
-           "componentId": "loans-0-sidebar1-div1-div2-container1"
+           "children": [],
+           "componentId": "loans-0-sidebar1-div1-div2-dropdown1"
           }
          ],
          "componentId": "loans-0-sidebar1-div1-div2"
@@ -433,7 +479,7 @@
           "borderWidth": "1px",
           "borderStyle": "solid",
           "borderColor": "var(--outline-gray-2)",
-          "borderRadius": "0.5rem",
+          "borderRadius": "var(--radius-4)",
           "backgroundColor": "var(--surface-base)"
          },
          "mobileStyles": {},
@@ -468,8 +514,8 @@
               "height": "40px",
               "justifyContent": "center",
               "borderRadius": "var(--radius-5)",
-              "backgroundColor": "var(--surface-blue-2)",
-              "color": "var(--ink-blue-7)"
+              "backgroundColor": "var(--surface-gray-2)",
+              "color": "var(--ink-gray-7)"
              },
              "mobileStyles": {},
              "tabletStyles": {},
@@ -511,7 +557,7 @@
                "componentProps": {
                 "text": "{{ loan.data.summary_note }}",
                 "tag": "p",
-                "fontSize": "text-p-xs"
+                "fontSize": "text-p-sm"
                },
                "componentSlots": {},
                "componentEvents": {},
@@ -956,7 +1002,7 @@
                      "componentProps": {
                       "text": "{{ loan.data.terms.frequency }}",
                       "tag": "p",
-                      "fontSize": "text-p-xs"
+                      "fontSize": "text-p-sm"
                      },
                      "componentSlots": {},
                      "componentEvents": {},
@@ -1145,7 +1191,7 @@
                      "componentProps": {
                       "text": "{{ loan.data.terms.written_off }}",
                       "tag": "p",
-                      "fontSize": "text-p-xs"
+                      "fontSize": "text-p-sm"
                      },
                      "componentSlots": {},
                      "componentEvents": {},
@@ -1314,11 +1360,11 @@
               "display": "flex",
               "flexDirection": "column",
               "gap": "20px",
-              "padding": "22px",
+              "padding": "20px",
               "borderWidth": "1px",
               "borderStyle": "solid",
               "borderColor": "var(--outline-gray-2)",
-              "borderRadius": "var(--radius-5)",
+              "borderRadius": "var(--radius-4)",
               "backgroundColor": "var(--surface-base)",
               "flex": "1 1 auto"
              },
@@ -1333,8 +1379,8 @@
                "baseStyles": {
                 "display": "flex",
                 "flexDirection": "row",
-                "alignItems": "center",
-                "gap": "20px"
+                "alignItems": "start",
+                "gap": "12px"
                },
                "mobileStyles": {},
                "tabletStyles": {},
@@ -1347,12 +1393,13 @@
                  "baseStyles": {
                   "display": "flex",
                   "alignItems": "center",
-                  "justifyContent": "center",
                   "flex": "0 0 auto",
-                  "width": "48px",
-                  "height": "48px",
-                  "borderRadius": "var(--radius-full)",
-                  "backgroundColor": "var(--surface-green-1)"
+                  "width": "40px",
+                  "height": "40px",
+                  "justifyContent": "center",
+                  "borderRadius": "var(--radius-5)",
+                  "backgroundColor": "var(--surface-gray-2)",
+                  "color": "var(--ink-gray-7)"
                  },
                  "mobileStyles": {},
                  "tabletStyles": {},
@@ -1362,16 +1409,14 @@
                    "componentProps": {
                     "text": "\u20b9",
                     "tag": "div",
-                    "fontSize": "text-2xl"
+                    "fontSize": "text-xl"
                    },
                    "componentSlots": {},
                    "componentEvents": {},
                    "baseStyles": {
-                    "fontSize": "27px",
                     "fontWeight": "500",
                     "lineHeight": "1",
-                    "letterSpacing": "0",
-                    "color": "var(--ink-green-8)"
+                    "letterSpacing": "0"
                    },
                    "mobileStyles": {},
                    "tabletStyles": {},
@@ -1390,7 +1435,7 @@
                  "baseStyles": {
                   "display": "flex",
                   "flexDirection": "column",
-                  "gap": "6px"
+                  "gap": "2px"
                  },
                  "mobileStyles": {},
                  "tabletStyles": {},
@@ -1418,7 +1463,7 @@
                    "componentProps": {
                     "text": "Total amount required to close this loan.",
                     "tag": "p",
-                    "fontSize": "text-p-xs"
+                    "fontSize": "text-p-sm"
                    },
                    "componentSlots": {},
                    "componentEvents": {},
@@ -1447,10 +1492,7 @@
                "baseStyles": {
                 "display": "flex",
                 "flexDirection": "column",
-                "gap": "0px",
-                "padding": "20px 22px 18px",
-                "borderRadius": "var(--radius-5)",
-                "backgroundColor": "var(--surface-green-1)"
+                "gap": "0px"
                },
                "mobileStyles": {},
                "tabletStyles": {},
@@ -1532,9 +1574,7 @@
                 }
                },
                "baseStyles": {
-                "width": "100%",
-                "height": "34px",
-                "fontSize": "13px"
+                "width": "100%"
                },
                "mobileStyles": {},
                "tabletStyles": {},
@@ -1572,11 +1612,11 @@
               "display": "flex",
               "flexDirection": "column",
               "gap": "20px",
-              "padding": "22px",
+              "padding": "20px",
               "borderWidth": "1px",
               "borderStyle": "solid",
               "borderColor": "var(--outline-gray-2)",
-              "borderRadius": "var(--radius-5)",
+              "borderRadius": "var(--radius-4)",
               "backgroundColor": "var(--surface-base)",
               "flex": "1 1 auto"
              },
@@ -1591,8 +1631,8 @@
                "baseStyles": {
                 "display": "flex",
                 "flexDirection": "row",
-                "alignItems": "center",
-                "gap": "20px"
+                "alignItems": "start",
+                "gap": "12px"
                },
                "mobileStyles": {},
                "tabletStyles": {},
@@ -1600,7 +1640,7 @@
                 {
                  "componentName": "HTML",
                  "componentProps": {
-                  "html": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z\"/><path d=\"M14 2v5a1 1 0 0 0 1 1h5\"/><path d=\"M10 9H8\"/><path d=\"M16 13H8\"/><path d=\"M16 17H8\"/></svg>"
+                  "html": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z\"/><path d=\"M14 2v5a1 1 0 0 0 1 1h5\"/><path d=\"M10 9H8\"/><path d=\"M16 13H8\"/><path d=\"M16 17H8\"/></svg>"
                  },
                  "componentSlots": {},
                  "componentEvents": {},
@@ -1608,12 +1648,12 @@
                   "display": "flex",
                   "alignItems": "center",
                   "flex": "0 0 auto",
+                  "width": "40px",
+                  "height": "40px",
                   "justifyContent": "center",
-                  "width": "48px",
-                  "height": "48px",
-                  "borderRadius": "var(--radius-full)",
-                  "backgroundColor": "var(--surface-purple-1)",
-                  "color": "var(--ink-purple-7)"
+                  "borderRadius": "var(--radius-5)",
+                  "backgroundColor": "var(--surface-gray-2)",
+                  "color": "var(--ink-gray-7)"
                  },
                  "mobileStyles": {},
                  "tabletStyles": {},
@@ -1628,7 +1668,7 @@
                  "baseStyles": {
                   "display": "flex",
                   "flexDirection": "column",
-                  "gap": "6px"
+                  "gap": "2px"
                  },
                  "mobileStyles": {},
                  "tabletStyles": {},
@@ -1656,7 +1696,7 @@
                    "componentProps": {
                     "text": "Additional charges applicable on this loan.",
                     "tag": "p",
-                    "fontSize": "text-p-xs"
+                    "fontSize": "text-p-sm"
                    },
                    "componentSlots": {},
                    "componentEvents": {},
@@ -1686,11 +1726,7 @@
                },
                "componentSlots": {},
                "componentEvents": {},
-               "baseStyles": {
-                "padding": "6px 18px",
-                "borderRadius": "var(--radius-5)",
-                "backgroundColor": "var(--surface-gray-1)"
-               },
+               "baseStyles": {},
                "mobileStyles": {},
                "tabletStyles": {},
                "children": [
@@ -1745,7 +1781,7 @@
                      "componentProps": {
                       "text": "{{ dataItem.detail }}",
                       "tag": "p",
-                      "fontSize": "text-p-xs"
+                      "fontSize": "text-p-sm"
                      },
                      "componentSlots": {},
                      "componentEvents": {},
@@ -1823,7 +1859,7 @@
                 {
                  "componentName": "HTML",
                  "componentProps": {
-                  "html": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z\"/><path d=\"M14 2v5a1 1 0 0 0 1 1h5\"/></svg>"
+                  "html": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z\"/><path d=\"M14 2v5a1 1 0 0 0 1 1h5\"/></svg>"
                  },
                  "componentSlots": {},
                  "componentEvents": {},
@@ -1831,12 +1867,12 @@
                   "display": "flex",
                   "alignItems": "center",
                   "flex": "0 0 auto",
+                  "width": "40px",
+                  "height": "40px",
                   "justifyContent": "center",
-                  "width": "48px",
-                  "height": "48px",
-                  "borderRadius": "var(--radius-full)",
-                  "backgroundColor": "var(--surface-gray-1)",
-                  "color": "var(--ink-gray-6)",
+                  "borderRadius": "var(--radius-5)",
+                  "backgroundColor": "var(--surface-gray-2)",
+                  "color": "var(--ink-gray-7)",
                   "marginBottom": "10px"
                  },
                  "mobileStyles": {},
@@ -1867,7 +1903,7 @@
                  "componentProps": {
                   "text": "Any processing fees or other charges will appear here.",
                   "tag": "p",
-                  "fontSize": "text-p-xs"
+                  "fontSize": "text-p-sm"
                  },
                  "componentSlots": {},
                  "componentEvents": {},
@@ -1943,12 +1979,30 @@
      ],
      "originalElement": "div",
      "componentId": "loans-0-container1"
+    },
+    {
+     "componentName": "HTML",
+     "componentProps": {
+      "html": "{{ loan.data.brand_style || '' }}"
+     },
+     "componentSlots": {},
+     "componentEvents": {},
+     "baseStyles": {
+      "display": "none"
+     },
+     "mobileStyles": {},
+     "tabletStyles": {},
+     "children": [],
+     "componentId": "loans-0-html1"
     }
+   ],
+   "classes": [
+    "borrower-portal"
    ],
    "originalElement": "body",
    "blockName": "body",
    "componentId": "loans-0"
   }
  ],
- "script": "import { computed, ref, watch } from \"vue\"\nimport { call, toast } from \"frappe-ui\"\nimport { tone, appRoute, useSearch } from \"@app/utils/portal\"\n\nexport default function setup(context: any) {\n\tconst { router } = context\n\tconst showAlerts = ref(false)\n\tconst alertsTab = ref(\"attention\")\n\tconst sidebarCollapsed = ref<boolean | null>(null)\n\n\tconst open = (url?: string) => {\n\t\tconst to = appRoute(url)\n\t\tif (to) router.push(to)\n\t}\n\tconst search = useSearch(open)\n\n\treturn { tone, open, showAlerts, alertsTab, sidebarCollapsed, ...search }\n}\n"
+ "script": "import { computed, ref, watch } from \"vue\"\nimport { call, toast } from \"frappe-ui\"\nimport { tone, appRoute, logout as endSession, useSearch } from \"@app/utils/portal\"\n\nexport default function setup(context: any) {\n\tconst { router } = context\n\tconst showAlerts = ref(false)\n\tconst alertsTab = ref(\"attention\")\n\tconst sidebarCollapsed = ref<boolean | null>(null)\n\n\tconst open = (url?: string) => {\n\t\tconst to = appRoute(url)\n\t\tif (to) router.push(to)\n\t}\n\tconst logout = () => endSession(router)\n\tconst search = useSearch(open)\n\n\treturn { tone, open, logout, showAlerts, alertsTab, sidebarCollapsed, ...search }\n}\n"
 }

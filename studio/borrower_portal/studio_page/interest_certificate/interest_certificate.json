@@ -34,8 +34,9 @@
           "flexDirection": "row",
           "flexShrink": "0",
           "gap": "8px",
-          "height": "48px",
+          "height": "48.8px",
           "justifyContent": "center",
+          "marginTop": "-8px",
           "padding": "0 6px"
          },
          "children": [
@@ -61,9 +62,9 @@
           {
            "baseStyles": {
             "alignItems": "center",
-            "backgroundColor": "var(--surface-gray-4)",
+            "backgroundColor": "var(--portal-primary, var(--surface-gray-4))",
             "borderRadius": "6px",
-            "color": "var(--ink-gray-7)",
+            "color": "var(--portal-primary-ink, var(--ink-gray-7))",
             "display": "flex",
             "flexShrink": "0",
             "height": "28px",
@@ -109,8 +110,10 @@
         {
          "baseStyles": {
           "flex": "1 1 0%",
+          "margin": "0 -4px",
           "overflowX": "hidden",
-          "overflowY": "auto"
+          "overflowY": "auto",
+          "padding": "2px 4px"
          },
          "children": [
           {
@@ -118,6 +121,7 @@
            "componentId": "certificate-0-sidebar1-div1-div1-sidebaritem1",
            "componentName": "SidebarItem",
            "componentProps": {
+            "active": "{{ typeof route !== 'undefined' && (route.path === '/overview') }}",
             "icon": "lucide-layout-dashboard",
             "label": "Account overview",
             "to": "/overview"
@@ -128,6 +132,7 @@
            "componentId": "certificate-0-sidebar1-div1-div1-sidebaritem2",
            "componentName": "SidebarItem",
            "componentProps": {
+            "active": "{{ typeof route !== 'undefined' && (route.path === '/loans' || route.path.startsWith('/loan/')) }}",
             "icon": "lucide-wallet",
             "label": "Loan account",
             "to": "/loans"
@@ -138,6 +143,7 @@
            "componentId": "certificate-0-sidebar1-div1-div1-sidebaritem3",
            "componentName": "SidebarItem",
            "componentProps": {
+            "active": "{{ typeof route !== 'undefined' && (route.path === '/applications' || route.path.startsWith('/application/')) }}",
             "icon": "lucide-file-text",
             "label": "Application",
             "to": "/applications"
@@ -148,6 +154,7 @@
            "componentId": "certificate-0-sidebar1-div1-div1-sidebaritem4",
            "componentName": "SidebarItem",
            "componentProps": {
+            "active": "{{ typeof route !== 'undefined' && (route.path === '/statement') }}",
             "icon": "lucide-receipt",
             "label": "Statement of account",
             "to": "/statement"
@@ -158,6 +165,7 @@
            "componentId": "certificate-0-sidebar1-div1-div1-sidebaritem5",
            "componentName": "SidebarItem",
            "componentProps": {
+            "active": "{{ typeof route !== 'undefined' && (route.path === '/certificate') }}",
             "icon": "lucide-award",
             "label": "Interest certificate",
             "to": "/certificate"
@@ -168,6 +176,7 @@
            "componentId": "certificate-0-sidebar1-div1-div1-sidebaritem6",
            "componentName": "SidebarItem",
            "componentProps": {
+            "active": "{{ typeof route !== 'undefined' && (route.path === '/profile') }}",
             "icon": "lucide-user",
             "label": "Personal details",
             "to": "/profile"
@@ -183,44 +192,90 @@
          },
          "children": [
           {
-           "baseStyles": {
-            "display": "flex",
-            "flexDirection": "column",
-            "gap": "2px",
-            "padding": "12px"
+           "children": [],
+           "componentId": "certificate-0-sidebar1-div1-div2-dropdown1",
+           "componentName": "Dropdown",
+           "componentProps": {
+            "align": "start",
+            "options": "{{ [{ label: 'Log out', icon: 'lucide-log-out', onClick: () => logout() }] }}",
+            "side": "top"
            },
-           "children": [
-            {
-             "baseStyles": {
-              "fontWeight": "600"
-             },
-             "children": [],
-             "componentId": "certificate-0-sidebar1-div1-div2-container1-textblock1",
-             "componentName": "TextBlock",
-             "componentProps": {
-              "fontSize": "text-sm",
-              "tag": "p",
-              "text": "{{ certificate.data.holder_name }}"
-             }
-            },
-            {
-             "baseStyles": {
-              "color": "var(--ink-gray-6)"
-             },
-             "children": [],
-             "componentId": "certificate-0-sidebar1-div1-div2-container1-textblock2",
-             "componentName": "TextBlock",
-             "componentProps": {
-              "fontSize": "text-p-xs",
-              "tag": "p",
-              "text": "{{ certificate.data.customer_note }}"
-             }
+           "componentSlots": {
+            "trigger": {
+             "slotContent": [
+              {
+               "baseStyles": {
+                "alignItems": "center",
+                "borderRadius": "8px",
+                "cursor": "pointer",
+                "display": "flex",
+                "flexDirection": "row",
+                "gap": "8px",
+                "height": "32px",
+                "justifyContent": "center",
+                "padding": "0 6px"
+               },
+               "children": [
+                {
+                 "baseStyles": {
+                  "flexShrink": "0"
+                 },
+                 "children": [],
+                 "classes": [
+                  "portal-avatar"
+                 ],
+                 "componentEvents": {},
+                 "componentId": "certificate-0-sidebar1-div1-div2-dropdown1-trigger-container1-avatar1",
+                 "componentName": "Avatar",
+                 "componentProps": {
+                  "label": "{{ certificate.data.holder_name || '' }}",
+                  "shape": "circle",
+                  "size": "md"
+                 },
+                 "componentSlots": {},
+                 "mobileStyles": {},
+                 "tabletStyles": {}
+                },
+                {
+                 "baseStyles": {
+                  "color": "var(--ink-gray-7)",
+                  "flex": "1 1 0%",
+                  "minWidth": "0px",
+                  "overflow": "hidden",
+                  "textOverflow": "ellipsis",
+                  "whiteSpace": "nowrap"
+                 },
+                 "children": [],
+                 "componentEvents": {},
+                 "componentId": "certificate-0-sidebar1-div1-div2-dropdown1-trigger-container1-textblock1",
+                 "componentName": "TextBlock",
+                 "componentProps": {
+                  "fontSize": "text-sm",
+                  "tag": "p",
+                  "text": "{{ certificate.data.holder_name || '' }}"
+                 },
+                 "componentSlots": {},
+                 "mobileStyles": {},
+                 "tabletStyles": {},
+                 "visibilityCondition": "{{ typeof sidebarCollapsed === 'undefined' || !sidebarCollapsed }}"
+                }
+               ],
+               "classes": [
+                "hover:bg-surface-gray-2"
+               ],
+               "componentEvents": {},
+               "componentId": "certificate-0-sidebar1-div1-div2-dropdown1-trigger-container1",
+               "componentName": "container",
+               "componentProps": {},
+               "componentSlots": {},
+               "mobileStyles": {},
+               "originalElement": "div",
+               "tabletStyles": {}
+              }
+             ],
+             "slotName": "trigger"
             }
-           ],
-           "componentId": "certificate-0-sidebar1-div1-div2-container1",
-           "componentName": "container",
-           "originalElement": "div",
-           "visibilityCondition": "{{ typeof sidebarCollapsed === 'undefined' || !sidebarCollapsed }}"
+           }
           }
          ],
          "componentId": "certificate-0-sidebar1-div1-div2",
@@ -378,7 +433,7 @@
              "componentId": "certificate-0-container1-container1-container1-container1-textblock1",
              "componentName": "TextBlock",
              "componentProps": {
-              "fontSize": "text-p-xs",
+              "fontSize": "text-p-sm",
               "tag": "p",
               "text": "{{ certificate.data.rows_note }}"
              }
@@ -453,7 +508,7 @@
          "baseStyles": {
           "backgroundColor": "var(--surface-base)",
           "borderColor": "var(--outline-gray-2)",
-          "borderRadius": "0.5rem",
+          "borderRadius": "var(--radius-4)",
           "borderStyle": "solid",
           "borderWidth": "1px",
           "overflow": "hidden",
@@ -515,7 +570,7 @@
                "componentId": "certificate-0-container1-container1-container2-container1-container1-textblock3",
                "componentName": "TextBlock",
                "componentProps": {
-                "fontSize": "text-p-xs",
+                "fontSize": "text-p-sm",
                 "tag": "p",
                 "text": "On your loans this year"
                }
@@ -572,7 +627,7 @@
                "componentId": "certificate-0-container1-container1-container2-container1-container2-textblock3",
                "componentName": "TextBlock",
                "componentProps": {
-                "fontSize": "text-p-xs",
+                "fontSize": "text-p-sm",
                 "tag": "p",
                 "text": "Towards the amount borrowed"
                }
@@ -629,7 +684,7 @@
                "componentId": "certificate-0-container1-container1-container2-container1-container3-textblock3",
                "componentName": "TextBlock",
                "componentProps": {
-                "fontSize": "text-p-xs",
+                "fontSize": "text-p-sm",
                 "tag": "p",
                 "text": "Late fees and other charges"
                }
@@ -687,7 +742,7 @@
                "componentId": "certificate-0-container1-container1-container2-container1-container4-textblock3",
                "componentName": "TextBlock",
                "componentProps": {
-                "fontSize": "text-p-xs",
+                "fontSize": "text-p-sm",
                 "tag": "p",
                 "text": "Interest, principal and charges"
                }
@@ -711,7 +766,7 @@
          "baseStyles": {
           "backgroundColor": "var(--surface-base)",
           "borderColor": "var(--outline-gray-2)",
-          "borderRadius": "0.5rem",
+          "borderRadius": "var(--radius-4)",
           "borderStyle": "solid",
           "borderWidth": "1px",
           "display": "flex",
@@ -748,7 +803,7 @@
              "componentId": "certificate-0-container1-container1-container3-container1-textblock2",
              "componentName": "TextBlock",
              "componentProps": {
-              "fontSize": "text-p-xs",
+              "fontSize": "text-p-sm",
               "tag": "p",
               "text": "{{ certificate.data.accounts_note }}"
              }
@@ -780,7 +835,7 @@
                 {
                  "baseStyles": {
                   "--outline-gray-1": "transparent",
-                  "backgroundColor": "var(--surface-gray-2)",
+                  "backgroundColor": "var(--portal-action-soft, var(--surface-gray-2))",
                   "borderRadius": "var(--radius-4)",
                   "height": "36px",
                   "marginBottom": "10px"
@@ -790,7 +845,7 @@
                    "children": [
                     {
                      "baseStyles": {
-                      "color": "var(--ink-gray-5)"
+                      "color": "var(--portal-action-deep, var(--ink-gray-5))"
                      },
                      "children": [],
                      "componentId": "certificate-0-container1-container1-container3-container2-container1-list1-listheader1-listheadercell1-textblock1",
@@ -806,14 +861,10 @@
                    "componentName": "ListHeaderCell"
                   },
                   {
-                   "baseStyles": {
-                    "justifyContent": "flex-end",
-                    "textAlign": "right"
-                   },
                    "children": [
                     {
                      "baseStyles": {
-                      "color": "var(--ink-gray-5)"
+                      "color": "var(--portal-action-deep, var(--ink-gray-5))"
                      },
                      "children": [],
                      "componentId": "certificate-0-container1-container1-container3-container2-container1-list1-listheader1-listheadercell2-textblock1",
@@ -829,14 +880,10 @@
                    "componentName": "ListHeaderCell"
                   },
                   {
-                   "baseStyles": {
-                    "justifyContent": "flex-end",
-                    "textAlign": "right"
-                   },
                    "children": [
                     {
                      "baseStyles": {
-                      "color": "var(--ink-gray-5)"
+                      "color": "var(--portal-action-deep, var(--ink-gray-5))"
                      },
                      "children": [],
                      "componentId": "certificate-0-container1-container1-container3-container2-container1-list1-listheader1-listheadercell3-textblock1",
@@ -852,14 +899,10 @@
                    "componentName": "ListHeaderCell"
                   },
                   {
-                   "baseStyles": {
-                    "justifyContent": "flex-end",
-                    "textAlign": "right"
-                   },
                    "children": [
                     {
                      "baseStyles": {
-                      "color": "var(--ink-gray-5)"
+                      "color": "var(--portal-action-deep, var(--ink-gray-5))"
                      },
                      "children": [],
                      "componentId": "certificate-0-container1-container1-container3-container2-container1-list1-listheader1-listheadercell4-textblock1",
@@ -930,7 +973,7 @@
                          "componentId": "certificate-0-container1-container1-container3-container2-container1-list1-listrows1-default-listrow1-listcell1-textblock2",
                          "componentName": "TextBlock",
                          "componentProps": {
-                          "fontSize": "text-p-xs",
+                          "fontSize": "text-p-sm",
                           "tag": "p",
                           "text": "{{ item.value }}"
                          },
@@ -948,10 +991,7 @@
                        "tabletStyles": {}
                       },
                       {
-                       "baseStyles": {
-                        "justifyContent": "flex-end",
-                        "textAlign": "right"
-                       },
+                       "baseStyles": {},
                        "children": [
                         {
                          "baseStyles": {
@@ -981,10 +1021,7 @@
                        "tabletStyles": {}
                       },
                       {
-                       "baseStyles": {
-                        "justifyContent": "flex-end",
-                        "textAlign": "right"
-                       },
+                       "baseStyles": {},
                        "children": [
                         {
                          "baseStyles": {
@@ -1014,10 +1051,7 @@
                        "tabletStyles": {}
                       },
                       {
-                       "baseStyles": {
-                        "justifyContent": "flex-end",
-                        "textAlign": "right"
-                       },
+                       "baseStyles": {},
                        "children": [
                         {
                          "baseStyles": {
@@ -1113,7 +1147,7 @@
                "componentId": "certificate-0-container1-container1-container3-container2-container2-textblock1",
                "componentName": "TextBlock",
                "componentProps": {
-                "fontSize": "text-p-xs",
+                "fontSize": "text-p-sm",
                 "tag": "p",
                 "text": "{{ certificate.data.disclaimer }}"
                }
@@ -1165,18 +1199,32 @@
      "componentId": "certificate-0-container1",
      "componentName": "container",
      "originalElement": "div"
+    },
+    {
+     "baseStyles": {
+      "display": "none"
+     },
+     "children": [],
+     "componentId": "certificate-0-html1",
+     "componentName": "HTML",
+     "componentProps": {
+      "html": "{{ certificate.data.brand_style || '' }}"
+     }
     }
+   ],
+   "classes": [
+    "borrower-portal"
    ],
    "componentId": "certificate-0",
    "componentName": "div",
    "originalElement": "body"
   }
  ],
- "creation": "2026-09-24 00:54:37.096255",
+ "creation": "2026-09-24 13:59:27.353242",
  "doctype": "Studio Page",
  "frappe_app": "lending",
  "is_standard": 1,
- "modified": "2026-09-24 02:29:57.901704",
+ "modified": "2026-09-24 22:47:53.965283",
  "modified_by": "Administrator",
  "name": "interest_certificate",
  "owner": "Administrator",

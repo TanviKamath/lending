@@ -15,11 +15,13 @@ fields laid straight on the card under them.
 
 from lending.portal.studio_build.app import api_resource, page_script, upsert_page
 from lending.portal.studio_build.blocks import (
+	button,
 	card,
 	column,
 	container,
 	field_grid,
 	icon,
+	icon_tile,
 	muted,
 	reader,
 	record_list,
@@ -45,12 +47,16 @@ SECTIONS = (
 	("Documents", "documents", True),
 )
 
-# The tracker's geometry and its one colour: the circle, the space between it and the
-# name under it, and the green a done step and the line between two of them share.
+# The tracker's geometry: the circle, and the space between it and the name under it.
 STEP_NODE = "32px"
 STEP_NODE_MOBILE = "24px"
 STEP_LABEL_GAP = "8px"
-STEP_GREEN = "var(--surface-green-8)"
+# The same three looks as the dots of /track, so a borrower who tracked the file before
+# logging in reads its stage the same way after. See track_page.DOT_STATES.
+# A done step is a wash of the lender's primary colour, and green where none is set.
+STEP_DONE = ("var(--portal-primary-soft, var(--surface-green-2))", "var(--portal-primary-deep, var(--ink-green-7))")
+STEP_NOW = ("var(--portal-primary, var(--surface-gray-9))", "var(--portal-primary-ink, var(--surface-base))")
+STEP_LINE_DONE = "var(--portal-primary-line, var(--outline-green-3))"
 
 
 # --- the list -----------------------------------------------------------------------
@@ -93,7 +99,7 @@ def applications(read):
 def step_node():
 	"""The circle for one step, with its short name hung under it.
 
-	A done step is a green disc with a tick, the step in progress a green ring round a
+	A done step is a pale disc with a tick -- the lender's primary, or green -- the step in progress a dark disc round a
 	dot, and one still ahead an empty grey ring. All three are in the tree and the step's
 	`code` shows one, because a fill is a style and only props are evaluated.
 
@@ -115,18 +121,18 @@ def step_node():
 		"check",
 		size=16,
 		stroke=3,
-		styles=dict(ring, backgroundColor=STEP_GREEN, color="#fff"),
+		styles=dict(ring, backgroundColor=STEP_DONE[0], color=STEP_DONE[1]),
 		mobile=small,
 		visible="{{ dataItem.code === 'done' }}",
 	)
 	current = container(
-		[container(styles={"width": "10px", "height": "10px", "borderRadius": "9999px", "backgroundColor": STEP_GREEN})],
-		styles=dict(ring, border=f"2px solid {STEP_GREEN}", backgroundColor="var(--surface-white)"),
+		[container(styles={"width": "10px", "height": "10px", "borderRadius": "9999px", "backgroundColor": STEP_NOW[1]})],
+		styles=dict(ring, backgroundColor=STEP_NOW[0]),
 		mobile=small,
 		visible="{{ dataItem.code === 'current' }}",
 	)
 	pending = container(
-		styles=dict(ring, border="2px solid var(--outline-gray-2)", backgroundColor="var(--surface-white)"),
+		styles=dict(ring, border="1.5px solid var(--outline-gray-3)", backgroundColor="var(--surface-base)"),
 		mobile=small,
 		visible="{{ dataItem.code === 'pending' }}",
 	)
@@ -178,7 +184,7 @@ def tracker(read):
 	circles; the bottom padding is room for all of them.
 	"""
 	step = container(
-		[step_node(), step_line("ok", STEP_GREEN), step_line("plain", "var(--outline-gray-2)")],
+		[step_node(), step_line("ok", STEP_LINE_DONE), step_line("plain", "var(--outline-gray-2)")],
 		styles={"display": "contents"},
 	)
 
@@ -200,7 +206,7 @@ def tracker(read):
 	)
 
 
-def lead_card(read):
+def lead_card(read, **kwargs):
 	"""The product, the reference and where the file stands, above everything else."""
 	head = column(
 		[
@@ -221,6 +227,7 @@ def lead_card(read):
 		"",
 		"",
 		column([head, tracker(read), muted(read("headline")), muted(read("headline_note"))], gap="12px"),
+		**kwargs,
 	)
 
 
@@ -245,8 +252,48 @@ def preview(read):
 	return column([tabs, *panels], gap="16px")
 
 
+def has_application(read, value):
+	"""The condition that the payload's `has_application` is `value`, and not undefined."""
+	return "{{ %s === %s }}" % (read("has_application")[2:-2].strip(), value)
+
+
+def no_application(read):
+	"""A borrower who has not applied gets one thing to do, centred on a plain page.
+
+	Shown only on an explicit `false`, so the canvas -- where the source never resolves --
+	still draws the tracker and the preview for whoever is designing them.
+	"""
+	return column(
+		[
+			icon_tile("file", styles={"marginBottom": "10px"}),
+			text(
+				"No applications yet",
+				size="text-base",
+				styles={"fontWeight": "600", "color": "var(--ink-gray-8)"},
+			),
+			muted("Apply for a loan and you can follow it here.", styles={"textAlign": "center"}),
+			button(
+				"Create application",
+				script="open('/apply')",
+				props={"iconLeft": "lucide-plus"},
+				styles={"marginTop": "12px"},
+			),
+		],
+		gap="4px",
+		visible=has_application(read, "false"),
+		styles={"flex": "1 1 auto", "alignItems": "center", "justifyContent": "center", "padding": "64px 16px"},
+	)
+
+
 def detail_content(read):
-	return [lead_card(read), card("Application preview", read("preview_note"), preview(read))]
+	# `!== false` rather than `=== true`, so the canvas draws these and not the empty state.
+	applied = "{{ %s !== false }}" % read("has_application")[2:-2].strip()
+
+	return [
+		lead_card(read, visible=applied),
+		card("Application preview", read("preview_note"), preview(read), visible=applied),
+		no_application(read),
+	]
 
 
 def build_detail(title, route, params=None):

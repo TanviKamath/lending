@@ -57,7 +57,7 @@ def get_profile_page() -> dict:
 		records.extend(contact_rows(customer))
 		records.extend(address_rows(customer))
 
-	payload = shell_payload(_("Personal details"), _("Contact us"), customers, loans)
+	payload = shell_payload(_("Personal details"), _("Contact us"), loans)
 	payload.update(
 		{
 			"records": records,

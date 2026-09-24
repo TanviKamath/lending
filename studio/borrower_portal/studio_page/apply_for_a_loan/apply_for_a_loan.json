@@ -15,6 +15,7 @@
    "children": [
     {
      "baseStyles": {
+      "backgroundColor": "var(--surface-gray-1)",
       "display": "flex",
       "flexDirection": "column",
       "height": "100%",
@@ -25,27 +26,77 @@
       {
        "baseStyles": {
         "alignItems": "center",
-        "borderColor": "var(--outline-gray-2)",
+        "backgroundColor": "var(--portal-primary, var(--surface-base))",
+        "borderColor": "var(--portal-primary, var(--outline-gray-2))",
         "borderStyle": "solid",
         "borderWidth": "0px 0px 1px 0px",
         "display": "flex",
         "flexDirection": "row",
-        "gap": "8px",
-        "padding": "12px 20px",
+        "flexShrink": "0",
+        "gap": "12px",
+        "padding": "10px 32px",
         "width": "100%"
        },
        "children": [
         {
          "baseStyles": {
-          "fontWeight": "600"
+          "borderRadius": "8px",
+          "flexShrink": "0",
+          "height": "36px",
+          "overflow": "hidden",
+          "width": "36px"
+         },
+         "children": [],
+         "componentId": "apply-0-container1-container1-imageview1",
+         "componentName": "ImageView",
+         "componentProps": {
+          "alt": "",
+          "image": "{{ apply.data.brand_logo }}",
+          "shape": "square",
+          "size": "lg"
+         },
+         "visibilityCondition": "{{ apply.data.brand_logo }}"
+        },
+        {
+         "baseStyles": {
+          "alignItems": "center",
+          "backgroundColor": "var(--portal-primary-ink, var(--surface-gray-2))",
+          "borderRadius": "8px",
+          "color": "var(--portal-primary, var(--ink-gray-8))",
+          "display": "flex",
+          "flexShrink": "0",
+          "fontWeight": "600",
+          "height": "36px",
+          "justifyContent": "center",
+          "textTransform": "uppercase",
+          "width": "36px"
          },
          "children": [],
          "componentId": "apply-0-container1-container1-textblock1",
          "componentName": "TextBlock",
          "componentProps": {
           "fontSize": "text-lg",
+          "tag": "p",
+          "text": "{{ (apply.data.brand_name || '').charAt(0) }}"
+         },
+         "visibilityCondition": "{{ apply.data.show_wordmark }}"
+        },
+        {
+         "baseStyles": {
+          "color": "var(--ink-gray-9)",
+          "fontWeight": "600",
+          "whiteSpace": "nowrap"
+         },
+         "children": [],
+         "componentId": "apply-0-container1-container1-textblock2",
+         "componentName": "TextBlock",
+         "componentProps": {
+          "fontSize": "text-lg",
           "tag": "span",
           "text": "{{ apply.data.brand_name }}"
+         },
+         "mobileStyles": {
+          "display": "none"
          }
         },
         {
@@ -63,14 +114,14 @@
           "click": {
            "action": "Run Script",
            "event": "click",
-           "script": "window.location.href = '/track'"
+           "script": "open('/track')"
           }
          },
          "componentId": "apply-0-container1-container1-button1",
          "componentName": "Button",
          "componentProps": {
           "label": "Track an application",
-          "size": "sm",
+          "size": "md",
           "variant": "ghost"
          }
         },
@@ -87,23 +138,75 @@
          "componentName": "Button",
          "componentProps": {
           "label": "Log in",
-          "size": "sm",
-          "variant": "ghost"
+          "size": "md",
+          "variant": "solid"
+         },
+         "componentSlots": {
+          "default": {
+           "slotContent": [
+            {
+             "baseStyles": {},
+             "children": [],
+             "componentEvents": {},
+             "componentId": "apply-0-container1-container1-button2-default-textblock1",
+             "componentName": "TextBlock",
+             "componentProps": {
+              "fontSize": "text-base",
+              "tag": "span",
+              "text": "Log in"
+             },
+             "componentSlots": {},
+             "mobileStyles": {},
+             "tabletStyles": {}
+            }
+           ],
+           "slotName": "default"
+          },
+          "prefix": {
+           "slotContent": [
+            {
+             "baseStyles": {
+              "alignItems": "center",
+              "display": "flex",
+              "flex": "0 0 auto"
+             },
+             "children": [],
+             "componentEvents": {},
+             "componentId": "apply-0-container1-container1-button2-prefix-html1",
+             "componentName": "HTML",
+             "componentProps": {
+              "html": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2\"/><circle cx=\"12\" cy=\"7\" r=\"4\"/></svg>"
+             },
+             "componentSlots": {},
+             "mobileStyles": {},
+             "tabletStyles": {}
+            }
+           ],
+           "slotName": "prefix"
+          }
          }
         }
        ],
+       "classes": [
+        "portal-header"
+       ],
        "componentId": "apply-0-container1-container1",
        "componentName": "container",
+       "mobileStyles": {
+        "gap": "4px",
+        "padding": "12px 16px"
+       },
        "originalElement": "div"
       },
       {
        "baseStyles": {
         "display": "flex",
+        "flex": "1 0 auto",
         "flexDirection": "column",
         "gap": "16px",
         "margin": "0 auto",
-        "maxWidth": "720px",
-        "padding": "24px 20px",
+        "maxWidth": "1080px",
+        "padding": "clamp(16px, 3.6vh, 40px) 20px",
         "width": "100%"
        },
        "children": [
@@ -111,7 +214,10 @@
          "baseStyles": {
           "display": "flex",
           "flexDirection": "column",
-          "gap": "6px"
+          "gap": "6px",
+          "margin": "0 auto",
+          "maxWidth": "720px",
+          "width": "100%"
          },
          "children": [
           {
@@ -125,15 +231,15 @@
           },
           {
            "baseStyles": {
-            "color": "var(--ink-gray-6)"
+            "color": "var(--ink-gray-7)"
            },
            "children": [],
            "componentId": "apply-0-container1-container2-container1-textblock1",
            "componentName": "TextBlock",
            "componentProps": {
-            "fontSize": "text-p-xs",
+            "fontSize": "text-sm",
             "tag": "p",
-            "text": "{{ ['Who is borrowing', 'What you need', 'Your mobile number', 'Your details', 'Your offer', 'Your account'][step - 2] || '' }}"
+            "text": "{{ 'Step ' + (step - 1) + ' of 6 \u00b7 ' + (['Who is borrowing', 'What you need', 'Your mobile number', 'Your details', 'Your offer', 'Your account'][step - 2] || '') }}"
            }
           }
          ],
@@ -146,83 +252,254 @@
          "baseStyles": {
           "display": "flex",
           "flexDirection": "column",
-          "gap": "16px"
+          "gap": "clamp(14px, 2.6vh, 28px)",
+          "marginBottom": "auto",
+          "marginTop": "auto"
          },
          "children": [
           {
            "baseStyles": {
-            "fontWeight": "600"
-           },
-           "children": [],
-           "componentId": "apply-0-container1-container2-container2-textblock1",
-           "componentName": "TextBlock",
-           "componentProps": {
-            "fontSize": "text-6xl",
-            "tag": "h1",
-            "text": "{{ apply.data.heading }}"
-           }
-          },
-          {
-           "baseStyles": {
-            "color": "var(--ink-gray-6)"
-           },
-           "children": [],
-           "componentId": "apply-0-container1-container2-container2-textblock2",
-           "componentName": "TextBlock",
-           "componentProps": {
-            "fontSize": "text-p-xs",
-            "tag": "p",
-            "text": "{{ apply.data.intro }}"
-           }
-          },
-          {
-           "baseStyles": {
             "display": "flex",
-            "flexDirection": "row",
-            "flexWrap": "wrap",
-            "gap": "16px"
+            "flexDirection": "column",
+            "gap": "clamp(14px, 2.6vh, 26px)"
            },
            "children": [
             {
              "baseStyles": {
-              "color": "var(--ink-gray-6)"
+              "alignSelf": "flex-start"
              },
              "children": [],
-             "componentId": "apply-0-container1-container2-container2-repeater1-textblock1",
-             "componentName": "TextBlock",
+             "componentId": "apply-0-container1-container2-container2-container1-badge1",
+             "componentName": "Badge",
              "componentProps": {
-              "fontSize": "text-p-xs",
-              "tag": "p",
-              "text": "{{ dataItem.label }}"
+              "label": "{{ apply.data.tagline }}",
+              "size": "lg",
+              "theme": "gray",
+              "variant": "subtle"
              }
-            }
-           ],
-           "componentId": "apply-0-container1-container2-container2-repeater1",
-           "componentName": "Repeater",
-           "componentProps": {
-            "data": "{{ apply.data.trust_points }}",
-            "dataKey": "label",
-            "emptyStateMessage": ""
-           }
-          },
-          {
-           "baseStyles": {
-            "backgroundColor": "var(--surface-base)",
-            "borderColor": "var(--outline-gray-2)",
-            "borderRadius": "0.5rem",
-            "borderStyle": "solid",
-            "borderWidth": "1px",
-            "display": "flex",
-            "flexDirection": "column",
-            "gap": "12px",
-            "padding": "16px"
-           },
-           "children": [
+            },
             {
              "baseStyles": {
               "display": "flex",
               "flexDirection": "column",
-              "gap": "2px"
+              "gap": "clamp(10px, 2vh, 20px)"
+             },
+             "children": [
+              {
+               "baseStyles": {
+                "color": "var(--ink-gray-9)",
+                "fontSize": "clamp(32px, 5.6vh, 48px)",
+                "fontWeight": "700",
+                "letterSpacing": "-0.02em",
+                "lineHeight": "1.08",
+                "whiteSpace": "pre-line"
+               },
+               "children": [],
+               "componentId": "apply-0-container1-container2-container2-container1-container1-textblock1",
+               "componentName": "TextBlock",
+               "componentProps": {
+                "fontSize": "text-5xl",
+                "tag": "h1",
+                "text": "{{ apply.data.heading }}"
+               },
+               "mobileStyles": {
+                "fontSize": "2.25rem"
+               }
+              },
+              {
+               "baseStyles": {
+                "color": "var(--ink-gray-6)",
+                "lineHeight": "1.5",
+                "maxWidth": "640px"
+               },
+               "children": [],
+               "componentId": "apply-0-container1-container2-container2-container1-container1-textblock2",
+               "componentName": "TextBlock",
+               "componentProps": {
+                "fontSize": "text-lg",
+                "tag": "p",
+                "text": "{{ apply.data.intro }}"
+               }
+              }
+             ],
+             "componentId": "apply-0-container1-container2-container2-container1-container1",
+             "componentName": "container",
+             "originalElement": "div"
+            },
+            {
+             "baseStyles": {
+              "columnGap": "36px",
+              "display": "flex",
+              "flexDirection": "row",
+              "flexWrap": "wrap",
+              "rowGap": "16px"
+             },
+             "children": [
+              {
+               "baseStyles": {
+                "alignItems": "center",
+                "display": "flex",
+                "flexDirection": "row",
+                "gap": "16px"
+               },
+               "children": [
+                {
+                 "baseStyles": {
+                  "alignItems": "center",
+                  "backgroundColor": "var(--surface-gray-2)",
+                  "borderRadius": "var(--radius-5)",
+                  "color": "var(--ink-gray-7)",
+                  "display": "flex",
+                  "flex": "0 0 auto",
+                  "height": "44px",
+                  "justifyContent": "center",
+                  "width": "44px"
+                 },
+                 "children": [],
+                 "componentId": "apply-0-container1-container2-container2-container1-repeater1-container1-html1",
+                 "componentName": "HTML",
+                 "componentProps": {
+                  "html": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M5 21v-6\"/><path d=\"M10 21v-9\"/><path d=\"M15 21V9\"/><path d=\"M20 21V5\"/></svg>"
+                 },
+                 "visibilityCondition": "{{ dataItem.icon === 'chart-no-axes' }}"
+                },
+                {
+                 "baseStyles": {
+                  "alignItems": "center",
+                  "backgroundColor": "var(--surface-gray-2)",
+                  "borderRadius": "var(--radius-5)",
+                  "color": "var(--ink-gray-7)",
+                  "display": "flex",
+                  "flex": "0 0 auto",
+                  "height": "44px",
+                  "justifyContent": "center",
+                  "width": "44px"
+                 },
+                 "children": [],
+                 "componentId": "apply-0-container1-container2-container2-container1-repeater1-container1-html2",
+                 "componentName": "HTML",
+                 "componentProps": {
+                  "html": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z\"/></svg>"
+                 },
+                 "visibilityCondition": "{{ dataItem.icon === 'shield' }}"
+                },
+                {
+                 "baseStyles": {
+                  "alignItems": "center",
+                  "backgroundColor": "var(--surface-gray-2)",
+                  "borderRadius": "var(--radius-5)",
+                  "color": "var(--ink-gray-7)",
+                  "display": "flex",
+                  "flex": "0 0 auto",
+                  "height": "44px",
+                  "justifyContent": "center",
+                  "width": "44px"
+                 },
+                 "children": [],
+                 "componentId": "apply-0-container1-container2-container2-container1-repeater1-container1-html3",
+                 "componentName": "HTML",
+                 "componentProps": {
+                  "html": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z\"/><path d=\"M14 8H8\"/><path d=\"M16 12H8\"/><path d=\"M13 16H8\"/></svg>"
+                 },
+                 "visibilityCondition": "{{ dataItem.icon === 'receipt-text' }}"
+                },
+                {
+                 "baseStyles": {
+                  "display": "flex",
+                  "flexDirection": "column",
+                  "gap": "0px"
+                 },
+                 "children": [
+                  {
+                   "baseStyles": {
+                    "color": "var(--ink-gray-8)"
+                   },
+                   "children": [],
+                   "componentId": "apply-0-container1-container2-container2-container1-repeater1-container1-container1-textblock1",
+                   "componentName": "TextBlock",
+                   "componentProps": {
+                    "fontSize": "text-base",
+                    "tag": "p",
+                    "text": "{{ dataItem.title }}"
+                   }
+                  },
+                  {
+                   "baseStyles": {
+                    "color": "var(--ink-gray-7)"
+                   },
+                   "children": [],
+                   "componentId": "apply-0-container1-container2-container2-container1-repeater1-container1-container1-textblock2",
+                   "componentName": "TextBlock",
+                   "componentProps": {
+                    "fontSize": "text-base",
+                    "tag": "p",
+                    "text": "{{ dataItem.note }}"
+                   }
+                  }
+                 ],
+                 "componentId": "apply-0-container1-container2-container2-container1-repeater1-container1-container1",
+                 "componentName": "container",
+                 "originalElement": "div"
+                }
+               ],
+               "componentId": "apply-0-container1-container2-container2-container1-repeater1-container1",
+               "componentName": "container",
+               "originalElement": "div"
+              }
+             ],
+             "componentId": "apply-0-container1-container2-container2-container1-repeater1",
+             "componentName": "Repeater",
+             "componentProps": {
+              "data": "{{ apply.data.trust_points }}",
+              "dataKey": "title",
+              "emptyStateMessage": ""
+             }
+            }
+           ],
+           "componentId": "apply-0-container1-container2-container2-container1",
+           "componentName": "container",
+           "originalElement": "div"
+          },
+          {
+           "baseStyles": {
+            "alignItems": "center",
+            "backgroundColor": "var(--surface-base)",
+            "borderColor": "var(--outline-gray-2)",
+            "borderRadius": "var(--radius-6)",
+            "borderStyle": "solid",
+            "borderWidth": "1px",
+            "display": "flex",
+            "flexDirection": "row",
+            "flexWrap": "wrap",
+            "gap": "20px",
+            "padding": "clamp(16px, 2.4vh, 24px) 24px"
+           },
+           "children": [
+            {
+             "baseStyles": {
+              "alignItems": "center",
+              "backgroundColor": "var(--surface-gray-2)",
+              "borderRadius": "var(--radius-5)",
+              "color": "var(--ink-gray-7)",
+              "display": "flex",
+              "flex": "0 0 auto",
+              "height": "48px",
+              "justifyContent": "center",
+              "width": "48px"
+             },
+             "children": [],
+             "componentId": "apply-0-container1-container2-container2-container2-html1",
+             "componentName": "HTML",
+             "componentProps": {
+              "html": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z\"/><path d=\"M14 2v5a1 1 0 0 0 1 1h5\"/><path d=\"M10 9H8\"/><path d=\"M16 13H8\"/><path d=\"M16 17H8\"/></svg>"
+             }
+            },
+            {
+             "baseStyles": {
+              "display": "flex",
+              "flex": "1 1 240px",
+              "flexDirection": "column",
+              "gap": "4px"
              },
              "children": [
               {
@@ -230,10 +507,10 @@
                 "fontWeight": "600"
                },
                "children": [],
-               "componentId": "apply-0-container1-container2-container2-container1-container1-textblock1",
+               "componentId": "apply-0-container1-container2-container2-container2-container1-textblock1",
                "componentName": "TextBlock",
                "componentProps": {
-                "fontSize": "text-lg",
+                "fontSize": "text-xl",
                 "tag": "h2",
                 "text": "{{ apply.data.start_title }}"
                }
@@ -243,16 +520,16 @@
                 "color": "var(--ink-gray-6)"
                },
                "children": [],
-               "componentId": "apply-0-container1-container2-container2-container1-container1-textblock2",
+               "componentId": "apply-0-container1-container2-container2-container2-container1-textblock2",
                "componentName": "TextBlock",
                "componentProps": {
-                "fontSize": "text-p-xs",
+                "fontSize": "text-base",
                 "tag": "p",
                 "text": "{{ apply.data.start_note }}"
                }
               }
              ],
-             "componentId": "apply-0-container1-container2-container2-container1-container1",
+             "componentId": "apply-0-container1-container2-container2-container2-container1",
              "componentName": "container",
              "originalElement": "div"
             },
@@ -265,51 +542,101 @@
                "script": "go(2)"
               }
              },
-             "componentId": "apply-0-container1-container2-container2-container1-button1",
+             "componentId": "apply-0-container1-container2-container2-container2-button1",
              "componentName": "Button",
              "componentProps": {
               "label": "Apply now",
-              "size": "sm",
+              "size": "lg",
               "variant": "solid"
+             },
+             "componentSlots": {
+              "default": {
+               "slotContent": [
+                {
+                 "baseStyles": {
+                  "fontWeight": "500"
+                 },
+                 "children": [],
+                 "componentEvents": {},
+                 "componentId": "apply-0-container1-container2-container2-container2-button1-default-textblock1",
+                 "componentName": "TextBlock",
+                 "componentProps": {
+                  "fontSize": "text-lg",
+                  "tag": "span",
+                  "text": "Apply now"
+                 },
+                 "componentSlots": {},
+                 "mobileStyles": {},
+                 "tabletStyles": {}
+                }
+               ],
+               "slotName": "default"
+              },
+              "suffix": {
+               "slotContent": [
+                {
+                 "baseStyles": {
+                  "alignItems": "center",
+                  "display": "flex",
+                  "flex": "0 0 auto"
+                 },
+                 "children": [],
+                 "componentEvents": {},
+                 "componentId": "apply-0-container1-container2-container2-container2-button1-suffix-html1",
+                 "componentName": "HTML",
+                 "componentProps": {
+                  "html": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M5 12h14\"/><path d=\"m12 5 7 7-7 7\"/></svg>"
+                 },
+                 "componentSlots": {},
+                 "mobileStyles": {},
+                 "tabletStyles": {}
+                }
+               ],
+               "slotName": "suffix"
+              }
+             },
+             "mobileStyles": {
+              "width": "100%"
              }
             }
            ],
-           "componentId": "apply-0-container1-container2-container2-container1",
+           "componentId": "apply-0-container1-container2-container2-container2",
            "componentName": "container",
+           "mobileStyles": {
+            "padding": "20px"
+           },
            "originalElement": "div"
+          },
+          {
+           "children": [],
+           "componentId": "apply-0-container1-container2-container2-divider1",
+           "componentName": "Divider"
           },
           {
            "baseStyles": {
             "display": "flex",
-            "flexDirection": "row",
-            "gap": "12px"
+            "flexDirection": "column",
+            "gap": "clamp(12px, 1.8vh, 20px)"
            },
            "children": [
             {
              "baseStyles": {
-              "backgroundColor": "var(--surface-base)",
-              "borderColor": "var(--outline-gray-2)",
-              "borderRadius": "0.5rem",
-              "borderStyle": "solid",
-              "borderWidth": "1px",
               "display": "flex",
-              "flex": "1",
               "flexDirection": "column",
-              "gap": "2px",
-              "padding": "16px"
+              "gap": "2px"
              },
              "children": [
               {
                "baseStyles": {
-                "fontWeight": "600"
+                "fontWeight": "700"
                },
                "children": [],
-               "componentId": "apply-0-container1-container2-container2-repeater2-container1-textblock1",
+               "componentId": "apply-0-container1-container2-container2-container3-container1-textblock1",
                "componentName": "TextBlock",
                "componentProps": {
-                "fontSize": "text-base",
-                "tag": "p",
-                "text": "{{ dataItem.step }}. {{ dataItem.title }}"
+                "fontSize": "text-xl",
+                "tag": "h2",
+                "text": "{{ apply.data.how_title }}"
                }
               },
               {
@@ -317,30 +644,183 @@
                 "color": "var(--ink-gray-6)"
                },
                "children": [],
-               "componentId": "apply-0-container1-container2-container2-repeater2-container1-textblock2",
+               "componentId": "apply-0-container1-container2-container2-container3-container1-textblock2",
                "componentName": "TextBlock",
                "componentProps": {
-                "fontSize": "text-p-xs",
+                "fontSize": "text-base",
                 "tag": "p",
-                "text": "{{ dataItem.note }}"
+                "text": "{{ apply.data.how_note }}"
                }
               }
              ],
-             "componentId": "apply-0-container1-container2-container2-repeater2-container1",
+             "componentId": "apply-0-container1-container2-container2-container3-container1",
              "componentName": "container",
              "originalElement": "div"
+            },
+            {
+             "baseStyles": {
+              "display": "flex",
+              "flexDirection": "row",
+              "flexWrap": "wrap",
+              "gap": "16px"
+             },
+             "children": [
+              {
+               "baseStyles": {
+                "alignItems": "start",
+                "backgroundColor": "var(--surface-base)",
+                "borderColor": "var(--outline-gray-2)",
+                "borderRadius": "var(--radius-6)",
+                "borderStyle": "solid",
+                "borderWidth": "1px",
+                "display": "flex",
+                "flex": "1 1 240px",
+                "flexDirection": "row",
+                "gap": "16px",
+                "padding": "clamp(14px, 2.2vh, 22px) 16px"
+               },
+               "children": [
+                {
+                 "baseStyles": {
+                  "alignItems": "center",
+                  "backgroundColor": "var(--surface-gray-2)",
+                  "borderRadius": "9999px",
+                  "color": "var(--ink-gray-8)",
+                  "display": "flex",
+                  "flexShrink": "0",
+                  "fontWeight": "500",
+                  "height": "32px",
+                  "justifyContent": "center",
+                  "width": "32px"
+                 },
+                 "children": [],
+                 "componentId": "apply-0-container1-container2-container2-container3-repeater1-container1-textblock1",
+                 "componentName": "TextBlock",
+                 "componentProps": {
+                  "fontSize": "text-sm",
+                  "tag": "p",
+                  "text": "{{ dataItem.step }}"
+                 }
+                },
+                {
+                 "baseStyles": {
+                  "alignItems": "center",
+                  "backgroundColor": "transparent",
+                  "borderRadius": "var(--radius-5)",
+                  "color": "var(--ink-gray-8)",
+                  "display": "flex",
+                  "flex": "0 0 auto",
+                  "height": "32px",
+                  "justifyContent": "center",
+                  "width": "32px"
+                 },
+                 "children": [],
+                 "componentId": "apply-0-container1-container2-container2-container3-repeater1-container1-html1",
+                 "componentName": "HTML",
+                 "componentProps": {
+                  "html": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z\"/><path d=\"M14 2v5a1 1 0 0 0 1 1h5\"/><path d=\"M10 9H8\"/><path d=\"M16 13H8\"/><path d=\"M16 17H8\"/></svg>"
+                 },
+                 "visibilityCondition": "{{ dataItem.icon === 'file-text' }}"
+                },
+                {
+                 "baseStyles": {
+                  "alignItems": "center",
+                  "backgroundColor": "transparent",
+                  "borderRadius": "var(--radius-5)",
+                  "color": "var(--ink-gray-8)",
+                  "display": "flex",
+                  "flex": "0 0 auto",
+                  "height": "32px",
+                  "justifyContent": "center",
+                  "width": "32px"
+                 },
+                 "children": [],
+                 "componentId": "apply-0-container1-container2-container2-container3-repeater1-container1-html2",
+                 "componentName": "HTML",
+                 "componentProps": {
+                  "html": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m21 21-4.34-4.34\"/><circle cx=\"11\" cy=\"11\" r=\"8\"/></svg>"
+                 },
+                 "visibilityCondition": "{{ dataItem.icon === 'search' }}"
+                },
+                {
+                 "baseStyles": {
+                  "alignItems": "center",
+                  "backgroundColor": "transparent",
+                  "borderRadius": "var(--radius-5)",
+                  "color": "var(--ink-gray-8)",
+                  "display": "flex",
+                  "flex": "0 0 auto",
+                  "height": "32px",
+                  "justifyContent": "center",
+                  "width": "32px"
+                 },
+                 "children": [],
+                 "componentId": "apply-0-container1-container2-container2-container3-repeater1-container1-html3",
+                 "componentName": "HTML",
+                 "componentProps": {
+                  "html": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><line x1=\"19\" x2=\"5\" y1=\"5\" y2=\"19\"/><circle cx=\"6.5\" cy=\"6.5\" r=\"2.5\"/><circle cx=\"17.5\" cy=\"17.5\" r=\"2.5\"/></svg>"
+                 },
+                 "visibilityCondition": "{{ dataItem.icon === 'percent' }}"
+                },
+                {
+                 "baseStyles": {
+                  "display": "flex",
+                  "flex": "1",
+                  "flexDirection": "column",
+                  "gap": "6px",
+                  "minWidth": "0px"
+                 },
+                 "children": [
+                  {
+                   "baseStyles": {
+                    "fontWeight": "600"
+                   },
+                   "children": [],
+                   "componentId": "apply-0-container1-container2-container2-container3-repeater1-container1-container1-textblock1",
+                   "componentName": "TextBlock",
+                   "componentProps": {
+                    "fontSize": "text-base",
+                    "tag": "p",
+                    "text": "{{ dataItem.title }}"
+                   }
+                  },
+                  {
+                   "baseStyles": {
+                    "color": "var(--ink-gray-6)",
+                    "lineHeight": "1.5"
+                   },
+                   "children": [],
+                   "componentId": "apply-0-container1-container2-container2-container3-repeater1-container1-container1-textblock2",
+                   "componentName": "TextBlock",
+                   "componentProps": {
+                    "fontSize": "text-sm",
+                    "tag": "p",
+                    "text": "{{ dataItem.note }}"
+                   }
+                  }
+                 ],
+                 "componentId": "apply-0-container1-container2-container2-container3-repeater1-container1-container1",
+                 "componentName": "container",
+                 "originalElement": "div"
+                }
+               ],
+               "componentId": "apply-0-container1-container2-container2-container3-repeater1-container1",
+               "componentName": "container",
+               "originalElement": "div"
+              }
+             ],
+             "componentId": "apply-0-container1-container2-container2-container3-repeater1",
+             "componentName": "Repeater",
+             "componentProps": {
+              "data": "{{ apply.data.benefits }}",
+              "dataKey": "step",
+              "emptyStateMessage": ""
+             }
             }
            ],
-           "componentId": "apply-0-container1-container2-container2-repeater2",
-           "componentName": "Repeater",
-           "componentProps": {
-            "data": "{{ apply.data.benefits }}",
-            "dataKey": "step",
-            "emptyStateMessage": ""
-           },
-           "mobileStyles": {
-            "flexDirection": "column"
-           }
+           "componentId": "apply-0-container1-container2-container2-container3",
+           "componentName": "container",
+           "originalElement": "div"
           }
          ],
          "componentId": "apply-0-container1-container2-container2",
@@ -352,13 +832,16 @@
          "baseStyles": {
           "backgroundColor": "var(--surface-base)",
           "borderColor": "var(--outline-gray-2)",
-          "borderRadius": "0.5rem",
+          "borderRadius": "var(--radius-4)",
           "borderStyle": "solid",
           "borderWidth": "1px",
           "display": "flex",
           "flexDirection": "column",
           "gap": "16px",
-          "padding": "16px"
+          "margin": "0 auto",
+          "maxWidth": "720px",
+          "padding": "16px",
+          "width": "100%"
          },
          "children": [
           {
@@ -389,7 +872,7 @@
              "componentId": "apply-0-container1-container2-container3-container1-textblock2",
              "componentName": "TextBlock",
              "componentProps": {
-              "fontSize": "text-p-xs",
+              "fontSize": "text-p-sm",
               "tag": "p",
               "text": "{{ apply.data.type_note }}"
              }
@@ -411,76 +894,168 @@
              "baseStyles": {
               "backgroundColor": "var(--surface-base)",
               "borderColor": "var(--outline-gray-2)",
-              "borderRadius": "0.5rem",
+              "borderRadius": "var(--radius-4)",
               "borderStyle": "solid",
               "borderWidth": "1px",
               "cursor": "pointer",
-              "display": "flex",
               "flex": "1",
-              "flexDirection": "column",
-              "gap": "2px",
-              "padding": "16px"
+              "padding": "16px",
+              "position": "relative",
+              "userSelect": "none"
              },
              "children": [
               {
                "baseStyles": {
-                "alignItems": "center",
+                "backgroundColor": "var(--surface-gray-1)",
+                "border": "2px solid var(--ink-gray-9)",
+                "borderRadius": "calc(var(--radius-4) + 1px)",
+                "inset": "-1px",
+                "pointerEvents": "none",
+                "position": "absolute"
+               },
+               "children": [],
+               "componentId": "apply-0-container1-container2-container3-container2-container1-container1",
+               "componentName": "container",
+               "originalElement": "div",
+               "visibilityCondition": "{{ applicantType === 'Individual' }}"
+              },
+              {
+               "baseStyles": {
+                "alignItems": "start",
                 "display": "flex",
                 "flexDirection": "row",
-                "gap": "6px"
+                "gap": "12px",
+                "position": "relative",
+                "width": "100%"
                },
                "children": [
                 {
                  "baseStyles": {
-                  "fontWeight": "600"
+                  "alignItems": "center",
+                  "backgroundColor": "var(--surface-gray-2)",
+                  "borderRadius": "var(--radius-5)",
+                  "color": "var(--ink-gray-7)",
+                  "display": "flex",
+                  "flex": "0 0 auto",
+                  "height": "40px",
+                  "justifyContent": "center",
+                  "width": "40px"
                  },
                  "children": [],
-                 "componentId": "apply-0-container1-container2-container3-container2-container1-container1-textblock1",
-                 "componentName": "TextBlock",
+                 "componentId": "apply-0-container1-container2-container3-container2-container1-container2-html1",
+                 "componentName": "HTML",
                  "componentProps": {
-                  "fontSize": "text-base",
-                  "tag": "p",
-                  "text": "Person"
+                  "html": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2\"/><circle cx=\"12\" cy=\"7\" r=\"4\"/></svg>"
                  }
+                },
+                {
+                 "baseStyles": {
+                  "display": "flex",
+                  "flexDirection": "column",
+                  "gap": "2px"
+                 },
+                 "children": [
+                  {
+                   "baseStyles": {
+                    "fontWeight": "600"
+                   },
+                   "children": [],
+                   "componentId": "apply-0-container1-container2-container3-container2-container1-container2-container1-textblock1",
+                   "componentName": "TextBlock",
+                   "componentProps": {
+                    "fontSize": "text-base",
+                    "tag": "p",
+                    "text": "Person"
+                   }
+                  },
+                  {
+                   "baseStyles": {
+                    "color": "var(--ink-gray-6)"
+                   },
+                   "children": [],
+                   "componentId": "apply-0-container1-container2-container3-container2-container1-container2-container1-textblock2",
+                   "componentName": "TextBlock",
+                   "componentProps": {
+                    "fontSize": "text-p-sm",
+                    "tag": "p",
+                    "text": "I am borrowing in my own name"
+                   }
+                  }
+                 ],
+                 "componentId": "apply-0-container1-container2-container3-container2-container1-container2-container1",
+                 "componentName": "container",
+                 "originalElement": "div"
                 },
                 {
                  "baseStyles": {
                   "flex": "1 1 auto"
                  },
                  "children": [],
-                 "componentId": "apply-0-container1-container2-container3-container2-container1-container1-container1",
+                 "componentId": "apply-0-container1-container2-container3-container2-container1-container2-container2",
                  "componentName": "container",
                  "originalElement": "div"
                 },
                 {
-                 "children": [],
-                 "componentId": "apply-0-container1-container2-container3-container2-container1-container1-badge1",
-                 "componentName": "Badge",
-                 "componentProps": {
-                  "label": "Chosen",
-                  "size": "sm",
-                  "theme": "green"
+                 "baseStyles": {
+                  "border": "1.5px solid var(--outline-gray-3)",
+                  "borderRadius": "9999px",
+                  "flexShrink": "0",
+                  "height": "20px",
+                  "justifyContent": "center",
+                  "width": "20px"
                  },
+                 "children": [],
+                 "componentId": "apply-0-container1-container2-container3-container2-container1-container2-container3",
+                 "componentName": "container",
+                 "originalElement": "div",
+                 "visibilityCondition": "{{ !(applicantType === 'Individual') }}"
+                },
+                {
+                 "baseStyles": {
+                  "alignItems": "center",
+                  "backgroundColor": "var(--ink-gray-9)",
+                  "borderRadius": "9999px",
+                  "color": "var(--surface-base)",
+                  "display": "flex",
+                  "flexDirection": "row",
+                  "flexShrink": "0",
+                  "gap": "8px",
+                  "height": "20px",
+                  "justifyContent": "center",
+                  "width": "20px"
+                 },
+                 "children": [
+                  {
+                   "baseStyles": {
+                    "alignItems": "center",
+                    "display": "flex",
+                    "flex": "0 0 auto"
+                   },
+                   "children": [],
+                   "componentId": "apply-0-container1-container2-container3-container2-container1-container2-container4-html1",
+                   "componentName": "HTML",
+                   "componentProps": {
+                    "html": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M20 6 9 17l-5-5\"/></svg>"
+                   }
+                  }
+                 ],
+                 "componentId": "apply-0-container1-container2-container3-container2-container1-container2-container4",
+                 "componentName": "container",
+                 "originalElement": "div",
                  "visibilityCondition": "{{ applicantType === 'Individual' }}"
                 }
                ],
-               "componentId": "apply-0-container1-container2-container3-container2-container1-container1",
+               "componentId": "apply-0-container1-container2-container3-container2-container1-container2",
                "componentName": "container",
                "originalElement": "div"
-              },
-              {
-               "baseStyles": {
-                "color": "var(--ink-gray-6)"
-               },
-               "children": [],
-               "componentId": "apply-0-container1-container2-container3-container2-container1-textblock1",
-               "componentName": "TextBlock",
-               "componentProps": {
-                "fontSize": "text-p-xs",
-                "tag": "p",
-                "text": "I am borrowing in my own name"
-               }
               }
+             ],
+             "classes": [
+              "transition",
+              "duration-150",
+              "hover:!border-outline-gray-4",
+              "hover:shadow-sm",
+              "active:scale-[0.98]"
              ],
              "componentEvents": {
               "click": {
@@ -497,76 +1072,168 @@
              "baseStyles": {
               "backgroundColor": "var(--surface-base)",
               "borderColor": "var(--outline-gray-2)",
-              "borderRadius": "0.5rem",
+              "borderRadius": "var(--radius-4)",
               "borderStyle": "solid",
               "borderWidth": "1px",
               "cursor": "pointer",
-              "display": "flex",
               "flex": "1",
-              "flexDirection": "column",
-              "gap": "2px",
-              "padding": "16px"
+              "padding": "16px",
+              "position": "relative",
+              "userSelect": "none"
              },
              "children": [
               {
                "baseStyles": {
-                "alignItems": "center",
+                "backgroundColor": "var(--surface-gray-1)",
+                "border": "2px solid var(--ink-gray-9)",
+                "borderRadius": "calc(var(--radius-4) + 1px)",
+                "inset": "-1px",
+                "pointerEvents": "none",
+                "position": "absolute"
+               },
+               "children": [],
+               "componentId": "apply-0-container1-container2-container3-container2-container2-container1",
+               "componentName": "container",
+               "originalElement": "div",
+               "visibilityCondition": "{{ applicantType === 'Business' }}"
+              },
+              {
+               "baseStyles": {
+                "alignItems": "start",
                 "display": "flex",
                 "flexDirection": "row",
-                "gap": "6px"
+                "gap": "12px",
+                "position": "relative",
+                "width": "100%"
                },
                "children": [
                 {
                  "baseStyles": {
-                  "fontWeight": "600"
+                  "alignItems": "center",
+                  "backgroundColor": "var(--surface-gray-2)",
+                  "borderRadius": "var(--radius-5)",
+                  "color": "var(--ink-gray-7)",
+                  "display": "flex",
+                  "flex": "0 0 auto",
+                  "height": "40px",
+                  "justifyContent": "center",
+                  "width": "40px"
                  },
                  "children": [],
-                 "componentId": "apply-0-container1-container2-container3-container2-container2-container1-textblock1",
-                 "componentName": "TextBlock",
+                 "componentId": "apply-0-container1-container2-container3-container2-container2-container2-html1",
+                 "componentName": "HTML",
                  "componentProps": {
-                  "fontSize": "text-base",
-                  "tag": "p",
-                  "text": "Company"
+                  "html": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z\"/><path d=\"M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2\"/><path d=\"M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2\"/><path d=\"M10 6h4\"/><path d=\"M10 10h4\"/><path d=\"M10 14h4\"/><path d=\"M10 18h4\"/></svg>"
                  }
+                },
+                {
+                 "baseStyles": {
+                  "display": "flex",
+                  "flexDirection": "column",
+                  "gap": "2px"
+                 },
+                 "children": [
+                  {
+                   "baseStyles": {
+                    "fontWeight": "600"
+                   },
+                   "children": [],
+                   "componentId": "apply-0-container1-container2-container3-container2-container2-container2-container1-textblock1",
+                   "componentName": "TextBlock",
+                   "componentProps": {
+                    "fontSize": "text-base",
+                    "tag": "p",
+                    "text": "Company"
+                   }
+                  },
+                  {
+                   "baseStyles": {
+                    "color": "var(--ink-gray-6)"
+                   },
+                   "children": [],
+                   "componentId": "apply-0-container1-container2-container3-container2-container2-container2-container1-textblock2",
+                   "componentName": "TextBlock",
+                   "componentProps": {
+                    "fontSize": "text-p-sm",
+                    "tag": "p",
+                    "text": "The business borrows, not me"
+                   }
+                  }
+                 ],
+                 "componentId": "apply-0-container1-container2-container3-container2-container2-container2-container1",
+                 "componentName": "container",
+                 "originalElement": "div"
                 },
                 {
                  "baseStyles": {
                   "flex": "1 1 auto"
                  },
                  "children": [],
-                 "componentId": "apply-0-container1-container2-container3-container2-container2-container1-container1",
+                 "componentId": "apply-0-container1-container2-container3-container2-container2-container2-container2",
                  "componentName": "container",
                  "originalElement": "div"
                 },
                 {
-                 "children": [],
-                 "componentId": "apply-0-container1-container2-container3-container2-container2-container1-badge1",
-                 "componentName": "Badge",
-                 "componentProps": {
-                  "label": "Chosen",
-                  "size": "sm",
-                  "theme": "green"
+                 "baseStyles": {
+                  "border": "1.5px solid var(--outline-gray-3)",
+                  "borderRadius": "9999px",
+                  "flexShrink": "0",
+                  "height": "20px",
+                  "justifyContent": "center",
+                  "width": "20px"
                  },
+                 "children": [],
+                 "componentId": "apply-0-container1-container2-container3-container2-container2-container2-container3",
+                 "componentName": "container",
+                 "originalElement": "div",
+                 "visibilityCondition": "{{ !(applicantType === 'Business') }}"
+                },
+                {
+                 "baseStyles": {
+                  "alignItems": "center",
+                  "backgroundColor": "var(--ink-gray-9)",
+                  "borderRadius": "9999px",
+                  "color": "var(--surface-base)",
+                  "display": "flex",
+                  "flexDirection": "row",
+                  "flexShrink": "0",
+                  "gap": "8px",
+                  "height": "20px",
+                  "justifyContent": "center",
+                  "width": "20px"
+                 },
+                 "children": [
+                  {
+                   "baseStyles": {
+                    "alignItems": "center",
+                    "display": "flex",
+                    "flex": "0 0 auto"
+                   },
+                   "children": [],
+                   "componentId": "apply-0-container1-container2-container3-container2-container2-container2-container4-html1",
+                   "componentName": "HTML",
+                   "componentProps": {
+                    "html": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M20 6 9 17l-5-5\"/></svg>"
+                   }
+                  }
+                 ],
+                 "componentId": "apply-0-container1-container2-container3-container2-container2-container2-container4",
+                 "componentName": "container",
+                 "originalElement": "div",
                  "visibilityCondition": "{{ applicantType === 'Business' }}"
                 }
                ],
-               "componentId": "apply-0-container1-container2-container3-container2-container2-container1",
+               "componentId": "apply-0-container1-container2-container3-container2-container2-container2",
                "componentName": "container",
                "originalElement": "div"
-              },
-              {
-               "baseStyles": {
-                "color": "var(--ink-gray-6)"
-               },
-               "children": [],
-               "componentId": "apply-0-container1-container2-container3-container2-container2-textblock1",
-               "componentName": "TextBlock",
-               "componentProps": {
-                "fontSize": "text-p-xs",
-                "tag": "p",
-                "text": "The business borrows, not me"
-               }
               }
+             ],
+             "classes": [
+              "transition",
+              "duration-150",
+              "hover:!border-outline-gray-4",
+              "hover:shadow-sm",
+              "active:scale-[0.98]"
              ],
              "componentEvents": {
               "click": {
@@ -582,6 +1249,9 @@
            ],
            "componentId": "apply-0-container1-container2-container3-container2",
            "componentName": "container",
+           "mobileStyles": {
+            "flexDirection": "column"
+           },
            "originalElement": "div"
           },
           {
@@ -605,7 +1275,7 @@
              "componentName": "Button",
              "componentProps": {
               "label": "Back",
-              "size": "sm",
+              "size": "md",
               "variant": "subtle"
              }
             },
@@ -631,7 +1301,7 @@
              "componentName": "Button",
              "componentProps": {
               "label": "Continue",
-              "size": "sm",
+              "size": "md",
               "variant": "solid"
              }
             }
@@ -650,13 +1320,16 @@
          "baseStyles": {
           "backgroundColor": "var(--surface-base)",
           "borderColor": "var(--outline-gray-2)",
-          "borderRadius": "0.5rem",
+          "borderRadius": "var(--radius-4)",
           "borderStyle": "solid",
           "borderWidth": "1px",
           "display": "flex",
           "flexDirection": "column",
           "gap": "16px",
-          "padding": "16px"
+          "margin": "0 auto",
+          "maxWidth": "720px",
+          "padding": "16px",
+          "width": "100%"
          },
          "children": [
           {
@@ -687,7 +1360,7 @@
              "componentId": "apply-0-container1-container2-container4-container1-textblock2",
              "componentName": "TextBlock",
              "componentProps": {
-              "fontSize": "text-p-xs",
+              "fontSize": "text-p-sm",
               "tag": "p",
               "text": "{{ apply.data.product_note }}"
              }
@@ -698,93 +1371,173 @@
            "originalElement": "div"
           },
           {
+           "baseStyles": {
+            "display": "grid",
+            "gap": "12px",
+            "gridTemplateColumns": "repeat(2, minmax(0, 1fr))",
+            "width": "100%"
+           },
            "children": [
             {
              "baseStyles": {
               "backgroundColor": "var(--surface-base)",
               "borderColor": "var(--outline-gray-2)",
-              "borderRadius": "0.5rem",
+              "borderRadius": "var(--radius-4)",
               "borderStyle": "solid",
               "borderWidth": "1px",
               "cursor": "pointer",
-              "display": "flex",
-              "flexDirection": "column",
-              "gap": "2px",
-              "padding": "16px"
+              "flex": "1",
+              "padding": "16px",
+              "position": "relative",
+              "userSelect": "none"
              },
              "children": [
               {
                "baseStyles": {
-                "alignItems": "center",
+                "backgroundColor": "var(--surface-gray-1)",
+                "border": "2px solid var(--ink-gray-9)",
+                "borderRadius": "calc(var(--radius-4) + 1px)",
+                "inset": "-1px",
+                "pointerEvents": "none",
+                "position": "absolute"
+               },
+               "children": [],
+               "componentId": "apply-0-container1-container2-container4-repeater1-container1-container1",
+               "componentName": "container",
+               "originalElement": "div",
+               "visibilityCondition": "{{ loanProduct === dataItem.value }}"
+              },
+              {
+               "baseStyles": {
+                "alignItems": "start",
                 "display": "flex",
                 "flexDirection": "row",
-                "gap": "6px"
+                "gap": "12px",
+                "position": "relative",
+                "width": "100%"
                },
                "children": [
                 {
                  "baseStyles": {
-                  "fontWeight": "600"
+                  "display": "flex",
+                  "flexDirection": "column",
+                  "gap": "2px"
                  },
-                 "children": [],
-                 "componentId": "apply-0-container1-container2-container4-repeater1-container1-container1-textblock1",
-                 "componentName": "TextBlock",
-                 "componentProps": {
-                  "fontSize": "text-base",
-                  "tag": "p",
-                  "text": "{{ dataItem.label }}"
-                 }
+                 "children": [
+                  {
+                   "baseStyles": {
+                    "fontWeight": "600"
+                   },
+                   "children": [],
+                   "componentId": "apply-0-container1-container2-container4-repeater1-container1-container2-container1-textblock1",
+                   "componentName": "TextBlock",
+                   "componentProps": {
+                    "fontSize": "text-base",
+                    "tag": "p",
+                    "text": "{{ dataItem.label }}"
+                   }
+                  },
+                  {
+                   "baseStyles": {
+                    "color": "var(--ink-gray-6)"
+                   },
+                   "children": [],
+                   "componentId": "apply-0-container1-container2-container4-repeater1-container1-container2-container1-textblock2",
+                   "componentName": "TextBlock",
+                   "componentProps": {
+                    "fontSize": "text-p-sm",
+                    "tag": "p",
+                    "text": "{{ dataItem.rate + ' ' + dataItem.rate_note + ' \u00b7 ' + dataItem.kind }}"
+                   }
+                  },
+                  {
+                   "baseStyles": {
+                    "color": "var(--ink-gray-6)"
+                   },
+                   "children": [],
+                   "componentId": "apply-0-container1-container2-container4-repeater1-container1-container2-container1-textblock3",
+                   "componentName": "TextBlock",
+                   "componentProps": {
+                    "fontSize": "text-p-sm",
+                    "tag": "p",
+                    "text": "Up to {{ dataItem.ceiling }}"
+                   }
+                  }
+                 ],
+                 "componentId": "apply-0-container1-container2-container4-repeater1-container1-container2-container1",
+                 "componentName": "container",
+                 "originalElement": "div"
                 },
                 {
                  "baseStyles": {
                   "flex": "1 1 auto"
                  },
                  "children": [],
-                 "componentId": "apply-0-container1-container2-container4-repeater1-container1-container1-container1",
+                 "componentId": "apply-0-container1-container2-container4-repeater1-container1-container2-container2",
                  "componentName": "container",
                  "originalElement": "div"
                 },
                 {
-                 "children": [],
-                 "componentId": "apply-0-container1-container2-container4-repeater1-container1-container1-badge1",
-                 "componentName": "Badge",
-                 "componentProps": {
-                  "label": "Chosen",
-                  "size": "sm",
-                  "theme": "green"
+                 "baseStyles": {
+                  "border": "1.5px solid var(--outline-gray-3)",
+                  "borderRadius": "9999px",
+                  "flexShrink": "0",
+                  "height": "20px",
+                  "justifyContent": "center",
+                  "width": "20px"
                  },
+                 "children": [],
+                 "componentId": "apply-0-container1-container2-container4-repeater1-container1-container2-container3",
+                 "componentName": "container",
+                 "originalElement": "div",
+                 "visibilityCondition": "{{ !(loanProduct === dataItem.value) }}"
+                },
+                {
+                 "baseStyles": {
+                  "alignItems": "center",
+                  "backgroundColor": "var(--ink-gray-9)",
+                  "borderRadius": "9999px",
+                  "color": "var(--surface-base)",
+                  "display": "flex",
+                  "flexDirection": "row",
+                  "flexShrink": "0",
+                  "gap": "8px",
+                  "height": "20px",
+                  "justifyContent": "center",
+                  "width": "20px"
+                 },
+                 "children": [
+                  {
+                   "baseStyles": {
+                    "alignItems": "center",
+                    "display": "flex",
+                    "flex": "0 0 auto"
+                   },
+                   "children": [],
+                   "componentId": "apply-0-container1-container2-container4-repeater1-container1-container2-container4-html1",
+                   "componentName": "HTML",
+                   "componentProps": {
+                    "html": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M20 6 9 17l-5-5\"/></svg>"
+                   }
+                  }
+                 ],
+                 "componentId": "apply-0-container1-container2-container4-repeater1-container1-container2-container4",
+                 "componentName": "container",
+                 "originalElement": "div",
                  "visibilityCondition": "{{ loanProduct === dataItem.value }}"
                 }
                ],
-               "componentId": "apply-0-container1-container2-container4-repeater1-container1-container1",
+               "componentId": "apply-0-container1-container2-container4-repeater1-container1-container2",
                "componentName": "container",
                "originalElement": "div"
-              },
-              {
-               "baseStyles": {
-                "color": "var(--ink-gray-6)"
-               },
-               "children": [],
-               "componentId": "apply-0-container1-container2-container4-repeater1-container1-textblock1",
-               "componentName": "TextBlock",
-               "componentProps": {
-                "fontSize": "text-p-xs",
-                "tag": "p",
-                "text": "{{ dataItem.rate }} {{ dataItem.rate_note }} \u00b7 {{ dataItem.kind }}"
-               }
-              },
-              {
-               "baseStyles": {
-                "color": "var(--ink-gray-6)"
-               },
-               "children": [],
-               "componentId": "apply-0-container1-container2-container4-repeater1-container1-textblock2",
-               "componentName": "TextBlock",
-               "componentProps": {
-                "fontSize": "text-p-xs",
-                "tag": "p",
-                "text": "Up to {{ dataItem.ceiling }}"
-               }
               }
+             ],
+             "classes": [
+              "transition",
+              "duration-150",
+              "hover:!border-outline-gray-4",
+              "hover:shadow-sm",
+              "active:scale-[0.98]"
              ],
              "componentEvents": {
               "click": {
@@ -801,9 +1554,12 @@
            "componentId": "apply-0-container1-container2-container4-repeater1",
            "componentName": "Repeater",
            "componentProps": {
-            "data": "{{ apply.data.products }}",
+            "data": "{{ apply.data.products[applicantType] }}",
             "dataKey": "value",
-            "emptyStateMessage": ""
+            "emptyStateMessage": "Nothing is open to this kind of applicant yet"
+           },
+           "mobileStyles": {
+            "gridTemplateColumns": "minmax(0, 1fr)"
            }
           },
           {
@@ -827,7 +1583,7 @@
              "componentName": "Button",
              "componentProps": {
               "label": "Back",
-              "size": "sm",
+              "size": "md",
               "variant": "subtle"
              }
             },
@@ -853,7 +1609,7 @@
              "componentName": "Button",
              "componentProps": {
               "label": "Continue",
-              "size": "sm",
+              "size": "md",
               "variant": "solid"
              },
              "visibilityCondition": "{{ loanProduct }}"
@@ -866,7 +1622,7 @@
              "componentId": "apply-0-container1-container2-container4-container2-textblock1",
              "componentName": "TextBlock",
              "componentProps": {
-              "fontSize": "text-p-xs",
+              "fontSize": "text-p-sm",
               "tag": "p",
               "text": "Pick a product to carry on"
              },
@@ -887,13 +1643,16 @@
          "baseStyles": {
           "backgroundColor": "var(--surface-base)",
           "borderColor": "var(--outline-gray-2)",
-          "borderRadius": "0.5rem",
+          "borderRadius": "var(--radius-4)",
           "borderStyle": "solid",
           "borderWidth": "1px",
           "display": "flex",
           "flexDirection": "column",
           "gap": "16px",
-          "padding": "16px"
+          "margin": "0 auto",
+          "maxWidth": "720px",
+          "padding": "16px",
+          "width": "100%"
          },
          "children": [
           {
@@ -924,7 +1683,7 @@
              "componentId": "apply-0-container1-container2-container5-container1-textblock2",
              "componentName": "TextBlock",
              "componentProps": {
-              "fontSize": "text-p-xs",
+              "fontSize": "text-p-sm",
               "tag": "p",
               "text": "{{ apply.data.verify_note }}"
              }
@@ -963,7 +1722,7 @@
              "componentId": "apply-0-container1-container2-container5-container2-textblock1",
              "componentName": "TextBlock",
              "componentProps": {
-              "fontSize": "text-p-xs",
+              "fontSize": "text-p-sm",
               "tag": "p",
               "text": "{{ apply.data.code_note }}"
              }
@@ -1025,7 +1784,7 @@
              "componentName": "Button",
              "componentProps": {
               "label": "Back",
-              "size": "sm",
+              "size": "md",
               "variant": "subtle"
              }
             },
@@ -1051,7 +1810,8 @@
              "componentName": "Button",
              "componentProps": {
               "label": "Send me a code",
-              "size": "sm",
+              "loading": "{{ busy }}",
+              "size": "md",
               "variant": "solid"
              },
              "visibilityCondition": "{{ !codeSent }}"
@@ -1069,7 +1829,8 @@
              "componentName": "Button",
              "componentProps": {
               "label": "Confirm my number",
-              "size": "sm",
+              "loading": "{{ busy }}",
+              "size": "md",
               "variant": "solid"
              },
              "visibilityCondition": "{{ codeSent }}"
@@ -1089,13 +1850,16 @@
          "baseStyles": {
           "backgroundColor": "var(--surface-base)",
           "borderColor": "var(--outline-gray-2)",
-          "borderRadius": "0.5rem",
+          "borderRadius": "var(--radius-4)",
           "borderStyle": "solid",
           "borderWidth": "1px",
           "display": "flex",
           "flexDirection": "column",
           "gap": "16px",
-          "padding": "16px"
+          "margin": "0 auto",
+          "maxWidth": "720px",
+          "padding": "16px",
+          "width": "100%"
          },
          "children": [
           {
@@ -1126,7 +1890,7 @@
              "componentId": "apply-0-container1-container2-container6-container1-textblock2",
              "componentName": "TextBlock",
              "componentProps": {
-              "fontSize": "text-p-xs",
+              "fontSize": "text-p-sm",
               "tag": "p",
               "text": "{{ apply.data.details_note }}"
              }
@@ -1187,6 +1951,7 @@
                "$type": "variable",
                "name": "companyName"
               },
+              "required": true,
               "type": "text"
              },
              "visibilityCondition": "{{ applicantType === 'Business' }}"
@@ -1201,6 +1966,7 @@
                "$type": "variable",
                "name": "applicantName"
               },
+              "required": true,
               "type": "text"
              }
             },
@@ -1214,6 +1980,7 @@
                "$type": "variable",
                "name": "dateOfBirth"
               },
+              "required": false,
               "type": "date"
              },
              "visibilityCondition": "{{ applicantType === 'Individual' }}"
@@ -1228,6 +1995,7 @@
                "$type": "variable",
                "name": "pan"
               },
+              "required": false,
               "type": "text"
              }
             },
@@ -1241,6 +2009,7 @@
                "$type": "variable",
                "name": "applicantCountry"
               },
+              "required": false,
               "type": "text"
              }
             },
@@ -1254,6 +2023,7 @@
                "$type": "variable",
                "name": "email"
               },
+              "required": true,
               "type": "email"
              }
             },
@@ -1267,6 +2037,7 @@
                "$type": "variable",
                "name": "loanAmount"
               },
+              "required": true,
               "type": "number"
              }
             },
@@ -1280,6 +2051,7 @@
                "$type": "variable",
                "name": "proposedTenure"
               },
+              "required": false,
               "type": "number"
              }
             },
@@ -1293,6 +2065,7 @@
                "$type": "variable",
                "name": "income"
               },
+              "required": false,
               "type": "number"
              }
             },
@@ -1349,7 +2122,7 @@
              "componentName": "Button",
              "componentProps": {
               "label": "Back",
-              "size": "sm",
+              "size": "md",
               "variant": "subtle"
              }
             },
@@ -1375,7 +2148,8 @@
              "componentName": "Button",
              "componentProps": {
               "label": "See my offer",
-              "size": "sm",
+              "loading": "{{ busy }}",
+              "size": "md",
               "variant": "solid"
              }
             }
@@ -1394,13 +2168,16 @@
          "baseStyles": {
           "backgroundColor": "var(--surface-base)",
           "borderColor": "var(--outline-gray-2)",
-          "borderRadius": "0.5rem",
+          "borderRadius": "var(--radius-4)",
           "borderStyle": "solid",
           "borderWidth": "1px",
           "display": "flex",
           "flexDirection": "column",
           "gap": "16px",
-          "padding": "16px"
+          "margin": "0 auto",
+          "maxWidth": "720px",
+          "padding": "16px",
+          "width": "100%"
          },
          "children": [
           {
@@ -1431,7 +2208,7 @@
              "componentId": "apply-0-container1-container2-container7-container1-textblock2",
              "componentName": "TextBlock",
              "componentProps": {
-              "fontSize": "text-p-xs",
+              "fontSize": "text-p-sm",
               "tag": "p",
               "text": "What our rules say about the details you gave us."
              }
@@ -1462,7 +2239,7 @@
            "componentId": "apply-0-container1-container2-container7-textblock2",
            "componentName": "TextBlock",
            "componentProps": {
-            "fontSize": "text-p-xs",
+            "fontSize": "text-p-sm",
             "tag": "p",
             "text": "{{ offer.message }}"
            }
@@ -1485,7 +2262,7 @@
                "componentId": "apply-0-container1-container2-container7-repeater1-container1-textblock1",
                "componentName": "TextBlock",
                "componentProps": {
-                "fontSize": "text-p-xs",
+                "fontSize": "text-p-sm",
                 "tag": "p",
                 "text": "{{ dataItem.label }}"
                }
@@ -1512,7 +2289,8 @@
             "data": "{{ offer.offer }}",
             "dataKey": "label",
             "emptyStateMessage": "Nothing to show"
-           }
+           },
+           "visibilityCondition": "{{ offer.offer?.length }}"
           },
           {
            "children": [],
@@ -1554,7 +2332,7 @@
              "componentName": "Button",
              "componentProps": {
               "label": "Open my account",
-              "size": "sm",
+              "size": "md",
               "variant": "solid"
              }
             }
@@ -1573,13 +2351,16 @@
          "baseStyles": {
           "backgroundColor": "var(--surface-base)",
           "borderColor": "var(--outline-gray-2)",
-          "borderRadius": "0.5rem",
+          "borderRadius": "var(--radius-4)",
           "borderStyle": "solid",
           "borderWidth": "1px",
           "display": "flex",
           "flexDirection": "column",
           "gap": "16px",
-          "padding": "16px"
+          "margin": "0 auto",
+          "maxWidth": "720px",
+          "padding": "16px",
+          "width": "100%"
          },
          "children": [
           {
@@ -1610,7 +2391,7 @@
              "componentId": "apply-0-container1-container2-container8-container1-textblock2",
              "componentName": "TextBlock",
              "componentProps": {
-              "fontSize": "text-p-xs",
+              "fontSize": "text-p-sm",
               "tag": "p",
               "text": "{{ apply.data.account_note }}"
              }
@@ -1663,7 +2444,8 @@
              "componentName": "Button",
              "componentProps": {
               "label": "Create my account",
-              "size": "sm",
+              "loading": "{{ busy }}",
+              "size": "md",
               "variant": "solid"
              }
             }
@@ -1681,24 +2463,41 @@
        ],
        "componentId": "apply-0-container1-container2",
        "componentName": "container",
+       "mobileStyles": {
+        "padding": "24px 16px"
+       },
        "originalElement": "div"
       }
      ],
      "componentId": "apply-0-container1",
      "componentName": "container",
      "originalElement": "div"
+    },
+    {
+     "baseStyles": {
+      "display": "none"
+     },
+     "children": [],
+     "componentId": "apply-0-html1",
+     "componentName": "HTML",
+     "componentProps": {
+      "html": "{{ apply.data.brand_style || '' }}"
+     }
     }
+   ],
+   "classes": [
+    "borrower-portal"
    ],
    "componentId": "apply-0",
    "componentName": "div",
    "originalElement": "body"
   }
  ],
- "creation": "2026-09-24 00:54:36.991704",
+ "creation": "2026-09-24 13:59:27.319872",
  "doctype": "Studio Page",
  "frappe_app": "lending",
  "is_standard": 1,
- "modified": "2026-09-24 02:22:04.794016",
+ "modified": "2026-09-24 22:47:54.057110",
  "modified_by": "Administrator",
  "name": "apply_for_a_loan",
  "owner": "Administrator",

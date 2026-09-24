@@ -52,6 +52,7 @@ from lending.portal.apply import (
 	submit_lead,
 	track_application,
 )
+from lending.portal.brand import brand_style, brand_tokens, channels, contrast
 from lending.portal.core import (
 	DEFAULT_BRAND_NAME,
 	PORTAL_ROUTE_PREFIX,
@@ -156,14 +157,22 @@ def show_product_on_portal(product: str, shown: int):
 	frappe.db.set_value("Loan Product", product, "show_on_portal", shown)
 
 
+def offer_product_to(product: str, applicant_type: str):
+	frappe.db.set_value("Loan Product", product, "portal_applicant_type", applicant_type)
+
+
+def offered_products(applicant_type: str) -> list[str]:
+	return [row["value"] for row in get_apply_page()["products"][applicant_type]]
+
+
 # Everything a lender may set about how the portal looks. Cleared between tests, so
 # one test's red portal is not the next test's starting point.
 BRAND_FIELDS = (
 	"portal_brand_name",
 	"portal_logo",
 	"portal_support_email",
-	"portal_brand_color",
-	"portal_accent_color",
+	"portal_primary_color",
+	"portal_secondary_color",
 )
 
 
@@ -390,7 +399,16 @@ class TestPortalOwnership(LendingTestSuite):
 		self.as_alpha()
 		frappe.form_dict.pop("name", None)
 
-		self.assertEqual(get_application_detail()["product"], PRODUCT)
+		payload = get_application_detail()
+		self.assertEqual(payload["product"], PRODUCT)
+		self.assertIs(payload["has_application"], True)
+
+	def test_a_borrower_with_no_application_gets_the_empty_state(self):
+		self.as_alpha()
+		frappe.form_dict.pop("name", None)
+
+		with patch("lending.portal.applications.default_application", return_value=None):
+			self.assertIs(get_application_detail()["has_application"], False)
 
 	def test_a_loan_detail_with_no_name_opens_the_default_loan(self):
 		self.as_alpha()
@@ -465,8 +483,7 @@ class TestPortalGuestEndpoints(LendingTestSuite):
 	def test_a_guest_can_read_the_apply_page(self):
 		payload = get_apply_page()
 
-		self.assertTrue(payload["products"])
-		self.assertIn(PRODUCT, [row["value"] for row in payload["products"]])
+		self.assertIn(PRODUCT, [row["value"] for row in payload["products"]["Individual"]])
 
 	# --- verifying the number -------------------------------------------------------
 
@@ -538,6 +555,33 @@ class TestPortalGuestEndpoints(LendingTestSuite):
 		self.submission(token=token)
 		with self.assertRaises(frappe.ValidationError):
 			submit_lead()
+
+	def test_a_refused_submission_leaves_the_token_usable(self):
+		token = self.mint_token()
+		self.submission(token=token, email="")
+		with self.assertRaises(frappe.ValidationError):
+			submit_lead()
+
+		self.submission(token=token)
+		self.assertTrue(submit_lead()["reference"])
+
+	def test_a_lead_that_fails_to_save_leaves_the_token_usable(self):
+		token = self.mint_token()
+		self.submission(token=token)
+		with patch("frappe.model.document.Document.insert", side_effect=frappe.ValidationError):
+			with self.assertRaises(frappe.ValidationError):
+				submit_lead()
+
+		self.submission(token=token)
+		self.assertTrue(submit_lead()["reference"])
+
+	def test_a_verification_survives_a_cache_clear(self):
+		# A migrate or a DocType save clears the whole cache, mid-application or not.
+		token = self.mint_token()
+		frappe.clear_cache()
+
+		self.submission(token=token)
+		self.assertTrue(submit_lead()["reference"])
 
 	def test_more_than_the_product_allows_is_refused(self):
 		token = self.mint_token()
@@ -992,6 +1036,14 @@ class TestPortalSignUp(LendingTestSuite):
 
 		self.assertFalse(frappe.db.exists("User", PERSON_EMAIL))
 
+	def test_a_refused_password_can_be_tried_again(self):
+		offer = self.apply_as(PERSON_EMAIL, "9812340112")
+		with self.assertRaises(frappe.ValidationError):
+			self.open_account(offer, password="a")
+
+		self.open_account(offer)
+		self.assertTrue(frappe.db.exists("User", PERSON_EMAIL))
+
 	# --- the join survives conversion -----------------------------------------------
 
 	def test_converting_a_lead_reuses_the_borrowers_customer(self):
@@ -1052,6 +1104,7 @@ class TestPortalSwitches(LendingTestSuite):
 	def tearDown(self):
 		set_portal_switches(1, 1)
 		show_product_on_portal(PRODUCT, 1)
+		offer_product_to(PRODUCT, "")
 		frappe.set_user("Administrator")
 		frappe.local.form_dict = frappe._dict()
 
@@ -1092,9 +1145,8 @@ class TestPortalSwitches(LendingTestSuite):
 	def test_a_product_not_shown_on_the_portal_is_not_offered(self):
 		show_product_on_portal(PRODUCT, 0)
 
-		offered = [row["value"] for row in get_apply_page()["products"]]
-
-		self.assertNotIn(PRODUCT, offered)
+		self.assertNotIn(PRODUCT, offered_products("Individual"))
+		self.assertNotIn(PRODUCT, offered_products("Business"))
 
 	def test_a_product_not_shown_on_the_portal_cannot_be_applied_for(self):
 		"""Filtering the list alone would leave it one guessed name away."""
@@ -1103,10 +1155,24 @@ class TestPortalSwitches(LendingTestSuite):
 		self.assertRaises(frappe.ValidationError, read_product, PRODUCT, 100000)
 
 	def test_a_product_shown_on_the_portal_is_offered_and_accepted(self):
-		offered = [row["value"] for row in get_apply_page()["products"]]
-
-		self.assertIn(PRODUCT, offered)
+		# No applicant type set on the product means both are offered it.
+		self.assertIn(PRODUCT, offered_products("Individual"))
+		self.assertIn(PRODUCT, offered_products("Business"))
 		self.assertEqual(read_product(PRODUCT, 100000)["name"], PRODUCT)
+		self.assertEqual(read_product(PRODUCT, 100000, "Business")["name"], PRODUCT)
+
+	def test_a_business_product_is_offered_to_companies_alone(self):
+		offer_product_to(PRODUCT, "Business")
+
+		self.assertIn(PRODUCT, offered_products("Business"))
+		self.assertNotIn(PRODUCT, offered_products("Individual"))
+
+	def test_a_person_cannot_apply_for_a_business_product(self):
+		"""Filtering the list alone would leave it one guessed name away."""
+		offer_product_to(PRODUCT, "Business")
+
+		self.assertRaises(frappe.ValidationError, read_product, PRODUCT, 100000, "Individual")
+		self.assertEqual(read_product(PRODUCT, 100000, "Business")["name"], PRODUCT)
 
 	def test_portal_off_takes_every_page_out_of_the_route_table(self):
 		"""The data layer refusing is not enough on its own.
@@ -1164,7 +1230,7 @@ class TestPortalBranding(LendingTestSuite):
 		set_branding(portal_brand_name="Ganges Finance")
 
 		self.assertEqual(brand_name(), "Ganges Finance")
-		self.assertEqual(shell_payload("Loans", "Apply", [], [])["brand_name"], "Ganges Finance")
+		self.assertEqual(shell_payload("Loans", "Apply", [])["brand_name"], "Ganges Finance")
 
 	def test_without_a_logo_the_frame_shows_the_name(self):
 		set_branding(portal_brand_name="Ganges Finance")
@@ -1202,6 +1268,130 @@ class TestPortalBranding(LendingTestSuite):
 		set_branding()
 
 		self.assertEqual(brand_payload()["support_email"], "")
+
+	def test_no_colours_leave_frappe_ui_to_paint_the_portal(self):
+		"""Every block that wears a colour falls back to frappe-ui's own, so none is sent."""
+		set_branding()
+
+		self.assertEqual(brand_payload()["brand_style"], "")
+
+	def test_both_colours_reach_the_page_from_the_desk_form(self):
+		set_branding(portal_primary_color="#004c8f", portal_secondary_color="#ed232a")
+		style = brand_payload()["brand_style"]
+
+		self.assertIn("--portal-primary: #004c8f;", style)
+		self.assertIn("--portal-action: #ed232a;", style)
+
+	def test_the_public_pages_carry_the_colours_too(self):
+		set_branding(portal_primary_color="#004c8f")
+
+		for payload in (get_apply_page(), get_track_page()):
+			self.assertIn("--portal-primary: #004c8f;", payload["brand_style"])
+
+	def test_the_secondary_colour_fills_the_buttons(self):
+		"""HDFC: a navy bank with red buttons."""
+		tokens = brand_tokens("#004c8f", "#ed232a")
+
+		self.assertEqual(tokens["--portal-primary"], "#004c8f")
+		self.assertEqual(tokens["--portal-action"], "#ed232a")
+		self.assertEqual(tokens["--portal-action-ink"], "#ffffff")
+
+	def test_without_a_secondary_colour_the_buttons_take_the_primary(self):
+		"""Axis: one maroon, and a portal that still has something to press."""
+		tokens = brand_tokens("#800000", None)
+
+		self.assertEqual(tokens["--portal-action"], "#800000")
+
+	def test_a_secondary_colour_alone_paints_only_the_buttons(self):
+		style = brand_style(None, "#ed232a")
+
+		self.assertIn("--portal-action: #ed232a;", style)
+		self.assertNotIn("portal-header", style)
+		self.assertNotIn("bg-surface-sidebar", style)
+
+	def test_a_light_colour_carries_dark_ink_and_a_saturated_one_white(self):
+		"""Canara: dark on its yellow buttons, white on its blue header."""
+		tokens = brand_tokens("#019eec", "#ffb600")
+
+		self.assertEqual(tokens["--portal-action-ink"], "#171717")
+		self.assertEqual(tokens["--portal-primary-ink"], "#ffffff")
+
+	def test_a_saturated_orange_carries_white_where_wcag_would_hand_it_black(self):
+		"""The WCAG ratio prefers black on #ef6f21, 6.0 to 3.0; the eye, and APCA, prefer white."""
+		self.assertEqual(brand_tokens("#ef6f21", None)["--portal-primary-ink"], "#ffffff")
+		# A truly light colour still gets the dark ink.
+		self.assertEqual(brand_tokens("#ff9f1c", None)["--portal-primary-ink"], "#171717")
+
+	def test_a_header_button_takes_the_secondary_only_where_it_stands_out(self):
+		"""SBI's cyan clears 3:1 on its navy; HDFC's red, at 2:1, would be a smudge."""
+		self.assertEqual(brand_tokens("#292075", "#00b5ef")["--portal-header-action"], "#00b5ef")
+		self.assertEqual(brand_tokens("#004c8f", "#ed232a")["--portal-header-action"], "#ffffff")
+
+	def test_the_primary_colour_tints_the_sidebar_and_nothing_beside_it(self):
+		style = brand_style("#004b8e", "#ed232a")
+
+		# A trace of blue in the rail's greys, set on the sidebar alone.
+		self.assertIn(".borrower-portal .bg-surface-sidebar { --surface-sidebar: #f5f9fc;", style)
+		self.assertNotIn(":root { --surface", style)
+
+	def test_the_header_is_a_band_of_the_primary_colour_in_its_own_ink(self):
+		style = brand_style("#004b8e", "#ed232a")
+
+		self.assertIn(".borrower-portal .portal-header { background-color: var(--portal-primary);", style)
+		self.assertIn("--ink-gray-9: var(--portal-primary-ink);", style)
+
+	def test_a_done_step_is_a_wash_of_the_primary_with_a_tick_that_can_be_seen(self):
+		"""HDFC's navy is dark enough as it is; Canara's blue is darkened to reach 3:1."""
+		hdfc = brand_tokens("#004b8e", None)
+		self.assertEqual(hdfc["--portal-primary-soft"], "#e0e9f1")
+		self.assertEqual(hdfc["--portal-primary-deep"], "#004b8e")
+
+		canara = brand_tokens("#019eec", None)
+		tick = contrast(channels(canara["--portal-primary-deep"]), channels(canara["--portal-primary-soft"]))
+		self.assertGreaterEqual(tick, 3.0)
+		self.assertNotEqual(canara["--portal-primary-deep"], "#019eec")
+
+	def test_the_borrowers_initial_wears_the_same_wash_as_a_done_step(self):
+		style = brand_style("#004b8e", None)
+
+		self.assertIn(".borrower-portal .portal-avatar { --surface-gray-2: var(--portal-primary-soft);", style)
+		self.assertNotIn("portal-avatar", brand_style(None, "#ed232a"))
+
+	def test_grey_buttons_and_table_bands_wear_a_wash_of_the_secondary(self):
+		style = brand_style("#004c8f", "#ed232a")
+
+		# A button marked plain -- the statement's period shortcuts -- stays grey.
+		self.assertIn(
+			'.borrower-portal button.bg-surface-gray-2:not(.portal-plain):not([role="combobox"]) { background-color: var(--portal-action-soft);',
+			style,
+		)
+		self.assertEqual(brand_tokens("#004c8f", "#ed232a")["--portal-action-soft"], "#fde5e5")
+
+	def test_a_label_on_a_wash_reads_as_body_text_even_while_pressed(self):
+		"""4.5:1 on the deepest of the three washes, for a dark red and a light yellow alike."""
+		for secondary in ("#ed232a", "#ffb600", "#00b5ef"):
+			tokens = brand_tokens("#004c8f", secondary)
+			label = channels(tokens["--portal-action-deep"])
+			for ground in ("--portal-action-soft", "--portal-action-soft-hover", "--portal-action-soft-active"):
+				self.assertGreaterEqual(contrast(label, channels(tokens[ground])), 4.5, (secondary, ground))
+
+	def test_the_footer_wears_the_sidebars_tint(self):
+		style = brand_style("#004b8e", None)
+
+		self.assertIn(".borrower-portal .portal-footer { background-color: #f5f9fc;", style)
+
+	def test_a_grey_primary_colour_leaves_the_sidebar_and_footer_grey(self):
+		"""A grey has no hue to lend, and the rounding of one is not a hue."""
+		style = brand_style("#777777", None)
+
+		self.assertNotIn("bg-surface-sidebar", style)
+		self.assertNotIn("portal-footer", style)
+
+	def test_only_a_hex_colour_reaches_the_stylesheet(self):
+		"""The value is written into a <style>, so anything else is dropped, not escaped."""
+		self.assertEqual(brand_style("red; } body { display: none", "</style><script>"), "")
+		self.assertIn("--portal-primary: #aabbcc;", brand_style("ABC", None))
+
 
 class TestPortalFooter(LendingTestSuite):
 	"""The line at the foot of every page, which is the lender's and not ours.
@@ -1302,7 +1492,7 @@ class TestPortalFooter(LendingTestSuite):
 		set_footer()
 
 		self.assertEqual(footer_links(), [])
-		self.assertEqual(shell_payload("Loans", "Apply", [], [])["footer_links"], [])
+		self.assertEqual(shell_payload("Loans", "Apply", [])["footer_links"], [])
 
 	def test_a_row_missing_its_destination_is_not_a_link(self):
 		"""Both columns are required on the grid, so this is the row saved before the
@@ -1321,7 +1511,7 @@ class TestPortalFooter(LendingTestSuite):
 	def test_the_footer_reaches_the_frame_every_page_wears(self):
 		set_branding(portal_brand_name="Ganges Finance")
 		set_footer(links=(("Privacy Policy", "/borrower/privacy-policy"),))
-		payload = shell_payload("Loans", "Apply", [], [])
+		payload = shell_payload("Loans", "Apply", [])
 
 		self.assertIn("Ganges Finance", payload["copyright_note"])
 		self.assertEqual(payload["footer_links"][0]["footer_label"], "Privacy Policy")

@@ -64,6 +64,7 @@ class LoanProduct(Document):
 		penalty_receivable_account: DF.Link | None
 		penalty_suspense_account: DF.Link | None
 		penalty_waiver_account: DF.Link | None
+		portal_applicant_type: DF.Literal["", "Individual", "Business"]
 		product_code: DF.Data
 		product_name: DF.Data
 		rate_of_interest: DF.Percent

@@ -23,7 +23,9 @@ from lending.portal.core import (
 	assert_owns,
 	clean,
 	get_applications,
+	get_loans,
 	get_portal_customers,
+	is_live,
 	long_date,
 	money,
 	shell_payload,
@@ -77,7 +79,7 @@ def get_application_detail() -> dict:
 	assert_owns("Loan Application", name)
 	application = frappe.db.get_value("Loan Application", name, DETAIL_FIELDS, as_dict=True)
 
-	payload = shell_payload(_("Application"), _("Contact us"), [application.applicant], [])
+	payload = shell_payload(_("Application"), _("Contact us"), borrower_loans())
 	payload["head_note"] = "{0} · {1}".format(
 		application.name, stage_label(application)
 	)
@@ -86,6 +88,7 @@ def get_application_detail() -> dict:
 	headline, headline_note = stage_headline(application, booked_loan(name))
 	payload.update(
 		{
+			"has_application": True,
 			"product": application.loan_product,
 			"reference": _("Application {0}").format(application.name),
 			"headline": headline,
@@ -120,11 +123,28 @@ def default_application() -> str | None:
 	return applications[0]["name"] if applications else None
 
 
+def borrower_loans() -> list[dict]:
+	"""Every loan the borrower holds, for the badge in the page head.
+
+	The badge speaks for the borrower's accounts, not for this application, so it is
+	read from all of them. Passing none made it say "No live accounts" above a
+	tracker announcing the loan this application had just booked.
+	"""
+	customers = get_portal_customers()
+
+	return get_loans(customers) if customers else []
+
+
 def no_application_payload() -> dict:
-	"""The page for a borrower with no application yet: the frame, and every card empty."""
-	payload = shell_payload(_("Application"), _("Apply for a loan"), get_portal_customers(), [])
+	"""The page for a borrower with no application yet: the frame, and every card empty.
+
+	`has_application` is what swaps the tracker and the preview for the empty state. The
+	cards' keys stay, empty, so a page built before the flag still renders.
+	"""
+	payload = shell_payload(_("Application"), _("Apply for a loan"), borrower_loans())
 	payload.update(
 		{
+			"has_application": False,
 			"product": _("No application yet"),
 			"reference": "",
 			"headline": _("Apply for a loan and you can follow it here."),
@@ -170,6 +190,12 @@ def stage_headline(application: dict, loan: dict) -> tuple[str, str]:
 	if application.docstatus == 0:
 		return _("Your application is not sent yet"), _(
 			"Finish the details and submit it, and we will start the review."
+		)
+
+	# The same test the badge in the head uses, so the two cannot disagree.
+	if loan and not is_live(loan):
+		return _("Your loan is closed"), _("{0} is {1}. Its statement is still under Loans.").format(
+			loan.name, STATUS_LABELS.get(loan.status, loan.status).lower()
 		)
 
 	if loan:

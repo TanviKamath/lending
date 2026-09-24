@@ -42,8 +42,9 @@ The one thing that did not survive the move is the portal's own design system: s
 thirty CSS custom properties driven by Lending Settings, and the inline styles on every
 block. The Studio pages take frappe-ui's own appearance instead, which is the point of
 asking for components rather than divs -- what is on the canvas now is a component to
-restyle rather than a div already painted. Brand colour, logo, radius and font are
-therefore not yet wired in.
+restyle rather than a div already painted. The logo and the two colours came back
+afterwards, read per request -- see lending.portal.brand; radius and font are not
+wired in.
 
 Where the work is
 -----------------

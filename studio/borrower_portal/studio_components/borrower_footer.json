@@ -23,7 +23,7 @@
     "componentId": "borrower_footer-0-textblock1",
     "componentName": "TextBlock",
     "componentProps": {
-     "fontSize": "text-p-xs",
+     "fontSize": "text-p-sm",
      "tag": "p",
      "text": "{{ inputs.note }}"
     },
@@ -58,13 +58,13 @@
        "click": {
         "action": "Run Script",
         "event": "click",
-        "script": "window.location.href = dataItem.href"
+        "script": "window.location.href = dataItem.footer_href"
        }
       },
       "componentId": "borrower_footer-0-repeater1-button1",
       "componentName": "Button",
       "componentProps": {
-       "label": "{{ dataItem.label }}",
+       "label": "{{ dataItem.footer_label }}",
        "size": "sm",
        "variant": "ghost"
       },
@@ -78,7 +78,7 @@
     "componentName": "Repeater",
     "componentProps": {
      "data": "{{ inputs.links }}",
-     "dataKey": "label",
+     "dataKey": "footer_label",
      "emptyStateMessage": ""
     },
     "componentSlots": {},
@@ -86,6 +86,9 @@
     "tabletStyles": {},
     "visibilityCondition": "{{ (inputs.links || []).length > 0 }}"
    }
+  ],
+  "classes": [
+   "portal-footer"
   ],
   "componentEvents": {},
   "componentId": "borrower_footer-0",
@@ -98,7 +101,7 @@
  },
  "component_id": "borrower_footer",
  "component_name": "Borrower Footer",
- "creation": "2026-09-24 00:54:36.739104",
+ "creation": "2026-09-24 13:59:27.047712",
  "docstatus": 0,
  "doctype": "Studio Component",
  "idx": 0,
@@ -117,7 +120,7 @@
   }
  ],
  "is_disabled": 0,
- "modified": "2026-09-24 02:13:21.820912",
+ "modified": "2026-09-24 21:37:05.678898",
  "modified_by": "Administrator",
  "name": "borrower_footer",
  "owner": "Administrator"

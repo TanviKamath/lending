@@ -41,8 +41,8 @@ from lending.portal.studio_build.shell import frame
 TITLE = "Account overview"
 ROUTE = "/overview"
 SOURCE = "overview"
-# Where every figure on this page is answered in full, and so where the head's button
-# and the two figure cards all lead.
+# Where every figure on this page is answered in full, and so where the two figure
+# cards lead.
 ACCOUNTS_ROUTE = "/loans"
 read = reader(SOURCE)
 
@@ -63,22 +63,25 @@ def application_card():
 
 	It sits in a strip of numbers and is not one. The product name is a headline at the
 	weight of a heading, the application's own name and the day it was raised are the
-	two quiet lines under it, and the tile on the left carries the stage's colour the
-	way the badge at the top does. What is waiting on the borrower, and how many more
+	two quiet lines under it, and the plain tile on the left that the figure cards beside
+	it wear -- the badge alone carries the stage's colour. What is waiting on the borrower, and how many more
 	applications the table below holds, follow only when there is something to say.
 	"""
 	stage_tone = f"{SOURCE}.data.application_stage_tone"
-	# The label, the stage, and the chevron at the end of the line the two figure cards
-	# put theirs on. The chevron waits for a destination: a borrower with nothing in
-	# progress reads the same card saying so, and that one opens nothing.
+	# The label and the chevron, on the line the two figure cards put theirs on. The
+	# chevron waits for a destination: a borrower with nothing in progress reads the
+	# same card saying so, and that one opens nothing.
 	label = row(
-		[
-			muted(read("label_application")),
-			toned_badge(read("application_stage"), stage_tone, visible=read("application_stage")),
-			spacer(),
-			chevron(visible=read("application_url")),
-		],
+		[muted(read("label_application")), spacer(), chevron(visible=read("application_url"))],
 		gap="8px",
+	)
+	# Under the headline rather than beside the label: there it crowded the label onto
+	# two lines, and the headline fell below the figures in the cards beside it.
+	stage = toned_badge(
+		read("application_stage"),
+		stage_tone,
+		visible=read("application_stage"),
+		styles={"alignSelf": "flex-start"},
 	)
 	initiated = icon_line(
 		"calendar", read("application_initiated"), visible=read("application_initiated")
@@ -86,7 +89,6 @@ def application_card():
 
 	return record_stat(
 		"file-text",
-		stage_tone,
 		[
 			label,
 			text(
@@ -95,6 +97,7 @@ def application_card():
 				size="text-2xl",
 				styles={"fontWeight": "600", "padding": "2px 0"},
 			),
+			stage,
 			muted(read("application_name"), visible=read("application_name")),
 			initiated,
 			muted(read("application_note"), visible=read("application_note")),
@@ -169,7 +172,11 @@ def tasks():
 
 
 def marker():
-	"""A green check for a step of the loan itself, a grey dot for one that led up to it.
+	"""A check for a step of the loan itself, a grey dot for one that led up to it.
+
+	The check is the application tracker's done step -- a wash of the lender's primary
+	colour with a tick in its deep shade -- so "done" looks the same on every page. Green
+	where no primary is set.
 
 	Both are in the tree and the row's `tone` shows one, because a fill is a style and
 	only props are evaluated. The dot sits in a box the check's size, so the two centre
@@ -180,7 +187,12 @@ def marker():
 		"check",
 		size=12,
 		stroke=3,
-		styles=dict(box, borderRadius="9999px", backgroundColor="var(--surface-green-6)", color="#fff"),
+		styles=dict(
+			box,
+			borderRadius="9999px",
+			backgroundColor="var(--portal-primary-soft, var(--surface-green-6))",
+			color="var(--portal-primary-deep, #fff)",
+		),
 		visible="{{ dataItem.tone === 'ok' }}",
 	)
 	dot = container(
@@ -219,7 +231,7 @@ def stems():
 			visible="{{ dataItem.stem === '%s' }}" % tone,
 		)
 
-	return [stem("ok", "var(--outline-green-3)"), stem("plain", "var(--outline-gray-1)")]
+	return [stem("ok", "var(--portal-primary-line, var(--outline-green-3))"), stem("plain", "var(--outline-gray-1)")]
 
 
 def activity():
@@ -296,7 +308,7 @@ def date_tile():
 			"width": DATE_TILE,
 			"flex": "0 0 auto",
 			"padding": "6px 0",
-			"borderRadius": "0.5rem",
+			"borderRadius": "var(--radius-4)",
 			"backgroundColor": "var(--surface-gray-1)",
 			"borderWidth": "1px",
 			"borderStyle": "solid",
@@ -308,13 +320,21 @@ def date_tile():
 def schedule():
 	"""The four instalments coming, as a diary rather than a record.
 
-	The breakdown is the one part that can run long, so it is the part that wraps: the
-	amount and the chevron keep to one line at the end of the row.
+	Principal and interest take a line each: joined on one, the pair wrapped at the dot
+	between them. The loan's name leads only when the rows are of several loans --
+	`sub` is set only then, see core.name_once.
 	"""
+	quiet = {"color": "var(--ink-gray-7)", "fontVariantNumeric": "tabular-nums"}
 	lines = column(
 		[
-			text("{{ dataItem.title }}", size="text-sm", styles={"color": "var(--ink-gray-8)"}),
-			muted("{{ dataItem.sub }}", visible="{{ dataItem.sub }}"),
+			text(
+				"{{ dataItem.product }}",
+				size="text-sm",
+				styles={"fontWeight": "500", "color": "var(--ink-gray-8)"},
+				visible="{{ dataItem.sub }}",
+			),
+			text("{{ dataItem.principal }}", size="text-sm", styles=quiet),
+			text("{{ dataItem.interest }}", size="text-sm", styles=quiet),
 		],
 		gap="2px",
 		styles={"flex": "1 1 auto", "minWidth": "0px"},
@@ -345,7 +365,14 @@ def content():
 		tasks(),
 		two_columns(
 			[
-				card("Application status", read("applications_note"), applications(read)),
+				# Only for several: one application is already the strip's first card, and
+				# the table would say it a second time right under it.
+				card(
+					"Application status",
+					read("applications_note"),
+					applications(read),
+					visible="{{ (overview.data.applications || []).length > 1 }}",
+				),
 				card(
 					"Activity timeline",
 					read("activity_note"),
@@ -379,7 +406,8 @@ def build():
 	return upsert_page(
 		TITLE,
 		ROUTE,
-		frame(SOURCE, content(), action_label="View payment details", action_route=ACCOUNTS_ROUTE),
+		# No header action: the two figure cards and the rail already open the loan page.
+		frame(SOURCE, content()),
 		resources=[
 			api_resource(SOURCE, "lending.portal.core.get_dashboard"),
 			api_resource("alerts", "lending.portal.notifications.get_notifications", auto=0),

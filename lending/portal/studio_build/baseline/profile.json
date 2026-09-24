@@ -62,7 +62,8 @@
           "flexDirection": "row",
           "alignItems": "center",
           "gap": "8px",
-          "height": "48px",
+          "height": "48.8px",
+          "marginTop": "-8px",
           "flexShrink": "0",
           "justifyContent": "center",
           "padding": "0 6px"
@@ -111,8 +112,8 @@
             "alignItems": "center",
             "justifyContent": "center",
             "textTransform": "uppercase",
-            "backgroundColor": "var(--surface-gray-4)",
-            "color": "var(--ink-gray-7)"
+            "backgroundColor": "var(--portal-primary, var(--surface-gray-4))",
+            "color": "var(--portal-primary-ink, var(--ink-gray-7))"
            },
            "mobileStyles": {},
            "tabletStyles": {},
@@ -156,7 +157,9 @@
          "baseStyles": {
           "flex": "1 1 0%",
           "overflowY": "auto",
-          "overflowX": "hidden"
+          "overflowX": "hidden",
+          "margin": "0 -4px",
+          "padding": "2px 4px"
          },
          "mobileStyles": {},
          "tabletStyles": {},
@@ -166,7 +169,8 @@
            "componentProps": {
             "label": "Account overview",
             "icon": "lucide-layout-dashboard",
-            "to": "/overview"
+            "to": "/overview",
+            "active": "{{ typeof route !== 'undefined' && (route.path === '/overview') }}"
            },
            "componentSlots": {},
            "componentEvents": {},
@@ -181,7 +185,8 @@
            "componentProps": {
             "label": "Loan account",
             "icon": "lucide-wallet",
-            "to": "/loans"
+            "to": "/loans",
+            "active": "{{ typeof route !== 'undefined' && (route.path === '/loans' || route.path.startsWith('/loan/')) }}"
            },
            "componentSlots": {},
            "componentEvents": {},
@@ -196,7 +201,8 @@
            "componentProps": {
             "label": "Application",
             "icon": "lucide-file-text",
-            "to": "/applications"
+            "to": "/applications",
+            "active": "{{ typeof route !== 'undefined' && (route.path === '/applications' || route.path.startsWith('/application/')) }}"
            },
            "componentSlots": {},
            "componentEvents": {},
@@ -211,7 +217,8 @@
            "componentProps": {
             "label": "Statement of account",
             "icon": "lucide-receipt",
-            "to": "/statement"
+            "to": "/statement",
+            "active": "{{ typeof route !== 'undefined' && (route.path === '/statement') }}"
            },
            "componentSlots": {},
            "componentEvents": {},
@@ -226,7 +233,8 @@
            "componentProps": {
             "label": "Interest certificate",
             "icon": "lucide-award",
-            "to": "/certificate"
+            "to": "/certificate",
+            "active": "{{ typeof route !== 'undefined' && (route.path === '/certificate') }}"
            },
            "componentSlots": {},
            "componentEvents": {},
@@ -241,7 +249,8 @@
            "componentProps": {
             "label": "Personal details",
             "icon": "lucide-user",
-            "to": "/profile"
+            "to": "/profile",
+            "active": "{{ typeof route !== 'undefined' && (route.path === '/profile') }}"
            },
            "componentSlots": {},
            "componentEvents": {},
@@ -266,57 +275,94 @@
          "tabletStyles": {},
          "children": [
           {
-           "componentName": "container",
-           "componentProps": {},
-           "componentSlots": {},
-           "componentEvents": {},
-           "baseStyles": {
-            "display": "flex",
-            "flexDirection": "column",
-            "gap": "2px",
-            "padding": "12px"
+           "componentName": "Dropdown",
+           "componentProps": {
+            "options": "{{ [{ label: 'Log out', icon: 'lucide-log-out', onClick: () => logout() }] }}",
+            "side": "top",
+            "align": "start"
            },
+           "componentSlots": {
+            "trigger": {
+             "slotName": "trigger",
+             "slotContent": [
+              {
+               "componentName": "container",
+               "componentProps": {},
+               "componentSlots": {},
+               "componentEvents": {},
+               "baseStyles": {
+                "display": "flex",
+                "flexDirection": "row",
+                "alignItems": "center",
+                "gap": "8px",
+                "height": "32px",
+                "padding": "0 6px",
+                "borderRadius": "8px",
+                "cursor": "pointer",
+                "justifyContent": "center"
+               },
+               "mobileStyles": {},
+               "tabletStyles": {},
+               "children": [
+                {
+                 "componentName": "Avatar",
+                 "componentProps": {
+                  "label": "{{ profile.data.holder_name || '' }}",
+                  "size": "md",
+                  "shape": "circle"
+                 },
+                 "componentSlots": {},
+                 "componentEvents": {},
+                 "baseStyles": {
+                  "flexShrink": "0"
+                 },
+                 "mobileStyles": {},
+                 "tabletStyles": {},
+                 "children": [],
+                 "classes": [
+                  "portal-avatar"
+                 ],
+                 "componentId": "profile-0-sidebar1-div1-div2-dropdown1-trigger-container1-avatar1"
+                },
+                {
+                 "componentName": "TextBlock",
+                 "componentProps": {
+                  "text": "{{ profile.data.holder_name || '' }}",
+                  "tag": "p",
+                  "fontSize": "text-sm"
+                 },
+                 "componentSlots": {},
+                 "componentEvents": {},
+                 "baseStyles": {
+                  "flex": "1 1 0%",
+                  "minWidth": "0px",
+                  "color": "var(--ink-gray-7)",
+                  "overflow": "hidden",
+                  "textOverflow": "ellipsis",
+                  "whiteSpace": "nowrap"
+                 },
+                 "mobileStyles": {},
+                 "tabletStyles": {},
+                 "children": [],
+                 "visibilityCondition": "{{ typeof sidebarCollapsed === 'undefined' || !sidebarCollapsed }}",
+                 "componentId": "profile-0-sidebar1-div1-div2-dropdown1-trigger-container1-textblock1"
+                }
+               ],
+               "originalElement": "div",
+               "classes": [
+                "hover:bg-surface-gray-2"
+               ],
+               "componentId": "profile-0-sidebar1-div1-div2-dropdown1-trigger-container1"
+              }
+             ]
+            }
+           },
+           "componentEvents": {},
+           "baseStyles": {},
            "mobileStyles": {},
            "tabletStyles": {},
-           "children": [
-            {
-             "componentName": "TextBlock",
-             "componentProps": {
-              "text": "{{ profile.data.holder_name }}",
-              "tag": "p",
-              "fontSize": "text-sm"
-             },
-             "componentSlots": {},
-             "componentEvents": {},
-             "baseStyles": {
-              "fontWeight": "600"
-             },
-             "mobileStyles": {},
-             "tabletStyles": {},
-             "children": [],
-             "componentId": "profile-0-sidebar1-div1-div2-container1-textblock1"
-            },
-            {
-             "componentName": "TextBlock",
-             "componentProps": {
-              "text": "{{ profile.data.customer_note }}",
-              "tag": "p",
-              "fontSize": "text-p-xs"
-             },
-             "componentSlots": {},
-             "componentEvents": {},
-             "baseStyles": {
-              "color": "var(--ink-gray-6)"
-             },
-             "mobileStyles": {},
-             "tabletStyles": {},
-             "children": [],
-             "componentId": "profile-0-sidebar1-div1-div2-container1-textblock2"
-            }
-           ],
-           "visibilityCondition": "{{ typeof sidebarCollapsed === 'undefined' || !sidebarCollapsed }}",
-           "originalElement": "div",
-           "componentId": "profile-0-sidebar1-div1-div2-container1"
+           "children": [],
+           "componentId": "profile-0-sidebar1-div1-div2-dropdown1"
           }
          ],
          "componentId": "profile-0-sidebar1-div1-div2"
@@ -433,7 +479,7 @@
           "borderWidth": "1px",
           "borderStyle": "solid",
           "borderColor": "var(--outline-gray-2)",
-          "borderRadius": "0.5rem",
+          "borderRadius": "var(--radius-4)",
           "backgroundColor": "var(--surface-base)"
          },
          "mobileStyles": {
@@ -488,7 +534,8 @@
                  "componentProps": {
                   "label": "{{ identity.customer_name }}",
                   "size": "2xl",
-                  "shape": "circle"
+                  "shape": "circle",
+                  "theme": "blue"
                  },
                  "componentSlots": {},
                  "componentEvents": {},
@@ -587,7 +634,7 @@
                       {
                        "componentName": "HTML",
                        "componentProps": {
-                        "html": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7\"/><path d=\"M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z\"/></svg>"
+                        "html": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7\"/><path d=\"M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z\"/></svg>"
                        },
                        "componentSlots": {},
                        "componentEvents": {},
@@ -611,7 +658,7 @@
                        "componentProps": {
                         "text": "Edit",
                         "tag": "span",
-                        "fontSize": "text-sm"
+                        "fontSize": "text-base"
                        },
                        "componentSlots": {},
                        "componentEvents": {},
@@ -810,7 +857,7 @@
                      "componentProps": {
                       "text": "This information is fetched from your verified records.",
                       "tag": "p",
-                      "fontSize": "text-p-xs"
+                      "fontSize": "text-p-sm"
                      },
                      "componentSlots": {},
                      "componentEvents": {},
@@ -1033,7 +1080,7 @@
                      "componentProps": {
                       "text": "Update your contact details.",
                       "tag": "p",
-                      "fontSize": "text-p-xs"
+                      "fontSize": "text-p-sm"
                      },
                      "componentSlots": {},
                      "componentEvents": {},
@@ -1259,7 +1306,7 @@
                      "componentProps": {
                       "text": "Enter your current address.",
                       "tag": "p",
-                      "fontSize": "text-p-xs"
+                      "fontSize": "text-p-sm"
                      },
                      "componentSlots": {},
                      "componentEvents": {},
@@ -1491,12 +1538,30 @@
      ],
      "originalElement": "div",
      "componentId": "profile-0-container1"
+    },
+    {
+     "componentName": "HTML",
+     "componentProps": {
+      "html": "{{ profile.data.brand_style || '' }}"
+     },
+     "componentSlots": {},
+     "componentEvents": {},
+     "baseStyles": {
+      "display": "none"
+     },
+     "mobileStyles": {},
+     "tabletStyles": {},
+     "children": [],
+     "componentId": "profile-0-html1"
     }
+   ],
+   "classes": [
+    "borrower-portal"
    ],
    "originalElement": "body",
    "blockName": "body",
    "componentId": "profile-0"
   }
  ],
- "script": "import { computed, ref, watch } from \"vue\"\nimport { call, toast } from \"frappe-ui\"\nimport { tone, appRoute, useSearch } from \"@app/utils/portal\"\n\nexport default function setup(context: any) {\n\tconst { router } = context\n\tconst showAlerts = ref(false)\n\tconst alertsTab = ref(\"attention\")\n\tconst sidebarCollapsed = ref<boolean | null>(null)\n\tconst editing = ref(false)\n\n\tconst open = (url?: string) => {\n\t\tconst to = appRoute(url)\n\t\tif (to) router.push(to)\n\t}\n\tconst search = useSearch(open)\n\n\tconst forms = computed(() => context.profile.data?.forms || {})\n\tconst customer = ref(\"\")\n\tconst form = ref<Record<string, string>>({})\n\tconst identity = ref<Record<string, string>>({})\n\tconst saved = ref(\"\")\n\tconst saving = ref(false)\n\n\tconst pick = (values: Record<string, string>, fields: string[]) =>\n\t\tObject.fromEntries(fields.map((field) => [field, values[field] || \"\"]))\n\n\tconst fillForm = () => {\n\t\tconst values = forms.value[customer.value] || {}\n\t\tidentity.value = pick(values, ['customer_name', 'customer_type', 'tax_id'])\n\t\tform.value = pick(values, ['email', 'mobile', 'phone', 'address_line1', 'address_line2', 'city', 'state', 'pincode', 'country'])\n\t\tsaved.value = JSON.stringify(form.value)\n\t}\n\twatch(forms, (all) => {\n\t\tif (!(customer.value in all)) customer.value = context.profile.data?.form_customer || \"\"\n\t\tfillForm()\n\t}, { immediate: true })\n\twatch(customer, () => { fillForm(); editing.value = false })\n\n\tconst dirty = computed(() => JSON.stringify(form.value) !== saved.value)\n\tconst edit = () => { editing.value = true }\n\tconst cancel = () => { fillForm(); editing.value = false }\n\n\tconst save = () => {\n\t\tsaving.value = true\n\t\tcall(\"lending.portal.profile.save_profile\", { customer: customer.value, ...form.value })\n\t\t\t.then((result: any) => {\n\t\t\t\ttoast.success(result?.message || \"Your details have been updated.\")\n\t\t\t\tediting.value = false\n\t\t\t\tcontext.profile.reload()\n\t\t\t})\n\t\t\t.catch((error: any) => toast.error(String(error.messages?.[0] || error)))\n\t\t\t.finally(() => { saving.value = false })\n\t}\n\n\treturn { tone, open, showAlerts, alertsTab, sidebarCollapsed, ...search, editing, form, identity, customer, dirty, edit, cancel, save, saving }\n}\n"
+ "script": "import { computed, ref, watch } from \"vue\"\nimport { call, toast } from \"frappe-ui\"\nimport { tone, appRoute, logout as endSession, useSearch } from \"@app/utils/portal\"\n\nexport default function setup(context: any) {\n\tconst { router } = context\n\tconst showAlerts = ref(false)\n\tconst alertsTab = ref(\"attention\")\n\tconst sidebarCollapsed = ref<boolean | null>(null)\n\tconst editing = ref(false)\n\n\tconst open = (url?: string) => {\n\t\tconst to = appRoute(url)\n\t\tif (to) router.push(to)\n\t}\n\tconst logout = () => endSession(router)\n\tconst search = useSearch(open)\n\n\tconst forms = computed(() => context.profile.data?.forms || {})\n\tconst customer = ref(\"\")\n\tconst form = ref<Record<string, string>>({})\n\tconst identity = ref<Record<string, string>>({})\n\tconst saved = ref(\"\")\n\tconst saving = ref(false)\n\n\tconst pick = (values: Record<string, string>, fields: string[]) =>\n\t\tObject.fromEntries(fields.map((field) => [field, values[field] || \"\"]))\n\n\tconst fillForm = () => {\n\t\tconst values = forms.value[customer.value] || {}\n\t\tidentity.value = pick(values, ['customer_name', 'customer_type', 'tax_id'])\n\t\tform.value = pick(values, ['email', 'mobile', 'phone', 'address_line1', 'address_line2', 'city', 'state', 'pincode', 'country'])\n\t\tsaved.value = JSON.stringify(form.value)\n\t}\n\twatch(forms, (all) => {\n\t\tif (!(customer.value in all)) customer.value = context.profile.data?.form_customer || \"\"\n\t\tfillForm()\n\t}, { immediate: true })\n\twatch(customer, () => { fillForm(); editing.value = false })\n\n\tconst dirty = computed(() => JSON.stringify(form.value) !== saved.value)\n\tconst edit = () => { editing.value = true }\n\tconst cancel = () => { fillForm(); editing.value = false }\n\n\tconst save = () => {\n\t\tsaving.value = true\n\t\tcall(\"lending.portal.profile.save_profile\", { customer: customer.value, ...form.value })\n\t\t\t.then((result: any) => {\n\t\t\t\ttoast.success(result?.message || \"Your details have been updated.\")\n\t\t\t\tediting.value = false\n\t\t\t\tcontext.profile.reload()\n\t\t\t})\n\t\t\t.catch((error: any) => toast.error(String(error.messages?.[0] || error)))\n\t\t\t.finally(() => { saving.value = false })\n\t}\n\n\treturn { tone, open, logout, showAlerts, alertsTab, sidebarCollapsed, ...search, editing, form, identity, customer, dirty, edit, cancel, save, saving }\n}\n"
 }

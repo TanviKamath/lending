@@ -58,7 +58,7 @@ def get_loan_detail() -> dict:
 	assert_owns("Loan", name)
 	loan = frappe.db.get_value("Loan", name, DETAIL_FIELDS, as_dict=True)
 
-	payload = shell_payload(loan.loan_product, _("Download statement"), [loan.applicant], [loan])
+	payload = shell_payload(loan.loan_product, _("Download statement"), [loan])
 	payload["crumb"] = loan.loan_product
 	payload["head_note"] = "{0} · {1}".format(loan.name, STATUS_LABELS.get(loan.status, loan.status))
 
@@ -94,7 +94,7 @@ def default_loan() -> str | None:
 
 def no_loan_payload() -> dict:
 	"""The page for a borrower with no loan yet: the frame, and every card empty."""
-	payload = shell_payload(_("Loan account"), _("Apply for a loan"), get_portal_customers(), [])
+	payload = shell_payload(_("Loan account"), _("Apply for a loan"), [])
 	payload.update(
 		{
 			"product": "",

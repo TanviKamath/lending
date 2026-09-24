@@ -1,6 +1,6 @@
 import { computed, ref, watch } from "vue"
 import { call, toast } from "frappe-ui"
-import { tone, appRoute } from "@app/utils/portal"
+import { tone, appRoute, logout as endSession } from "@app/utils/portal"
 
 export default function setup(context: any) {
 	const { router } = context
@@ -28,6 +28,7 @@ export default function setup(context: any) {
 		const to = appRoute(url)
 		if (to) router.push(to)
 	}
+	const logout = () => endSession(router)
 
 	const busy = ref(false)
 	const codeSent = ref(false)
@@ -38,9 +39,18 @@ export default function setup(context: any) {
 	const fail = (error: any) =>
 		toast.error(String(error?.messages?.[0] || error?.message || error))
 
-	const go = (to: number) => { step.value = to }
+	// A confirmed number is not asked for twice: the mobile screen is stepped over in
+	// whichever direction the visitor is going.
+	const go = (to: number) => {
+		if (to === 4 && token.value) to = step.value > 4 ? 3 : 5
+		step.value = to
+	}
 
-	const choose = (type: string) => { applicantType.value = type }
+	// Each type is offered its own products, so a product picked for the other one goes.
+	const choose = (type: string) => {
+		if (type !== applicantType.value) loanProduct.value = ""
+		applicantType.value = type
+	}
 
 	const chooseProduct = (product: string) => { loanProduct.value = product }
 
@@ -89,7 +99,15 @@ export default function setup(context: any) {
 				accountToken.value = result.account_token
 				step.value = 6
 			})
-			.catch(fail)
+			.catch((error: any) => {
+				fail(error)
+				// The proof of the number is gone: verify again, keeping every answer given.
+				if (error?.exc_type !== "VerificationExpiredError") return
+				token.value = ""
+				codeSent.value = false
+				otp.value = ""
+				step.value = 4
+			})
 			.finally(() => { busy.value = false })
 	}
 
@@ -104,5 +122,5 @@ export default function setup(context: any) {
 			.finally(() => { busy.value = false })
 	}
 
-	return { tone, open, showAlerts, alertsTab, sidebarCollapsed, step, applicantType, loanProduct, mobileNumber, otp, employmentType, password, companyName, applicantName, dateOfBirth, pan, applicantCountry, email, loanAmount, proposedTenure, income, busy, codeSent, offer, go, choose, chooseProduct, sendCode, confirmCode, submit, createAccount }
+	return { tone, open, logout, showAlerts, alertsTab, sidebarCollapsed, step, applicantType, loanProduct, mobileNumber, otp, employmentType, password, companyName, applicantName, dateOfBirth, pan, applicantCountry, email, loanAmount, proposedTenure, income, busy, codeSent, offer, go, choose, chooseProduct, sendCode, confirmCode, submit, createAccount }
 }

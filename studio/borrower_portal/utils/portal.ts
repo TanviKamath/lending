@@ -1,6 +1,7 @@
 // Shared by every page's setup() module, as "@app/utils/portal".
 
 import { onScopeDispose, ref, watch } from "vue"
+import { call } from "frappe-ui"
 
 const TONES: Record<string, string> = { ok: "green", warn: "orange", danger: "red" }
 
@@ -21,6 +22,15 @@ export function tone(value?: string): string {
 export function appRoute(url?: string): string {
 	if (!url) return ""
 	return url.replace(/^\/borrower(-portal)?/, "") || "/overview"
+}
+
+// Ends the session and lands on the apply page, the one page a guest can use.
+//
+// A full load rather than router.push: the session and its CSRF token are gone, and
+// every page already open would otherwise keep what it read as the borrower.
+export async function logout(router: any) {
+	await call("logout")
+	window.location.href = router.resolve("/apply").href
 }
 
 const FIND_URL = "/api/method/lending.portal.search.find"

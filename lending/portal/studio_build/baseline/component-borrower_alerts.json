@@ -61,7 +61,7 @@
       "componentProps": {
        "text": "{{ alertsTab === 'attention' ? alerts.data.attention_note : alerts.data.activity_note }}",
        "tag": "p",
-       "fontSize": "text-p-xs"
+       "fontSize": "text-p-sm"
       },
       "componentSlots": {},
       "componentEvents": {},
@@ -141,7 +141,7 @@
             "componentProps": {
              "text": "{{ dataItem.note }}",
              "tag": "p",
-             "fontSize": "text-p-xs"
+             "fontSize": "text-p-sm"
             },
             "componentSlots": {},
             "componentEvents": {},
@@ -176,7 +176,7 @@
           "componentProps": {
            "text": "{{ dataItem.when }}",
            "tag": "p",
-           "fontSize": "text-p-xs"
+           "fontSize": "text-p-sm"
           },
           "componentSlots": {},
           "componentEvents": {},

@@ -17,6 +17,8 @@ from frappe import _
 from frappe.utils import flt, fmt_money, formatdate, getdate, nowdate
 from frappe.website.utils import get_portal_sidebar_items
 
+from lending.portal.brand import brand_style
+
 # Internal risk classification. These never reach a borrower -- see PORTAL_PLAN.md
 # section 6.7: showing someone their own delinquency labels invites a dispute.
 WITHHELD_FROM_BORROWER = (
@@ -235,7 +237,7 @@ def nav_items() -> list[dict]:
 	]
 
 
-def shell_payload(crumb: str, action_label: str, customers: list[str], loans: list[dict]) -> dict:
+def shell_payload(crumb: str, action_label: str, loans: list[dict]) -> dict:
 	return {
 		"as_on": long_date(nowdate()),
 		"nav_items": nav_items(),
@@ -244,11 +246,6 @@ def shell_payload(crumb: str, action_label: str, customers: list[str], loans: li
 		"initials": initials(),
 		"holder_name": holder_name(),
 		"head_note": head_note(),
-		"customer_note": (
-			_("{0} customer records").format(len(customers))
-			if customers
-			else _("No customer record is linked to this login")
-		),
 		**account_status(loans),
 		"crumb": crumb,
 		"action_label": action_label,
@@ -290,7 +287,7 @@ def get_dashboard() -> dict:
 		"schedule_url": one_loan_url(schedule),
 		"activity_note": one_loan_note(_("Last 60 days"), activity),
 	}
-	payload.update(shell_payload(_("Account overview"), _("View payment details"), customers, loans))
+	payload.update(shell_payload(_("Account overview"), _("View payment details"), loans))
 	payload.update(labels())
 	payload.update(build_summary(loans, schedule))
 	payload["tasks"] = waiting_on_borrower(applications)
@@ -327,7 +324,7 @@ def empty_dashboard() -> dict:
 		"tasks_note": "",
 	}
 	payload.update(application_lead([]))
-	payload.update(shell_payload(_("Account overview"), _("View payment details"), [], []))
+	payload.update(shell_payload(_("Account overview"), _("View payment details"), []))
 	payload.update(labels())
 	payload.update(next_action(due_soon=False))
 
@@ -498,7 +495,7 @@ def brand_name() -> str:
 
 
 def brand_payload() -> dict:
-	"""The lender's mark and its grievance address, for every frame that carries one.
+	"""The lender's mark, its colours and its grievance address, for every frame that carries one.
 
 	The pages are written once by the build scripts and these values are read per
 	request, so a page cannot be built knowing whether a logo exists. It carries both
@@ -508,7 +505,13 @@ def brand_payload() -> dict:
 	expression and could invert it, so this is now a convenience rather than a
 	necessity -- it was one when the portal's pages could only test a key.
 	"""
-	settings = portal_settings("portal_brand_name", "portal_logo", "portal_support_email")
+	settings = portal_settings(
+		"portal_brand_name",
+		"portal_logo",
+		"portal_support_email",
+		"portal_primary_color",
+		"portal_secondary_color",
+	)
 	logo = (settings.portal_logo or "").strip()
 	support = (settings.portal_support_email or "").strip()
 
@@ -518,6 +521,7 @@ def brand_payload() -> dict:
 		"show_wordmark": 0 if logo else 1,
 		"support_email": support,
 		"support_href": f"mailto:{support}" if support else "#",
+		"brand_style": brand_style(settings.portal_primary_color, settings.portal_secondary_color),
 	}
 
 
@@ -738,6 +742,9 @@ def get_upcoming_repayments(loans: list[dict], limit: int = 4) -> list[dict]:
 				"detail": _("Principal {0} · Interest {1}").format(
 					money(row.principal_amount), money(row.interest_amount)
 				),
+				# The same two halves apart, for a row that gives each a line.
+				"principal": _("Principal {0}").format(money(row.principal_amount)),
+				"interest": _("Interest {0}").format(money(row.interest_amount)),
 				"amount": money(row.total_payment),
 				"url": loan_url(loan_name),
 			}

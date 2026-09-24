@@ -45,7 +45,7 @@
       "componentId": "borrower_alerts-0-container1-textblock1",
       "componentName": "TextBlock",
       "componentProps": {
-       "fontSize": "text-p-xs",
+       "fontSize": "text-p-sm",
        "tag": "p",
        "text": "{{ alertsTab === 'attention' ? alerts.data.attention_note : alerts.data.activity_note }}"
       },
@@ -97,7 +97,7 @@
             "componentId": "borrower_alerts-0-container1-repeater1-container1-container1-textblock2",
             "componentName": "TextBlock",
             "componentProps": {
-             "fontSize": "text-p-xs",
+             "fontSize": "text-p-sm",
              "tag": "p",
              "text": "{{ dataItem.note }}"
             },
@@ -138,7 +138,7 @@
           "componentId": "borrower_alerts-0-container1-repeater1-container1-textblock1",
           "componentName": "TextBlock",
           "componentProps": {
-           "fontSize": "text-p-xs",
+           "fontSize": "text-p-sm",
            "tag": "p",
            "text": "{{ dataItem.when }}"
           },
@@ -224,13 +224,13 @@
  },
  "component_id": "borrower_alerts",
  "component_name": "Borrower Notifications",
- "creation": "2026-09-24 00:54:36.705806",
+ "creation": "2026-09-24 13:59:27.010312",
  "docstatus": 0,
  "doctype": "Studio Component",
  "idx": 0,
  "inputs": [],
  "is_disabled": 0,
- "modified": "2026-09-24 01:04:43.069394",
+ "modified": "2026-09-24 19:54:15.631247",
  "modified_by": "Administrator",
  "name": "borrower_alerts",
  "owner": "Administrator"

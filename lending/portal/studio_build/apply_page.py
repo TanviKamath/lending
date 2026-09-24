@@ -22,17 +22,22 @@ from lending.portal.studio_build.app import api_resource, page_script, upsert_pa
 from lending.portal.studio_build.blocks import (
 	PANEL,
 	alert,
+	badge,
 	block,
 	button,
-	card,
 	click,
 	column,
 	container,
+	divider,
+	heading,
+	icon,
+	icon_tile,
 	muted,
 	pair_rows,
 	reader,
 	repeater,
 	row,
+	slot,
 	spacer,
 	text,
 )
@@ -53,29 +58,35 @@ STEPS = (
 # Loan Lead.applicant_type. A person borrows in their own name, a company in the
 # company's, and the two are not asked the same questions.
 APPLICANT_TYPES = (
-	("Individual", "Person", "I am borrowing in my own name"),
-	("Business", "Company", "The business borrows, not me"),
+	("Individual", "Person", "I am borrowing in my own name", "user"),
+	("Business", "Company", "The business borrows, not me", "building-2"),
 )
 
 # Loan Lead.employment_type accepts these two and nothing else.
 EMPLOYMENT_TYPES = ("Salaried", "Self-employed")
 
-# Every box on the details screen, and who it is asked of. The last column empty means
-# both. The names are Loan Lead's own, because submit_lead reads them off the request.
+# Every box on the details screen, who it is asked of, and whether submit_lead refuses
+# without it. An empty "who" means both. The names are Loan Lead's own, because
+# submit_lead reads them off the request.
 DETAIL_FIELDS = (
-	("Company name", "companyName", "company_name", "text", "Business"),
-	("Your full name", "applicantName", "applicant_name", "text", ""),
-	("Date of birth", "dateOfBirth", "date_of_birth", "date", "Individual"),
-	("PAN", "pan", "pan", "text", ""),
-	("Country", "applicantCountry", "applicant_country", "text", ""),
-	("Email", "email", "email", "email", ""),
-	("Amount needed", "loanAmount", "loan_amount", "number", ""),
-	("Over how many months", "proposedTenure", "proposed_tenure", "number", ""),
-	("Monthly income", "income", "income", "number", ""),
+	("Company name", "companyName", "company_name", "text", "Business", True),
+	("Your full name", "applicantName", "applicant_name", "text", "", True),
+	("Date of birth", "dateOfBirth", "date_of_birth", "date", "Individual", False),
+	("PAN", "pan", "pan", "text", "", False),
+	("Country", "applicantCountry", "applicant_country", "text", "", False),
+	("Email", "email", "email", "email", "", True),
+	("Amount needed", "loanAmount", "loan_amount", "number", "", True),
+	("Over how many months", "proposedTenure", "proposed_tenure", "number", "", False),
+	("Monthly income", "income", "income", "number", "", False),
 )
 
 
 read_apply = reader(APPLY_SOURCE)
+
+# The opening screen is a landing page and takes the width of one; the questions after it
+# are a form, and keep a form's measure.
+PAGE_WIDTH = "1080px"
+FORM = {"width": "100%", "maxWidth": "720px", "margin": "0 auto"}
 
 APPLY_SCRIPT = '''\tconst busy = ref(false)
 \tconst codeSent = ref(false)
@@ -86,9 +97,18 @@ APPLY_SCRIPT = '''\tconst busy = ref(false)
 \tconst fail = (error: any) =>
 \t\ttoast.error(String(error?.messages?.[0] || error?.message || error))
 
-\tconst go = (to: number) => { step.value = to }
+\t// A confirmed number is not asked for twice: the mobile screen is stepped over in
+\t// whichever direction the visitor is going.
+\tconst go = (to: number) => {
+\t\tif (to === 4 && token.value) to = step.value > 4 ? 3 : 5
+\t\tstep.value = to
+\t}
 
-\tconst choose = (type: string) => { applicantType.value = type }
+\t// Each type is offered its own products, so a product picked for the other one goes.
+\tconst choose = (type: string) => {
+\t\tif (type !== applicantType.value) loanProduct.value = ""
+\t\tapplicantType.value = type
+\t}
 
 \tconst chooseProduct = (product: string) => { loanProduct.value = product }
 
@@ -129,7 +149,15 @@ APPLY_SCRIPT = '''\tconst busy = ref(false)
 \t\t\t\taccountToken.value = result.account_token
 \t\t\t\tstep.value = 6
 \t\t\t})
-\t\t\t.catch(fail)
+\t\t\t.catch((error: any) => {
+\t\t\t\tfail(error)
+\t\t\t\t// The proof of the number is gone: verify again, keeping every answer given.
+\t\t\t\tif (error?.exc_type !== "VerificationExpiredError") return
+\t\t\t\ttoken.value = ""
+\t\t\t\tcodeSent.value = false
+\t\t\t\totp.value = ""
+\t\t\t\tstep.value = 4
+\t\t\t})
 \t\t\t.finally(() => { busy.value = false })
 \t}
 
@@ -144,7 +172,7 @@ APPLY_SCRIPT = '''\tconst busy = ref(false)
 \t\t\t.finally(() => { busy.value = false })
 \t}''' % {
 	"fields": "\n".join(
-		f"\t\t\t{field}: {ref_name}.value," for _label, ref_name, field, _kind, _who in DETAIL_FIELDS
+		f"\t\t\t{field}: {ref_name}.value," for _label, ref_name, field, *_rest in DETAIL_FIELDS
 	)
 }
 
@@ -156,7 +184,7 @@ APPLY_STATE = [
 	("otp", '""'),
 	("employmentType", '"Salaried"'),
 	("password", '""'),
-] + [(ref_name, '""') for _label, ref_name, _field, _kind, _who in DETAIL_FIELDS]
+] + [(ref_name, '""') for _label, ref_name, *_rest in DETAIL_FIELDS]
 
 APPLY_RETURNS = [
 	"busy",
@@ -172,99 +200,306 @@ APPLY_RETURNS = [
 ]
 
 
+def action(label, script, **kwargs):
+	"""The button that calls the server. It spins while the call is out, so a second
+	click cannot send a second code or raise a second lead."""
+	return button(label, script=script, variant="solid", props={"loading": "{{ busy }}"}, **kwargs)
+
+
 def panel(index, title, note, body, back=None, forward=()):
 	"""One screen of the wizard: its question, what it asks for, and the way on."""
 	head = column([text(title, tag="h2", size="text-2xl", styles={"fontWeight": "600"}), muted(note)], gap="4px")
-	nav = row(
-		[
-			*([button("Back", script=f"go({back})")] if back else []),
-			spacer(),
-			*forward,
-		],
-		gap="8px",
-	)
+	buttons = [*([button("Back", script=f"go({back})")] if back else []), spacer(), *forward]
+	nav = row([sized(part) for part in buttons], gap="8px")
 
 	return column(
 		[head, *body, nav],
 		gap="16px",
-		styles=PANEL,
+		styles=dict(PANEL, **FORM),
 		visible="{{ step === %d }}" % index,
 	)
 
 
+def sized(part):
+	"""A wizard button at `md`: the way on is the one thing to press on each screen,
+	and `sm` is the desk's size for a toolbar."""
+	if part["componentName"] != "Button":
+		return part
+
+	return dict(part, componentProps=dict(part["componentProps"], size="md"))
+
+
 def progress():
 	"""How far through the six questions, and which one is being asked."""
+	where = "{{ 'Step ' + (step - 1) + ' of %d · ' + (%s[step - 2] || '') }}" % (len(STEPS), list(STEPS))
+
 	return column(
 		[
 			block("Progress", props={"value": "{{ (step - 1) / %d * 100 }}" % len(STEPS), "size": "sm"}),
-			muted("{{ %s[step - 2] || '' }}" % list(STEPS)),
+			text(where, size="text-sm", styles={"color": "var(--ink-gray-7)"}),
 		],
 		gap="6px",
+		styles=FORM,
 		visible="{{ step > 1 }}",
 	)
 
 
-def tile(label, note, script, chosen):
+RADIO = {
+	"width": "20px",
+	"height": "20px",
+	"flexShrink": "0",
+	"borderRadius": "9999px",
+	"justifyContent": "center",
+}
+
+
+def radio(chosen):
+	"""The mark a choice leaves: an empty ring, or a filled disc with a tick in it."""
+	return [
+		container(
+			[],
+			styles=dict(RADIO, border="1.5px solid var(--outline-gray-3)"),
+			visible="{{ !(%s) }}" % chosen,
+		),
+		row(
+			[icon("check", size=12, stroke=3)],
+			styles=dict(RADIO, backgroundColor="var(--ink-gray-9)", color="var(--surface-base)"),
+			visible="{{ %s }}" % chosen,
+		),
+	]
+
+
+def choice(content, script, chosen, **kwargs):
 	"""A tile is this form's radio button, at the size the question deserves.
 
-	The chosen one wears a badge, because a choice that leaves no mark is not a choice.
-	The Builder page drew that state in a stylesheet keyed off a data attribute; here it
-	is a Badge that says when it is the one.
+	A block's styles cannot follow state, so the chosen look is a layer that appears
+	behind the content: a ring and a tint, drawn outside the border so nothing moves.
+	Hover and press are classes, because an inline style has neither -- and the `!`
+	because PANEL's border is inline, which a plain class can never outrank.
 	"""
-	return column(
+	selected = container(
+		[],
+		styles={
+			"position": "absolute",
+			"inset": "-1px",
+			"borderRadius": "calc(var(--radius-4) + 1px)",
+			"border": "2px solid var(--ink-gray-9)",
+			"backgroundColor": "var(--surface-gray-1)",
+			"pointerEvents": "none",
+		},
+		visible="{{ %s }}" % chosen,
+	)
+	body = row(
+		[*content, spacer(), *radio(chosen)],
+		gap="12px",
+		align="start",
+		styles={"position": "relative", "width": "100%"},
+	)
+
+	return container(
+		[selected, body],
+		styles=dict(PANEL, position="relative", cursor="pointer", userSelect="none", flex="1"),
+		events=click(script),
+		classes=[
+			"transition",
+			"duration-150",
+			"hover:!border-outline-gray-4",
+			"hover:shadow-sm",
+			"active:scale-[0.98]",
+		],
+		**kwargs,
+	)
+
+
+def tile(label, note, glyph_name, script, chosen):
+	"""One answer to who is borrowing."""
+	return choice(
 		[
-			row(
+			icon_tile(glyph_name, tile=40, glyph=20),
+			column(
+				[text(label, size="text-base", styles={"fontWeight": "600"}), muted(note)],
+				gap="2px",
+			),
+		],
+		script,
+		chosen,
+	)
+
+
+def glyph(names, expression, **kwargs):
+	"""The glyph a payload row names, out of the few it may name.
+
+	An icon is SVG written at build time and the row picks it at render time, so this is
+	one block per name, each shown when the row says it.
+	Returns a list, to be spread into the row that carries it.
+	"""
+	return [
+		icon_tile(name, visible="{{ %s === '%s' }}" % (expression, name), **kwargs) for name in names
+	]
+
+
+def fit(low, share, high):
+	"""A length that follows the window's height between two bounds.
+
+	The opening screen is meant to be taken in without scrolling, so its gaps and its
+	headline give way on a short laptop screen and keep the mockup's measure on a tall one.
+	"""
+	return f"clamp({low}px, {share}vh, {high}px)"
+
+
+def hero():
+	"""The promise: what this is, how long it takes, and that it costs nothing to look."""
+	tagline = badge(read_apply("tagline"), size="lg", styles={"alignSelf": "flex-start"})
+	title = text(
+		read_apply("heading"),
+		tag="h1",
+		size="text-5xl",
+		# Studio's type scale stops short of a landing page's headline, so the size is a style.
+		styles={
+			"fontSize": fit(32, 5.6, 48),
+			"fontWeight": "700",
+			"lineHeight": "1.08",
+			"letterSpacing": "-0.02em",
+			"whiteSpace": "pre-line",
+			"color": "var(--ink-gray-9)",
+		},
+		mobile={"fontSize": "2.25rem"},
+	)
+	intro = text(
+		read_apply("intro"),
+		size="text-lg",
+		styles={"maxWidth": "640px", "lineHeight": "1.5", "color": "var(--ink-gray-6)"},
+	)
+	point = row(
+		[
+			*glyph(("chart-no-axes", "shield", "receipt-text"), "dataItem.icon", tile=44, glyph=20),
+			column(
 				[
-					text(label, size="text-base", styles={"fontWeight": "600"}),
-					spacer(),
-					block("Badge", props={"label": "Chosen", "theme": "green", "size": "sm"}, visible=chosen),
+					text("{{ dataItem.title }}", size="text-base", styles={"color": "var(--ink-gray-8)"}),
+					text("{{ dataItem.note }}", size="text-base", styles={"color": "var(--ink-gray-7)"}),
+				],
+				gap="0px",
+			),
+		],
+		gap="16px",
+	)
+	trust = repeater(
+		read_apply("trust_points"),
+		point,
+		data_key="title",
+		styles={"display": "flex", "flexDirection": "row", "columnGap": "36px", "rowGap": "16px", "flexWrap": "wrap"},
+	)
+
+	return column(
+		[tagline, column([title, intro], gap=fit(10, 2, 20)), trust],
+		gap=fit(14, 2.6, 26),
+	)
+
+
+def start_card():
+	"""The one thing to press, on a panel of its own so nothing else competes with it."""
+	# The label goes in the default slot as well as the prop: once a block has any slot,
+	# Studio hands Button an empty default one too, and Button renders that over `label`.
+	apply = button(
+		"Apply now",
+		script="go(2)",
+		variant="solid",
+		props={"size": "lg"},
+		slots={
+			**slot("suffix", [icon("arrow-right", size=16)]),
+			**slot("default", [text("Apply now", tag="span", size="text-lg", styles={"fontWeight": "500"})]),
+		},
+		mobile={"width": "100%"},
+	)
+
+	return row(
+		[
+			icon_tile("file-text", tile=48, glyph=22),
+			column(
+				[
+					heading(read_apply("start_title"), size="text-xl"),
+					text(read_apply("start_note"), size="text-base", styles={"color": "var(--ink-gray-6)"}),
+				],
+				gap="4px",
+				styles={"flex": "1 1 240px"},
+			),
+			apply,
+		],
+		gap="20px",
+		styles=dict(PANEL, padding=f"{fit(16, 2.4, 24)} 24px", borderRadius="var(--radius-6)", flexWrap="wrap"),
+		mobile={"padding": "20px"},
+	)
+
+
+def how_it_works():
+	"""What happens after the button, in the three steps a visitor will see."""
+	number = text(
+		"{{ dataItem.step }}",
+		size="text-sm",
+		styles={
+			"display": "flex",
+			"alignItems": "center",
+			"justifyContent": "center",
+			"flexShrink": "0",
+			"width": "32px",
+			"height": "32px",
+			"borderRadius": "9999px",
+			"fontWeight": "500",
+			"backgroundColor": "var(--surface-gray-2)",
+			"color": "var(--ink-gray-8)",
+		},
+	)
+	step = row(
+		[
+			number,
+			*glyph(
+				("file-text", "search", "percent"),
+				"dataItem.icon",
+				tile=32,
+				glyph=24,
+				styles={"backgroundColor": "transparent", "color": "var(--ink-gray-8)"},
+			),
+			column(
+				[
+					text("{{ dataItem.title }}", size="text-base", styles={"fontWeight": "600"}),
+					text("{{ dataItem.note }}", size="text-sm", styles={"color": "var(--ink-gray-6)", "lineHeight": "1.5"}),
 				],
 				gap="6px",
+				styles={"flex": "1", "minWidth": "0px"},
 			),
-			muted(note),
 		],
-		gap="2px",
-		styles=dict(PANEL, cursor="pointer", flex="1"),
-		events=click(script),
+		gap="16px",
+		align="start",
+		styles=dict(PANEL, padding=f"{fit(14, 2.2, 22)} 16px", borderRadius="var(--radius-6)", flex="1 1 240px"),
+	)
+
+	return column(
+		[
+			column(
+				[
+					heading(read_apply("how_title"), size="text-xl", styles={"fontWeight": "700"}),
+					text(read_apply("how_note"), size="text-base", styles={"color": "var(--ink-gray-6)"}),
+				],
+				gap="2px",
+			),
+			repeater(
+				read_apply("benefits"),
+				step,
+				data_key="step",
+				styles={"display": "flex", "flexDirection": "row", "gap": "16px", "flexWrap": "wrap"},
+			),
+		],
+		gap=fit(12, 1.8, 20),
 	)
 
 
 def opening():
 	"""Screen 1. It asks for nothing: the promise, the three reassurances, one button."""
-	trust = repeater(
-		read_apply("trust_points"),
-		muted("{{ dataItem.label }}"),
-		data_key="label",
-		styles={"display": "flex", "flexDirection": "row", "gap": "16px", "flexWrap": "wrap"},
-	)
-	benefit = column(
-		[
-			text("{{ dataItem.step }}. {{ dataItem.title }}", size="text-base", styles={"fontWeight": "600"}),
-			muted("{{ dataItem.note }}"),
-		],
-		gap="2px",
-		styles=dict(PANEL, flex="1"),
-	)
-
 	return column(
-		[
-			text(read_apply("heading"), tag="h1", size="text-6xl", styles={"fontWeight": "600"}),
-			muted(read_apply("intro")),
-			trust,
-			card(
-				read_apply("start_title"),
-				read_apply("start_note"),
-				button("Apply now", script="go(2)", variant="solid"),
-			),
-			repeater(
-				read_apply("benefits"),
-				benefit,
-				data_key="step",
-				styles={"display": "flex", "flexDirection": "row", "gap": "12px"},
-				mobile={"flexDirection": "column"},
-			),
-		],
-		gap="16px",
+		[hero(), start_card(), divider(), how_it_works()],
+		gap=fit(14, 2.6, 28),
+		# Centred in the height the frame leaves, so a tall window has no empty band below.
+		styles={"marginTop": "auto", "marginBottom": "auto"},
 		visible="{{ step === 1 }}",
 	)
 
@@ -273,11 +508,12 @@ def type_panel():
 	"""Screen 2. It decides what screen 5 asks for, which is why it comes first."""
 	tiles = row(
 		[
-			tile(label, note, f"choose('{value}')", "{{ applicantType === '%s' }}" % value)
-			for value, label, note in APPLICANT_TYPES
+			tile(label, note, glyph_name, f"choose('{value}')", "applicantType === '%s'" % value)
+			for value, label, note, glyph_name in APPLICANT_TYPES
 		],
 		gap="12px",
 		align="stretch",
+		mobile={"flexDirection": "column"},
 	)
 
 	return panel(
@@ -291,34 +527,42 @@ def type_panel():
 
 
 def product_panel():
-	"""Screen 3. Every Loan Product open to the portal, with its rate on it."""
-	product = column(
+	"""Screen 3. Every Loan Product open to the portal and to the applicant type chosen
+	on screen 2, with its rate on it."""
+	product = choice(
 		[
-			row(
+			column(
 				[
 					text("{{ dataItem.label }}", size="text-base", styles={"fontWeight": "600"}),
-					spacer(),
-					block(
-						"Badge",
-						props={"label": "Chosen", "theme": "green", "size": "sm"},
-						visible="{{ loanProduct === dataItem.value }}",
-					),
+					# One expression: Studio renders only the first of several bindings in a string.
+					muted("{{ dataItem.rate + ' ' + dataItem.rate_note + ' · ' + dataItem.kind }}"),
+					muted("Up to {{ dataItem.ceiling }}"),
 				],
-				gap="6px",
-			),
-			muted("{{ dataItem.rate }} {{ dataItem.rate_note }} · {{ dataItem.kind }}"),
-			muted("Up to {{ dataItem.ceiling }}"),
+				gap="2px",
+			)
 		],
-		gap="2px",
-		styles=dict(PANEL, cursor="pointer"),
-		events=click("chooseProduct(dataItem.value)"),
+		"chooseProduct(dataItem.value)",
+		"loanProduct === dataItem.value",
+	)
+	products = repeater(
+		read_apply("products[applicantType]"),
+		product,
+		data_key="value",
+		empty="Nothing is open to this kind of applicant yet",
+		styles={
+			"display": "grid",
+			"gridTemplateColumns": "repeat(2, minmax(0, 1fr))",
+			"gap": "12px",
+			"width": "100%",
+		},
+		mobile={"gridTemplateColumns": "minmax(0, 1fr)"},
 	)
 
 	return panel(
 		3,
 		"What are you looking for?",
 		read_apply("product_note"),
-		[repeater(read_apply("products"), product, data_key="value")],
+		[products],
 		back=2,
 		# Nothing is chosen for the visitor, so the way on waits until they choose.
 		forward=[
@@ -364,8 +608,8 @@ def verify_panel():
 		back=3,
 		# One button, in the same place, whichever half of this screen is showing.
 		forward=[
-			button("Send me a code", script="sendCode()", variant="solid", visible="{{ !codeSent }}"),
-			button("Confirm my number", script="confirmCode()", variant="solid", visible="{{ codeSent }}"),
+			action("Send me a code", "sendCode()", visible="{{ !codeSent }}"),
+			action("Confirm my number", "confirmCode()", visible="{{ codeSent }}"),
 		],
 	)
 
@@ -379,11 +623,12 @@ def details_panel():
 			props={
 				"type": kind,
 				"label": label,
+				"required": required,
 				"modelValue": {"$type": "variable", "name": ref_name},
 			},
 			visible="{{ applicantType === '%s' }}" % who if who else None,
 		)
-		for label, ref_name, _field, kind, who in DETAIL_FIELDS
+		for label, ref_name, _field, kind, who, required in DETAIL_FIELDS
 	]
 	work = block(
 		"FormControl",
@@ -419,7 +664,7 @@ def details_panel():
 		read_apply("details_note"),
 		[chosen, grid],
 		back=4,
-		forward=[button("See my offer", script="submit()", variant="solid")],
+		forward=[action("See my offer", "submit()")],
 	)
 
 
@@ -432,7 +677,8 @@ def offer_panel():
 		[
 			text("{{ offer.headline }}", tag="h3", size="text-xl", styles={"fontWeight": "600"}),
 			muted("{{ offer.message }}"),
-			pair_rows("{{ offer.offer }}", data_key="label"),
+			# A holding message has no figures, and an empty list would say "Nothing to show".
+			pair_rows("{{ offer.offer }}", data_key="label", visible="{{ offer.offer?.length }}"),
 			alert("{{ offer.reference_note }}", visible="{{ offer.reference_note }}"),
 		],
 		forward=[button("Open my account", script="go(7)", variant="solid")],
@@ -456,7 +702,7 @@ def account_panel():
 				},
 			)
 		],
-		forward=[button("Create my account", script="createAccount()", variant="solid")],
+		forward=[action("Create my account", "createAccount()")],
 	)
 
 
@@ -475,7 +721,7 @@ def build_apply():
 	return upsert_page(
 		"Apply for a loan",
 		"/apply",
-		page(read_apply, [("Track an application", "/track"), ("Log in", "/login")], body),
+		page(read_apply, [("Track an application", "/track"), ("Log in", "/login", "user")], body, width=PAGE_WIDTH),
 		[api_resource(APPLY_SOURCE, "lending.portal.apply.get_apply_page")],
 		script=page_script(state=APPLY_STATE, body=APPLY_SCRIPT, returns=APPLY_RETURNS, search=False),
 		allow_guest=True,

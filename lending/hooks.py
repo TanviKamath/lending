@@ -389,3 +389,8 @@ workflow_methods = [
 		"method": "lending.loan_origination.doctype.loan_lead.applicant_exposure.run_live_loan_limit_task"
 	}
 ]
+
+# The /apply tokens are a visitor's proof of a verified number, held in the cache.
+# frappe.clear_cache() deletes every other key on the site -- a migrate, a DocType
+# save, "Reload" -- which would strand everyone half way through the form.
+persistent_cache_keys = ["portal-apply-*"]

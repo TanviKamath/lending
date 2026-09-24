@@ -170,7 +170,7 @@ def get_statement_page() -> dict:
 
 	# No header button on this page -- the download lives inside it, next to the dates
 	# it obeys -- so there is no label for one either.
-	payload = shell_payload(_("Statement of account"), "", customers, loans)
+	payload = shell_payload(_("Statement of account"), "", loans)
 	# The header says which period is on screen; the generic note would not.
 	payload["head_note"] = _("{0} to {1}").format(long_date(from_date), long_date(to_date))
 	payload.update(
@@ -215,9 +215,10 @@ def present_entry(row: dict) -> dict:
 		"amount": money(debit) if debit else money(credit),
 		"direction": _("Charged") if debit else _("Paid"),
 		# One column each, the way a ledger reads, so an entry's side is where it
-		# stands rather than a word beside it. The empty side stays blank.
-		"debit": money(debit) if debit else "",
-		"credit": money(credit) if credit else "",
+		# stands rather than a word beside it. The empty side says N/A, so a blank
+		# cell does not read as a figure that failed to load.
+		"debit": money(debit) if debit else _("N/A"),
+		"credit": money(credit) if credit else _("N/A"),
 		"balance": money(row.get("balance")),
 	}
 
@@ -266,7 +267,7 @@ def get_certificate_page() -> dict:
 
 	# No header button on this page -- the download lives inside it, under the year it
 	# obeys -- so there is no label for one either.
-	payload = shell_payload(_("Interest certificate"), "", customers, loans)
+	payload = shell_payload(_("Interest certificate"), "", loans)
 	payload["head_note"] = _("Financial year {0} · {1}").format(
 		label, _("provisional") if running else _("final")
 	)

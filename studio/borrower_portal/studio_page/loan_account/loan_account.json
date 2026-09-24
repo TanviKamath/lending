@@ -34,8 +34,9 @@
           "flexDirection": "row",
           "flexShrink": "0",
           "gap": "8px",
-          "height": "48px",
+          "height": "48.8px",
           "justifyContent": "center",
+          "marginTop": "-8px",
           "padding": "0 6px"
          },
          "children": [
@@ -61,9 +62,9 @@
           {
            "baseStyles": {
             "alignItems": "center",
-            "backgroundColor": "var(--surface-gray-4)",
+            "backgroundColor": "var(--portal-primary, var(--surface-gray-4))",
             "borderRadius": "6px",
-            "color": "var(--ink-gray-7)",
+            "color": "var(--portal-primary-ink, var(--ink-gray-7))",
             "display": "flex",
             "flexShrink": "0",
             "height": "28px",
@@ -109,8 +110,10 @@
         {
          "baseStyles": {
           "flex": "1 1 0%",
+          "margin": "0 -4px",
           "overflowX": "hidden",
-          "overflowY": "auto"
+          "overflowY": "auto",
+          "padding": "2px 4px"
          },
          "children": [
           {
@@ -118,6 +121,7 @@
            "componentId": "loans-0-sidebar1-div1-div1-sidebaritem1",
            "componentName": "SidebarItem",
            "componentProps": {
+            "active": "{{ typeof route !== 'undefined' && (route.path === '/overview') }}",
             "icon": "lucide-layout-dashboard",
             "label": "Account overview",
             "to": "/overview"
@@ -128,6 +132,7 @@
            "componentId": "loans-0-sidebar1-div1-div1-sidebaritem2",
            "componentName": "SidebarItem",
            "componentProps": {
+            "active": "{{ typeof route !== 'undefined' && (route.path === '/loans' || route.path.startsWith('/loan/')) }}",
             "icon": "lucide-wallet",
             "label": "Loan account",
             "to": "/loans"
@@ -138,6 +143,7 @@
            "componentId": "loans-0-sidebar1-div1-div1-sidebaritem3",
            "componentName": "SidebarItem",
            "componentProps": {
+            "active": "{{ typeof route !== 'undefined' && (route.path === '/applications' || route.path.startsWith('/application/')) }}",
             "icon": "lucide-file-text",
             "label": "Application",
             "to": "/applications"
@@ -148,6 +154,7 @@
            "componentId": "loans-0-sidebar1-div1-div1-sidebaritem4",
            "componentName": "SidebarItem",
            "componentProps": {
+            "active": "{{ typeof route !== 'undefined' && (route.path === '/statement') }}",
             "icon": "lucide-receipt",
             "label": "Statement of account",
             "to": "/statement"
@@ -158,6 +165,7 @@
            "componentId": "loans-0-sidebar1-div1-div1-sidebaritem5",
            "componentName": "SidebarItem",
            "componentProps": {
+            "active": "{{ typeof route !== 'undefined' && (route.path === '/certificate') }}",
             "icon": "lucide-award",
             "label": "Interest certificate",
             "to": "/certificate"
@@ -168,6 +176,7 @@
            "componentId": "loans-0-sidebar1-div1-div1-sidebaritem6",
            "componentName": "SidebarItem",
            "componentProps": {
+            "active": "{{ typeof route !== 'undefined' && (route.path === '/profile') }}",
             "icon": "lucide-user",
             "label": "Personal details",
             "to": "/profile"
@@ -183,44 +192,90 @@
          },
          "children": [
           {
-           "baseStyles": {
-            "display": "flex",
-            "flexDirection": "column",
-            "gap": "2px",
-            "padding": "12px"
+           "children": [],
+           "componentId": "loans-0-sidebar1-div1-div2-dropdown1",
+           "componentName": "Dropdown",
+           "componentProps": {
+            "align": "start",
+            "options": "{{ [{ label: 'Log out', icon: 'lucide-log-out', onClick: () => logout() }] }}",
+            "side": "top"
            },
-           "children": [
-            {
-             "baseStyles": {
-              "fontWeight": "600"
-             },
-             "children": [],
-             "componentId": "loans-0-sidebar1-div1-div2-container1-textblock1",
-             "componentName": "TextBlock",
-             "componentProps": {
-              "fontSize": "text-sm",
-              "tag": "p",
-              "text": "{{ loan.data.holder_name }}"
-             }
-            },
-            {
-             "baseStyles": {
-              "color": "var(--ink-gray-6)"
-             },
-             "children": [],
-             "componentId": "loans-0-sidebar1-div1-div2-container1-textblock2",
-             "componentName": "TextBlock",
-             "componentProps": {
-              "fontSize": "text-p-xs",
-              "tag": "p",
-              "text": "{{ loan.data.customer_note }}"
-             }
+           "componentSlots": {
+            "trigger": {
+             "slotContent": [
+              {
+               "baseStyles": {
+                "alignItems": "center",
+                "borderRadius": "8px",
+                "cursor": "pointer",
+                "display": "flex",
+                "flexDirection": "row",
+                "gap": "8px",
+                "height": "32px",
+                "justifyContent": "center",
+                "padding": "0 6px"
+               },
+               "children": [
+                {
+                 "baseStyles": {
+                  "flexShrink": "0"
+                 },
+                 "children": [],
+                 "classes": [
+                  "portal-avatar"
+                 ],
+                 "componentEvents": {},
+                 "componentId": "loans-0-sidebar1-div1-div2-dropdown1-trigger-container1-avatar1",
+                 "componentName": "Avatar",
+                 "componentProps": {
+                  "label": "{{ loan.data.holder_name || '' }}",
+                  "shape": "circle",
+                  "size": "md"
+                 },
+                 "componentSlots": {},
+                 "mobileStyles": {},
+                 "tabletStyles": {}
+                },
+                {
+                 "baseStyles": {
+                  "color": "var(--ink-gray-7)",
+                  "flex": "1 1 0%",
+                  "minWidth": "0px",
+                  "overflow": "hidden",
+                  "textOverflow": "ellipsis",
+                  "whiteSpace": "nowrap"
+                 },
+                 "children": [],
+                 "componentEvents": {},
+                 "componentId": "loans-0-sidebar1-div1-div2-dropdown1-trigger-container1-textblock1",
+                 "componentName": "TextBlock",
+                 "componentProps": {
+                  "fontSize": "text-sm",
+                  "tag": "p",
+                  "text": "{{ loan.data.holder_name || '' }}"
+                 },
+                 "componentSlots": {},
+                 "mobileStyles": {},
+                 "tabletStyles": {},
+                 "visibilityCondition": "{{ typeof sidebarCollapsed === 'undefined' || !sidebarCollapsed }}"
+                }
+               ],
+               "classes": [
+                "hover:bg-surface-gray-2"
+               ],
+               "componentEvents": {},
+               "componentId": "loans-0-sidebar1-div1-div2-dropdown1-trigger-container1",
+               "componentName": "container",
+               "componentProps": {},
+               "componentSlots": {},
+               "mobileStyles": {},
+               "originalElement": "div",
+               "tabletStyles": {}
+              }
+             ],
+             "slotName": "trigger"
             }
-           ],
-           "componentId": "loans-0-sidebar1-div1-div2-container1",
-           "componentName": "container",
-           "originalElement": "div",
-           "visibilityCondition": "{{ typeof sidebarCollapsed === 'undefined' || !sidebarCollapsed }}"
+           }
           }
          ],
          "componentId": "loans-0-sidebar1-div1-div2",
@@ -320,7 +375,7 @@
          "baseStyles": {
           "backgroundColor": "var(--surface-base)",
           "borderColor": "var(--outline-gray-2)",
-          "borderRadius": "0.5rem",
+          "borderRadius": "var(--radius-4)",
           "borderStyle": "solid",
           "borderWidth": "1px",
           "display": "flex",
@@ -340,9 +395,9 @@
             {
              "baseStyles": {
               "alignItems": "center",
-              "backgroundColor": "var(--surface-blue-2)",
+              "backgroundColor": "var(--surface-gray-2)",
               "borderRadius": "var(--radius-5)",
-              "color": "var(--ink-blue-7)",
+              "color": "var(--ink-gray-7)",
               "display": "flex",
               "flex": "0 0 auto",
               "height": "40px",
@@ -384,7 +439,7 @@
                "componentId": "loans-0-container1-container1-container1-container1-container1-textblock2",
                "componentName": "TextBlock",
                "componentProps": {
-                "fontSize": "text-p-xs",
+                "fontSize": "text-p-sm",
                 "tag": "p",
                 "text": "{{ loan.data.summary_note }}"
                }
@@ -711,7 +766,7 @@
                      "componentId": "loans-0-container1-container1-container1-container2-container2-container1-container1-container1-textblock3",
                      "componentName": "TextBlock",
                      "componentProps": {
-                      "fontSize": "text-p-xs",
+                      "fontSize": "text-p-sm",
                       "tag": "p",
                       "text": "{{ loan.data.terms.frequency }}"
                      },
@@ -856,7 +911,7 @@
                      "componentId": "loans-0-container1-container1-container1-container2-container2-container1-container2-container1-textblock3",
                      "componentName": "TextBlock",
                      "componentProps": {
-                      "fontSize": "text-p-xs",
+                      "fontSize": "text-p-sm",
                       "tag": "p",
                       "text": "{{ loan.data.terms.written_off }}"
                      },
@@ -985,40 +1040,39 @@
              "baseStyles": {
               "backgroundColor": "var(--surface-base)",
               "borderColor": "var(--outline-gray-2)",
-              "borderRadius": "var(--radius-5)",
+              "borderRadius": "var(--radius-4)",
               "borderStyle": "solid",
               "borderWidth": "1px",
               "display": "flex",
               "flex": "1 1 auto",
               "flexDirection": "column",
               "gap": "20px",
-              "padding": "22px"
+              "padding": "20px"
              },
              "children": [
               {
                "baseStyles": {
-                "alignItems": "center",
+                "alignItems": "start",
                 "display": "flex",
                 "flexDirection": "row",
-                "gap": "20px"
+                "gap": "12px"
                },
                "children": [
                 {
                  "baseStyles": {
                   "alignItems": "center",
-                  "backgroundColor": "var(--surface-green-1)",
-                  "borderRadius": "var(--radius-full)",
+                  "backgroundColor": "var(--surface-gray-2)",
+                  "borderRadius": "var(--radius-5)",
+                  "color": "var(--ink-gray-7)",
                   "display": "flex",
                   "flex": "0 0 auto",
-                  "height": "48px",
+                  "height": "40px",
                   "justifyContent": "center",
-                  "width": "48px"
+                  "width": "40px"
                  },
                  "children": [
                   {
                    "baseStyles": {
-                    "color": "var(--ink-green-8)",
-                    "fontSize": "27px",
                     "fontWeight": "500",
                     "letterSpacing": "0",
                     "lineHeight": "1"
@@ -1027,7 +1081,7 @@
                    "componentId": "loans-0-container1-container1-container2-container1-container1-container1-container1-textblock1",
                    "componentName": "TextBlock",
                    "componentProps": {
-                    "fontSize": "text-2xl",
+                    "fontSize": "text-xl",
                     "tag": "div",
                     "text": "\u20b9"
                    }
@@ -1041,7 +1095,7 @@
                  "baseStyles": {
                   "display": "flex",
                   "flexDirection": "column",
-                  "gap": "6px"
+                  "gap": "2px"
                  },
                  "children": [
                   {
@@ -1067,7 +1121,7 @@
                    "componentId": "loans-0-container1-container1-container2-container1-container1-container1-container2-textblock2",
                    "componentName": "TextBlock",
                    "componentProps": {
-                    "fontSize": "text-p-xs",
+                    "fontSize": "text-p-sm",
                     "tag": "p",
                     "text": "Total amount required to close this loan."
                    }
@@ -1084,12 +1138,9 @@
               },
               {
                "baseStyles": {
-                "backgroundColor": "var(--surface-green-1)",
-                "borderRadius": "var(--radius-5)",
                 "display": "flex",
                 "flexDirection": "column",
-                "gap": "0px",
-                "padding": "20px 22px 18px"
+                "gap": "0px"
                },
                "children": [
                 {
@@ -1144,8 +1195,6 @@
               },
               {
                "baseStyles": {
-                "fontSize": "13px",
-                "height": "34px",
                 "width": "100%"
                },
                "children": [],
@@ -1186,48 +1235,48 @@
              "baseStyles": {
               "backgroundColor": "var(--surface-base)",
               "borderColor": "var(--outline-gray-2)",
-              "borderRadius": "var(--radius-5)",
+              "borderRadius": "var(--radius-4)",
               "borderStyle": "solid",
               "borderWidth": "1px",
               "display": "flex",
               "flex": "1 1 auto",
               "flexDirection": "column",
               "gap": "20px",
-              "padding": "22px"
+              "padding": "20px"
              },
              "children": [
               {
                "baseStyles": {
-                "alignItems": "center",
+                "alignItems": "start",
                 "display": "flex",
                 "flexDirection": "row",
-                "gap": "20px"
+                "gap": "12px"
                },
                "children": [
                 {
                  "baseStyles": {
                   "alignItems": "center",
-                  "backgroundColor": "var(--surface-purple-1)",
-                  "borderRadius": "var(--radius-full)",
-                  "color": "var(--ink-purple-7)",
+                  "backgroundColor": "var(--surface-gray-2)",
+                  "borderRadius": "var(--radius-5)",
+                  "color": "var(--ink-gray-7)",
                   "display": "flex",
                   "flex": "0 0 auto",
-                  "height": "48px",
+                  "height": "40px",
                   "justifyContent": "center",
-                  "width": "48px"
+                  "width": "40px"
                  },
                  "children": [],
                  "componentId": "loans-0-container1-container1-container2-container2-container1-container1-html1",
                  "componentName": "HTML",
                  "componentProps": {
-                  "html": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z\"/><path d=\"M14 2v5a1 1 0 0 0 1 1h5\"/><path d=\"M10 9H8\"/><path d=\"M16 13H8\"/><path d=\"M16 17H8\"/></svg>"
+                  "html": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z\"/><path d=\"M14 2v5a1 1 0 0 0 1 1h5\"/><path d=\"M10 9H8\"/><path d=\"M16 13H8\"/><path d=\"M16 17H8\"/></svg>"
                  }
                 },
                 {
                  "baseStyles": {
                   "display": "flex",
                   "flexDirection": "column",
-                  "gap": "6px"
+                  "gap": "2px"
                  },
                  "children": [
                   {
@@ -1253,7 +1302,7 @@
                    "componentId": "loans-0-container1-container1-container2-container2-container1-container1-container1-textblock2",
                    "componentName": "TextBlock",
                    "componentProps": {
-                    "fontSize": "text-p-xs",
+                    "fontSize": "text-p-sm",
                     "tag": "p",
                     "text": "Additional charges applicable on this loan."
                    }
@@ -1269,11 +1318,6 @@
                "originalElement": "div"
               },
               {
-               "baseStyles": {
-                "backgroundColor": "var(--surface-gray-1)",
-                "borderRadius": "var(--radius-5)",
-                "padding": "6px 18px"
-               },
                "children": [
                 {
                  "baseStyles": {
@@ -1313,7 +1357,7 @@
                      "componentId": "loans-0-container1-container1-container2-container2-container1-repeater1-container1-container1-textblock2",
                      "componentName": "TextBlock",
                      "componentProps": {
-                      "fontSize": "text-p-xs",
+                      "fontSize": "text-p-sm",
                       "tag": "p",
                       "text": "{{ dataItem.detail }}"
                      },
@@ -1377,21 +1421,21 @@
                 {
                  "baseStyles": {
                   "alignItems": "center",
-                  "backgroundColor": "var(--surface-gray-1)",
-                  "borderRadius": "var(--radius-full)",
-                  "color": "var(--ink-gray-6)",
+                  "backgroundColor": "var(--surface-gray-2)",
+                  "borderRadius": "var(--radius-5)",
+                  "color": "var(--ink-gray-7)",
                   "display": "flex",
                   "flex": "0 0 auto",
-                  "height": "48px",
+                  "height": "40px",
                   "justifyContent": "center",
                   "marginBottom": "10px",
-                  "width": "48px"
+                  "width": "40px"
                  },
                  "children": [],
                  "componentId": "loans-0-container1-container1-container2-container2-container1-container2-html1",
                  "componentName": "HTML",
                  "componentProps": {
-                  "html": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z\"/><path d=\"M14 2v5a1 1 0 0 0 1 1h5\"/></svg>"
+                  "html": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z\"/><path d=\"M14 2v5a1 1 0 0 0 1 1h5\"/></svg>"
                  }
                 },
                 {
@@ -1417,7 +1461,7 @@
                  "componentId": "loans-0-container1-container1-container2-container2-container1-container2-textblock2",
                  "componentName": "TextBlock",
                  "componentProps": {
-                  "fontSize": "text-p-xs",
+                  "fontSize": "text-p-sm",
                   "tag": "p",
                   "text": "Any processing fees or other charges will appear here."
                  }
@@ -1474,18 +1518,32 @@
      "componentId": "loans-0-container1",
      "componentName": "container",
      "originalElement": "div"
+    },
+    {
+     "baseStyles": {
+      "display": "none"
+     },
+     "children": [],
+     "componentId": "loans-0-html1",
+     "componentName": "HTML",
+     "componentProps": {
+      "html": "{{ loan.data.brand_style || '' }}"
+     }
     }
+   ],
+   "classes": [
+    "borrower-portal"
    ],
    "componentId": "loans-0",
    "componentName": "div",
    "originalElement": "body"
   }
  ],
- "creation": "2026-09-24 00:54:37.183489",
+ "creation": "2026-09-24 20:50:29.023952",
  "doctype": "Studio Page",
  "frappe_app": "lending",
  "is_standard": 1,
- "modified": "2026-09-24 02:22:04.534170",
+ "modified": "2026-09-24 22:47:53.746522",
  "modified_by": "Administrator",
  "name": "loan_account",
  "owner": "Administrator",

@@ -14,7 +14,9 @@ Almost nothing here sets a colour, a border or a font. The Builder portal carrie
 own design system -- some thirty CSS custom properties driven by Lending Settings --
 and the Studio pages deliberately do not: they take frappe-ui's own appearance first,
 so what is on the canvas is a component to restyle rather than a div already painted.
-Only layout (flex, gap, padding, width) is written here.
+Only layout (flex, gap, padding, width) is written here. The exception is the lender's
+two colours, which a handful of blocks read as `var(--portal-primary, ...)` -- see
+lending.portal.brand.
 
 A value in a prop can be a `{{ }}` expression, evaluated against the page's data
 sources, its script's return value, and `route`/`router`. That is how a block reads
@@ -141,10 +143,21 @@ def root(children, direction="row"):
 				"scrollbarColor": "var(--outline-gray-3) transparent",
 			},
 			children=children,
+			# What lending.portal.brand scopes its button rule to.
+			classes=["borrower-portal"],
 			originalElement="body",
 			blockName="body",
 		)
 	]
+
+
+def brand_style(expression):
+	"""The lender's colours, as a stylesheet: see lending.portal.brand.
+
+	Hidden, and still applied. Read through `fallback` because the canvas never resolves
+	the source, and a page is built once while the colours are read per request.
+	"""
+	return block("HTML", props={"html": fallback(expression, "''")}, styles={"display": "none"})
 
 
 def container(children=None, styles=None, **kwargs):
@@ -182,11 +195,15 @@ def heading(value, tag="h2", size="text-lg", **kwargs):
 
 
 def muted(value, **kwargs):
-	"""The quieter second line under a heading or a row."""
+	"""The quieter second line under a heading or a row.
+
+	`text-p-sm`, not `-xs`: a borrower reads these lines -- a reference, a due date --
+	and 12px grey is too small to take in at a glance.
+	"""
 	styles = {"color": "var(--ink-gray-6)"}
 	styles.update(kwargs.pop("styles", None) or {})
 
-	return text(value, size="text-p-xs", styles=styles, **kwargs)
+	return text(value, size="text-p-sm", styles=styles, **kwargs)
 
 
 def subject(value, **kwargs):
@@ -229,12 +246,19 @@ ICON_PATHS = {
 		'A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/>'
 		'<path d="M14 2v5a1 1 0 0 0 1 1h5"/>'
 	),
+	"file-search-corner": (
+		'<path d="M11.1 22H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.706.706l3.589 3.588'
+		'A2.4 2.4 0 0 1 20 8v3.25"/>'
+		'<path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="m21 22-2.88-2.88"/>'
+		'<circle cx="16" cy="17" r="3"/>'
+	),
 	"chevron-right": '<path d="m9 18 6-6-6-6"/>',
 	"search": '<path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/>',
 	"arrow-up": '<path d="m5 12 7-7 7 7"/><path d="M12 19V5"/>',
 	"arrow-down": '<path d="M12 5v14"/><path d="m19 12-7 7-7-7"/>',
 	"corner-down-left": '<path d="M20 4v7a4 4 0 0 1-4 4H4"/><path d="m9 10-5 5 5 5"/>',
 	"check": '<path d="M20 6 9 17l-5-5"/>',
+	"x": '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
 	"percent": (
 		'<line x1="19" x2="5" y1="5" y2="19"/>'
 		'<circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/>'
@@ -261,9 +285,29 @@ ICON_PATHS = {
 		'a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351'
 		'a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384"/>'
 	),
+	"chart-no-axes": (
+		'<path d="M5 21v-6"/><path d="M10 21v-9"/><path d="M15 21V9"/><path d="M20 21V5"/>'
+	),
+	"shield": (
+		'<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1'
+		'c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>'
+	),
+	"receipt-text": (
+		'<path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/>'
+		'<path d="M14 8H8"/><path d="M16 12H8"/><path d="M13 16H8"/>'
+	),
+	"arrow-right": '<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>',
+	"arrow-left": '<path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>',
 	"map-pin": (
 		'<path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993'
 		' 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/>'
+	),
+	"user": '<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+	"building-2": (
+		'<path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/>'
+		'<path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/>'
+		'<path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/>'
+		'<path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/>'
 	),
 }
 
@@ -272,12 +316,6 @@ SVG = (
 	' fill="none" stroke="currentColor" stroke-width="{stroke}" stroke-linecap="round"'
 	' stroke-linejoin="round">{paths}</svg>'
 )
-
-# A payload tone -- "", "ok", "warn", "danger" -- as the frappe-ui colour a tile tints
-# itself in. The same map as the page script's `tone()`, kept here because a tile picks
-# its colour at build time and that one answers at render time. See toned_tile.
-TILE_THEMES = {"": "gray", "ok": "green", "warn": "orange", "danger": "red"}
-
 
 def icon(name, size=16, stroke=2, hint=None, **kwargs):
 	"""One glyph, drawn at `size` and painted by whatever colour it inherits.
@@ -321,15 +359,24 @@ def icon_line(name, value, size=14, **kwargs):
 def icon_tile(name, theme="gray", tile=40, glyph=20, **kwargs):
 	"""A glyph on a tinted square: what a card about a record or a figure leads with.
 
-	The one place besides PANEL that names a colour, and for the same reason -- a tile
-	that does not tint itself is not a tile. Both halves come from the theme, so the
-	tile reads as the quiet form of the badge beside it.
+	Grey unless `theme` names a status. A tile tinted for decoration competes with the
+	badges and trackers, where colour means something.
+	"""
+	styles = dict(tile_styles(theme, tile), **(kwargs.pop("styles", None) or {}))
+
+	return icon(name, size=glyph, styles=styles, **kwargs)
+
+
+def tile_styles(theme="gray", tile=40):
+	"""A tile's square, for a tile that holds something other than a glyph.
 
 	Rounded to `--radius-5` rather than to a circle. A disc reads as a person, which is
-	what an Avatar is for; these stand for a document and an amount, and the card they
-	lead has square corners of its own.
+	what an Avatar is for; these stand for a document and an amount.
 	"""
-	styles = {
+	return {
+		"display": "flex",
+		"alignItems": "center",
+		"flex": "0 0 auto",
 		"width": f"{tile}px",
 		"height": f"{tile}px",
 		"justifyContent": "center",
@@ -337,23 +384,6 @@ def icon_tile(name, theme="gray", tile=40, glyph=20, **kwargs):
 		"backgroundColor": f"var(--surface-{theme}-2)",
 		"color": f"var(--ink-{theme}-7)",
 	}
-	styles.update(kwargs.pop("styles", None) or {})
-
-	return icon(name, size=glyph, styles=styles, **kwargs)
-
-
-def toned_tile(name, tone_expression):
-	"""The same tile in every tone, with the payload choosing which one renders.
-
-	A tile cannot read its tone the way `toned_badge` does: only a block's props are
-	evaluated as expressions, and a tint is a style. So this is one block per tone,
-	each shown by the condition that names it -- four blocks in the tree, one on the
-	page. Returns a list, to be spread into the row that carries it.
-	"""
-	return [
-		icon_tile(name, theme, visible="{{ (%s || '') === '%s' }}" % (tone_expression, value))
-		for value, theme in TILE_THEMES.items()
-	]
 
 
 # --- components -----------------------------------------------------------------------
@@ -386,31 +416,7 @@ def button(label, script=None, variant="subtle", **kwargs):
 def alert(message, theme="blue", **kwargs):
 	"""A quiet panel of guidance, shown only when the data supplies one."""
 	return block("Alert", props={"title": message, "theme": theme}, **kwargs)
-def breadcrumb_trail(items, **kwargs):
-	children = []
-	for i, item in enumerate(items):
-		if item.get("route"):
-			children.append(
-				button(
-					item["label"],
-					variant="ghost",
-					script=f"open('{item['route']}')",
-					props={"size": "sm"},
-					styles={"padding": "4px 8px"}
-				)
-			)
-		else:
-			children.append(
-				text(
-					item["label"],
-					size="text-sm",
-					styles={"fontWeight": "500", "padding": "4px 8px"}
-				)
-			)
-		if i < len(items) - 1:
-			children.append(text("/", size="text-sm", styles={"color": "var(--ink-gray-4)"}))
 
-	return row(children, gap="4px", styles={"alignItems": "center"}, **kwargs)
 
 
 def divider(**kwargs):
@@ -467,7 +473,8 @@ ROW_PADDING = {
 HEADER_BAND = {
 	"height": "36px",
 	"borderRadius": "var(--radius-4)",
-	"backgroundColor": "var(--surface-gray-2)",
+	# A wash of the lender's button colour, and frappe-ui's grey where none is set.
+	"backgroundColor": "var(--portal-action-soft, var(--surface-gray-2))",
 	"--outline-gray-1": "transparent",
 	"marginBottom": "10px",
 }
@@ -522,7 +529,9 @@ def record_list(columns, items, cells, row_key="name", script=None):
 		children=[
 			block(
 				"ListHeaderCell",
-				children=[text(column[1], size="text-sm", styles={"color": "var(--ink-gray-5)"})],
+				children=[
+					text(column[1], size="text-sm", styles={"color": "var(--portal-action-deep, var(--ink-gray-5))"})
+				],
 				styles=aligned(None, end),
 			)
 			for column, end in zip(columns, ends)
@@ -643,7 +652,8 @@ def tab_strip(tabs, state):
 	Not the Tabs component, which renders its panel slot once for whichever tab is open --
 	so every panel under it would draw at once. The look is copied from its source: 14px
 	labels 20px apart, grey-5 until open and grey-9 once it is, and a 2px bar in
-	surface-gray-10 standing on the rule under the open one.
+	surface-gray-10 standing on the rule under the open one -- or in the lender's brand
+	colour, where one is set.
 
 	`tabs` is (label, value) pairs and `state` the page ref that holds the open value.
 	A label's colour is a style, and only props are evaluated, so each label is in the
@@ -668,7 +678,7 @@ def tab_strip(tabs, state):
 						"bottom": "0px",
 						"height": "2px",
 						"borderRadius": "9999px",
-						"backgroundColor": "var(--surface-gray-10)",
+						"backgroundColor": "var(--portal-primary, var(--surface-gray-10))",
 					},
 					visible="{{ %s }}" % is_open,
 				),
@@ -702,7 +712,7 @@ PANEL = {
 	"borderWidth": "1px",
 	"borderStyle": "solid",
 	"borderColor": "var(--outline-gray-2)",
-	"borderRadius": "0.5rem",
+	"borderRadius": "var(--radius-4)",
 	"backgroundColor": "var(--surface-base)",
 }
 
@@ -792,18 +802,20 @@ def stat(
 		styles={"flex": "1 1 auto", "minWidth": "0px"},
 	)
 	cursor, opens = pressable(script)
-	children = ([icon_tile(icon_name, "blue")] if icon_name else []) + [lines]
+	children = ([icon_tile(icon_name)] if icon_name else []) + [lines]
 
 	return row(children, gap="12px", align="start", styles=dict(PANEL, flex="1", **cursor), **opens)
 
 
-def record_stat(icon_name, tone_expression, lines, script=None):
+def record_stat(icon_name, lines, script=None):
 	"""A card the size of a stat, standing on a record instead of a figure.
 
 	What a borrower reads off an application is its name, its stage and the day it was
 	raised -- four short lines, none of which is a number. Drawn as a stat they are a
-	4xl product name pretending to be an amount, so this leads with a tile in the
-	stage's own colour and lets the lines stay the size they are.
+	4xl product name pretending to be an amount, so this leads with a tile and lets the
+	lines stay the size they are. The tile is the plain grey one the figure cards beside
+	it wear: the stage already says its colour on its own badge, and a green tile beside
+	two grey ones read as the one card that was different in kind.
 
 	`lines` is whatever the page stacks beside the tile, top to bottom. The tile sits at
 	the top of them rather than in the middle, as it does on the figure cards beside it:
@@ -817,7 +829,7 @@ def record_stat(icon_name, tone_expression, lines, script=None):
 
 	return row(
 		[
-			*toned_tile(icon_name, tone_expression),
+			icon_tile(icon_name),
 			column(lines, gap="2px", styles={"flex": "1 1 auto", "minWidth": "0px"}),
 		],
 		gap="12px",

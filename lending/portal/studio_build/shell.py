@@ -30,6 +30,7 @@ from lending.portal.studio_build.blocks import (
 	any_row,
 	badge,
 	block,
+	brand_style,
 	button,
 	click,
 	column,
@@ -41,6 +42,7 @@ from lending.portal.studio_build.blocks import (
 	repeater,
 	root,
 	row,
+	slot,
 	spacer,
 	text,
 )
@@ -109,13 +111,16 @@ CRUMB_BOX = {"display": "flex", "alignItems": "center", "padding": "4px 2px"}
 # the Builder ones (/borrower/loans), the menu is marked current from the request path,
 # and a Studio page's request is an API call rather than the page itself. So the rows
 # are declared once, here, and a page added is a line here plus a rebuild.
+#
+# The last column is the detail page a row stays lit on, where it has one: a loan read
+# at /loan/<name> is still "Loan account".
 NAV_ITEMS = (
-	("Account overview", "/overview", "layout-dashboard"),
-	("Loan account", "/loans", "wallet"),
-	("Application", "/applications", "file-text"),
-	("Statement of account", "/statement", "receipt"),
-	("Interest certificate", "/certificate", "award"),
-	("Personal details", "/profile", "user"),
+	("Account overview", "/overview", "layout-dashboard", None),
+	("Loan account", "/loans", "wallet", "/loan/"),
+	("Application", "/applications", "file-text", "/application/"),
+	("Statement of account", "/statement", "receipt", None),
+	("Interest certificate", "/certificate", "award", None),
+	("Personal details", "/profile", "user", None),
 )
 
 # Whether the rail is open, as every block in it has to ask.
@@ -181,8 +186,8 @@ def brand(data):
 			alignItems="center",
 			justifyContent="center",
 			textTransform="uppercase",
-			backgroundColor="var(--surface-gray-4)",
-			color="var(--ink-gray-7)",
+			backgroundColor="var(--portal-primary, var(--surface-gray-4))",
+			color="var(--portal-primary-ink, var(--ink-gray-7))",
 		),
 		visible="{{ %s.show_wordmark }}" % data,
 	)
@@ -205,7 +210,8 @@ def brand(data):
 		visible=EXPANDED,
 	)
 
-	# 48px tall, so the mark sits in the same band as the page header beside it, and 6px
+	# The header's own 48.8px, pulled up over the rail's 8px of top padding, so the mark
+	# sits in the same band as the page header beside it. 6px
 	# in from a rail already padded 8, which is where SidebarHeader's own px-1 + px-1.5
 	# put it. Shut, those 6px leave less room than the mark needs and it overflows them
 	# evenly either side -- which is the rail's centre, 8 + 6 + 10 of 48.
@@ -216,7 +222,13 @@ def brand(data):
 	return row(
 		[logo, letter, name],
 		gap="8px",
-		styles={"height": "48px", "flexShrink": "0", "justifyContent": "center", "padding": "0 6px"},
+		styles={
+			"height": "48.8px",
+			"marginTop": "-8px",
+			"flexShrink": "0",
+			"justifyContent": "center",
+			"padding": "0 6px",
+		},
 	)
 
 
@@ -268,6 +280,62 @@ def collapse_toggle():
 	)
 
 
+def account_menu(data):
+	"""Who is signed in, and the menu that signs them out, as the desk's own foot has it.
+
+	The avatar and the name are the Dropdown's trigger slot. Studio forwards the trigger's
+	handlers onto the slot's one block, so the row itself is what opens the menu. Shut,
+	the name leaves the rail and the avatar is centred in the 48px that remain.
+
+	The options are an expression rather than a list, because an option's `onClick` is a
+	function and a block's props are JSON. Only the click calls `logout`, so the canvas,
+	where the page script is never loaded, still draws the menu.
+	"""
+	holder = fallback("{{ %s.holder_name }}" % data, "''")
+	avatar = block(
+		"Avatar",
+		props={"label": holder, "size": "md", "shape": "circle"},
+		styles={"flexShrink": "0"},
+		# What lending.portal.brand washes in the lender's primary colour.
+		classes=["portal-avatar"],
+	)
+	name = text(
+		holder,
+		size="text-sm",
+		styles={
+			"flex": "1 1 0%",
+			"minWidth": "0px",
+			"color": "var(--ink-gray-7)",
+			"overflow": "hidden",
+			"textOverflow": "ellipsis",
+			"whiteSpace": "nowrap",
+		},
+		visible=EXPANDED,
+	)
+	trigger = row(
+		[avatar, name],
+		gap="8px",
+		classes=["hover:bg-surface-gray-2"],
+		styles={
+			"height": "32px",
+			"padding": "0 6px",
+			"borderRadius": "8px",
+			"cursor": "pointer",
+			"justifyContent": "center",
+		},
+	)
+
+	return block(
+		"Dropdown",
+		props={
+			"options": "{{ [{ label: 'Log out', icon: 'lucide-log-out', onClick: () => logout() }] }}",
+			"side": "top",
+			"align": "start",
+		},
+		slots=slot("trigger", [trigger]),
+	)
+
+
 def sidebar(data):
 	"""The list of pages, and whose portal it is.
 
@@ -284,19 +352,12 @@ def sidebar(data):
 	has no dock, so a rail that left would leave nothing to press to bring it back; it
 	keeps frappe-ui's 48px of icons instead, and the disc rides along on that.
 	"""
-	foot = column(
-		[
-			text("{{ %s.holder_name }}" % data, size="text-sm", styles={"fontWeight": "600"}),
-			muted("{{ %s.customer_note }}" % data),
-		],
-		gap="2px",
-		styles={"padding": "12px"},
-		visible=EXPANDED,
-	)
-
 	nav_items = [
-		block("SidebarItem", props={"label": title, "icon": "lucide-%s" % icon, "to": route})
-		for title, route, icon in NAV_ITEMS
+		block(
+			"SidebarItem",
+			props={"label": title, "icon": "lucide-%s" % icon, "to": route, "active": is_current(route, detail)},
+		)
+		for title, route, icon, detail in NAV_ITEMS
 	]
 
 	sidebar_children = [
@@ -305,12 +366,21 @@ def sidebar(data):
 			styles={"display": "flex", "height": "100%", "flexDirection": "column", "padding": "0.5rem"},
 			children=[
 				brand(data),
+				# The list clips, so the current row's shadow would be cut flat at its
+				# edges. The padding is room for the shadow inside the clip, and the
+				# negative margin hands it back so the rows stay where they were.
 				block(
 					"div",
-					styles={"flex": "1 1 0%", "overflowY": "auto", "overflowX": "hidden"},
+					styles={
+						"flex": "1 1 0%",
+						"overflowY": "auto",
+						"overflowX": "hidden",
+						"margin": "0 -4px",
+						"padding": "2px 4px",
+					},
 					children=nav_items,
 				),
-				block("div", styles={"marginTop": "auto"}, children=[foot]),
+				block("div", styles={"marginTop": "auto"}, children=[account_menu(data)]),
 			],
 		),
 		collapse_toggle(),
@@ -338,6 +408,19 @@ def sidebar(data):
 		},
 		mobile={"display": "none"},
 	)
+
+
+def is_current(route, detail=None):
+	"""Whether a row is the page being read, which SidebarItem draws raised in white.
+
+	Said outright rather than left to SidebarItem's own guess from `to`, which compares
+	route names and so goes dark on a loan's own page. `typeof` guards the canvas, which
+	has no `route` in scope; see EXPANDED.
+	"""
+	condition = "route.path === '%s'" % route
+	if detail:
+		condition += " || route.path.startsWith('%s')" % detail
+	return "{{ typeof route !== 'undefined' && (%s) }}" % condition
 
 
 def header_tree():
@@ -450,12 +533,12 @@ def header_tree():
 			action,
 		],
 		gap="10px",
+		# What lending.portal.brand paints in the lender's primary colour.
+		classes=["portal-header"],
 		styles={
-			"padding": "0px",
-			# Set on the canvas rather than here, and carried back so a rebuild keeps it.
-			# frappe-ui's own header pads `px-3 sm:px-5`, and the content below this one
-			# sits at 20px, so 20 is what would line the crumb up with the cards.
-			"paddingLeft": "15px",
+			# The content's own 20px inset, so the crumb lines up with the cards and the
+			# action does not touch the window's edge.
+			"padding": "0 20px",
 			"width": "100%",
 			"minHeight": "48.8px",
 			"alignItems": "center",
@@ -652,9 +735,11 @@ def search_tree():
 
 def footer_tree():
 	"""Whose portal this is, and the policies. Both are Lending Settings, read per request."""
+	# The rows keep the Builder portal's names -- core.footer_links is shared -- so the
+	# keys are footer_label and footer_href, not label and href.
 	link = button(
-		"{{ dataItem.label }}",
-		script="window.location.href = dataItem.href",
+		"{{ dataItem.footer_label }}",
+		script="window.location.href = dataItem.footer_href",
 		variant="ghost",
 		props={"size": "sm"},
 	)
@@ -668,12 +753,14 @@ def footer_tree():
 			repeater(
 				"{{ inputs.links }}",
 				link,
-				data_key="label",
+				data_key="footer_label",
 				visible=any_row("{{ inputs.links }}"),
 				styles={"display": "flex", "gap": "4px"},
 			),
 		],
 		gap="10px",
+		# What lending.portal.brand tints with the sidebar's trace of the primary colour.
+		classes=["portal-footer"],
 		styles={
 			# A fixed 49px band, matching the 48.8px header at the other end of the page.
 			# The vertical padding goes with it: the links are `sm` buttons, 28px tall, and
@@ -716,7 +803,7 @@ def upsert_frame():
 		footer_tree(),
 		inputs=(
 			("note", "The lender's copyright line"),
-			("links", "The policy links, as {label, href} rows"),
+			("links", "The policy links, as {footer_label, footer_href} rows"),
 		),
 	)
 
@@ -767,4 +854,5 @@ def frame(source, content, action_label="", action_route=""):
 			"overflowY": "auto",
 		},
 	)
-	return root([sidebar(data), main])
+	# Last, so adding it moved no block the merge already knows by its position.
+	return root([sidebar(data), main, brand_style("{{ %s.brand_style }}" % data)])

@@ -30,12 +30,12 @@ class LendingSettings(Document):
 		auto_create_customer: DF.Check
 		enable_borrower_portal: DF.Check
 		enable_public_apply: DF.Check
-		portal_accent_color: DF.Color | None
-		portal_brand_color: DF.Color | None
 		portal_brand_name: DF.Data | None
 		portal_copyright: DF.Data | None
 		portal_footer_links: DF.Table[PortalFooterLink]
 		portal_logo: DF.AttachImage | None
+		portal_primary_color: DF.Color | None
+		portal_secondary_color: DF.Color | None
 		portal_support_email: DF.Data | None
 	# end: auto-generated types
 

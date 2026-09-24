@@ -85,8 +85,10 @@ def period_bar(read):
 	The download sits here rather than in the header because it obeys these dates --
 	its link comes from the payload, which the dates re-fetch.
 	"""
+	# Kept frappe-ui's grey: they sit between the date fields, which are grey too, and a
+	# wash of the lender's colour made three shortcuts outshout the dates they set.
 	ranges = row(
-		[button(label, script=f"setPeriod('{period}')") for label, period in PERIODS],
+		[button(label, script=f"setPeriod('{period}')", classes=["portal-plain"]) for label, period in PERIODS],
 		gap="6px",
 	)
 	fields = row(
@@ -104,32 +106,6 @@ def period_bar(read):
 	)
 
 
-def figure_card(title, value, note, glyph, theme, **kwargs):
-	"""One total, led by a tile the way the overview's figure cards are."""
-	lines = column(
-		[
-			text(title, size="text-sm", styles={"color": "var(--ink-gray-6)"}),
-			text(value, tag="div", size="text-xl", styles=FIGURE),
-			muted(note),
-		],
-		gap="4px",
-		styles={"minWidth": "0px"},
-	)
-
-	return row(
-		[icon_tile(glyph, theme), lines],
-		gap="12px",
-		align="start",
-		styles=dict(PANEL, flex="1 1 220px"),
-		**kwargs,
-	)
-
-
-def figure_strip(cards):
-	"""Figure cards in a row, wrapping by their own width -- see loan_pages.TermCell."""
-	return container(cards, styles={"display": "flex", "flexWrap": "wrap", "gap": "16px", "width": "100%"})
-
-
 # Figures set in tabular digits, so a column of them lines up digit under digit.
 FIGURE = {"fontWeight": "600", "fontVariantNumeric": "tabular-nums", "color": "var(--ink-gray-9)"}
 AMOUNT = {"fontVariantNumeric": "tabular-nums", "whiteSpace": "nowrap"}
@@ -142,16 +118,13 @@ ROW_INSET = {"--_list-row-pad": "12px"}
 
 
 def summary_strip(read):
-	"""Charged, paid and what is left."""
-	return figure_strip(
+	"""Charged, paid and what is left, in one panel split by rules, as the certificate's
+	figures are. Three cards in a row were three more boxes on a page that has two."""
+	return ruled_panel(
 		[
-			figure_card(
-				"Charged", read("summary.charged"), "Disbursements, interest and charges", "arrow-up", "orange"
-			),
-			figure_card("Paid", read("summary.paid"), "Repayments received", "arrow-down", "green"),
-			figure_card(
-				"Closing balance", read("summary.balance"), read("summary.balance_note"), "wallet", "blue"
-			),
+			figure_cell("Charged", read("summary.charged"), "Disbursements, interest and charges"),
+			figure_cell("Paid", read("summary.paid"), "Repayments received"),
+			figure_cell("Closing balance", read("summary.balance"), read("summary.balance_note")),
 		]
 	)
 
@@ -167,9 +140,9 @@ def ledger(read):
 		[
 			("minmax(96px, 0.8fr)", "Date"),
 			("minmax(0, 2fr)", "Particulars"),
-			("minmax(0, 1fr)", "Debit", "end"),
-			("minmax(0, 1fr)", "Credit", "end"),
-			("minmax(0, 1fr)", "Balance", "end"),
+			("minmax(0, 1fr)", "Debit"),
+			("minmax(0, 1fr)", "Credit"),
+			("minmax(0, 1fr)", "Balance"),
 		],
 		read("rows"),
 		[
@@ -326,13 +299,8 @@ def figure_cell(title, value, note, **kwargs):
 
 
 def paid_summary(read):
-	"""The year's figures in one panel, split by rules rather than boxed apart.
-
-	Interest first: it is the figure the certificate exists to state. The grid is pulled
-	left by one inset and one rule, and the panel clips it, so whichever figure starts a
-	line -- at any width the grid wraps to -- has no rule before it.
-	"""
-	grid = container(
+	"""The year's figures. Interest first: it is the figure the certificate exists to state."""
+	return ruled_panel(
 		[
 			figure_cell("Interest paid", read("summary.interest"), "On your loans this year"),
 			figure_cell("Principal repaid", read("summary.principal"), "Towards the amount borrowed"),
@@ -343,7 +311,18 @@ def paid_summary(read):
 				visible=read("summary.other"),
 			),
 			figure_cell("Total paid", read("summary.total"), "Interest, principal and charges"),
-		],
+		]
+	)
+
+
+def ruled_panel(cells):
+	"""Figure cells in one panel, split by rules rather than boxed apart.
+
+	The grid is pulled left by one inset and one rule, and the panel clips it, so
+	whichever figure starts a line -- at any width the grid wraps to -- has no rule before it.
+	"""
+	grid = container(
+		cells,
 		styles={
 			"display": "grid",
 			"gridTemplateColumns": "repeat(auto-fit, minmax(200px, 1fr))",
@@ -371,9 +350,9 @@ def accounts_table(read):
 	table = record_list(
 		[
 			("minmax(0, 2fr)", "Loan"),
-			("minmax(0, 1fr)", "Interest", "end"),
-			("minmax(0, 1fr)", "Principal", "end"),
-			("minmax(0, 1fr)", "Total", "end"),
+			("minmax(0, 1fr)", "Interest"),
+			("minmax(0, 1fr)", "Principal"),
+			("minmax(0, 1fr)", "Total"),
 		],
 		read("accounts"),
 		[

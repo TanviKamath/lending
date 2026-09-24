@@ -15,8 +15,8 @@
   "portal_support_email",
   "column_break_portal",
   "portal_logo",
-  "portal_brand_color",
-  "portal_accent_color",
+  "portal_primary_color",
+  "portal_secondary_color",
   "portal_footer_section",
   "portal_copyright",
   "portal_footer_links"
@@ -83,16 +83,16 @@
    "make_attachment_public": 1
   },
   {
-   "description": "Buttons, the focus ring and a chosen answer. The text on it is worked out from it.",
-   "fieldname": "portal_brand_color",
+   "description": "The bank's main colour. Fills the page header and the letter tile beside the brand name, tints the sidebar, and marks the open tab and the current step. The text on it turns white or dark, whichever reads better.",
+   "fieldname": "portal_primary_color",
    "fieldtype": "Color",
-   "label": "Portal Brand Colour"
+   "label": "Portal Primary Colour"
   },
   {
-   "description": "The mark beside the brand name, and the quieter tints taken from it.",
-   "fieldname": "portal_accent_color",
+   "description": "The bank's second colour, for buttons. Left blank, buttons use the primary colour. In the header, a button uses it only if it stands out from the primary colour.",
+   "fieldname": "portal_secondary_color",
    "fieldtype": "Color",
-   "label": "Portal Accent Colour"
+   "label": "Portal Secondary Colour"
   },
   {
    "depends_on": "enable_borrower_portal",

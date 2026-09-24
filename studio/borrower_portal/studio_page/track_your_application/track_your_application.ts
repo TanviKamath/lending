@@ -1,6 +1,6 @@
 import { computed, ref, watch } from "vue"
 import { call, toast } from "frappe-ui"
-import { tone, appRoute } from "@app/utils/portal"
+import { tone, appRoute, logout as endSession } from "@app/utils/portal"
 
 export default function setup(context: any) {
 	const { router } = context
@@ -14,11 +14,12 @@ export default function setup(context: any) {
 		const to = appRoute(url)
 		if (to) router.push(to)
 	}
+	const logout = () => endSession(router)
 
 	const busy = ref(false)
 	const result = ref<Record<string, any>>({})
 
-	const track = () => {
+	const find = () => {
 		busy.value = true
 		call("lending.portal.apply.track_application", {
 			reference: reference.value,
@@ -31,5 +32,7 @@ export default function setup(context: any) {
 			.finally(() => { busy.value = false })
 	}
 
-	return { tone, open, showAlerts, alertsTab, sidebarCollapsed, reference, mobileNumber, busy, result, track }
+	const startOver = () => { result.value = {} }
+
+	return { tone, open, logout, showAlerts, alertsTab, sidebarCollapsed, reference, mobileNumber, busy, result, find, startOver }
 }

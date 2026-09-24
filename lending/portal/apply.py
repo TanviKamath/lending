@@ -100,6 +100,22 @@ PAN_LENGTH = 10
 MINIMUM_PASSWORD_LENGTH = 8
 
 
+def offered_to(product_applicant_type: str | None, applicant_type: str) -> bool:
+	"""Loan Product.portal_applicant_type. Blank offers the product to both."""
+	return not product_applicant_type or product_applicant_type == applicant_type
+
+
+def product_card(row) -> dict:
+	return {
+		"label": row.name,
+		"value": row.name,
+		"rate": _("{0}%").format(flt(row.rate_of_interest, 2)),
+		"rate_note": _("per year"),
+		"ceiling": money(row.maximum_loan_amount) if row.maximum_loan_amount else _("No set limit"),
+		"kind": _("Term loan") if row.is_term_loan else _("Credit line"),
+	}
+
+
 @frappe.whitelist(allow_guest=True)
 def get_apply_page() -> dict:
 	assert_public_apply_enabled()
@@ -107,56 +123,61 @@ def get_apply_page() -> dict:
 	products = frappe.get_all(
 		"Loan Product",
 		filters={"disabled": 0, "show_on_portal": 1},
-		fields=["name", "rate_of_interest", "maximum_loan_amount", "is_term_loan"],
+		fields=["name", "rate_of_interest", "maximum_loan_amount", "is_term_loan", "portal_applicant_type"],
 		order_by="rate_of_interest asc, name asc",
 	)
 
 	return {
 		**brand_payload(),
-		"heading": _("A loan that fits, without the paperwork"),
+		"tagline": _("Simple · Secure · Transparent"),
+		# The break is where the heading turns, so the page keeps it rather than letting
+		# the column's width decide.
+		"heading": _("A loan that fits,\nwithout the paperwork"),
 		"intro": _(
 			"Tell us what you need and see an indicative offer in about two minutes. "
 			"Nothing is committed until you accept it."
 		),
 		"trust_points": [
-			{"label": _("No effect on your credit score")},
-			{"label": _("No obligation to go ahead")},
-			{"label": _("No fee to ask")},
+			{"icon": "chart-no-axes", "title": _("No effect"), "note": _("on your credit score")},
+			{"icon": "shield", "title": _("No obligation"), "note": _("to go ahead")},
+			{"icon": "receipt-text", "title": _("No fee"), "note": _("to ask")},
 		],
-		"products": [
-			{
-				"label": row.name,
-				"value": row.name,
-				"rate": _("{0}%").format(flt(row.rate_of_interest, 2)),
-				"rate_note": _("per year"),
-				"ceiling": money(row.maximum_loan_amount) if row.maximum_loan_amount else _("No set limit"),
-				"kind": _("Term loan") if row.is_term_loan else _("Credit line"),
-			}
-			for row in products
-		],
+		# Keyed by applicant type, so the page lists the products open to whoever the
+		# visitor said is borrowing, and nothing else.
+		"products": {
+			applicant_type: [
+				product_card(row) for row in products if offered_to(row.portal_applicant_type, applicant_type)
+			]
+			for applicant_type in APPLICANT_TYPES
+		},
 		# The opening screen asks for nothing. It says what this is, how long it takes,
 		# and offers one button, because a form is work and an invitation is not.
 		"start_title": _("Let's get started"),
 		"start_note": _("A few questions, one at a time. Most people are through in two minutes."),
+		"how_title": _("How it works"),
+		"how_note": _("Get from application to an offer in a few simple steps."),
 		"benefits": [
 			{
 				"step": "1",
-				"title": _("One thing at a time"),
+				"icon": "file-text",
+				"title": _("Answer a few questions"),
 				"note": _("Six short steps. You can go back to any of them before you send it."),
 			},
 			{
 				"step": "2",
-				"title": _("Works on a phone"),
-				"note": _("The whole application, on whatever you are reading this on."),
+				"icon": "search",
+				"title": _("We review your application"),
+				"note": _("Our team checks the details and runs the necessary checks."),
 			},
 			{
 				"step": "3",
-				"title": _("Nothing committed"),
-				"note": _("You see the indicative offer before you decide anything."),
+				"icon": "percent",
+				"title": _("See your indicative offer"),
+				"note": _("View a personalized offer before you decide anything."),
 			},
 		],
 		"type_note": _("Whoever the money is for is who we run the numbers on."),
-		"product_note": _("{0} products, open to everyone. Pick the one that fits.").format(len(products)),
+		"product_note": _("These are the products open to you. Pick the one that fits."),
 		"verify_title": _("Your mobile number"),
 		"verify_note": _(
 			"We send a six digit code to check the number is yours. "
@@ -183,13 +204,16 @@ def get_track_page() -> dict:
 
 	return {
 		**brand_payload(),
+		"eyebrow": _("Track application"),
 		"heading": _("Where has my application got to?"),
-		"intro": _(
-			"Enter the reference number we gave you and the mobile number you applied with. "
-			"We show both together so nobody else can look up your application."
+		# One sentence to a line, as the page sets them.
+		"intro": "\n".join(
+			(
+				_("Enter the reference number we gave you and the mobile number you applied with."),
+				_("We show both together so nobody else can look up your application."),
+			)
 		),
 		"track_title": _("Find your application"),
-		"track_note": _("Both details have to match the ones on the application."),
 	}
 
 
@@ -273,42 +297,61 @@ def confirm_mobile_code() -> dict:
 	}
 
 
-def verified_mobile(token: str) -> str:
-	"""The number step 2 proved, or a refusal. The token is spent either way."""
-	if not token:
-		frappe.throw(_("Please confirm your mobile number first."), frappe.ValidationError)
+class VerificationExpiredError(frappe.ValidationError):
+	"""The proof of the number is gone, so the page sends the visitor back to verify."""
 
-	key = f"{VERIFICATION_PREFIX}:{token}"
-	mobile = frappe.cache.get_value(key)
+
+def verified_mobile(token: str) -> str:
+	"""The number step 2 proved, or a refusal. Read only: spend_token uses it up."""
+	mobile = frappe.cache.get_value(f"{VERIFICATION_PREFIX}:{token}") if token else None
 
 	if not mobile:
 		frappe.throw(
 			_("Your confirmation has expired. Please verify your mobile number again."),
-			frappe.ValidationError,
+			VerificationExpiredError,
 		)
 
-	# One token, one lead. Left alive it would be a reusable licence to insert rows.
-	frappe.cache.delete_value(key)
-
 	return mobile
+
+
+def claim(key: str) -> bool:
+	"""Delete a token, and say whether this request was the one that deleted it.
+
+	Redis DEL reports what it removed, so of two requests racing with one token only
+	one gets True. The other throws, and whatever it wrote rolls back.
+	"""
+	return bool(frappe.cache.delete(frappe.cache.make_key(key)))
+
+
+def spend_token(token: str):
+	"""One token, one lead. Left alive it would be a reusable licence to insert rows.
+
+	Spent after the lead is saved, so a lead that fails to save leaves the visitor
+	verified.
+	"""
+	if not claim(f"{VERIFICATION_PREFIX}:{token}"):
+		frappe.throw(
+			_("Your confirmation has expired. Please verify your mobile number again."),
+			VerificationExpiredError,
+		)
 
 
 # --- step 3: the lead ---------------------------------------------------------------
 
 
-def read_product(name: str, amount: float) -> dict:
+def read_product(name: str, amount: float, applicant_type: str = DEFAULT_APPLICANT_TYPE) -> dict:
 	"""A Link field is a name, so it is checked against the table rather than trusted.
 
-	The same filter as the list above. Filtering only the list would leave the hidden
-	products one guessed name away from being applied for.
+	The same filter as the list above, applicant type included. Filtering only the list
+	would leave the hidden products one guessed name away from being applied for.
 	"""
 	product = frappe.db.get_value(
 		"Loan Product",
 		{"name": name, "disabled": 0, "show_on_portal": 1},
-		["name", "maximum_loan_amount"],
+		["name", "maximum_loan_amount", "portal_applicant_type"],
 		as_dict=True,
 	)
-	if not product:
+	if not product or not offered_to(product.portal_applicant_type, applicant_type):
 		frappe.throw(_("Please choose a product from the list."), frappe.ValidationError)
 
 	if product.maximum_loan_amount and amount > flt(product.maximum_loan_amount):
@@ -399,9 +442,10 @@ def read_submission() -> dict:
 	if amount <= 0:
 		frappe.throw(_("Please give the amount you need."), frappe.ValidationError)
 
-	read_product(data["loan_product"], amount)
+	applicant_type = read_applicant_type()
+	read_product(data["loan_product"], amount, applicant_type)
 	data["loan_amount"] = amount
-	data.update(read_optional(read_applicant_type()))
+	data.update(read_optional(applicant_type))
 
 	return data
 
@@ -416,12 +460,14 @@ def submit_lead() -> dict:
 	"""
 	assert_public_apply_enabled()
 
-	mobile = verified_mobile(clean(frappe.form_dict.get("token")))
+	token = clean(frappe.form_dict.get("token"))
 	data = read_submission()
+	mobile = verified_mobile(token)
 
 	lead = frappe.new_doc("Loan Lead")
 	lead.update({**data, "mobile_number": mobile, "lead_source": LEAD_SOURCE})
 	lead.insert(ignore_permissions=True)
+	spend_token(token)
 
 	try:
 		lead.submit()
@@ -437,7 +483,6 @@ def submit_lead() -> dict:
 
 	offer = present_offer(lead)
 	offer["account_token"] = issue_account_token(lead.name)
-	frappe.db.commit()
 
 	return offer
 
@@ -522,12 +567,12 @@ def issue_account_token(lead: str) -> str:
 
 
 def lead_for_account(token: str) -> str:
-	"""The lead the token was issued for. Spent on use, like the verification one."""
+	"""The lead the token was issued for. Read only: spend_account_token uses it up,
+	once the account exists, so a refused password can be retried."""
 	if not token:
 		frappe.throw(_("Please finish your application first."), frappe.ValidationError)
 
-	key = f"{ACCOUNT_PREFIX}:{token}"
-	lead = frappe.cache.get_value(key)
+	lead = frappe.cache.get_value(f"{ACCOUNT_PREFIX}:{token}")
 
 	if not lead:
 		frappe.throw(
@@ -535,9 +580,16 @@ def lead_for_account(token: str) -> str:
 			frappe.ValidationError,
 		)
 
-	frappe.cache.delete_value(key)
-
 	return lead
+
+
+def spend_account_token(token: str):
+	"""One token, one account."""
+	if not claim(f"{ACCOUNT_PREFIX}:{token}"):
+		frappe.throw(
+			_("This has taken too long. Please apply again to open an account."),
+			frappe.ValidationError,
+		)
 
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
@@ -552,12 +604,14 @@ def create_account() -> dict:
 	rather than making them go round to /login and type it again.
 
 	Written with ignore_permissions throughout because the caller is a guest. What
-	keeps that narrow is the token: it names one lead, it is spent on use, and every
-	value written comes off that lead rather than out of the request.
+	keeps that narrow is the token: it names one lead, it is spent once the account
+	exists, and every value written comes off that lead rather than out of the request.
 	"""
 	assert_public_apply_enabled()
 
-	lead_name = lead_for_account(clean(frappe.form_dict.get("token")))
+	# Read once: the writes below leave form_dict without it by the time it is spent.
+	token = clean(frappe.form_dict.get("token"))
+	lead_name = lead_for_account(token)
 
 	# Not run through clean(): stripping a password would change it silently, and
 	# leading or trailing spaces are the borrower's to choose.
@@ -617,6 +671,9 @@ def create_account() -> dict:
 			lead.mobile_number,
 		)
 		link_portal_user(customer, user.name)
+		# Last, and before the commit: a password the policy refused above leaves the
+		# token for the retry, and a request that loses the race rolls all of this back.
+		spend_account_token(token)
 		frappe.db.commit()  # nosemgrep
 	finally:
 		frappe.set_user(caller)
@@ -705,31 +762,21 @@ def tracker_stage(lead: dict) -> str:
 	return _("With our team")
 
 
-# Drawn on the dot in the timeline. A step that has happened gets a tick, the one
-# happening now gets a ring, and one still ahead stays empty.
-STEP_TONES = {
-	"done": "background:#e4faeb;color:#14804d",
-	"now": "background:#0f0f0f;color:#ffffff",
-	"todo": "background:#f3f3f3;color:#999999",
-	"stopped": "background:#fdf8ed;color:#bb6f0c",
-}
-
-
 def tracker_steps(lead: dict) -> list[dict]:
 	"""The tracker as a list of steps, so a longer workflow changes this and nothing else.
 
 	PORTAL_PLAN.md section 6.6 asks for exactly one function to own these. When Module A
 	reshapes the application workflow, the extra stages are added here and every page
 	that draws a tracker picks them up.
+
+	A step's `state` is "done", "now", "todo" or "stopped", and the page draws the dot
+	for it -- a tick, a ring, an empty circle, a cross.
 	"""
 	declined = lead.prequalification_status == "Not Pre-Qualified"
 	qualified = lead.prequalification_status == "Pre-Qualified"
 
-	def mark(state: str) -> str:
-		return {"done": "&#10003;", "now": "&#9679;", "todo": "", "stopped": "&#10005;"}[state]
-
 	def as_step(title: str, note: str, state: str) -> dict:
-		return {"title": title, "note": note, "mark": mark(state), "tone": STEP_TONES[state]}
+		return {"title": title, "note": note, "state": state}
 
 	steps = [
 		as_step(_("Enquiry received"), _("We have your details and your number is confirmed."), "done")

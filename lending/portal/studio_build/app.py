@@ -55,6 +55,7 @@ SHARED_UTILS_PATH = ("utils", "portal.ts")
 SHARED_UTILS = '''// Shared by every page's setup() module, as "@app/utils/portal".
 
 import { onScopeDispose, ref, watch } from "vue"
+import { call } from "frappe-ui"
 
 const TONES: Record<string, string> = { ok: "green", warn: "orange", danger: "red" }
 
@@ -75,6 +76,15 @@ export function tone(value?: string): string {
 export function appRoute(url?: string): string {
 \tif (!url) return ""
 \treturn url.replace(/^\\/borrower(-portal)?/, "") || "/overview"
+}
+
+// Ends the session and lands on the apply page, the one page a guest can use.
+//
+// A full load rather than router.push: the session and its CSRF token are gone, and
+// every page already open would otherwise keep what it read as the borrower.
+export async function logout(router: any) {
+\tawait call("logout")
+\twindow.location.href = router.resolve("/apply").href
 }
 
 const FIND_URL = "/api/method/lending.portal.search.find"
@@ -168,9 +178,10 @@ export function useSearch(open: (url?: string) => void) {
 # in Studio Page Variables, so this is where a page's refs and handlers live, and
 # whatever it returns is what the page's blocks can bind to and its events can write.
 #
-# Every page returns the five the frame itself reads: the tone helper its badges take
-# their colour from, the one way a row opens the record it stands for, the two pieces of
-# state behind the bell, and whether the sidebar is shut. They are here rather than in
+# Every page returns the six the frame itself reads: the tone helper its badges take
+# their colour from, the one way a row opens the record it stands for, the sign-out
+# behind the account menu, the two pieces of state behind the bell, and whether the
+# sidebar is shut. They are here rather than in
 # the header component because a Studio Component holds blocks and no state of its own.
 #
 # `sidebarCollapsed` starts as null rather than false: that is Sidebar's own reading of
@@ -181,7 +192,7 @@ export function useSearch(open: (url?: string) => void) {
 # A framed page also spreads in useSearch, which is the Ctrl+K palette the frame draws.
 SCRIPT_TEMPLATE = '''import {{ computed, ref, watch }} from "vue"
 import {{ call, toast }} from "frappe-ui"
-import {{ tone, appRoute{search_import} }} from "@app/utils/portal"
+import {{ tone, appRoute, logout as endSession{search_import} }} from "@app/utils/portal"
 
 export default function setup(context: any) {{
 \tconst {{ router }} = context
@@ -193,8 +204,9 @@ export default function setup(context: any) {{
 \t\tconst to = appRoute(url)
 \t\tif (to) router.push(to)
 \t}}
+\tconst logout = () => endSession(router)
 {search}{body}
-\treturn {{ tone, open, showAlerts, alertsTab, sidebarCollapsed{search_returns}{returns} }}
+\treturn {{ tone, open, logout, showAlerts, alertsTab, sidebarCollapsed{search_returns}{returns} }}
 }}
 '''
 

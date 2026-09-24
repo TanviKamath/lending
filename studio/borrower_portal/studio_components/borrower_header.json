@@ -7,8 +7,7 @@
    "flexDirection": "row",
    "gap": "10px",
    "minHeight": "48.8px",
-   "padding": "0px",
-   "paddingLeft": "15px",
+   "padding": "0 20px",
    "width": "100%"
   },
   "children": [
@@ -247,6 +246,9 @@
     "visibilityCondition": "{{ inputs.action_label }}"
    }
   ],
+  "classes": [
+   "portal-header"
+  ],
   "componentEvents": {},
   "componentId": "borrower_header-0",
   "componentName": "container",
@@ -258,7 +260,7 @@
  },
  "component_id": "borrower_header",
  "component_name": "Borrower Page Header",
- "creation": "2026-09-24 00:54:36.779837",
+ "creation": "2026-09-24 13:59:27.113980",
  "docstatus": 0,
  "doctype": "Studio Component",
  "idx": 0,
@@ -307,7 +309,7 @@
   }
  ],
  "is_disabled": 0,
- "modified": "2026-09-24 01:04:43.032865",
+ "modified": "2026-09-24 20:20:01.058880",
  "modified_by": "Administrator",
  "name": "borrower_header",
  "owner": "Administrator"

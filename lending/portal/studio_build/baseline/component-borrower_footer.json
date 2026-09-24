@@ -26,7 +26,7 @@
     "componentProps": {
      "text": "{{ inputs.note }}",
      "tag": "p",
-     "fontSize": "text-p-xs"
+     "fontSize": "text-p-sm"
     },
     "componentSlots": {},
     "componentEvents": {},
@@ -56,7 +56,7 @@
     "componentName": "Repeater",
     "componentProps": {
      "data": "{{ inputs.links }}",
-     "dataKey": "label",
+     "dataKey": "footer_label",
      "emptyStateMessage": ""
     },
     "componentSlots": {},
@@ -71,7 +71,7 @@
      {
       "componentName": "Button",
       "componentProps": {
-       "label": "{{ dataItem.label }}",
+       "label": "{{ dataItem.footer_label }}",
        "variant": "ghost",
        "size": "sm"
       },
@@ -80,7 +80,7 @@
        "click": {
         "event": "click",
         "action": "Run Script",
-        "script": "window.location.href = dataItem.href"
+        "script": "window.location.href = dataItem.footer_href"
        }
       },
       "baseStyles": {},
@@ -95,6 +95,9 @@
    }
   ],
   "originalElement": "div",
+  "classes": [
+   "portal-footer"
+  ],
   "componentId": "borrower_footer-0"
  }
 }
