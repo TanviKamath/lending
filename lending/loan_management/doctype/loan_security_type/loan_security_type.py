@@ -29,6 +29,8 @@ class LoanSecurityType(Document):
 
 	def validate(self):
 		validate_sell_ltv(self)
+		if self.is_vehicle and self.valuation_method != "Fixed Valuation":
+			frappe.throw(_("A vehicle security type must use Fixed Valuation"))
 
 
 def validate_sell_ltv(doc):

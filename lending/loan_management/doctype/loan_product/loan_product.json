@@ -85,15 +85,31 @@
   "write_off_recovery_account",
   "co_lending_tab",
   "loan_partners",
+  "vehicle_finance_tab",
+  "max_vehicles_per_loan",
+  "column_break_vfin",
+  "valuation_validity_days",
+  "vehicle_ltv_section",
+  "vehicle_ltv_rules",
+  "pdd_section",
+  "pdd_requirements",
   "connections_tab"
  ],
  "fields": [
   {
-   "fieldname": "maximum_loan_amount",
-   "fieldtype": "Currency",
-   "label": "Maximum Loan Amount",
-   "non_negative": 1,
-   "options": "Company:company:default_currency"
+   "fieldname": "product_code",
+   "fieldtype": "Data",
+   "label": "Product Code",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "product_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Product Name",
+   "reqd": 1,
+   "unique": 1
   },
   {
    "fieldname": "rate_of_interest",
@@ -102,55 +118,17 @@
    "reqd": 1
   },
   {
-   "fieldname": "column_break_2",
-   "fieldtype": "Column Break"
-  },
-  {
-   "allow_on_submit": 1,
-   "default": "0",
-   "fieldname": "disabled",
-   "fieldtype": "Check",
-   "label": "Disabled"
-  },
-  {
-   "collapsible": 1,
-   "fieldname": "account_details_section",
-   "fieldtype": "Section Break",
-   "label": "Loan Accounts"
-  },
-  {
-   "fieldname": "payment_account",
+   "fieldname": "loan_category",
    "fieldtype": "Link",
-   "label": "Repayment Account",
-   "options": "Account"
+   "label": "Loan Category",
+   "options": "Loan Category"
   },
   {
-   "fieldname": "loan_account",
-   "fieldtype": "Link",
-   "label": "Loan Account",
-   "options": "Account"
-  },
-  {
-   "fieldname": "column_break_12",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "interest_income_account",
-   "fieldtype": "Link",
-   "label": "Interest Income Account",
-   "options": "Account"
-  },
-  {
-   "fieldname": "penalty_income_account",
-   "fieldtype": "Link",
-   "label": "Penalty Income Account",
-   "options": "Account"
-  },
-  {
-   "default": "0",
-   "fieldname": "is_term_loan",
-   "fieldtype": "Check",
-   "label": "Is Term Loan"
+   "fieldname": "maximum_loan_amount",
+   "fieldtype": "Currency",
+   "label": "Maximum Loan Amount",
+   "non_negative": 1,
+   "options": "Company:company:default_currency"
   },
   {
    "description": "Penalty Interest Rate is levied on the pending amount on a daily basis in case of delayed repayment ",
@@ -159,27 +137,30 @@
    "label": "Penalty Interest Rate (%)"
   },
   {
-   "description": "No. of days from due date until which penalty won't be charged in case of delay in loan repayment",
-   "fieldname": "grace_period_in_days",
-   "fieldtype": "Int",
-   "label": "Grace Period in Days",
-   "non_negative": 1
+   "default": "Upfront Deduction",
+   "fieldname": "bpi_recovery_method",
+   "fieldtype": "Select",
+   "label": "BPI Recovery Method",
+   "options": "\nUpfront Deduction\nAmortized Over Tenure\nAdd to First EMI\nAdd to Last EMI"
   },
   {
-   "description": "No. of days a rejected applicant has to wait before a lead for this product can be taken forward. Overrides the workflow task's value; 0 falls back to it.",
-   "fieldname": "cooling_period_days",
-   "fieldtype": "Int",
-   "label": "Cooling Period in Days",
-   "non_negative": 1
+   "depends_on": "eval:doc.bpi_recovery_method == \"Add to First EMI\"",
+   "fieldname": "bpi_treatment",
+   "fieldtype": "Select",
+   "label": "BPI Treatment",
+   "options": "On top of first EMI\nAdjust within the EMI amount"
   },
   {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Loan Product",
-   "print_hide": 1,
-   "read_only": 1
+   "default": "Round to Nearest",
+   "description": "How the calculated EMI is rounded. Round to Nearest rounds off normally. Round Up always rounds up, which can close the loan before the entered tenure. No Rounding keeps the exact value.",
+   "fieldname": "emi_rounding_method",
+   "fieldtype": "Select",
+   "label": "EMI Rounding Method",
+   "options": "Round to Nearest\nRound Up\nNo Rounding"
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "company",
@@ -189,19 +170,21 @@
    "reqd": 1
   },
   {
-   "allow_on_submit": 1,
-   "description": "Loan Write Off will be automatically created on loan closure request if pending amount is below this limit",
-   "fieldname": "write_off_amount",
-   "fieldtype": "Currency",
-   "label": "Auto Write Off Amount ",
-   "non_negative": 1,
-   "options": "Company:company:default_currency"
+   "depends_on": "eval:doc.repayment_schedule_type == \"Monthly as per cycle date\"",
+   "description": "Day of every month on which the repayment date is considered",
+   "fieldname": "cyclic_day_of_the_month",
+   "fieldtype": "Int",
+   "label": "Cyclic Day Of the Month",
+   "mandatory_depends_on": "eval:doc.repayment_schedule_type == \"Monthly as per cycle date\""
   },
   {
-   "fieldname": "disbursement_account",
-   "fieldtype": "Link",
-   "label": "Disbursement Account",
-   "options": "Account"
+   "depends_on": "eval:doc.repayment_schedule_type == \"Pro-rated calendar months\"",
+   "description": "Select whether the repayment date should be the end of the current month or start of the upcoming month",
+   "fieldname": "repayment_date_on",
+   "fieldtype": "Select",
+   "label": "Repayment Date On",
+   "mandatory_depends_on": "eval:doc.repayment_schedule_type == \"Pro-rated calendar months\"",
+   "options": "\nStart of the next month\nEnd of the current month"
   },
   {
    "depends_on": "is_term_loan",
@@ -221,15 +204,6 @@
    "label": "No Interest Accrual Till Month End"
   },
   {
-   "depends_on": "eval:doc.repayment_schedule_type == \"Pro-rated calendar months\"",
-   "description": "Select whether the repayment date should be the end of the current month or start of the upcoming month",
-   "fieldname": "repayment_date_on",
-   "fieldtype": "Select",
-   "label": "Repayment Date On",
-   "mandatory_depends_on": "eval:doc.repayment_schedule_type == \"Pro-rated calendar months\"",
-   "options": "\nStart of the next month\nEnd of the current month"
-  },
-  {
    "default": "Reduce Tenure",
    "description": "Determines how an advance payment is handled while restructuring the loan schedule. \"Reduce Tenure\" keeps the EMI fixed and reduces the number of periods, while \"Reduce EMI\" keeps the number of periods fixed and reduces the EMI.",
    "fieldname": "advance_payment_handling",
@@ -245,40 +219,119 @@
    "non_negative": 1
   },
   {
-   "fieldname": "interest_waiver_account",
-   "fieldtype": "Link",
-   "label": "Interest Waiver Account",
-   "options": "Account"
+   "default": "0",
+   "fieldname": "is_term_loan",
+   "fieldtype": "Check",
+   "label": "Is Term Loan"
   },
   {
-   "fieldname": "penalty_waiver_account",
-   "fieldtype": "Link",
-   "label": "Penalty Waiver Account",
-   "options": "Account"
+   "default": "1",
+   "depends_on": "is_term_loan",
+   "description": "If unticked, a request to skip an installment is approved as soon as it is saved.",
+   "fieldname": "installment_skip_needs_approval",
+   "fieldtype": "Check",
+   "label": "Installment Skip Needs Approval"
   },
   {
-   "fieldname": "suspense_interest_income",
-   "fieldtype": "Link",
-   "label": "Suspense Interest Income",
-   "options": "Account"
+   "default": "0",
+   "fieldname": "validate_normal_repayment",
+   "fieldtype": "Check",
+   "label": "Validate Normal Repayment"
   },
   {
-   "fieldname": "suspense_collection_account",
-   "fieldtype": "Link",
-   "label": "Suspense Collection Account",
-   "options": "Account"
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "disabled",
+   "fieldtype": "Check",
+   "label": "Disabled"
   },
   {
-   "fieldname": "interest_receivable_account",
-   "fieldtype": "Link",
-   "label": "Interest Receivable Account",
-   "options": "Account"
+   "fieldname": "collection_offset_sequence_section",
+   "fieldtype": "Section Break",
+   "label": "Collection Offset Sequence"
   },
   {
-   "fieldname": "penalty_receivable_account",
+   "fieldname": "collection_offset_sequence_for_standard_asset",
    "fieldtype": "Link",
-   "label": "Penalty Receivable Account",
-   "options": "Account"
+   "label": "Collection Offset Sequence for Standard Asset",
+   "options": "Loan Demand Offset Order"
+  },
+  {
+   "fieldname": "collection_offset_sequence_for_sub_standard_asset",
+   "fieldtype": "Link",
+   "label": "Collection Offset Sequence for Sub Standard Asset",
+   "options": "Loan Demand Offset Order"
+  },
+  {
+   "fieldname": "column_break_dbkg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "collection_offset_sequence_for_written_off_asset",
+   "fieldtype": "Link",
+   "label": "Collection Offset Sequence for Written Off Asset",
+   "options": "Loan Demand Offset Order"
+  },
+  {
+   "fieldname": "collection_offset_sequence_for_settlement_collection",
+   "fieldtype": "Link",
+   "label": "Collection Offset Sequence for Settlement Collection",
+   "options": "Loan Demand Offset Order"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "limits_section",
+   "fieldtype": "Section Break",
+   "label": "Limits"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.is_term_loan && doc.repayment_schedule_type == \"Monthly as per cycle date\"",
+   "fieldname": "min_days_bw_disbursement_first_repayment",
+   "fieldtype": "Int",
+   "label": "Minimum days between Disbursement date and first Repayment date",
+   "non_negative": 1
+  },
+  {
+   "description": "Excess amount repayment limit during loan closure",
+   "fieldname": "excess_amount_acceptance_limit",
+   "fieldtype": "Float",
+   "label": "Excess Amount Acceptance Limit"
+  },
+  {
+   "default": "0",
+   "description": "Allowed percentage by which a new loan can exceed the applicant's sanctioned loan amount limit.",
+   "fieldname": "sanctioned_amount_tolerance_percentage",
+   "fieldtype": "Percent",
+   "label": "Sanctioned Amount Tolerance (%)",
+   "non_negative": 1
+  },
+  {
+   "fieldname": "column_break_wwhp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "description": "Loan Write Off will be automatically created on loan closure request if pending amount is below this limit",
+   "fieldname": "write_off_amount",
+   "fieldtype": "Currency",
+   "label": "Auto Write Off Amount ",
+   "non_negative": 1,
+   "options": "Company:company:default_currency"
+  },
+  {
+   "description": "No. of days from due date until which penalty won't be charged in case of delay in loan repayment",
+   "fieldname": "grace_period_in_days",
+   "fieldtype": "Int",
+   "label": "Grace Period in Days",
+   "non_negative": 1
+  },
+  {
+   "description": "No. of days a rejected applicant has to wait before a lead for this product can be taken forward. Overrides the workflow task's value; 0 falls back to it.",
+   "fieldname": "cooling_period_days",
+   "fieldtype": "Int",
+   "label": "Cooling Period in Days",
+   "non_negative": 1
   },
   {
    "collapsible": 1,
@@ -294,47 +347,70 @@
    "options": "Loan Charges"
   },
   {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Loan Product",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "accounting_tab",
+   "fieldtype": "Tab Break",
+   "label": "Accounting"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "account_details_section",
+   "fieldtype": "Section Break",
+   "label": "Loan Accounts"
+  },
+  {
+   "fieldname": "disbursement_account",
+   "fieldtype": "Link",
+   "label": "Disbursement Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "payment_account",
+   "fieldtype": "Link",
+   "label": "Repayment Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "subsidy_adjustment_account",
+   "fieldtype": "Link",
+   "label": "Subsidy Adjustment Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "column_break_12",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "loan_account",
+   "fieldtype": "Link",
+   "label": "Loan Account",
+   "options": "Account"
+  },
+  {
    "fieldname": "security_deposit_account",
    "fieldtype": "Link",
    "label": "Security Deposit Account",
    "options": "Account"
   },
   {
-   "depends_on": "eval:doc.repayment_schedule_type == \"Monthly as per cycle date\"",
-   "description": "Day of every month on which the repayment date is considered",
-   "fieldname": "cyclic_day_of_the_month",
-   "fieldtype": "Int",
-   "label": "Cyclic Day Of the Month",
-   "mandatory_depends_on": "eval:doc.repayment_schedule_type == \"Monthly as per cycle date\""
+   "fieldname": "suspense_collection_account",
+   "fieldtype": "Link",
+   "label": "Suspense Collection Account",
+   "options": "Account"
   },
   {
-   "fieldname": "loan_partners",
-   "fieldtype": "Table MultiSelect",
-   "label": "Loan Partners",
-   "options": "Loan Product Loan Partner"
-  },
-  {
-   "fieldname": "product_code",
-   "fieldtype": "Data",
-   "label": "Product Code",
-   "reqd": 1,
-   "unique": 1
-  },
-  {
-   "fieldname": "product_name",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Product Name",
-   "reqd": 1,
-   "unique": 1
-  },
-  {
-   "default": "0",
-   "depends_on": "eval:doc.is_term_loan && doc.repayment_schedule_type == \"Monthly as per cycle date\"",
-   "fieldname": "min_days_bw_disbursement_first_repayment",
-   "fieldtype": "Int",
-   "label": "Minimum days between Disbursement date and first Repayment date",
-   "non_negative": 1
+   "fieldname": "customer_refund_account",
+   "fieldtype": "Link",
+   "label": "Customer Refund Account",
+   "options": "Account"
   },
   {
    "collapsible": 1,
@@ -343,16 +419,38 @@
    "label": "Interest Accounts"
   },
   {
+   "fieldname": "interest_income_account",
+   "fieldtype": "Link",
+   "label": "Interest Income Account",
+   "options": "Account"
+  },
+  {
    "fieldname": "interest_accrued_account",
    "fieldtype": "Link",
    "label": "Interest Accrued Account",
    "options": "Account"
   },
   {
-   "default": "0",
-   "fieldname": "same_as_regular_interest_accounts",
-   "fieldtype": "Check",
-   "label": "Same as regular interest accounts"
+   "fieldname": "interest_waiver_account",
+   "fieldtype": "Link",
+   "label": "Interest Waiver Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "column_break_nuqr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "interest_receivable_account",
+   "fieldtype": "Link",
+   "label": "Interest Receivable Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "suspense_interest_income",
+   "fieldtype": "Link",
+   "label": "Suspense Interest Income",
+   "options": "Account"
   },
   {
    "fieldname": "broken_period_interest_recovery_account",
@@ -361,14 +459,16 @@
    "options": "Account"
   },
   {
-   "fieldname": "column_break_nuqr",
-   "fieldtype": "Column Break"
-  },
-  {
    "collapsible": 1,
    "fieldname": "additional_interest_accounts_section",
    "fieldtype": "Section Break",
    "label": "Additional Interest Accounts "
+  },
+  {
+   "default": "0",
+   "fieldname": "same_as_regular_interest_accounts",
+   "fieldtype": "Check",
+   "label": "Same as regular interest accounts"
   },
   {
    "fieldname": "additional_interest_income",
@@ -411,14 +511,32 @@
    "label": "Penalty Charges Accounts"
   },
   {
+   "fieldname": "penalty_income_account",
+   "fieldtype": "Link",
+   "label": "Penalty Income Account",
+   "options": "Account"
+  },
+  {
    "fieldname": "penalty_accrued_account",
    "fieldtype": "Link",
    "label": "Penalty Accrued Account",
    "options": "Account"
   },
   {
+   "fieldname": "penalty_waiver_account",
+   "fieldtype": "Link",
+   "label": "Penalty Waiver Account",
+   "options": "Account"
+  },
+  {
    "fieldname": "column_break_zslc",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "penalty_receivable_account",
+   "fieldtype": "Link",
+   "label": "Penalty Receivable Account",
+   "options": "Account"
   },
   {
    "fieldname": "penalty_suspense_account",
@@ -450,131 +568,65 @@
    "options": "Account"
   },
   {
-   "fieldname": "loan_category",
-   "fieldtype": "Link",
-   "label": "Loan Category",
-   "options": "Loan Category"
+   "fieldname": "co_lending_tab",
+   "fieldtype": "Tab Break",
+   "label": "Co Lending"
   },
   {
-   "fieldname": "subsidy_adjustment_account",
-   "fieldtype": "Link",
-   "label": "Subsidy Adjustment Account",
-   "options": "Account"
+   "fieldname": "loan_partners",
+   "fieldtype": "Table MultiSelect",
+   "label": "Loan Partners",
+   "options": "Loan Product Loan Partner"
   },
   {
-   "description": "Excess amount repayment limit during loan closure",
-   "fieldname": "excess_amount_acceptance_limit",
-   "fieldtype": "Float",
-   "label": "Excess Amount Acceptance Limit"
+   "fieldname": "vehicle_finance_tab",
+   "fieldtype": "Tab Break",
+   "label": "Vehicle Finance"
   },
   {
-   "default": "0",
-   "description": "Allowed percentage by which a new loan can exceed the applicant's sanctioned loan amount limit.",
-   "fieldname": "sanctioned_amount_tolerance_percentage",
-   "fieldtype": "Percent",
-   "label": "Sanctioned Amount Tolerance (%)",
-   "non_negative": 1
+   "default": "1",
+   "fieldname": "max_vehicles_per_loan",
+   "fieldtype": "Int",
+   "label": "Max Vehicles per Loan"
   },
   {
-   "fieldname": "customer_refund_account",
-   "fieldtype": "Link",
-   "label": "Customer Refund Account",
-   "options": "Account"
-  },
-  {
-   "default": "0",
-   "fieldname": "validate_normal_repayment",
-   "fieldtype": "Check",
-   "label": "Validate Normal Repayment"
-  },
-  {
-   "fieldname": "collection_offset_sequence_for_standard_asset",
-   "fieldtype": "Link",
-   "label": "Collection Offset Sequence for Standard Asset",
-   "options": "Loan Demand Offset Order"
-  },
-  {
-   "fieldname": "collection_offset_sequence_for_sub_standard_asset",
-   "fieldtype": "Link",
-   "label": "Collection Offset Sequence for Sub Standard Asset",
-   "options": "Loan Demand Offset Order"
-  },
-  {
-   "fieldname": "collection_offset_sequence_for_written_off_asset",
-   "fieldtype": "Link",
-   "label": "Collection Offset Sequence for Written Off Asset",
-   "options": "Loan Demand Offset Order"
-  },
-  {
-   "fieldname": "collection_offset_sequence_for_settlement_collection",
-   "fieldtype": "Link",
-   "label": "Collection Offset Sequence for Settlement Collection",
-   "options": "Loan Demand Offset Order"
-  },
-  {
-   "collapsible": 1,
-   "fieldname": "limits_section",
-   "fieldtype": "Section Break",
-   "label": "Limits"
-  },
-  {
-   "fieldname": "column_break_wwhp",
+   "fieldname": "column_break_vfin",
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "collection_offset_sequence_section",
-   "fieldtype": "Section Break",
-   "label": "Collection Offset Sequence"
+   "default": "90",
+   "description": "A Used or Refinance vehicle needs a valuation at most this old when the application is approved",
+   "fieldname": "valuation_validity_days",
+   "fieldtype": "Int",
+   "label": "Valuation Validity (Days)"
   },
   {
-   "fieldname": "column_break_dbkg",
-   "fieldtype": "Column Break"
+   "fieldname": "vehicle_ltv_section",
+   "fieldtype": "Section Break",
+   "label": "LTV and Age Rules"
+  },
+  {
+   "fieldname": "vehicle_ltv_rules",
+   "fieldtype": "Table",
+   "label": "Vehicle LTV Rules",
+   "options": "Vehicle LTV Rule"
+  },
+  {
+   "fieldname": "pdd_section",
+   "fieldtype": "Section Break",
+   "label": "Post Disbursal Documents"
+  },
+  {
+   "fieldname": "pdd_requirements",
+   "fieldtype": "Table",
+   "label": "PDD Requirements",
+   "options": "PDD Requirement"
   },
   {
    "fieldname": "connections_tab",
    "fieldtype": "Tab Break",
    "label": "Connections",
    "show_dashboard": 1
-  },
-  {
-   "fieldname": "co_lending_tab",
-   "fieldtype": "Tab Break",
-   "label": "Co Lending"
-  },
-  {
-   "fieldname": "accounting_tab",
-   "fieldtype": "Tab Break",
-   "label": "Accounting"
-  },
-  {
-   "default": "Upfront Deduction",
-   "fieldname": "bpi_recovery_method",
-   "fieldtype": "Select",
-   "label": "BPI Recovery Method",
-   "options": "\nUpfront Deduction\nAmortized Over Tenure\nAdd to First EMI\nAdd to Last EMI"
-  },
-  {
-   "depends_on": "eval:doc.bpi_recovery_method == \"Add to First EMI\"",
-   "fieldname": "bpi_treatment",
-   "fieldtype": "Select",
-   "label": "BPI Treatment",
-   "options": "On top of first EMI\nAdjust within the EMI amount"
-  },
-  {
-   "default": "Round to Nearest",
-   "description": "How the calculated EMI is rounded. Round to Nearest rounds off normally. Round Up always rounds up, which can close the loan before the entered tenure. No Rounding keeps the exact value.",
-   "fieldname": "emi_rounding_method",
-   "fieldtype": "Select",
-   "label": "EMI Rounding Method",
-   "options": "Round to Nearest\nRound Up\nNo Rounding"
-  },
-  {
-   "default": "1",
-   "depends_on": "is_term_loan",
-   "description": "If unticked, a request to skip an installment is approved as soon as it is saved.",
-   "fieldname": "installment_skip_needs_approval",
-   "fieldtype": "Check",
-   "label": "Installment Skip Needs Approval"
   }
  ],
  "index_web_pages_for_search": 1,

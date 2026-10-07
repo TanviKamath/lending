@@ -18,9 +18,17 @@
   "available_security_value",
   "loan_to_value_ratio",
   "sell_ltv",
-  "disabled"
+  "disabled",
+  "vehicle"
  ],
  "fields": [
+  {
+   "fieldname": "loan_security_code",
+   "fieldtype": "Data",
+   "label": "Loan Security Code",
+   "reqd": 1,
+   "unique": 1
+  },
   {
    "fieldname": "loan_security_name",
    "fieldtype": "Data",
@@ -35,6 +43,20 @@
    "label": "Haircut %"
   },
   {
+   "fieldname": "original_security_value",
+   "fieldtype": "Currency",
+   "label": "Original Security Value",
+   "options": "Company:company:default_currency"
+  },
+  {
+   "depends_on": "eval:doc.original_security_value",
+   "fieldname": "utilized_security_value",
+   "fieldtype": "Currency",
+   "label": "Utilized Security Value",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
    "fieldname": "column_break_3",
    "fieldtype": "Column Break"
   },
@@ -47,39 +69,12 @@
    "reqd": 1
   },
   {
-   "fieldname": "loan_security_code",
-   "fieldtype": "Data",
-   "label": "Loan Security Code",
-   "reqd": 1,
-   "unique": 1
-  },
-  {
-   "default": "0",
-   "fieldname": "disabled",
-   "fieldtype": "Check",
-   "label": "Disabled"
-  },
-  {
-   "depends_on": "eval:doc.original_security_value",
-   "fieldname": "utilized_security_value",
-   "fieldtype": "Currency",
-   "label": "Utilized Security Value",
-   "options": "Company:company:default_currency",
-   "read_only": 1
-  },
-  {
    "depends_on": "eval:doc.original_security_value",
    "fieldname": "available_security_value",
    "fieldtype": "Currency",
    "label": "Available Security Value",
    "options": "Company:company:default_currency",
    "read_only": 1
-  },
-  {
-   "fieldname": "original_security_value",
-   "fieldtype": "Currency",
-   "label": "Original Security Value",
-   "options": "Company:company:default_currency"
   },
   {
    "fetch_from": "loan_security_type.loan_to_value_ratio",
@@ -94,6 +89,20 @@
    "fieldname": "sell_ltv",
    "fieldtype": "Percent",
    "label": "Sell LTV"
+  },
+  {
+   "default": "0",
+   "fieldname": "disabled",
+   "fieldtype": "Check",
+   "label": "Disabled"
+  },
+  {
+   "fieldname": "vehicle",
+   "fieldtype": "Link",
+   "label": "Vehicle",
+   "no_copy": 1,
+   "options": "Loan Vehicle",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,

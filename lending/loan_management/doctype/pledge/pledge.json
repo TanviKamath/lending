@@ -6,6 +6,7 @@
  "engine": "InnoDB",
  "field_order": [
   "loan_security",
+  "vehicle",
   "loan_security_name",
   "loan_security_type",
   "loan_security_code",
@@ -28,6 +29,21 @@
    "search_index": 1
   },
   {
+   "fetch_from": "loan_security.vehicle",
+   "fieldname": "vehicle",
+   "fieldtype": "Link",
+   "label": "Vehicle",
+   "options": "Loan Vehicle",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "loan_security.loan_security_name",
+   "fieldname": "loan_security_name",
+   "fieldtype": "Data",
+   "label": "Loan Security Name",
+   "read_only": 1
+  },
+  {
    "fetch_from": "loan_security.loan_security_type",
    "fieldname": "loan_security_type",
    "fieldtype": "Link",
@@ -42,6 +58,18 @@
    "label": "Loan Security Code"
   },
   {
+   "allow_on_submit": 1,
+   "description": "Proof that the security is locked, such as the depository pledge number, the gold packet number or the mortgage registration number.",
+   "fieldname": "lien_reference",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Lien Reference"
+  },
+  {
+   "fieldname": "column_break_5",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "qty",
    "fieldtype": "Float",
    "in_list_view": 1,
@@ -49,18 +77,18 @@
    "non_negative": 1
   },
   {
-   "fieldname": "loan_security_price",
-   "fieldtype": "Currency",
-   "in_list_view": 1,
-   "label": "Loan Security Price",
-   "options": "Company:company:default_currency"
-  },
-  {
    "fetch_from": "loan_security.haircut",
    "fieldname": "haircut",
    "fieldtype": "Percent",
    "label": "Haircut %",
    "read_only": 1
+  },
+  {
+   "fieldname": "loan_security_price",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Loan Security Price",
+   "options": "Company:company:default_currency"
   },
   {
    "fieldname": "amount",
@@ -71,30 +99,11 @@
    "read_only": 1
   },
   {
-   "fieldname": "column_break_5",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "post_haircut_amount",
    "fieldtype": "Currency",
    "label": "Post Haircut Amount",
    "options": "Company:company:default_currency",
    "read_only": 1
-  },
-  {
-   "fetch_from": "loan_security.loan_security_name",
-   "fieldname": "loan_security_name",
-   "fieldtype": "Data",
-   "label": "Loan Security Name",
-   "read_only": 1
-  },
-  {
-   "allow_on_submit": 1,
-   "description": "Proof that the security is locked, such as the depository pledge number, the gold packet number or the mortgage registration number.",
-   "fieldname": "lien_reference",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Lien Reference"
   }
  ],
  "istable": 1,

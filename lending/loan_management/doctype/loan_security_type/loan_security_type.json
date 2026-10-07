@@ -10,6 +10,8 @@
   "haircut",
   "column_break_5",
   "loan_to_value_ratio",
+  "valuation_method",
+  "is_vehicle",
   "disabled",
   "section_break_sale",
   "sell_ltv",
@@ -21,12 +23,6 @@
   "max_exposure_per_security"
  ],
  "fields": [
-  {
-   "default": "0",
-   "fieldname": "disabled",
-   "fieldtype": "Check",
-   "label": "Disabled"
-  },
   {
    "fieldname": "loan_security_type",
    "fieldtype": "Data",
@@ -51,6 +47,27 @@
    "fieldname": "loan_to_value_ratio",
    "fieldtype": "Percent",
    "label": "Loan To Value Ratio"
+  },
+  {
+   "default": "Market Price",
+   "description": "Fixed Valuation securities are valued once at pledge and skip Loan Security Price lookups and the daily shortfall check",
+   "fieldname": "valuation_method",
+   "fieldtype": "Select",
+   "label": "Valuation Method",
+   "options": "Market Price\nFixed Valuation"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.valuation_method=='Fixed Valuation'",
+   "fieldname": "is_vehicle",
+   "fieldtype": "Check",
+   "label": "Is Vehicle"
+  },
+  {
+   "default": "0",
+   "fieldname": "disabled",
+   "fieldtype": "Check",
+   "label": "Disabled"
   },
   {
    "fieldname": "section_break_sale",

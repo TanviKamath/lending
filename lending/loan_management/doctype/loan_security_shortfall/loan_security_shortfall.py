@@ -13,6 +13,7 @@ from lending.loan_management.doctype.loan_security_price.loan_security_price imp
 from lending.loan_management.doctype.loan_security_release.loan_security_release import (
 	get_pledged_security_qty,
 )
+from lending.vehicle_finance.loan_hooks import is_fixed_valuation_security
 
 
 class LoanSecurityShortfall(Document):
@@ -209,8 +210,12 @@ def check_for_ltv_shortfall(process_loan_security_shortfall, loan=None, applican
 
 	# Loan-wise shortfall processing
 	for loan in loans:
+		pledged_securities = get_pledged_security_qty(loan=loan.name)
+		if only_fixed_valuation_securities(pledged_securities):
+			continue
+
 		outstanding_amount = get_outstanding_amount(loan)
-		collateral = valuation.value_loan(loan.name)
+		collateral = valuation.value_loan(loan.name, pledged_qty=pledged_securities)
 
 		shortfall_amount = outstanding_amount - collateral.allowed_amount
 		# A security with no current price is valued at 0, so a missing price raises a shortfall
@@ -238,6 +243,9 @@ def check_for_ltv_shortfall(process_loan_security_shortfall, loan=None, applican
 
 	# Applicant-wise shortfall processing
 	for applicant in applicants:
+		if only_fixed_valuation_securities(get_pledged_security_qty(applicant=applicant)):
+			continue
+
 		security_value = get_total_pledged_security_value(applicant=applicant, on_shortfall_check=True)
 		pending_principal_amount = get_pending_principal_amount_for_applicant(applicant)
 
@@ -339,6 +347,11 @@ def get_ltv_ratio_map(loan_securities=None, field="loan_to_value_ratio"):
 		row.name: flt(row.security_ratio) or flt(row.type_ratio)
 		for row in query.run(as_dict=True)
 	}
+
+
+def only_fixed_valuation_securities(pledged_securities):
+	securities = [security for security, qty in pledged_securities.items() if flt(qty) > 0]
+	return bool(securities) and all(is_fixed_valuation_security(security) for security in securities)
 
 
 def has_pledged_qty(pledged_securities):
