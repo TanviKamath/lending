@@ -13,7 +13,10 @@ from lending.loan_management.doctype.loan_security_price.loan_security_price imp
 from lending.loan_management.doctype.loan_security_release.loan_security_release import (
 	get_pledged_security_qty,
 )
-from lending.vehicle_finance.loan_hooks import is_fixed_valuation_security
+from lending.vehicle_finance.loan_hooks import (
+	get_fixed_security_eligible_value,
+	is_fixed_valuation_security,
+)
 
 
 class LoanSecurityShortfall(Document):
@@ -215,7 +218,16 @@ def check_for_ltv_shortfall(process_loan_security_shortfall, loan=None, applican
 			continue
 
 		outstanding_amount = get_outstanding_amount(loan)
-		collateral = valuation.value_loan(loan.name, pledged_qty=pledged_securities)
+		# A fixed-value security such as a vehicle covers its eligible value and has no price to check
+		priced_qty = {}
+		for security, qty in pledged_securities.items():
+			fixed_value = get_fixed_security_eligible_value(security)
+			if fixed_value is None:
+				priced_qty[security] = qty
+			else:
+				outstanding_amount -= fixed_value * flt(qty)
+
+		collateral = valuation.value_loan(loan.name, pledged_qty=priced_qty)
 
 		shortfall_amount = outstanding_amount - collateral.allowed_amount
 		# A security with no current price is valued at 0, so a missing price raises a shortfall
