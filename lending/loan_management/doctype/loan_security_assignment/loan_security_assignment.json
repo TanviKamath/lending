@@ -15,6 +15,7 @@
   "company",
   "pledge_time",
   "release_time",
+  "released_by",
   "release_reference",
   "status",
   "loan_security_details_section",
@@ -31,13 +32,30 @@
  ],
  "fields": [
   {
-   "fieldname": "amended_from",
+   "fieldname": "applicant_details",
+   "fieldtype": "Section Break",
+   "label": "Applicant Details"
+  },
+  {
+   "fieldname": "loan",
    "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Loan Security Assignment",
-   "print_hide": 1,
-   "read_only": 1
+   "label": "Loan",
+   "options": "Loan",
+   "search_index": 1
+  },
+  {
+   "fieldname": "loan_application",
+   "fieldtype": "Link",
+   "label": "Loan Application",
+   "options": "Loan Application"
+  },
+  {
+   "fetch_from": "loan.applicant_type",
+   "fieldname": "applicant_type",
+   "fieldtype": "Select",
+   "label": "Applicant Type",
+   "options": "Employee\nMember\nCustomer",
+   "reqd": 1
   },
   {
    "fetch_from": "loan.applicant",
@@ -51,26 +69,46 @@
    "search_index": 1
   },
   {
-   "fieldname": "loan_security_details_section",
-   "fieldtype": "Section Break",
-   "label": "Loan Security Details"
-  },
-  {
    "fieldname": "column_break_3",
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "total_security_value",
-   "fieldtype": "Currency",
-   "label": "Total Security Value",
-   "options": "Company:company:default_currency",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "pledge_time",
+   "fieldtype": "Datetime",
+   "label": "Pledge Time",
    "read_only": 1
   },
   {
-   "fieldname": "maximum_loan_value",
-   "fieldtype": "Currency",
-   "label": "Maximum Loan Value",
-   "options": "Company:company:default_currency",
+   "allow_on_submit": 1,
+   "fieldname": "release_time",
+   "fieldtype": "Datetime",
+   "label": "Release Time",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "released_by",
+   "fieldtype": "Link",
+   "label": "Released By",
+   "no_copy": 1,
+   "options": "Loan Security Release",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "depends_on": "release_reference",
+   "description": "Proof that the lock was removed, such as the depository unpledge number, the gold handover receipt or the mortgage release deed number.",
+   "fieldname": "release_reference",
+   "fieldtype": "Data",
+   "label": "Release Reference",
    "read_only": 1
   },
   {
@@ -85,11 +123,9 @@
    "read_only": 1
   },
   {
-   "allow_on_submit": 1,
-   "fieldname": "pledge_time",
-   "fieldtype": "Datetime",
-   "label": "Pledge Time",
-   "read_only": 1
+   "fieldname": "loan_security_details_section",
+   "fieldtype": "Section Break",
+   "label": "Loan Security Details"
   },
   {
    "fieldname": "securities",
@@ -99,28 +135,27 @@
    "reqd": 1
   },
   {
-   "fieldname": "column_break_11",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "section_break_10",
    "fieldtype": "Section Break",
    "label": "Totals"
   },
   {
-   "fieldname": "company",
-   "fieldtype": "Link",
-   "label": "Company",
-   "options": "Company",
-   "reqd": 1
+   "fieldname": "total_security_value",
+   "fieldtype": "Currency",
+   "label": "Total Security Value",
+   "options": "Company:company:default_currency",
+   "read_only": 1
   },
   {
-   "fetch_from": "loan.applicant_type",
-   "fieldname": "applicant_type",
-   "fieldtype": "Select",
-   "label": "Applicant Type",
-   "options": "Employee\nMember\nCustomer",
-   "reqd": 1
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "maximum_loan_value",
+   "fieldtype": "Currency",
+   "label": "Maximum Loan Value",
+   "options": "Company:company:default_currency",
+   "read_only": 1
   },
   {
    "collapsible": 1,
@@ -145,38 +180,13 @@
    "label": "Description"
   },
   {
-   "fieldname": "applicant_details",
-   "fieldtype": "Section Break",
-   "label": "Applicant Details"
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "release_time",
-   "fieldtype": "Datetime",
-   "label": "Release Time",
-   "read_only": 1
-  },
-  {
-   "allow_on_submit": 1,
-   "depends_on": "release_reference",
-   "description": "Proof that the lock was removed, such as the depository unpledge number, the gold handover receipt or the mortgage release deed number.",
-   "fieldname": "release_reference",
-   "fieldtype": "Data",
-   "label": "Release Reference",
-   "read_only": 1
-  },
-  {
-   "fieldname": "loan",
+   "fieldname": "amended_from",
    "fieldtype": "Link",
-   "label": "Loan",
-   "options": "Loan",
-   "search_index": 1
-  },
-  {
-   "fieldname": "loan_application",
-   "fieldtype": "Link",
-   "label": "Loan Application",
-   "options": "Loan Application"
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Loan Security Assignment",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,

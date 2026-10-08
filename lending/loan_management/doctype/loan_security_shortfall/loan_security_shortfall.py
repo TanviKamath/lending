@@ -221,7 +221,7 @@ def check_for_ltv_shortfall(process_loan_security_shortfall, loan=None, applican
 		# A fixed-value security such as a vehicle covers its eligible value and has no price to check
 		priced_qty = {}
 		for security, qty in pledged_securities.items():
-			fixed_value = get_fixed_security_eligible_value(security)
+			fixed_value = get_fixed_security_eligible_value(security, loan=loan.name)
 			if fixed_value is None:
 				priced_qty[security] = qty
 			else:
