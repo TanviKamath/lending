@@ -204,6 +204,7 @@ scheduler_events = {
 		"lending.loan_management.doctype.process_loan_security_shortfall.process_loan_security_shortfall.create_process_loan_security_shortfall",
 		"lending.loan_management.doctype.process_loan_classification.process_loan_classification.create_process_loan_classification",
 		"lending.loan_management.doctype.loan.loan.auto_close_loc_loans",
+		"lending.loan_management.doctype.process_loan_accounting.process_loan_accounting.process_loan_accounting",
 		"lending.loan_management.doctype.process_loan_statement_of_accounts.process_loan_statement_of_accounts.send_auto_email",
 	],
 	"monthly_long": [
@@ -339,5 +340,16 @@ workflow_methods = [
 	{
 		"name": "Run Knockout Rules",
 		"method": "lending.loan_origination.decisioning.run_knockout_rules"
+	},
+	{
+		"name": "Pull Credit Bureau Report",
+		"method": "lending.loan_integrations.bureau.run_bureau_pull_task"
 	}
 ]
+
+# Another app adds its own provider by naming its adapter class here.
+# lending_integration_adapters = ["partner_app.adapters.experian.ExperianAdapter"]
+
+# Overrides core's 90 days: a pull is the evidence we had consent before marking somebody's
+# credit file, and that has to outlive the loan. Only a default; a Log Settings row wins.
+default_log_clearing_doctypes = {"Integration Request": [3650]}
