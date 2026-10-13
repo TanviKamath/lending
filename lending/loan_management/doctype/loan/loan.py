@@ -39,6 +39,7 @@ from lending.loan_management.doctype.loan_security_assignment.loan_security_assi
 	validate_lien_references,
 )
 from lending.loan_management.doctype.loan_security_release.loan_security_release import (
+	PLEDGED_STATUSES,
 	get_pledged_security_qty,
 )
 from lending.loan_management.utils import (
@@ -657,10 +658,16 @@ class Loan(LoanController):
 			self.db_set("maximum_loan_amount", maximum_loan_value)
 
 	def cancel_loan_security_assignment(self):
+		# Releases link to the Loan and to the assignments they free, so they are cancelled first.
+		for release in frappe.get_all(
+			"Loan Security Release", filters={"loan": self.name, "docstatus": 1}, pluck="name"
+		):
+			frappe.get_doc("Loan Security Release", release).cancel()
+
 		if not self.loan_application:
 			for assignment in frappe.get_all(
 				"Loan Security Assignment",
-				filters={"loan": self.name, "status": "Pledged"},
+				filters={"loan": self.name, "docstatus": 1, "status": ("in", PLEDGED_STATUSES)},
 				fields=["name"],
 			):
 				doc = frappe.get_doc("Loan Security Assignment", assignment.name)

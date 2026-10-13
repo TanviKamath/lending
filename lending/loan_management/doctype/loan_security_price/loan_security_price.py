@@ -38,6 +38,7 @@ class LoanSecurityPrice(Document):
 
 	def update_sanctioned_limits_for_security_holders(self):
 		from lending.loan_management.doctype.loan_security_release.loan_security_release import (
+			LOCKED_STATUSES,
 			update_sanctioned_loan_amount_for_applicant,
 		)
 
@@ -50,7 +51,7 @@ class LoanSecurityPrice(Document):
 			.on(pledge.parent == loan_security_assignment.name)
 			.select(loan_security_assignment.applicant, loan_security_assignment.applicant_type)
 			.where(loan_security_assignment.docstatus == 1)
-			.where(loan_security_assignment.status == "Pledged")
+			.where(loan_security_assignment.status.isin(LOCKED_STATUSES))
 			.where(pledge.loan_security == self.loan_security)
 			.distinct()
 		).run(as_list=True)

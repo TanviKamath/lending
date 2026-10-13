@@ -12,7 +12,11 @@ from lending.loan_management.doctype.loan_security_price.loan_security_price imp
 	get_loan_security_price_map,
 )
 from lending.loan_management.doctype.loan_security_release.loan_security_release import (
+	LOCKED_STATUSES,
 	get_pledged_qty_map,
+	get_unreleased_qty,
+	lock_loan,
+	lock_loan_securities,
 	update_sanctioned_loan_amount_for_applicant,
 	validate_references,
 )
@@ -307,16 +311,6 @@ def validate_lien_references(securities):
 	)
 
 
-def lock_loan(loan):
-	frappe.db.get_value("Loan", loan, "name", for_update=True)
-
-
-def lock_loan_securities(securities):
-	# Serialises concurrent pledges of the same security, so two cannot both pass the exposure cap.
-	ls = frappe.qb.DocType("Loan Security")
-	frappe.qb.from_(ls).select(ls.name).where(ls.name.isin(securities)).orderby(ls.name).for_update().run()
-
-
 def update_loan(loan, maximum_value_against_pledge, cancel=0):
 	precision = cint(frappe.db.get_default("currency_precision")) or 2
 	maximum_loan_value = flt(frappe.db.get_value("Loan", {"name": loan}, "maximum_loan_amount"), precision)
@@ -424,7 +418,7 @@ def release_loan_security_assignment(loan_security_assignment: str, release_refe
 		)
 
 	lsa = frappe.get_doc("Loan Security Assignment", loan_security_assignment)
-	if lsa.docstatus != 1 or lsa.status not in ("Pledged", "Release Requested"):
+	if lsa.docstatus != 1 or lsa.status not in LOCKED_STATUSES:
 		frappe.throw(
 			_("{0} is {1}. Only a Pledged assignment can be released.").format(
 				frappe.bold(lsa.name), _(lsa.status)
@@ -433,46 +427,30 @@ def release_loan_security_assignment(loan_security_assignment: str, release_refe
 
 	if lsa.loan:
 		lock_loan(lsa.loan)
-	validate_not_already_released(lsa)
+	lock_loan_securities(sorted({row.loan_security for row in lsa.securities}))
 
-	# The release is recorded as a Loan Security Release, like any other, so its quantity
-	# is subtracted once and the Loan's closure and sanctioned limits update as usual.
-	release = make_release_for_assignment(lsa, release_reference)
-	release.insert()
-	release.submit()
+	unreleased = {
+		security: qty
+		for (_name, security), qty in get_unreleased_qty([lsa.name], for_update=True).items()
+		if qty > 0
+	}
+	if not unreleased:
+		frappe.throw(
+			_("All of {0} is already covered by Loan Security Releases.").format(frappe.bold(lsa.name)),
+			title=_("Already Released"),
+		)
+
+	# The rest of the assignment is released through an approved Loan Security Release linked
+	# to it, so its quantity is subtracted once, and approving it marks the assignment Released.
+	release = make_release_for_assignment(lsa, unreleased, release_reference)
 	release.status = "Approved"
-	release.save()
-
-	lsa.db_set({"status": "Released", "release_time": now_datetime(), "release_reference": release_reference})
+	release.docstatus = 1
+	release.insert()
 
 	return release.name
 
 
-def validate_not_already_released(lsa):
-	still_pledged = get_pledged_qty_map(
-		loan=lsa.loan,
-		applicant=lsa.applicant,
-		securities=[row.loan_security for row in lsa.securities],
-		for_update=True,
-	)
-
-	for row in lsa.securities:
-		remaining = flt(still_pledged.get(row.loan_security))
-		if flt(row.qty) > remaining:
-			frappe.throw(
-				_(
-					"Only {0} of {1} is still pledged, but {2} pledges {3}. An approved Loan Security Release may already cover it."
-				).format(
-					remaining,
-					frappe.bold(row.loan_security),
-					frappe.bold(lsa.name),
-					flt(row.qty),
-				),
-				title=_("Already Released"),
-			)
-
-
-def make_release_for_assignment(lsa, release_reference):
+def make_release_for_assignment(lsa, quantities, release_reference):
 	release = frappe.new_doc("Loan Security Release")
 	release.update(
 		{
@@ -480,13 +458,17 @@ def make_release_for_assignment(lsa, release_reference):
 			"applicant": lsa.applicant,
 			"loan": lsa.loan,
 			"company": lsa.company,
-			"description": _("Release of Loan Security Assignment {0}").format(lsa.name),
 		}
 	)
-	for row in lsa.securities:
+	for security, qty in quantities.items():
 		release.append(
 			"securities",
-			{"loan_security": row.loan_security, "qty": row.qty, "release_reference": release_reference},
+			{
+				"loan_security": security,
+				"qty": qty,
+				"release_reference": release_reference,
+				"loan_security_assignment": lsa.name,
+			},
 		)
 
 	return release

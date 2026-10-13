@@ -2,7 +2,7 @@
 # See license.txt
 
 import frappe
-from frappe.utils import add_days, nowdate
+from frappe.utils import add_days, now_datetime, nowdate
 
 from lending.loan_management.doctype.loan.loan import unpledge_security
 from lending.loan_management.doctype.loan_application.loan_application import (
@@ -14,8 +14,8 @@ from lending.loan_management.doctype.loan_security_assignment.loan_security_assi
 from lending.loan_management.doctype.loan_security_release.loan_security_release import (
 	get_pledged_qty_map,
 )
-from lending.patches.v16_0.create_releases_for_released_assignments import (
-	execute as create_releases_for_released_assignments,
+from lending.patches.v16_0.link_releases_to_assignments import (
+	execute as link_releases_to_assignments,
 )
 from lending.tests.test_utils import (
 	create_loan,
@@ -48,6 +48,24 @@ def make_pledge(securities, loan=None, applicant=APPLICANT):
 		}
 	)
 	return lsa.insert()
+
+
+def make_unlinked_release(applicant, qty):
+	# An approved release saved before releases were linked to assignments.
+	release = frappe.new_doc("Loan Security Release")
+	release.update(
+		{
+			"applicant_type": "Customer",
+			"applicant": applicant,
+			"company": "_Test Company",
+			"status": "Approved",
+			"docstatus": 1,
+			"unpledge_time": now_datetime(),
+			"securities": [{"loan_security": "Test Security 1", "qty": qty, "release_reference": "OLD-1"}],
+		}
+	)
+	release.flags.ignore_validate = True
+	return release.insert()
 
 
 def make_loan():
@@ -273,9 +291,12 @@ class TestLoanSecurityAssignment(LendingTestSuite):
 			[{"loan_security": "Test Security 1", "qty": 100, "lien_reference": "PSN-1"}], loan=loan.name
 		).submit()
 
+		# A failed request rolls back, so the release it submitted does not hold the shares.
+		frappe.db.savepoint("unpledge")
 		self.assertRaises(
 			frappe.ValidationError, unpledge_security, loan=loan.name, save=1, submit=1, approve=1
 		)
+		frappe.db.rollback(save_point="unpledge")
 
 		release = unpledge_security(
 			loan=loan.name,
@@ -372,86 +393,204 @@ class TestLoanSecurityAssignment(LendingTestSuite):
 			applicant="_Test Loan Customer 1",
 		).submit()
 
-		# This applicant releases 100 units, then the assignment is cancelled as well.
+		# A release from before releases were linked to assignments, then the assignment is cancelled.
 		lsa = make_pledge([{"loan_security": "Test Security 1", "qty": 100, "lien_reference": "PSN-2"}])
 		lsa.submit()
-		release = make_release(
-			[{"loan_security": "Test Security 1", "qty": 100, "release_reference": "UNPLEDGE-1"}]
-		)
-		release.status = "Approved"
-		release.save()
-		lsa.reload()
+		make_unlinked_release(APPLICANT, 100)
 		lsa.cancel()
 
 		self.assertEqual(
 			get_pledged_qty_map(securities=["Test Security 1"]).get("Test Security 1", 0), before + 100
 		)
 
-	def make_two_pledges(self, applicant):
+	def make_pledges(self, applicant, *quantities):
 		make_customer(applicant)
-		first = make_pledge(
-			[{"loan_security": "Test Security 1", "qty": 50, "lien_reference": "PSN-1"}], applicant=applicant
+		pledges = []
+		for qty in quantities:
+			lsa = make_pledge(
+				[{"loan_security": "Test Security 1", "qty": qty, "lien_reference": f"PSN-{qty}"}],
+				applicant=applicant,
+			)
+			lsa.submit()
+			pledges.append(lsa)
+		return pledges
+
+	def approve_release(self, applicant, qty, assignment=None):
+		release = make_release(
+			[
+				{
+					"loan_security": "Test Security 1",
+					"qty": qty,
+					"release_reference": "UNPLEDGE-1",
+					"loan_security_assignment": assignment,
+				}
+			],
+			applicant=applicant,
 		)
-		first.submit()
-		make_pledge(
-			[{"loan_security": "Test Security 1", "qty": 30, "lien_reference": "PSN-2"}], applicant=applicant
-		).submit()
-		return first
+		release.status = "Approved"
+		release.save()
+		return release
 
 	def pledged(self, applicant):
 		return get_pledged_qty_map(applicant=applicant, securities=["Test Security 1"]).get(
 			"Test Security 1", 0
 		)
 
-	def test_release_button_records_a_loan_security_release(self):
+	def status(self, lsa):
+		return frappe.db.get_value("Loan Security Assignment", lsa.name, "status")
+
+	def test_release_button_records_a_linked_loan_security_release(self):
 		applicant = "_Test Release Button Customer"
-		first = self.make_two_pledges(applicant)
+		first, _second = self.make_pledges(applicant, 50, 30)
 
 		release = frappe.get_doc(
 			"Loan Security Release", release_loan_security_assignment(first.name, "UNPLEDGE-1")
 		)
-		first.reload()
 
 		self.assertEqual((release.docstatus, release.status), (1, "Approved"))
 		self.assertEqual(
-			[(row.loan_security, row.qty, row.release_reference) for row in release.securities],
-			[("Test Security 1", 50, "UNPLEDGE-1")],
+			[
+				(row.loan_security, row.qty, row.release_reference, row.loan_security_assignment)
+				for row in release.securities
+			],
+			[("Test Security 1", 50, "UNPLEDGE-1", first.name)],
 		)
-		self.assertEqual(first.status, "Released")
+		self.assertEqual(self.status(first), "Released")
 		self.assertEqual(self.pledged(applicant), 30)
 
-	def test_release_button_refuses_shares_already_released(self):
+	def test_release_button_refuses_a_pledge_already_released(self):
+		# Two pledges of the same size: the review's case that a total cannot tell apart.
 		applicant = "_Test Double Release Customer"
-		first = self.make_two_pledges(applicant)
+		first, second = self.make_pledges(applicant, 50, 50)
 
-		release = make_release(
-			[{"loan_security": "Test Security 1", "qty": 50, "release_reference": "UNPLEDGE-1"}],
-			applicant=applicant,
-		)
-		release.status = "Approved"
-		release.save()
+		# A release without a pledge takes the oldest one, the first.
+		release = self.approve_release(applicant, 50)
+		self.assertEqual(release.securities[0].loan_security_assignment, first.name)
+		self.assertEqual(self.status(first), "Released")
 
-		# Only the other pledge's 30 are still locked, so releasing the first 50 again is refused.
 		self.assertRaises(frappe.ValidationError, release_loan_security_assignment, first.name, "UNPLEDGE-2")
-		self.assertEqual(self.pledged(applicant), 30)
-		self.assertEqual(frappe.db.get_value("Loan Security Assignment", first.name, "status"), "Pledged")
+		self.assertRaisesRegex(
+			frappe.ValidationError, "not yet released", self.approve_release, applicant, 10, first.name
+		)
+		self.assertEqual(self.pledged(applicant), 50)
+
+		release_loan_security_assignment(second.name, "UNPLEDGE-2")
+		self.assertEqual(self.pledged(applicant), 0)
+
+	def test_release_button_after_the_other_pledge_was_released(self):
+		applicant = "_Test Other Release Customer"
+		first, second = self.make_pledges(applicant, 50, 50)
+
+		self.approve_release(applicant, 50, assignment=second.name)
+		release_loan_security_assignment(first.name, "UNPLEDGE-2")
+
+		self.assertEqual(self.pledged(applicant), 0)
+		self.assertEqual((self.status(first), self.status(second)), ("Released", "Released"))
+
+	def test_release_rows_are_split_across_pledges(self):
+		applicant = "_Test Split Release Customer"
+		first, second = self.make_pledges(applicant, 50, 30)
+
+		release = self.approve_release(applicant, 60)
+
+		self.assertEqual(
+			[(row.loan_security_assignment, row.qty) for row in release.securities],
+			[(first.name, 50), (second.name, 10)],
+		)
+		self.assertEqual((self.status(first), self.status(second)), ("Released", "Pledged"))
+		self.assertEqual(self.pledged(applicant), 20)
+
+	def test_release_of_more_than_is_pledged_is_refused(self):
+		applicant = "_Test Over Release Customer"
+		self.make_pledges(applicant, 50, 30)
+
+		self.assertRaises(frappe.ValidationError, self.approve_release, applicant, 100)
+
+	def test_partial_releases_mark_the_pledge_released_when_covered(self):
+		applicant = "_Test Partial Release Customer"
+		(lsa,) = self.make_pledges(applicant, 50)
+
+		self.approve_release(applicant, 20)
+		self.assertEqual(self.status(lsa), "Pledged")
+
+		# The Release button releases what is left.
+		release = frappe.get_doc(
+			"Loan Security Release", release_loan_security_assignment(lsa.name, "UNPLEDGE-2")
+		)
+		self.assertEqual(release.securities[0].qty, 30)
+		self.assertEqual(self.status(lsa), "Released")
+		self.assertEqual(self.pledged(applicant), 0)
+
+	def test_cancelling_a_release_puts_the_pledge_back(self):
+		applicant = "_Test Cancel Release Customer"
+		first, _second = self.make_pledges(applicant, 50, 30)
+		release = frappe.get_doc(
+			"Loan Security Release", release_loan_security_assignment(first.name, "UNPLEDGE-1")
+		)
+
+		release.cancel()
+
+		self.assertEqual(self.status(first), "Pledged")
+		self.assertEqual(self.pledged(applicant), 80)
+
+	def test_a_released_pledge_cannot_be_cancelled_before_its_release(self):
+		applicant = "_Test Cancel Pledge Customer"
+		(lsa,) = self.make_pledges(applicant, 50)
+		release_loan_security_assignment(lsa.name, "UNPLEDGE-1")
+
+		lsa.reload()
+		self.assertRaises(frappe.LinkExistsError, lsa.cancel)
+
+	def test_cancelling_the_loan_cancels_its_releases(self):
+		loan = make_loan()
+		lsa = make_pledge(
+			[{"loan_security": "Test Security 1", "qty": 100, "lien_reference": "PSN-1"}],
+			loan=loan.name,
+			applicant=loan.applicant,
+		)
+		lsa.submit()
+		release = release_loan_security_assignment(lsa.name, "UNPLEDGE-1")
+
+		loan.reload()
+		loan.cancel()
+
+		self.assertEqual(frappe.db.get_value("Loan Security Release", release, "docstatus"), 2)
+		self.assertEqual(self.status(lsa), "Cancelled")
 
 	def test_patch_gives_old_released_assignments_a_release(self):
 		applicant = "_Test Old Release Customer"
-		make_customer(applicant)
-		lsa = make_pledge(
-			[{"loan_security": "Test Security 1", "qty": 40, "lien_reference": "PSN-1"}], applicant=applicant
-		)
-		lsa.submit()
+		first, _second = self.make_pledges(applicant, 50, 30)
 		# The old Release button only changed the status.
-		lsa.db_set("status", "Released")
-		self.assertEqual(self.pledged(applicant), 40)
+		first.db_set("status", "Released")
+		self.assertEqual(self.pledged(applicant), 80)
 
-		create_releases_for_released_assignments()
+		link_releases_to_assignments()
 
-		self.assertEqual(self.pledged(applicant), 0)
-		self.assertTrue(
-			frappe.db.exists(
-				"Loan Security Release", {"applicant": applicant, "docstatus": 1, "status": "Approved"}
-			)
+		self.assertEqual(self.pledged(applicant), 30)
+		release = frappe.get_doc(
+			"Loan Security Release", {"applicant": applicant, "docstatus": 1, "status": "Approved"}
 		)
+		self.assertEqual(release.securities[0].loan_security_assignment, first.name)
+
+	def test_patch_does_not_release_an_old_double_release_twice(self):
+		applicant = "_Test Old Double Release Customer"
+		first, second = self.make_pledges(applicant, 50, 30)
+		# Released with the old button and with a release made by hand.
+		first.db_set("status", "Released")
+		make_unlinked_release(applicant, 50)
+
+		link_releases_to_assignments()
+
+		self.assertEqual(frappe.db.count("Loan Security Release", {"applicant": applicant}), 1)
+		self.assertEqual(self.pledged(applicant), 30)
+		self.assertEqual(self.status(second), "Pledged")
+
+	def test_patch_marks_pledges_covered_by_old_releases_released(self):
+		applicant = "_Test Old Covered Release Customer"
+		(lsa,) = self.make_pledges(applicant, 50)
+		make_unlinked_release(applicant, 50)
+
+		link_releases_to_assignments()
+
+		self.assertEqual(self.status(lsa), "Released")
+		self.assertEqual(self.pledged(applicant), 0)

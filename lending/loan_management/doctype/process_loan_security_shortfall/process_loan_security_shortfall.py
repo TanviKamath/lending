@@ -6,6 +6,9 @@ import frappe
 from frappe.model.document import Document
 from frappe.utils import get_datetime
 
+from lending.loan_management.doctype.loan_security_release.loan_security_release import (
+	LOCKED_STATUSES,
+)
 from lending.loan_management.doctype.loan_security_shortfall.loan_security_shortfall import (
 	check_for_ltv_shortfall,
 )
@@ -45,4 +48,4 @@ def create_process_loan_security_shortfall():
 
 def check_for_secured_loans():
 	return frappe.db.count("Loan", {"docstatus": 1, "is_secured_loan": 1}) or \
-		frappe.db.count("Loan Security Assignment", {"docstatus": 1, "status": "Pledged"})
+		frappe.db.count("Loan Security Assignment", {"docstatus": 1, "status": ("in", LOCKED_STATUSES)})
