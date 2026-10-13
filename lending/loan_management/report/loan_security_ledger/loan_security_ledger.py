@@ -6,6 +6,10 @@ from frappe import _
 from frappe.query_builder import functions as fn
 from frappe.query_builder.custom import ConstantColumn
 
+from lending.loan_management.doctype.loan_security_release.loan_security_release import (
+	PLEDGED_STATUSES,
+)
+
 
 def execute(filters: dict | None = None):
 	columns = get_columns(filters)
@@ -90,7 +94,9 @@ def get_data(filters) -> list[list]:
 		pledge_doctype.parent == loan_security_assignment_doctype.name
 	).select(
 		loan_security_assignment_doctype.loan, ConstantColumn("Loan Security Assignment").as_("doctype"), pledge_doctype.loan_security, fn.Sum(pledge_doctype.qty).as_("qty"), loan_security_assignment_doctype.pledge_time.as_("date"), pledge_doctype.loan_security_type
-	).where(loan_security_assignment_doctype.docstatus == 1).where(loan_security_assignment_doctype.status == "Pledged")
+	).where(loan_security_assignment_doctype.docstatus == 1).where(
+		loan_security_assignment_doctype.status.isin(PLEDGED_STATUSES)
+	)
 
 	if loan:
 		unpledge_query = unpledge_query.where(loan_security_release_doctype.loan == loan)

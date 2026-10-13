@@ -6,6 +6,9 @@ import frappe
 from frappe.query_builder.functions import Sum
 from frappe.utils.dashboard import cache_source
 
+from lending.loan_management.doctype.loan_security_release.loan_security_release import (
+	PLEDGED_STATUSES,
+)
 from lending.loan_management.report.applicant_wise_loan_security_exposure.applicant_wise_loan_security_exposure import (
 	get_loan_security_details,
 )
@@ -64,7 +67,7 @@ def get_data(
 		.inner_join(pledge)
 		.on(pledge.parent == lsa.name)
 		.select(pledge.loan_security, Sum(pledge.qty).as_("qty"))
-		.where(lsa.status == "Pledged")
+		.where(lsa.status.isin(PLEDGED_STATUSES))
 		.groupby(pledge.loan_security)
 	)
 	if company:

@@ -3,7 +3,7 @@
 
 frappe.ui.form.on('Loan Security Assignment', {
 	refresh: function(frm) {
-		if (frm.doc.status === "Release Requested") {
+		if (frm.doc.docstatus === 1 && ["Pledged", "Release Requested"].includes(frm.doc.status)) {
 			frm.add_custom_button(__("Release"), function() {
 				frm.trigger("release_loan_security_assignment");
 			})
@@ -41,6 +41,14 @@ frappe.ui.form.on('Loan Security Assignment', {
 				},
 				method: "lending.loan_management.doctype.loan_security_assignment.loan_security_assignment.release_loan_security_assignment",
 				callback: function(r) {
+					if (r.message) {
+						frappe.show_alert({
+							message: __("Released through Loan Security Release {0}", [
+								frappe.utils.get_form_link("Loan Security Release", r.message, true),
+							]),
+							indicator: "green",
+						});
+					}
 					frm.reload_doc();
 				}
 			})

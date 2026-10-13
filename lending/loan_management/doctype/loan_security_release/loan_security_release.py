@@ -12,6 +12,11 @@ from lending.loan_management.doctype.loan_security_price.loan_security_price imp
 	get_loan_security_price_map,
 )
 
+# Every assignment that ever locked its securities. Released quantities come only from
+# approved Loan Security Releases, so a Released assignment still counts here and its
+# release is subtracted once.
+PLEDGED_STATUSES = ("Pledged", "Release Requested", "Released")
+
 
 class LoanSecurityRelease(Document):
 	# begin: auto-generated types
@@ -267,7 +272,9 @@ def get_pledged_qty_map(loan=None, applicant=None, securities=None, for_update=F
 		loan_security_assignment_doctype.applicant,
 		pledge_doctype.loan_security,
 		fn.Sum(pledge_doctype.qty).as_("qty"),
-	).where(loan_security_assignment_doctype.docstatus == 1).where(loan_security_assignment_doctype.status == "Pledged")
+	).where(loan_security_assignment_doctype.docstatus == 1).where(
+		loan_security_assignment_doctype.status.isin(PLEDGED_STATUSES)
+	)
 
 	if loan:
 		unpledge_query = unpledge_query.where(loan_security_release_doctype.loan == loan)

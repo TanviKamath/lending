@@ -414,15 +414,79 @@ def update_loan_securities_values(
 @frappe.whitelist()
 def release_loan_security_assignment(loan_security_assignment: str, release_reference: str | None = None):
 	frappe.has_permission("Loan Security Assignment", "write", doc=loan_security_assignment, throw=True)
+	frappe.has_permission("Loan Security Release", "submit", throw=True)
 
-	if not (release_reference or "").strip():
+	release_reference = (release_reference or "").strip()
+	if not release_reference:
 		frappe.throw(
 			_("Add the release reference before releasing {0}.").format(frappe.bold(loan_security_assignment)),
 			title=_("Release Reference Missing"),
 		)
 
-	frappe.db.set_value(
-		"Loan Security Assignment",
-		loan_security_assignment,
-		{"status": "Released", "release_time": now_datetime(), "release_reference": release_reference.strip()},
+	lsa = frappe.get_doc("Loan Security Assignment", loan_security_assignment)
+	if lsa.docstatus != 1 or lsa.status not in ("Pledged", "Release Requested"):
+		frappe.throw(
+			_("{0} is {1}. Only a Pledged assignment can be released.").format(
+				frappe.bold(lsa.name), _(lsa.status)
+			)
+		)
+
+	if lsa.loan:
+		lock_loan(lsa.loan)
+	validate_not_already_released(lsa)
+
+	# The release is recorded as a Loan Security Release, like any other, so its quantity
+	# is subtracted once and the Loan's closure and sanctioned limits update as usual.
+	release = make_release_for_assignment(lsa, release_reference)
+	release.insert()
+	release.submit()
+	release.status = "Approved"
+	release.save()
+
+	lsa.db_set({"status": "Released", "release_time": now_datetime(), "release_reference": release_reference})
+
+	return release.name
+
+
+def validate_not_already_released(lsa):
+	still_pledged = get_pledged_qty_map(
+		loan=lsa.loan,
+		applicant=lsa.applicant,
+		securities=[row.loan_security for row in lsa.securities],
+		for_update=True,
 	)
+
+	for row in lsa.securities:
+		remaining = flt(still_pledged.get(row.loan_security))
+		if flt(row.qty) > remaining:
+			frappe.throw(
+				_(
+					"Only {0} of {1} is still pledged, but {2} pledges {3}. An approved Loan Security Release may already cover it."
+				).format(
+					remaining,
+					frappe.bold(row.loan_security),
+					frappe.bold(lsa.name),
+					flt(row.qty),
+				),
+				title=_("Already Released"),
+			)
+
+
+def make_release_for_assignment(lsa, release_reference):
+	release = frappe.new_doc("Loan Security Release")
+	release.update(
+		{
+			"applicant_type": lsa.applicant_type,
+			"applicant": lsa.applicant,
+			"loan": lsa.loan,
+			"company": lsa.company,
+			"description": _("Release of Loan Security Assignment {0}").format(lsa.name),
+		}
+	)
+	for row in lsa.securities:
+		release.append(
+			"securities",
+			{"loan_security": row.loan_security, "qty": row.qty, "release_reference": release_reference},
+		)
+
+	return release
