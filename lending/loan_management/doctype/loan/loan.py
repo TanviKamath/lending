@@ -35,6 +35,9 @@ from lending.loan_management.doctype.loan_interest_accrual.loan_interest_accrual
 from lending.loan_management.doctype.loan_limit_change_log.loan_limit_change_log import (
 	create_loan_limit_change_log,
 )
+from lending.loan_management.doctype.loan_security_assignment.loan_security_assignment import (
+	validate_lien_references,
+)
 from lending.loan_management.doctype.loan_security_release.loan_security_release import (
 	get_pledged_security_qty,
 )
@@ -413,6 +416,9 @@ class Loan(LoanController):
 				is_imported=1,
 			)
 
+	def before_submit(self):
+		self.validate_requested_pledge()
+
 	def on_submit(self):
 		self.link_loan_security_assignment()
 		# Interest accrual for backdated term loans
@@ -615,9 +621,9 @@ class Loan(LoanController):
 		if self.is_secured_loan and not self.maximum_loan_amount and not self.loan_application:
 			frappe.throw(_("Maximum Loan Amount is mandatory for secured Loans without a Loan Application"))
 
-	def link_loan_security_assignment(self):
+	def get_requested_loan_security_assignment(self):
 		if self.is_secured_loan and self.loan_application:
-			lsa_details = frappe.db.get_value(
+			return frappe.db.get_value(
 				"Loan Security Assignment",
 				{
 					"loan_application": self.loan_application,
@@ -627,21 +633,38 @@ class Loan(LoanController):
 				["name", "maximum_loan_value"],
 			)
 
-			if lsa_details:
-				lsa, maximum_loan_value = lsa_details
-				frappe.db.set_value(
-					"Loan Security Assignment",
-					lsa,
-					{
-						"loan": self.name,
-						"pledge_time": now_datetime(),
-						"status": "Pledged",
-					},
-				)
+	def validate_requested_pledge(self):
+		# Creating the loan marks the requested pledge as Pledged, and only Pledged
+		# assignments count toward the exposure cap, so these checks run here. A security
+		# can also be disabled after the request was saved.
+		if lsa_details := self.get_requested_loan_security_assignment():
+			lsa = frappe.get_doc("Loan Security Assignment", lsa_details[0])
+			lsa.validate_securities()
+			validate_lien_references(lsa.securities)
+			lsa.validate_security_limits()
 
-				self.db_set("maximum_loan_amount", maximum_loan_value)
+	def link_loan_security_assignment(self):
+		if lsa_details := self.get_requested_loan_security_assignment():
+			lsa, maximum_loan_value = lsa_details
+			frappe.db.set_value(
+				"Loan Security Assignment",
+				lsa,
+				{
+					"loan": self.name,
+					"pledge_time": now_datetime(),
+					"status": "Pledged",
+				},
+			)
+
+			self.db_set("maximum_loan_amount", maximum_loan_value)
 
 	def cancel_loan_security_assignment(self):
+		# Releases link to the Loan and to the assignments they free, so they are cancelled first.
+		for release in frappe.get_all(
+			"Loan Security Release", filters={"loan": self.name, "docstatus": 1}, pluck="name"
+		):
+			frappe.get_doc("Loan Security Release", release).cancel()
+
 		if not self.loan_application:
 			for assignment in frappe.get_all(
 				"Loan Security Assignment",
@@ -1082,12 +1105,17 @@ def unpledge_security(
 	save: int = 0,
 	submit: int = 0,
 	approve: int = 0,
+	release_references: dict | None = None,
 ):
 	frappe.has_permission("Loan Security Release", "create", throw=True)
 
 	# if no security_map is passed it will be considered as full unpledge
 	if security_map and isinstance(security_map, str):
 		security_map = json.loads(security_map)
+
+	# {loan_security: reference}, needed to approve the release
+	if release_references and isinstance(release_references, str):
+		release_references = json.loads(release_references)
 
 	if loan:
 		frappe.has_permission("Loan", "write", doc=loan, throw=True)
@@ -1113,6 +1141,9 @@ def unpledge_security(
 			pledge_doc.applicant_type,
 			pledge_doc.applicant,
 		)
+
+	for row in unpledge_request.securities:
+		row.release_reference = (release_references or {}).get(row.loan_security)
 
 	if save:
 		unpledge_request.save()

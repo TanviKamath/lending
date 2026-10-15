@@ -17,6 +17,7 @@ class Unpledge(Document):
 
 		haircut: DF.Percent
 		loan_security: DF.Link
+		loan_security_assignment: DF.Link | None
 		loan_security_code: DF.Data | None
 		loan_security_name: DF.Data | None
 		loan_security_type: DF.Link | None
@@ -24,6 +25,7 @@ class Unpledge(Document):
 		parentfield: DF.Data
 		parenttype: DF.Data
 		qty: DF.Float
+		release_reference: DF.Data | None
 	# end: auto-generated types
 
 	pass
