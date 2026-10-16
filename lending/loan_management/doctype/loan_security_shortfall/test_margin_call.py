@@ -6,9 +6,6 @@ from unittest.mock import patch
 import frappe
 from frappe.utils import add_days, flt, getdate, nowdate
 
-from lending.loan_management.doctype.loan_application.loan_application import (
-	create_loan_security_assignment,
-)
 from lending.loan_management.doctype.process_loan_security_shortfall.process_loan_security_shortfall import (
 	create_process_loan_security_shortfall,
 )
@@ -17,6 +14,7 @@ from lending.loan_management.utils import add_working_days
 from lending.tests.test_utils import (
 	create_loan_application,
 	create_loan_security,
+	create_loan_security_assignment,
 	create_loan_security_price,
 	create_loan_security_type,
 	create_loan_with_security,
