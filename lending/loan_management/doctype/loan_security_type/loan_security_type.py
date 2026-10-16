@@ -21,6 +21,8 @@ class LoanSecurityType(Document):
 		haircut: DF.Percent
 		loan_security_type: DF.Data
 		loan_to_value_ratio: DF.Percent
+		max_exposure_per_security: DF.Currency
+		max_single_security_pct: DF.Percent
 		price_validity_days: DF.Int
 		sell_ltv: DF.Percent
 	# end: auto-generated types
