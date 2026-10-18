@@ -13,6 +13,7 @@
   "sell_ltv",
   "price_validity_days",
   "disabled",
+  "is_mutual_fund",
   "limits_section",
   "max_single_security_pct",
   "column_break_lmts",
@@ -66,6 +67,13 @@
    "reqd": 1
   },
   {
+   "default": "0",
+   "description": "Pledges of this type record the folio, holding and lock-in, and its price updates can read the AMFI NAV file",
+   "fieldname": "is_mutual_fund",
+   "fieldtype": "Check",
+   "label": "Is Mutual Fund"
+  },
+  {
    "collapsible": 1,
    "fieldname": "limits_section",
    "fieldtype": "Section Break",
@@ -90,7 +98,7 @@
   }
  ],
  "links": [],
- "modified": "2026-11-02 12:00:00.000000",
+ "modified": "2026-11-02 12:10:00.000000",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Security Type",
