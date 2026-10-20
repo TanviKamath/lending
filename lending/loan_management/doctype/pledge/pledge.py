@@ -22,6 +22,7 @@ class Pledge(Document):
 		holding_mode: DF.Literal["", "Demat", "Statement of Account"]
 		holding_type: DF.Literal["", "Single", "Joint", "Anyone or Survivor", "Minor"]
 		is_mutual_fund: DF.Check
+		lien_reference: DF.Data | None
 		loan_security: DF.Link
 		loan_security_code: DF.Data | None
 		loan_security_name: DF.Data | None
