@@ -30,7 +30,7 @@ def fill_prices(doc, content):
 
 	rows = {row.loan_security: row for row in doc.items}
 	filled = 0
-	for security in get_securities_to_price(doc, rows):
+	for security in get_securities_to_price(doc):
 		nav = navs.get(security.amfi_scheme_code.strip())
 		if not nav:
 			continue
@@ -66,14 +66,10 @@ def validate_price_update(doc):
 		)
 
 
-def get_securities_to_price(doc, rows):
-	names = doc.get_pledged_securities() | set(rows)
-	if not names:
-		return []
+def get_securities_to_price(doc):
 	return frappe.get_all(
 		"Loan Security",
 		filters={
-			"name": ("in", list(names)),
 			"loan_security_type": doc.loan_security_type,
 			"disabled": 0,
 			"amfi_scheme_code": ("is", "set"),
