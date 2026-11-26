@@ -11,7 +11,10 @@ from frappe.utils import flt, get_datetime, getdate
 from lending.loan_management.doctype.loan_security_price.loan_security_price import (
 	get_loan_security_price_map,
 )
-from lending.vehicle_finance.loan_hooks import update_vehicles_on_security_release
+from lending.vehicle_finance.loan_hooks import (
+	get_fixed_securities,
+	update_vehicles_on_security_release,
+)
 
 
 class LoanSecurityRelease(Document):
@@ -150,10 +153,18 @@ class LoanSecurityRelease(Document):
 
 			pending_principal_amount = get_pending_principal_amount(loan_details)
 
+			# A vehicle has no market price, so one left pledged covers the amount it was pledged for
+			fixed_securities = get_fixed_securities(securities, loan=self.loan)
+
 			security_value = 0
 			allowed_amount = 0
 			for security in pledge_qty_map:
 				qty_after_unpledge = pledge_qty_map.get(security, 0) - unpledge_qty_map.get(security, 0)
+				if fixed := fixed_securities.get(security):
+					security_value += qty_after_unpledge * fixed.value
+					allowed_amount += qty_after_unpledge * fixed.eligible
+					continue
+
 				value = qty_after_unpledge * flt(loan_security_price_map.get(security))
 				security_value += value
 				allowed_amount += value * flt(ltv_ratio_map.get(security)) / 100

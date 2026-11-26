@@ -13,10 +13,7 @@ from lending.loan_management.doctype.loan_security_price.loan_security_price imp
 from lending.loan_management.doctype.loan_security_release.loan_security_release import (
 	get_pledged_security_qty,
 )
-from lending.vehicle_finance.loan_hooks import (
-	get_fixed_security_eligible_value,
-	is_fixed_valuation_security,
-)
+from lending.vehicle_finance.loan_hooks import get_fixed_securities, get_fixed_security_values
 
 
 class LoanSecurityShortfall(Document):
@@ -214,18 +211,18 @@ def check_for_ltv_shortfall(process_loan_security_shortfall, loan=None, applican
 	# Loan-wise shortfall processing
 	for loan in loans:
 		pledged_securities = get_pledged_security_qty(loan=loan.name)
-		if only_fixed_valuation_securities(pledged_securities):
+		fixed_securities = get_fixed_securities(pledged_securities, loan=loan.name)
+		if only_fixed_valuation_securities(pledged_securities, fixed_securities):
 			continue
 
 		outstanding_amount = get_outstanding_amount(loan)
 		# A fixed-value security such as a vehicle covers its eligible value and has no price to check
 		priced_qty = {}
 		for security, qty in pledged_securities.items():
-			fixed_value = get_fixed_security_eligible_value(security, loan=loan.name)
-			if fixed_value is None:
-				priced_qty[security] = qty
+			if fixed := fixed_securities.get(security):
+				outstanding_amount -= fixed.eligible * flt(qty)
 			else:
-				outstanding_amount -= fixed_value * flt(qty)
+				priced_qty[security] = qty
 
 		collateral = valuation.value_loan(loan.name, pledged_qty=priced_qty)
 
@@ -361,9 +358,11 @@ def get_ltv_ratio_map(loan_securities=None, field="loan_to_value_ratio"):
 	}
 
 
-def only_fixed_valuation_securities(pledged_securities):
+def only_fixed_valuation_securities(pledged_securities, fixed_securities=None):
 	securities = [security for security, qty in pledged_securities.items() if flt(qty) > 0]
-	return bool(securities) and all(is_fixed_valuation_security(security) for security in securities)
+	if fixed_securities is None:
+		fixed_securities = get_fixed_security_values(securities)
+	return bool(securities) and all(security in fixed_securities for security in securities)
 
 
 def has_pledged_qty(pledged_securities):

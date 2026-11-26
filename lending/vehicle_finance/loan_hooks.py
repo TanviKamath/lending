@@ -68,6 +68,59 @@ def get_fixed_security_eligible_value(loan_security, loan=None, applicant=None):
 	return flt(row[0].amount) / flt(row[0].qty)
 
 
+def get_fixed_security_values(loan_securities):
+	# One query for any number of securities: a loan against shares has many and no vehicle
+	if not loan_securities:
+		return {}
+
+	security = DocType("Loan Security")
+	security_type = DocType("Loan Security Type")
+	rows = (
+		frappe.qb.from_(security)
+		.inner_join(security_type)
+		.on(security.loan_security_type == security_type.name)
+		.select(security.name, security.original_security_value)
+		.where(security.name.isin(list(loan_securities)))
+		.where(security_type.valuation_method == "Fixed Valuation")
+	).run(as_dict=True)
+
+	return {row.name: flt(row.original_security_value) for row in rows}
+
+
+def get_fixed_securities(loan_securities, loan=None):
+	fixed = {
+		name: frappe._dict(value=value, eligible=0.0)
+		for name, value in get_fixed_security_values(loan_securities).items()
+	}
+	if not fixed:
+		return fixed
+
+	pledge = DocType("Pledge")
+	assignment = DocType("Loan Security Assignment")
+	query = (
+		frappe.qb.from_(pledge)
+		.inner_join(assignment)
+		.on(pledge.parent == assignment.name)
+		.select(
+			pledge.loan_security,
+			fn.Sum(pledge.post_haircut_amount).as_("amount"),
+			fn.Sum(pledge.qty).as_("qty"),
+		)
+		.where(pledge.loan_security.isin(list(fixed)))
+		.where(assignment.docstatus == 1)
+		.where(assignment.status == "Pledged")
+		.groupby(pledge.loan_security)
+	)
+	if loan:
+		query = query.where(assignment.loan == loan)
+
+	for row in query.run(as_dict=True):
+		if flt(row.qty):
+			fixed[row.loan_security].eligible = flt(row.amount) / flt(row.qty)
+
+	return fixed
+
+
 def get_loan_vehicles(loan):
 	pledge = DocType("Pledge")
 	assignment = DocType("Loan Security Assignment")

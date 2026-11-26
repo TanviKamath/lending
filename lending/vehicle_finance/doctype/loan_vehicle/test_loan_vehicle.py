@@ -340,6 +340,29 @@ class TestLoanVehicle(LendingTestSuite):
 
 		self.assertFalse(frappe.db.exists("Loan Security Shortfall", {"loan": loan.name}))
 
+	def test_a_vehicle_left_pledged_covers_its_eligible_value_on_release(self):
+		# Each new Dost is invoiced at 10,00,000 and lends 85%, so one left pledged covers 8,50,000
+		first, second = create_vehicle(), create_vehicle()
+		loan = make_direct_loan(1700000)
+		assign_vehicles(loan.name, [first, second])
+		make_loan_disbursement_entry(
+			loan.name, 800000, disbursement_date="2026-04-01", repayment_start_date="2026-05-05"
+		)
+		create_loan_security_release(
+			APPLICANT, "Customer", [{"loan_security": first.loan_security, "qty": 1}], loan=loan.name
+		)
+
+		third, fourth = create_vehicle(), create_vehicle()
+		loan = make_direct_loan(1700000)
+		assign_vehicles(loan.name, [third, fourth])
+		make_loan_disbursement_entry(
+			loan.name, 1000000, disbursement_date="2026-04-01", repayment_start_date="2026-05-05"
+		)
+		with self.assertRaisesRegex(frappe.ValidationError, "Maximum loan allowed"):
+			create_loan_security_release(
+				APPLICANT, "Customer", [{"loan_security": third.loan_security, "qty": 1}], loan=loan.name
+			)
+
 	def test_repossessing_one_vehicle_keeps_other_pledges(self):
 		first, second = create_vehicle(), create_vehicle()
 		loan = make_direct_loan()
