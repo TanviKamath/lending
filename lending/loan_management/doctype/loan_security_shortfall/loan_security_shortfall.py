@@ -210,22 +210,11 @@ def check_for_ltv_shortfall(process_loan_security_shortfall, loan=None, applican
 
 	# Loan-wise shortfall processing
 	for loan in loans:
-		pledged_securities = get_pledged_security_qty(loan=loan.name)
-		fixed_securities = get_fixed_securities(pledged_securities, loan=loan.name)
-		if only_fixed_valuation_securities(pledged_securities, fixed_securities):
+		collateral = value_priced_collateral(valuation, loan)
+		if not collateral:
 			continue
 
-		outstanding_amount = get_outstanding_amount(loan)
-		# A fixed-value security such as a vehicle covers its eligible value and has no price to check
-		priced_qty = {}
-		for security, qty in pledged_securities.items():
-			if fixed := fixed_securities.get(security):
-				outstanding_amount -= fixed.eligible * flt(qty)
-			else:
-				priced_qty[security] = qty
-
-		collateral = valuation.value_loan(loan.name, pledged_qty=priced_qty)
-
+		outstanding_amount = collateral.outstanding_amount
 		shortfall_amount = outstanding_amount - collateral.allowed_amount
 		# A security with no current price is valued at 0, so a missing price raises a shortfall
 		if has_pledged_qty(collateral.pledged_qty) and flt(shortfall_amount, 6) > 0:
@@ -252,7 +241,11 @@ def check_for_ltv_shortfall(process_loan_security_shortfall, loan=None, applican
 
 	# Applicant-wise shortfall processing
 	for applicant in applicants:
-		if only_fixed_valuation_securities(get_pledged_security_qty(applicant=applicant)):
+		pledged_securities = get_pledged_security_qty(applicant=applicant)
+		fixed_values = get_fixed_security_values(
+			[security for security, qty in pledged_securities.items() if flt(qty) > 0]
+		)
+		if only_fixed_valuation_securities(pledged_securities, fixed_values):
 			continue
 
 		security_value = get_total_pledged_security_value(applicant=applicant, on_shortfall_check=True)
@@ -260,7 +253,7 @@ def check_for_ltv_shortfall(process_loan_security_shortfall, loan=None, applican
 
 		shortfall_amount = security_value - pending_principal_amount
 		if flt(shortfall_amount) < 0:
-			collateral = get_applicant_collateral(applicant, loan_security_price_map)
+			collateral = get_applicant_collateral(pledged_securities, fixed_values, loan_security_price_map)
 			create_loan_security_shortfall(
 				pending_principal_amount,
 				security_value,
@@ -280,6 +273,27 @@ def check_for_ltv_shortfall(process_loan_security_shortfall, loan=None, applican
 			frappe.db.set_value(
 				"Sanctioned Loan Amount", sanctioned_limit, "sanctioned_amount_limit", security_value
 			)
+
+
+def value_priced_collateral(valuation, loan):
+	# loan carries OUTSTANDING_FIELDS. None when only fixed-value securities are pledged.
+	pledged_securities = get_pledged_security_qty(loan=loan.name)
+	fixed_securities = get_fixed_securities(pledged_securities, loan=loan.name)
+	if only_fixed_valuation_securities(pledged_securities, fixed_securities):
+		return None
+
+	# A fixed-value security such as a vehicle covers its eligible value and has no price to check
+	outstanding_amount = get_outstanding_amount(loan)
+	priced_qty = {}
+	for security, qty in pledged_securities.items():
+		if fixed := fixed_securities.get(security):
+			outstanding_amount -= fixed.eligible * flt(qty)
+		else:
+			priced_qty[security] = qty
+
+	collateral = valuation.value_loan(loan.name, pledged_qty=priced_qty)
+	collateral.outstanding_amount = outstanding_amount
+	return collateral
 
 
 def close_shortfall_without_cover(shortfall):
@@ -369,16 +383,21 @@ def has_pledged_qty(pledged_securities):
 	return any(flt(qty) > 0 for qty in pledged_securities.values())
 
 
-def get_applicant_collateral(applicant, loan_security_price_map):
-	held = {
-		security: flt(qty)
-		for security, qty in get_pledged_security_qty(applicant=applicant).items()
-		if flt(qty) > 0
-	}
-	return frappe._dict(
-		security_value=sum(flt(loan_security_price_map.get(security)) * qty for security, qty in held.items()),
-		missing_price=any(not flt(loan_security_price_map.get(security)) for security in held),
-	)
+def get_applicant_collateral(pledged_securities, fixed_values, loan_security_price_map):
+	security_value = 0.0
+	missing_price = False
+	for security, qty in pledged_securities.items():
+		if flt(qty) <= 0:
+			continue
+		# A fixed-value security such as a vehicle has its own value and no market price
+		if security in fixed_values:
+			security_value += fixed_values[security] * flt(qty)
+			continue
+		price = flt(loan_security_price_map.get(security))
+		security_value += price * flt(qty)
+		missing_price = missing_price or not price
+
+	return frappe._dict(security_value=security_value, missing_price=missing_price)
 
 
 def recheck_loan_shortfall(loan, cure_method=None):
@@ -391,10 +410,13 @@ def recheck_loan_shortfall(loan, cure_method=None):
 	if not shortfall:
 		return
 
-	outstanding_amount = get_outstanding_amount(
-		frappe.db.get_value("Loan", loan, OUTSTANDING_FIELDS, as_dict=1)
+	collateral = value_priced_collateral(
+		CollateralValuation(), frappe.db.get_value("Loan", loan, OUTSTANDING_FIELDS, as_dict=1)
 	)
-	collateral = CollateralValuation().value_loan(loan)
+	if not collateral:
+		return
+
+	outstanding_amount = collateral.outstanding_amount
 	shortfall_amount = outstanding_amount - collateral.allowed_amount
 
 	if flt(shortfall_amount, 6) <= 0:

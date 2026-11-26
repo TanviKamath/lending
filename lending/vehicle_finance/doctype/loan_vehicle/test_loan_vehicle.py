@@ -5,7 +5,7 @@ from random import randint
 
 import frappe
 from frappe.desk.query_report import run
-from frappe.utils import add_days, getdate, nowdate
+from frappe.utils import add_days, flt, getdate, nowdate
 
 from lending.loan_management.doctype.loan_application.loan_application import (
 	create_loan_security_assignment,
@@ -340,6 +340,41 @@ class TestLoanVehicle(LendingTestSuite):
 
 		self.assertFalse(frappe.db.exists("Loan Security Shortfall", {"loan": loan.name}))
 
+	def test_additional_pledge_cures_mixed_collateral_shortfall(self):
+		create_loan_security_price(
+			"Test Security 1", 500, "Nos", nowdate(), add_days(nowdate(), 1), update_if_existing=True
+		)
+		vehicle = create_vehicle()
+		loan = make_direct_loan(950000)
+		create_loan_security_assignment(
+			loan=loan.name,
+			securities=[
+				{"loan_security": vehicle.loan_security, "qty": 1},
+				{"loan_security": "Test Security 1", "qty": 400},
+			],
+		)
+		make_loan_disbursement_entry(
+			loan.name, 900000, disbursement_date="2026-04-01", repayment_start_date="2026-05-05"
+		)
+
+		# The truck covers ₹8,50,000; 400 shares at ₹100 cover ₹20,000 of the remaining ₹50,000
+		create_loan_security_price(
+			"Test Security 1", 100, "Nos", nowdate(), add_days(nowdate(), 1), update_if_existing=True
+		)
+		check_for_ltv_shortfall(None, loan=loan.name)
+		shortfall = frappe.db.get_value("Loan Security Shortfall", {"loan": loan.name}, "name")
+		self.assertEqual(
+			flt(frappe.db.get_value("Loan Security Shortfall", shortfall, "shortfall_amount")), 30000
+		)
+
+		# 600 more shares cover ₹30,000, which cures the shortfall
+		create_loan_security_assignment(
+			loan=loan.name, securities=[{"loan_security": "Test Security 1", "qty": 600}]
+		)
+		self.assertEqual(
+			frappe.db.get_value("Loan Security Shortfall", shortfall, "status"), "Completed"
+		)
+
 	def test_a_vehicle_left_pledged_covers_its_eligible_value_on_release(self):
 		# Each new Dost is invoiced at 10,00,000 and lends 85%, so one left pledged covers 8,50,000
 		first, second = create_vehicle(), create_vehicle()
@@ -362,6 +397,55 @@ class TestLoanVehicle(LendingTestSuite):
 			create_loan_security_release(
 				APPLICANT, "Customer", [{"loan_security": third.loan_security, "qty": 1}], loan=loan.name
 			)
+
+	def test_applicant_shortfall_values_a_vehicle_without_a_price(self):
+		# A vehicle loan fully covered by its truck, and a term loan drawn on shares pledged without a loan
+		vehicle = create_vehicle()
+		loan = make_direct_loan(850000)
+		assign_vehicles(loan.name, [vehicle])
+		make_loan_disbursement_entry(
+			loan.name, 850000, disbursement_date="2026-04-01", repayment_start_date="2026-05-05"
+		)
+
+		create_loan_security_price(
+			"Test Security 1", 500, "Nos", nowdate(), add_days(nowdate(), 1), update_if_existing=True
+		)
+		create_loan_security_assignment(
+			applicant_type="Customer",
+			applicant=APPLICANT,
+			company="_Test Company",
+			# ₹30,00,000 at a 50% haircut sanctions ₹15,00,000, enough for both loans
+			securities=[{"loan_security": "Test Security 1", "qty": 6000}],
+		)
+		term_loan = create_loan(
+			APPLICANT,
+			"Term Loan Product 4",
+			500000,
+			"Repay Over Number of Periods",
+			12,
+			repayment_start_date="2026-05-05",
+			posting_date="2026-04-01",
+			applicant_type="Customer",
+		)
+		term_loan.submit()
+		make_loan_disbursement_entry(
+			term_loan.name, 500000, disbursement_date="2026-04-01", repayment_start_date="2026-05-05"
+		)
+
+		# 6,000 shares at ₹100 allow ₹3,00,000 and the truck ₹8,50,000, against ₹13,50,000 drawn
+		create_loan_security_price(
+			"Test Security 1", 100, "Nos", nowdate(), add_days(nowdate(), 1), update_if_existing=True
+		)
+		check_for_ltv_shortfall(None, applicant=APPLICANT)
+
+		shortfall = frappe.get_doc(
+			"Loan Security Shortfall", {"applicant": APPLICANT, "loan": ("is", "not set")}
+		)
+		self.assertEqual(flt(shortfall.shortfall_amount), 200000)
+		# The truck has a value, not a missing price, so the margin call is not held back
+		self.assertFalse(shortfall.missing_price)
+		# ₹13,50,000 drawn against ₹6,00,000 of shares and the ₹10,00,000 truck
+		self.assertEqual(flt(shortfall.shortfall_percentage, 3), 84.375)
 
 	def test_repossessing_one_vehicle_keeps_other_pledges(self):
 		first, second = create_vehicle(), create_vehicle()
