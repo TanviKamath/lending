@@ -467,6 +467,36 @@ class TestLoanVehicle(LendingTestSuite):
 		with self.assertRaisesRegex(frappe.ValidationError, "no market price to update"):
 			price_update.insert()
 
+	def test_sale_expects_a_vehicle_to_fetch_its_pledged_value(self):
+		create_loan_security_price(
+			"Test Security 1", 500, "Nos", nowdate(), add_days(nowdate(), 1), update_if_existing=True
+		)
+		vehicle = create_vehicle()
+		loan = make_direct_loan(950000)
+		create_loan_security_assignment(
+			loan=loan.name,
+			securities=[
+				{"loan_security": vehicle.loan_security, "qty": 1},
+				{"loan_security": "Test Security 1", "qty": 400},
+			],
+		)
+		make_loan_disbursement_entry(
+			loan.name, 900000, disbursement_date="2026-04-01", repayment_start_date="2026-05-05"
+		)
+
+		# Get Items sells the shares, never the truck
+		sale = frappe.new_doc("Loan Security Sale")
+		sale.loan = loan.name
+		sale.reason = "Loan Default"
+		sale.prefill_items()
+		self.assertEqual([row.loan_security for row in sale.items], ["Test Security 1"])
+
+		# Added by hand, the truck is expected to fetch its ₹10,00,000
+		sale.append("items", {"loan_security": vehicle.loan_security, "qty": 1})
+		sale.insert()
+		truck = next(row for row in sale.items if row.loan_security == vehicle.loan_security)
+		self.assertEqual(flt(truck.expected_price), 1000000)
+
 	def test_additional_pledge_cures_mixed_collateral_shortfall(self):
 		create_loan_security_price(
 			"Test Security 1", 500, "Nos", nowdate(), add_days(nowdate(), 1), update_if_existing=True

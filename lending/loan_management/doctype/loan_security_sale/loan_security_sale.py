@@ -24,6 +24,7 @@ from lending.loan_management.doctype.loan_security_shortfall.loan_security_short
 	get_ltv_ratio_map,
 	recheck_loan_shortfall,
 )
+from lending.vehicle_finance.loan_hooks import get_fixed_security_values
 
 
 class LoanSecuritySale(Document):
@@ -127,7 +128,12 @@ class LoanSecuritySale(Document):
 	def prefill_items(self):
 		self.set_amount_to_recover()
 		pledged_qty_map = get_pledged_security_qty(loan=self.loan)
-		price_map = get_loan_security_price_map(list(pledged_qty_map))
+		# A vehicle is sold only after it is repossessed, so staff add it by hand; a fall in the
+		# price of other collateral never picks it
+		fixed_values = get_fixed_security_values(list(pledged_qty_map))
+		price_map = get_loan_security_price_map(
+			[security for security in pledged_qty_map if security not in fixed_values]
+		)
 		cover_map = self.get_cover_per_unit(price_map)
 
 		holdings = sorted(
@@ -216,7 +222,10 @@ class LoanSecuritySale(Document):
 			pledged_qty_map = get_current_pledges(loan=self.loan, for_update=True)
 		else:
 			pledged_qty_map = get_pledged_security_qty(loan=self.loan)
-		price_map = get_loan_security_price_map([row.loan_security for row in self.items])
+		securities = [row.loan_security for row in self.items]
+		price_map = get_loan_security_price_map(securities)
+		# A vehicle has no market price: its pledged value is what the sale is expected to fetch
+		price_map.update(get_fixed_security_values(securities))
 		listed = set()
 		for row in self.items:
 			if row.loan_security in listed:
