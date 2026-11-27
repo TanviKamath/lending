@@ -29,7 +29,22 @@ class LoanSecurityPrice(Document):
 	# end: auto-generated types
 
 	def validate(self):
+		self.validate_market_priced()
 		self.validate_dates()
+
+	def validate_market_priced(self):
+		# The pledged value is used for such a security, so a price here would only mislead.
+		# Cached, because a Loan Security Price Update inserts one price per security.
+		if (
+			frappe.get_cached_value("Loan Security Type", self.loan_security_type, "valuation_method")
+			== "Fixed Valuation"
+		):
+			frappe.throw(
+				_("Loan Security {0} uses Fixed Valuation, so it cannot have a market price").format(
+					frappe.bold(self.loan_security)
+				),
+				title=_("Fixed Valuation Security"),
+			)
 
 	def on_update(self):
 		self.update_sanctioned_limits_for_security_holders()

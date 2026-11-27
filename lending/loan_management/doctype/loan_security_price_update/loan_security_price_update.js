@@ -3,6 +3,9 @@
 
 frappe.ui.form.on("Loan Security Price Update", {
 	setup(frm) {
+		frm.set_query("loan_security_type", () => ({
+			filters: { valuation_method: ["!=", "Fixed Valuation"] },
+		}));
 		frm.set_query("loan_security", "items", () => ({
 			filters: { loan_security_type: frm.doc.loan_security_type, disabled: 0 },
 		}));

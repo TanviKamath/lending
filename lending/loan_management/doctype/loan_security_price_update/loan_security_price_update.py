@@ -44,8 +44,21 @@ class LoanSecurityPriceUpdate(Document):
 			)
 
 	def validate(self):
+		self.validate_security_type()
 		self.validate_items()
 		self.set_missing_count()
+
+	def validate_security_type(self):
+		if (
+			frappe.db.get_value("Loan Security Type", self.loan_security_type, "valuation_method")
+			== "Fixed Valuation"
+		):
+			frappe.throw(
+				_(
+					"Loan Security Type {0} uses Fixed Valuation, so its securities have no market price to update"
+				).format(frappe.bold(self.loan_security_type)),
+				title=_("Fixed Valuation Security Type"),
+			)
 
 	def before_submit(self):
 		self.set_previous_prices()

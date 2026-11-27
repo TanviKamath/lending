@@ -403,10 +403,18 @@ class TestLoanVehicle(LendingTestSuite):
 			],
 		)
 
-		# A price keyed in for the truck by mistake is ignored
-		create_loan_security_price(
-			vehicle.loan_security, 1, "Nos", nowdate(), add_days(nowdate(), 1), update_if_existing=True
+		# A price saved for the truck before vehicles were refused a price is ignored
+		price = frappe.get_doc(
+			{
+				"doctype": "Loan Security Price",
+				"loan_security": vehicle.loan_security,
+				"loan_security_price": 1,
+				"valid_from": nowdate(),
+				"valid_upto": add_days(nowdate(), 1),
+			}
 		)
+		price.flags.ignore_validate = True
+		price.insert()
 		_columns, data = pledged_collateral({"company": "_Test Company", "loan": loan.name})
 		rows = {row["loan_security"]: row for row in data}
 
@@ -441,6 +449,23 @@ class TestLoanVehicle(LendingTestSuite):
 			create_loan_security_assignment(
 				loan=loan.name, securities=[{"loan_security": "Test Security 1", "qty": 2000}]
 			)
+
+	def test_vehicle_cannot_have_a_market_price(self):
+		vehicle = create_vehicle()
+
+		with self.assertRaisesRegex(frappe.ValidationError, "cannot have a market price"):
+			create_loan_security_price(vehicle.loan_security, 900000, "Nos", nowdate(), add_days(nowdate(), 1))
+
+		price_update = frappe.get_doc(
+			{
+				"doctype": "Loan Security Price Update",
+				"loan_security_type": "Vehicle",
+				"price_date": nowdate(),
+				"items": [{"loan_security": vehicle.loan_security, "price": 900000}],
+			}
+		)
+		with self.assertRaisesRegex(frappe.ValidationError, "no market price to update"):
+			price_update.insert()
 
 	def test_additional_pledge_cures_mixed_collateral_shortfall(self):
 		create_loan_security_price(
