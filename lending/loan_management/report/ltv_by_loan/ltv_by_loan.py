@@ -16,6 +16,7 @@ from lending.loan_management.doctype.loan_security_shortfall.loan_security_short
 	get_current_ltv,
 	get_outstanding_amount,
 )
+from lending.vehicle_finance.loan_hooks import get_fixed_securities_by_loan
 
 
 def execute(filters=None):
@@ -30,11 +31,14 @@ def get_data(filters):
 
 	loans = get_loans(filters)
 	pledges_by_loan = get_current_pledges_by_loan([loan.name for loan in loans])
+	fixed_by_loan = get_fixed_securities_by_loan(pledges_by_loan)
 
 	data = []
 	for loan in loans:
 		outstanding_amount = get_outstanding_amount(loan)
-		collateral = valuation.value_loan(loan.name, pledges_by_loan.get(loan.name, {}))
+		collateral = value_collateral(
+			valuation, loan.name, pledges_by_loan.get(loan.name, {}), fixed_by_loan.get(loan.name, {})
+		)
 		value = collateral.security_value
 		shortfall = shortfall_map.get(loan.name, {})
 
@@ -61,6 +65,22 @@ def get_data(filters):
 		)
 
 	return sorted(data, key=lambda row: flt(row["current_ltv"]), reverse=True)
+
+
+def value_collateral(valuation, loan, pledged_qty, fixed_securities):
+	collateral = valuation.value_loan(
+		loan,
+		{security: qty for security, qty in pledged_qty.items() if security not in fixed_securities},
+	)
+	# A vehicle has no price: it counts at its pledged value and covers its eligible value,
+	# as in the shortfall check
+	for security, fixed in fixed_securities.items():
+		qty = flt(pledged_qty.get(security))
+		collateral.security_value += fixed.value * qty
+		collateral.allowed_amount += fixed.eligible * qty
+		collateral.sell_amount += fixed.eligible * qty
+
+	return collateral
 
 
 def get_loans(filters):

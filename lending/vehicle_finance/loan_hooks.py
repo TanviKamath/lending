@@ -87,38 +87,55 @@ def get_fixed_security_values(loan_securities):
 	return {row.name: flt(row.original_security_value) for row in rows}
 
 
-def get_fixed_securities(loan_securities, loan=None):
-	fixed = {
-		name: frappe._dict(value=value, eligible=0.0)
-		for name, value in get_fixed_security_values(loan_securities).items()
-	}
-	if not fixed:
-		return fixed
+def get_fixed_securities(loan_securities, loan):
+	return get_fixed_securities_by_loan({loan: loan_securities}).get(loan, {})
+
+
+def get_fixed_securities_by_loan(securities_by_loan):
+	# {loan: {security: _dict(value, eligible)}} in two queries for any number of loans
+	values = get_fixed_security_values(
+		{security for securities in securities_by_loan.values() for security in securities}
+	)
+	if not values:
+		return {}
+
+	fixed_by_loan = {}
+	for loan, securities in securities_by_loan.items():
+		fixed = {
+			security: frappe._dict(value=values[security], eligible=0.0)
+			for security in securities
+			if security in values
+		}
+		if fixed:
+			fixed_by_loan[loan] = fixed
+	if not fixed_by_loan:
+		return {}
 
 	pledge = DocType("Pledge")
 	assignment = DocType("Loan Security Assignment")
-	query = (
+	rows = (
 		frappe.qb.from_(pledge)
 		.inner_join(assignment)
 		.on(pledge.parent == assignment.name)
 		.select(
+			assignment.loan,
 			pledge.loan_security,
 			fn.Sum(pledge.post_haircut_amount).as_("amount"),
 			fn.Sum(pledge.qty).as_("qty"),
 		)
-		.where(pledge.loan_security.isin(list(fixed)))
+		.where(assignment.loan.isin(list(fixed_by_loan)))
+		.where(pledge.loan_security.isin(list(values)))
 		.where(assignment.docstatus == 1)
 		.where(assignment.status == "Pledged")
-		.groupby(pledge.loan_security)
-	)
-	if loan:
-		query = query.where(assignment.loan == loan)
+		.groupby(assignment.loan, pledge.loan_security)
+	).run(as_dict=True)
 
-	for row in query.run(as_dict=True):
-		if flt(row.qty):
-			fixed[row.loan_security].eligible = flt(row.amount) / flt(row.qty)
+	for row in rows:
+		fixed = fixed_by_loan[row.loan].get(row.loan_security)
+		if fixed and flt(row.qty):
+			fixed.eligible = flt(row.amount) / flt(row.qty)
 
-	return fixed
+	return fixed_by_loan
 
 
 def get_loan_vehicles(loan):

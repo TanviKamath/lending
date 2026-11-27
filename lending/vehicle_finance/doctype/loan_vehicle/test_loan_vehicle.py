@@ -19,6 +19,7 @@ from lending.loan_management.doctype.loan_security_assignment.loan_security_assi
 from lending.loan_management.doctype.loan_security_shortfall.loan_security_shortfall import (
 	check_for_ltv_shortfall,
 )
+from lending.loan_management.report.ltv_by_loan.ltv_by_loan import execute as ltv_by_loan
 from lending.tests.test_utils import (
 	create_loan,
 	create_loan_application,
@@ -339,6 +340,51 @@ class TestLoanVehicle(LendingTestSuite):
 		check_for_ltv_shortfall(None, loan=loan.name, applicant=APPLICANT)
 
 		self.assertFalse(frappe.db.exists("Loan Security Shortfall", {"loan": loan.name}))
+
+	def test_ltv_by_loan_report_values_vehicles(self):
+		create_loan_security_price(
+			"Test Security 1", 500, "Nos", nowdate(), add_days(nowdate(), 1), update_if_existing=True
+		)
+		# Both loans before any pledge, which sets a sanctioned limit that a later loan must fit in
+		vehicle_loan = make_direct_loan(850000)
+		mixed_loan = make_direct_loan(950000)
+		assign_vehicles(vehicle_loan.name, [create_vehicle()])
+		make_loan_disbursement_entry(
+			vehicle_loan.name, 500000, disbursement_date="2026-04-01", repayment_start_date="2026-05-05"
+		)
+		create_loan_security_assignment(
+			loan=mixed_loan.name,
+			securities=[
+				{"loan_security": create_vehicle().loan_security, "qty": 1},
+				{"loan_security": "Test Security 1", "qty": 400},
+			],
+		)
+		make_loan_disbursement_entry(
+			mixed_loan.name, 900000, disbursement_date="2026-04-01", repayment_start_date="2026-05-05"
+		)
+
+		frappe.db.set_value("Loan Security", "Test Security 1", "sell_ltv", 70)
+		_columns, data = ltv_by_loan({"company": "_Test Company"})
+		rows = {row["loan"]: row for row in data}
+
+		# ₹9,00,000 against the ₹10,00,000 truck and 400 shares at ₹500
+		mixed = rows[mixed_loan.name]
+		self.assertEqual(flt(mixed["security_value"]), 1200000)
+		self.assertEqual(flt(mixed["allowed_amount"]), 950000)
+		self.assertEqual(flt(mixed["current_ltv"]), 75)
+		# The sale starts above 70% of the shares plus the truck's ₹8,50,000: ₹9,90,000 of ₹12,00,000
+		self.assertEqual(flt(mixed["sell_ltv"]), 82.5)
+		self.assertFalse(mixed["missing_price"])
+
+		only_vehicle = rows[vehicle_loan.name]
+		self.assertEqual(flt(only_vehicle["security_value"]), 1000000)
+		self.assertEqual(flt(only_vehicle["allowed_amount"]), 850000)
+		self.assertEqual(flt(only_vehicle["current_ltv"]), 50)
+		self.assertIsNone(only_vehicle["sell_ltv"])
+		self.assertFalse(only_vehicle["missing_price"])
+
+		_columns, data = ltv_by_loan({"company": "_Test Company", "only_above_ltv": 1})
+		self.assertFalse({mixed_loan.name, vehicle_loan.name} & {row["loan"] for row in data})
 
 	def test_additional_pledge_cures_mixed_collateral_shortfall(self):
 		create_loan_security_price(
