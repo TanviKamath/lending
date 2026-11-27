@@ -20,6 +20,9 @@ from lending.loan_management.doctype.loan_security_shortfall.loan_security_short
 	check_for_ltv_shortfall,
 )
 from lending.loan_management.report.ltv_by_loan.ltv_by_loan import execute as ltv_by_loan
+from lending.loan_management.report.pledged_collateral.pledged_collateral import (
+	execute as pledged_collateral,
+)
 from lending.tests.test_utils import (
 	create_loan,
 	create_loan_application,
@@ -385,6 +388,39 @@ class TestLoanVehicle(LendingTestSuite):
 
 		_columns, data = ltv_by_loan({"company": "_Test Company", "only_above_ltv": 1})
 		self.assertFalse({mixed_loan.name, vehicle_loan.name} & {row["loan"] for row in data})
+
+	def test_pledged_collateral_report_values_vehicles(self):
+		create_loan_security_price(
+			"Test Security 1", 500, "Nos", nowdate(), add_days(nowdate(), 1), update_if_existing=True
+		)
+		vehicle = create_vehicle()
+		loan = make_direct_loan(950000)
+		create_loan_security_assignment(
+			loan=loan.name,
+			securities=[
+				{"loan_security": vehicle.loan_security, "qty": 1},
+				{"loan_security": "Test Security 1", "qty": 400},
+			],
+		)
+
+		# A price keyed in for the truck by mistake is ignored
+		create_loan_security_price(
+			vehicle.loan_security, 1, "Nos", nowdate(), add_days(nowdate(), 1), update_if_existing=True
+		)
+		_columns, data = pledged_collateral({"company": "_Test Company", "loan": loan.name})
+		rows = {row["loan_security"]: row for row in data}
+
+		# A new truck invoiced at ₹10,00,000 lends 85%
+		truck = rows[vehicle.loan_security]
+		self.assertIsNone(truck["price"])
+		self.assertIsNone(truck["price_valid_upto"])
+		self.assertEqual(flt(truck["value"]), 1000000)
+		self.assertEqual(flt(truck["ltv"]), 85)
+		self.assertEqual(flt(truck["allowed_amount"]), 850000)
+
+		shares = rows["Test Security 1"]
+		self.assertEqual(flt(shares["value"]), 200000)
+		self.assertEqual(flt(shares["allowed_amount"]), 100000)
 
 	def test_additional_pledge_cures_mixed_collateral_shortfall(self):
 		create_loan_security_price(

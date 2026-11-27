@@ -14,6 +14,7 @@ from lending.loan_management.doctype.loan_security_release.loan_security_release
 from lending.loan_management.doctype.loan_security_shortfall.loan_security_shortfall import (
 	get_ltv_ratio_map,
 )
+from lending.vehicle_finance.loan_hooks import get_fixed_securities_by_loan
 
 
 def execute(filters=None):
@@ -29,9 +30,11 @@ def get_data(filters):
 
 	loans = get_loans(filters)
 	pledges_by_loan = get_current_pledges_by_loan([loan.name for loan in loans])
+	fixed_by_loan = get_fixed_securities_by_loan(pledges_by_loan)
 
 	data = []
 	for loan in loans:
+		fixed_securities = fixed_by_loan.get(loan.name, {})
 		for security, qty in pledges_by_loan.get(loan.name, {}).items():
 			details = security_map.get(security, {})
 			if flt(qty) <= 0 or (
@@ -40,8 +43,17 @@ def get_data(filters):
 				continue
 
 			price = price_map.get(security, {})
-			value = flt(qty) * flt(price.get("loan_security_price"))
-			ltv = flt(ltv_ratio_map.get(security))
+			if fixed := fixed_securities.get(security):
+				# A vehicle has no price: its pledged value and its own LTV rule, as in the shortfall check.
+				# A price entered for it by mistake is not shown, as it is not used.
+				price = {}
+				value = flt(qty) * fixed.value
+				allowed_amount = flt(qty) * fixed.eligible
+				ltv = allowed_amount / value * 100 if value else 0
+			else:
+				value = flt(qty) * flt(price.get("loan_security_price"))
+				ltv = flt(ltv_ratio_map.get(security))
+				allowed_amount = value * ltv / 100
 			data.append(
 				{
 					"loan": loan.name,
@@ -54,7 +66,7 @@ def get_data(filters):
 					"price_valid_upto": price.get("valid_upto"),
 					"value": value,
 					"ltv": ltv,
-					"allowed_amount": value * ltv / 100,
+					"allowed_amount": allowed_amount,
 					"currency": currency,
 				}
 			)
