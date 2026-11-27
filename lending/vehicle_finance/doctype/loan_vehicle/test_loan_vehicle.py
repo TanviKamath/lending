@@ -422,6 +422,26 @@ class TestLoanVehicle(LendingTestSuite):
 		self.assertEqual(flt(shares["value"]), 200000)
 		self.assertEqual(flt(shares["allowed_amount"]), 100000)
 
+	def test_share_cap_counts_a_vehicle_at_its_pledged_value(self):
+		create_loan_security_price(
+			"Test Security 1", 500, "Nos", nowdate(), add_days(nowdate(), 1), update_if_existing=True
+		)
+		loan = make_direct_loan(950000)
+		assign_vehicles(loan.name, [create_vehicle()])
+		security_type = frappe.db.get_value("Loan Security", "Test Security 1", "loan_security_type")
+		frappe.db.set_value("Loan Security Type", security_type, "max_single_security_pct", 50)
+
+		# ₹2,00,000 of shares next to the ₹10,00,000 truck are 16.67% of the collateral
+		create_loan_security_assignment(
+			loan=loan.name, securities=[{"loan_security": "Test Security 1", "qty": 400}]
+		)
+
+		# 2,000 more make ₹12,00,000 of shares, 54.55% of the collateral
+		with self.assertRaisesRegex(frappe.ValidationError, "allows at most 50"):
+			create_loan_security_assignment(
+				loan=loan.name, securities=[{"loan_security": "Test Security 1", "qty": 2000}]
+			)
+
 	def test_additional_pledge_cures_mixed_collateral_shortfall(self):
 		create_loan_security_price(
 			"Test Security 1", 500, "Nos", nowdate(), add_days(nowdate(), 1), update_if_existing=True
